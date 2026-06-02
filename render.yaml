@@ -10,7 +10,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        value: 22.0.0
       - key: FRONTEND_URL
         value: https://osi-logistics.vercel.app
-      - key: NODE_VERSION
-        value: 20.0.0
