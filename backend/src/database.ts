@@ -1,5 +1,7 @@
-import { DatabaseSync } from 'node:sqlite';
+import BetterSqlite3 from 'better-sqlite3';
 import { scryptSync, randomBytes } from 'node:crypto';
+
+type DatabaseSync = BetterSqlite3.Database;
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,9 +15,9 @@ let db: DatabaseSync;
 
 export function getDb(): DatabaseSync {
   if (!db) {
-    db = new DatabaseSync(DB_PATH);
-    db.exec('PRAGMA journal_mode = WAL');
-    db.exec('PRAGMA foreign_keys = ON');
+    db = new BetterSqlite3(DB_PATH);
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
   }
   return db;
 }
