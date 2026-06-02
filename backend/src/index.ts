@@ -26,14 +26,28 @@ if (process.env.FRONTEND_URL) {
   process.env.FRONTEND_URL.split(',').forEach(u => allowedOrigins.push(u.trim()));
 }
 
+// Accept any vercel.app subdomain (preview deployments)
+function isAllowedOrigin(origin: string | undefined): boolean {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  if (origin.endsWith('.vercel.app')) return true;
+  return false;
+}
+
+const corsOptions = {
+  origin: (origin: string | undefined, cb: (e: null, ok: boolean) => void) => cb(null, isAllowedOrigin(origin)),
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
 const app = express();
 const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
-  cors: { origin: allowedOrigins, methods: ['GET', 'POST'], credentials: true },
+  cors: corsOptions,
 });
 
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Public routes

@@ -8,8 +8,7 @@ export function getSocket(): Socket {
     // In development: connect directly to localhost:3001 (bypass Vite proxy for WS)
     const url = import.meta.env.VITE_API_URL || 'http://localhost:3001';
     socket = io(url, {
-      transports: ['websocket', 'polling'],
-      withCredentials: true,
+      transports: ['polling', 'websocket'],
     });
   }
   return socket;
