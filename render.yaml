@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: osi-logistics-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 22.0.0
+      - key: FRONTEND_URL
+        sync: false   # set manually in Render dashboard
+      - key: DATABASE_PATH
+        value: /var/data/osi_logistics.db
+    disk:
+      name: osi-db
+      mountPath: /var/data
+      sizeGB: 1
