@@ -6,16 +6,11 @@ services:
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/health
+    plan: free
     envVars:
       - key: NODE_ENV
         value: production
-      - key: NODE_VERSION
-        value: 22.0.0
       - key: FRONTEND_URL
-        sync: false   # set manually in Render dashboard
-      - key: DATABASE_PATH
-        value: /var/data/osi_logistics.db
-    disk:
-      name: osi-db
-      mountPath: /var/data
-      sizeGB: 1
+        value: https://osi-logistics.vercel.app
+      - key: NODE_VERSION
+        value: 20.0.0
