@@ -1,16 +1,15 @@
 services:
   - type: web
     name: osi-logistics-backend
-    runtime: node
+    runtime: docker
     rootDir: backend
-    buildCommand: npm install
-    startCommand: npm start
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
     plan: free
     envVars:
       - key: NODE_ENV
         value: production
-      - key: NODE_VERSION
-        value: 22.0.0
       - key: FRONTEND_URL
         value: https://osi-logistics.vercel.app
+      - key: PORT
+        value: 3001
