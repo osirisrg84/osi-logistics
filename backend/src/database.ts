@@ -156,6 +156,8 @@ export function initDatabase(): void {
     );
   `);
 
+  // Always runs on every startup — INSERT OR IGNORE is idempotent
+  seedUsers(db);
   seedDatabase(db);
 }
 
@@ -183,13 +185,6 @@ function seedUsers(db: DatabaseSync): void {
 }
 
 function seedDatabase(db: DatabaseSync): void {
-  // Always ensure users exist (handles re-deploys where DB already has data)
-  const userCount = (db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number }).count;
-  if (userCount === 0) {
-    seedUsers(db);
-    console.log('✅ Users seeded');
-  }
-
   const driverCount = (db.prepare('SELECT COUNT(*) as count FROM drivers').get() as { count: number }).count;
   if (driverCount > 0) return;
 

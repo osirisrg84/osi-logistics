@@ -52,8 +52,54 @@ app.use(express.json());
 
 // Public routes
 app.use('/api/auth', authRouter);
+
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '2.1.0' });
+  const db = getDb();
+  const userCount = (db.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number }).c;
+  const driverCount = (db.prepare('SELECT COUNT(*) as c FROM drivers').get() as { c: number }).c;
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '2.1.1', userCount, driverCount });
+});
+
+// Temporary: force-create default users (safe to call multiple times)
+app.post('/api/setup', (_req, res) => {
+  const { scryptSync, randomBytes, timingSafeEqual } = require('node:crypto');
+  const { v4: uuidv4 } = require('uuid');
+  const db = getDb();
+
+  function hash(pw: string, salt: string) {
+    return scryptSync(pw, salt, 64).toString('hex');
+  }
+
+  const users = [
+    { name: 'Admin OSI',       email: 'admin@osilogistics.com',      pw: 'Admin123!',    role: 'admin' },
+    { name: 'Dispatcher OSI',  email: 'dispatcher@osilogistics.com', pw: 'Dispatch123!', role: 'dispatcher' },
+  ];
+
+  const created: string[] = [];
+  for (const u of users) {
+    const exists = db.prepare('SELECT id FROM users WHERE email = ?').get(u.email);
+    if (!exists) {
+      const salt = randomBytes(16).toString('hex');
+      db.prepare(`INSERT INTO users (id,name,email,password_hash,salt,role,driver_id) VALUES (?,?,?,?,?,?,?)`)
+        .run(uuidv4(), u.name, u.email, hash(u.pw, salt), salt, u.role, null);
+      created.push(u.email);
+    }
+  }
+
+  // Link driver account
+  const driverUser = db.prepare("SELECT id FROM users WHERE email = 'carlos.r@osilogistics.com'").get();
+  if (!driverUser) {
+    const driver = db.prepare("SELECT id,name,email FROM drivers ORDER BY name LIMIT 1").get() as Record<string,string>|undefined;
+    if (driver) {
+      const salt = randomBytes(16).toString('hex');
+      db.prepare(`INSERT OR IGNORE INTO users (id,name,email,password_hash,salt,role,driver_id) VALUES (?,?,?,?,?,?,?)`)
+        .run(uuidv4(), driver.name, driver.email, hash('Driver123!', salt), salt, 'driver', driver.id);
+      created.push(driver.email);
+    }
+  }
+
+  const allUsers = db.prepare('SELECT id, name, email, role, active FROM users').all();
+  res.json({ created, allUsers });
 });
 
 // Protected routes
