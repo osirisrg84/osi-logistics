@@ -159,7 +159,37 @@ export function initDatabase(): void {
   seedDatabase(db);
 }
 
+function seedUsers(db: DatabaseSync): void {
+  const insertUser = db.prepare(`
+    INSERT OR IGNORE INTO users (id, name, email, password_hash, salt, role, driver_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  const adminSalt = randomBytes(16).toString('hex');
+  const dispatchSalt = randomBytes(16).toString('hex');
+
+  insertUser.run(uuidv4(), 'Admin OSI', 'admin@osilogistics.com', hashPassword('Admin123!', adminSalt), adminSalt, 'admin', null);
+  insertUser.run(uuidv4(), 'Dispatcher OSI', 'dispatcher@osilogistics.com', hashPassword('Dispatch123!', dispatchSalt), dispatchSalt, 'dispatcher', null);
+
+  const firstDriver = db.prepare("SELECT id, name, email FROM drivers ORDER BY name LIMIT 1").get() as Record<string, string> | undefined;
+  if (firstDriver) {
+    const driverSalt = randomBytes(16).toString('hex');
+    insertUser.run(uuidv4(), firstDriver.name, firstDriver.email, hashPassword('Driver123!', driverSalt), driverSalt, 'driver', firstDriver.id);
+  }
+
+  console.log('   👤 admin@osilogistics.com / Admin123!');
+  console.log('   👤 dispatcher@osilogistics.com / Dispatch123!');
+  console.log('   👤 (first driver) / Driver123!');
+}
+
 function seedDatabase(db: DatabaseSync): void {
+  // Always ensure users exist (handles re-deploys where DB already has data)
+  const userCount = (db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number }).count;
+  if (userCount === 0) {
+    seedUsers(db);
+    console.log('✅ Users seeded');
+  }
+
   const driverCount = (db.prepare('SELECT COUNT(*) as count FROM drivers').get() as { count: number }).count;
   if (driverCount > 0) return;
 
@@ -377,27 +407,5 @@ function seedDatabase(db: DatabaseSync): void {
     insertNotif.run(uuidv4(), notifs[i].type, notifs[i].title, notifs[i].message, notifs[i].read, t.toISOString(), null);
   }
 
-  // Seed default users
-  const adminSalt = randomBytes(16).toString('hex');
-  const dispatchSalt = randomBytes(16).toString('hex');
-
-  const insertUser = db.prepare(`
-    INSERT INTO users (id, name, email, password_hash, salt, role, driver_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `);
-
-  insertUser.run(uuidv4(), 'Admin OSI', 'admin@osilogistics.com', hashPassword('Admin123!', adminSalt), adminSalt, 'admin', null);
-  insertUser.run(uuidv4(), 'Dispatcher OSI', 'dispatcher@osilogistics.com', hashPassword('Dispatch123!', dispatchSalt), dispatchSalt, 'dispatcher', null);
-
-  // Link first driver to a driver user account
-  const firstDriver = db.prepare('SELECT id, name, email FROM drivers LIMIT 1').get() as Record<string, string> | undefined;
-  if (firstDriver) {
-    const driverSalt = randomBytes(16).toString('hex');
-    insertUser.run(uuidv4(), firstDriver.name, firstDriver.email, hashPassword('Driver123!', driverSalt), driverSalt, 'driver', firstDriver.id);
-  }
-
   console.log('✅ Database seeded with sample data');
-  console.log('   👤 admin@osilogistics.com / Admin123!');
-  console.log('   👤 dispatcher@osilogistics.com / Dispatch123!');
-  console.log('   👤 carlos.r@osilogistics.com / Driver123! (driver portal)');
 }
