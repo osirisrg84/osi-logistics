@@ -4,9 +4,9 @@ let socket: Socket | null = null;
 
 export function getSocket(): Socket {
   if (!socket) {
-    // In production: VITE_API_URL = https://your-backend.onrender.com
-    // In development: connect directly to localhost:3001 (bypass Vite proxy for WS)
-    const url = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    const url = import.meta.env.PROD
+      ? 'https://osi-logistics-backend.onrender.com'
+      : 'http://localhost:3001';
     socket = io(url, {
       transports: ['polling', 'websocket'],
     });
