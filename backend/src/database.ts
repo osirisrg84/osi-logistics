@@ -156,9 +156,10 @@ export function initDatabase(): void {
     );
   `);
 
-  // Always runs on every startup — INSERT OR IGNORE is idempotent
-  seedUsers(db);
+  // 1. Seed demo data first (creates drivers)
   seedDatabase(db);
+  // 2. Then seed users (needs drivers to already exist for driver account)
+  seedUsers(db);
 }
 
 function seedUsers(db: DatabaseSync): void {
@@ -167,23 +168,22 @@ function seedUsers(db: DatabaseSync): void {
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
 
+  // Admin + Dispatcher (always created)
   const adminSalt = randomBytes(16).toString('hex');
   const dispatchSalt = randomBytes(16).toString('hex');
+  insertUser.run(uuidv4(), 'Admin OSI',       'admin@osilogistics.com',      hashPassword('Admin123!',    adminSalt),    adminSalt,    'admin',      null);
+  insertUser.run(uuidv4(), 'Dispatcher OSI',  'dispatcher@osilogistics.com', hashPassword('Dispatch123!', dispatchSalt), dispatchSalt, 'dispatcher', null);
 
-  insertUser.run(uuidv4(), 'Admin OSI', 'admin@osilogistics.com', hashPassword('Admin123!', adminSalt), adminSalt, 'admin', null);
-  insertUser.run(uuidv4(), 'Dispatcher OSI', 'dispatcher@osilogistics.com', hashPassword('Dispatch123!', dispatchSalt), dispatchSalt, 'dispatcher', null);
-
-  // Link Carlos Rodriguez as the demo driver account
+  // Driver: Carlos Rodriguez specifically (drivers already exist at this point)
   const carlos = db.prepare("SELECT id, name, email FROM drivers WHERE email = 'carlos.r@osilogistics.com' LIMIT 1").get() as Record<string, string> | undefined;
-  const demoDriver = carlos || (db.prepare("SELECT id, name, email FROM drivers LIMIT 1").get() as Record<string, string> | undefined);
-  if (demoDriver) {
+  if (carlos) {
     const driverSalt = randomBytes(16).toString('hex');
-    insertUser.run(uuidv4(), demoDriver.name, demoDriver.email, hashPassword('Driver123!', driverSalt), driverSalt, 'driver', demoDriver.id);
+    insertUser.run(uuidv4(), carlos.name, carlos.email, hashPassword('Driver123!', driverSalt), driverSalt, 'driver', carlos.id);
+    console.log('   👤 carlos.r@osilogistics.com / Driver123!');
   }
 
   console.log('   👤 admin@osilogistics.com / Admin123!');
   console.log('   👤 dispatcher@osilogistics.com / Dispatch123!');
-  console.log('   👤 (first driver) / Driver123!');
 }
 
 function seedDatabase(db: DatabaseSync): void {
