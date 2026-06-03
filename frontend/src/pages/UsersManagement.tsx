@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2, X, Shield, UserCheck, Truck, AlertTriangle } from 'lucide-react';
 import api from '../services/api';
 import { format } from 'date-fns';
@@ -78,10 +78,10 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900">{user ? 'Edit User' : 'Create User'}</h2>
-          <button onClick={onClose}><X className="w-5 h-5 text-gray-400" /></button>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">{user ? 'Edit User' : 'Create User'}</h2>
+          <button onClick={onClose}><X className="w-5 h-5 text-gray-400 dark:text-slate-500" /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
@@ -128,8 +128,8 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
           {user && (
             <div className="flex items-center justify-between py-2">
               <div>
-                <p className="text-sm font-medium text-gray-900">Active Account</p>
-                <p className="text-xs text-gray-400">Deactivated users cannot sign in</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-slate-100">Active Account</p>
+                <p className="text-xs text-gray-400 dark:text-slate-500">Deactivated users cannot sign in</p>
               </div>
               <button type="button" onClick={() => setForm({...form, active: form.active ? 0 : 1})}
                 className={`w-11 h-6 rounded-full transition-colors ${form.active ? 'bg-green-500' : 'bg-gray-200'}`}>
@@ -209,7 +209,7 @@ export default function UsersManagement() {
             { label: 'Active Sessions', value: stats.active_sessions, color: 'text-green-700', bg: 'bg-green-50' },
           ].map(s => (
             <div key={s.label} className={`card ${s.bg} p-4`}>
-              <p className="text-xs text-gray-500">{s.label}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">{s.label}</p>
               <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
             </div>
           ))}
@@ -220,7 +220,7 @@ export default function UsersManagement() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
             <input className="input pl-9 w-52" placeholder="Search users..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <select className="input w-36" value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
@@ -241,7 +241,7 @@ export default function UsersManagement() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
+              <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
                 {['User', 'Role', 'Status', 'Driver Profile', 'Created', 'Actions'].map(h => (
                   <th key={h} className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{h}</th>
                 ))}
@@ -249,9 +249,9 @@ export default function UsersManagement() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={6} className="text-center py-10 text-gray-400">Loading users...</td></tr>
+                <tr><td colSpan={6} className="text-center py-10 text-gray-400 dark:text-slate-500">Loading users...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-10 text-gray-400">No users found</td></tr>
+                <tr><td colSpan={6} className="text-center py-10 text-gray-400 dark:text-slate-500">No users found</td></tr>
               ) : filtered.map(user => {
                 const RoleIcon = ROLE_ICONS[user.role];
                 return (
@@ -265,8 +265,8 @@ export default function UsersManagement() {
                           {user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-                          <p className="text-xs text-gray-400">{user.email}</p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{user.name}</p>
+                          <p className="text-xs text-gray-400 dark:text-slate-500">{user.email}</p>
                         </div>
                       </div>
                     </td>
@@ -288,13 +288,13 @@ export default function UsersManagement() {
                           <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
                             {user.driver_avatar}
                           </div>
-                          <span className="text-xs text-gray-600">{user.driver_name}</span>
+                          <span className="text-xs text-gray-600 dark:text-slate-400">{user.driver_name}</span>
                         </div>
                       ) : (
-                        <span className="text-xs text-gray-400">—</span>
+                        <span className="text-xs text-gray-400 dark:text-slate-500">â€”</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">
+                    <td className="px-4 py-3 text-xs text-gray-500 dark:text-slate-400">
                       {format(new Date(user.created_at), 'MMM d, yyyy')}
                     </td>
                     <td className="px-4 py-3">
@@ -332,13 +332,13 @@ export default function UsersManagement() {
                     {login.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <span className="font-medium text-gray-900">{login.name}</span>
+                    <span className="font-medium text-gray-900 dark:text-slate-100">{login.name}</span>
                     <span className="text-gray-400 ml-1 text-xs">{login.email}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`badge text-xs ${ROLE_STYLES[login.role]}`}>{login.role}</span>
-                  <span className="text-xs text-gray-400">{format(new Date(login.created_at), 'MMM d, HH:mm')}</span>
+                  <span className="text-xs text-gray-400 dark:text-slate-500">{format(new Date(login.created_at), 'MMM d, HH:mm')}</span>
                 </div>
               </div>
             ))}
@@ -356,3 +356,4 @@ export default function UsersManagement() {
     </div>
   );
 }
+

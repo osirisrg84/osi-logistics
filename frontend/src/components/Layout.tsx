@@ -11,7 +11,7 @@ export default function Layout() {
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-gray-50 dark:bg-slate-950 overflow-hidden">
       {/* Mobile backdrop */}
       {sidebarOpen && (
         <div

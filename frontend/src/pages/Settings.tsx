@@ -95,7 +95,7 @@ export default function Settings() {
       <div className="flex-1 space-y-5">
         {activeSection === 'company' && (
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-5">Company Information</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">Company Information</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className="label">Company Name</label>
@@ -158,16 +158,16 @@ export default function Settings() {
 
         {activeSection === 'notifications' && (
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-5">Notification Preferences</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">Notification Preferences</h3>
             <div className="space-y-4">
-              <p className="text-sm font-medium text-gray-700">Order Events</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-slate-300">Order Events</p>
               {[
                 { key: 'order_created', label: 'New order created' },
                 { key: 'order_assigned', label: 'Order assigned to driver' },
                 { key: 'order_delivered', label: 'Order delivered' },
               ].map(({ key, label }) => (
                 <div key={key} className="flex items-center justify-between py-2 border-b border-gray-50">
-                  <span className="text-sm text-gray-700">{label}</span>
+                  <span className="text-sm text-gray-700 dark:text-slate-300">{label}</span>
                   <button
                     onClick={() => setNotifSettings({...notifSettings, [key]: !notifSettings[key as keyof typeof notifSettings]})}
                     className={`w-10 h-5 rounded-full transition-colors ${notifSettings[key as keyof typeof notifSettings] ? 'bg-orange-500' : 'bg-gray-200'}`}
@@ -183,7 +183,7 @@ export default function Settings() {
                 { key: 'maintenance_due', label: 'Maintenance due reminder' },
               ].map(({ key, label }) => (
                 <div key={key} className="flex items-center justify-between py-2 border-b border-gray-50">
-                  <span className="text-sm text-gray-700">{label}</span>
+                  <span className="text-sm text-gray-700 dark:text-slate-300">{label}</span>
                   <button
                     onClick={() => setNotifSettings({...notifSettings, [key]: !notifSettings[key as keyof typeof notifSettings]})}
                     className={`w-10 h-5 rounded-full transition-colors ${notifSettings[key as keyof typeof notifSettings] ? 'bg-orange-500' : 'bg-gray-200'}`}
@@ -199,7 +199,7 @@ export default function Settings() {
                 { key: 'sms_alerts', label: 'SMS alerts' },
               ].map(({ key, label }) => (
                 <div key={key} className="flex items-center justify-between py-2 border-b border-gray-50">
-                  <span className="text-sm text-gray-700">{label}</span>
+                  <span className="text-sm text-gray-700 dark:text-slate-300">{label}</span>
                   <button
                     onClick={() => setNotifSettings({...notifSettings, [key]: !notifSettings[key as keyof typeof notifSettings]})}
                     className={`w-10 h-5 rounded-full transition-colors ${notifSettings[key as keyof typeof notifSettings] ? 'bg-orange-500' : 'bg-gray-200'}`}
@@ -214,12 +214,12 @@ export default function Settings() {
 
         {activeSection === 'dispatch' && (
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-5">Dispatch Rules</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">Dispatch Rules</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-gray-50">
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Auto-Assign Orders</p>
-                  <p className="text-xs text-gray-400">Automatically assign new orders to available drivers</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-slate-100">Auto-Assign Orders</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500">Automatically assign new orders to available drivers</p>
                 </div>
                 <button
                   onClick={() => setDispatchSettings({...dispatchSettings, auto_assign: !dispatchSettings.auto_assign})}
@@ -256,7 +256,7 @@ export default function Settings() {
 
         {activeSection === 'tracking' && (
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-5">Tracking Settings</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">Tracking Settings</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="label">GPS Update Interval (seconds)</label>
@@ -285,8 +285,8 @@ export default function Settings() {
                 ].map(({ key, label, desc }) => (
                   <div key={key} className="flex items-center justify-between py-2 border-b border-gray-50">
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{label}</p>
-                      <p className="text-xs text-gray-400">{desc}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{label}</p>
+                      <p className="text-xs text-gray-400 dark:text-slate-500">{desc}</p>
                     </div>
                     <button
                       onClick={() => setTrackingSettings({...trackingSettings, [key]: !trackingSettings[key as keyof typeof trackingSettings]})}
@@ -303,7 +303,7 @@ export default function Settings() {
 
         {activeSection === 'appearance' && (
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-5">Appearance</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">Appearance</h3>
             <div className="space-y-5">
               <div>
                 <label className="label">Brand Color</label>
@@ -335,7 +335,7 @@ export default function Settings() {
 
         {activeSection === 'security' && (
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-5">Security Settings</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">Security Settings</h3>
             <div className="space-y-4">
               <div className="bg-green-50 border border-green-100 rounded-xl p-4">
                 <p className="text-sm font-medium text-green-800">âœ“ System is running securely</p>
@@ -360,15 +360,15 @@ export default function Settings() {
 
         {activeSection === 'api' && (
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-5">API & Integrations</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">API & Integrations</h3>
             <div className="space-y-4">
-              <div className="bg-gray-50 rounded-xl p-4">
+              <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-xl p-4">
                 <p className="text-sm font-medium text-gray-900 mb-2">Backend API</p>
-                <p className="text-xs font-mono text-gray-600 bg-white rounded-lg p-2 border border-gray-200">http://localhost:3001/api</p>
+                <p className="text-xs font-mono text-gray-600 bg-white rounded-lg p-2 border border-gray-200 dark:border-slate-600">http://localhost:3001/api</p>
               </div>
-              <div className="bg-gray-50 rounded-xl p-4">
+              <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-xl p-4">
                 <p className="text-sm font-medium text-gray-900 mb-2">WebSocket (Real-time)</p>
-                <p className="text-xs font-mono text-gray-600 bg-white rounded-lg p-2 border border-gray-200">ws://localhost:3001</p>
+                <p className="text-xs font-mono text-gray-600 bg-white rounded-lg p-2 border border-gray-200 dark:border-slate-600">ws://localhost:3001</p>
               </div>
               <div>
                 <label className="label">Webhook URL (for order events)</label>
@@ -376,7 +376,7 @@ export default function Settings() {
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full" />
-                <span className="text-xs text-gray-600">API is online and accepting requests</span>
+                <span className="text-xs text-gray-600 dark:text-slate-400">API is online and accepting requests</span>
               </div>
             </div>
           </div>
@@ -393,4 +393,5 @@ export default function Settings() {
     </div>
   );
 }
+
 

@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Bell, Search, RefreshCw, X, Check, LogOut, ChevronDown, Menu } from 'lucide-react';
+import { Bell, Search, RefreshCw, X, Check, LogOut, ChevronDown, Menu, Sun, Moon } from 'lucide-react';
 import { notificationsApi } from '../services/api';
 import { Notification } from '../types';
 import { getSocket } from '../services/socket';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { formatDistanceToNow } from 'date-fns';
 
 const PAGE_TITLES: Record<string, string> = {
@@ -33,6 +34,7 @@ interface HeaderProps {
 export default function Header({ onMenuClick }: HeaderProps) {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { dark, toggle: toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unread, setUnread] = useState(0);
   const [showNotifs, setShowNotifs] = useState(false);
@@ -76,9 +78,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="bg-white border-b border-gray-100 px-4 md:px-6 py-3 flex items-center justify-between flex-shrink-0">
+    <header className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 px-4 md:px-6 py-3 flex items-center justify-between flex-shrink-0">
       <div className="flex items-center gap-3">
-        {/* Hamburger — mobile only */}
+        {/* Hamburger â€” mobile only */}
         <button
           onClick={onMenuClick}
           className="md:hidden p-2 -ml-1 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
@@ -87,14 +89,14 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </button>
         <div>
           <h1 className="text-base md:text-lg font-semibold text-gray-900">{title}</h1>
-          <p className="text-xs text-gray-400 hidden sm:block">
+          <p className="text-xs text-gray-400 dark:text-slate-500 hidden sm:block">
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </div>
       </div>
 
       <div className="flex items-center gap-2">
-        {/* Search — hidden on small screens */}
+        {/* Search â€” hidden on small screens */}
         <div className="relative hidden lg:block">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
@@ -106,14 +108,26 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
         {/* Refresh */}
         <button onClick={async () => { setLoading(true); await fetchNotifications(); setLoading(false); }}
-          className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors hidden sm:block">
+          className="p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors hidden sm:block">
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+        </button>
+
+        {/* Dark mode toggle */}
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+          title={dark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        >
+          {dark
+            ? <Sun className="w-4 h-4 text-yellow-400" />
+            : <Moon className="w-4 h-4" />
+          }
         </button>
 
         {/* Notifications */}
         <div className="relative" ref={notifRef}>
           <button onClick={() => setShowNotifs(!showNotifs)}
-            className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
+            className="relative p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
             <Bell className="w-5 h-5" />
             {unread > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
@@ -123,9 +137,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
           </button>
 
           {showNotifs && (
-            <div className="absolute right-0 top-full mt-2 w-72 md:w-80 bg-white rounded-xl shadow-xl border border-gray-100 z-50 slide-in">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-                <span className="font-semibold text-gray-900 text-sm">Notifications</span>
+            <div className="absolute right-0 top-full mt-2 w-72 md:w-80 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 z-50 slide-in">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+                <span className="font-semibold text-gray-900 dark:text-slate-100 text-sm">Notifications</span>
                 <div className="flex items-center gap-2">
                   {unread > 0 && (
                     <button onClick={handleMarkAllRead} className="text-xs text-orange-500 hover:text-orange-600 flex items-center gap-1">
@@ -176,8 +190,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
           {showUserMenu && (
             <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 z-50 slide-in py-1">
-              <div className="px-4 py-3 border-b border-gray-100">
-                <p className="text-sm font-semibold text-gray-900">{user?.name}</p>
+              <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+                <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{user?.name}</p>
                 <p className="text-xs text-gray-400 truncate">{user?.email}</p>
                 <span className={`badge mt-1 capitalize ${user?.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'}`}>{user?.role}</span>
               </div>
@@ -193,3 +207,4 @@ export default function Header({ onMenuClick }: HeaderProps) {
     </header>
   );
 }
+

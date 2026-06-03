@@ -95,7 +95,7 @@ export default function Reports() {
   return (
     <div className="space-y-5 fade-in">
       {/* Tabs */}
-      <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1 w-fit">
+      <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-700 rounded-xl p-1 w-fit">
         {(['overview', 'orders', 'drivers', 'fleet'] as const).map(tab => (
           <button
             key={tab}
@@ -124,7 +124,7 @@ export default function Reports() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* Revenue trend */}
             <div className="card">
-              <h3 className="font-semibold text-gray-900 mb-4">Revenue Trend (7 days)</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Revenue Trend (7 days)</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <AreaChart data={((dashData as Record<string, unknown>)?.dailyRevenue as unknown[]) || []}>
                   <defs>
@@ -144,7 +144,7 @@ export default function Reports() {
 
             {/* Deliveries by hour */}
             <div className="card">
-              <h3 className="font-semibold text-gray-900 mb-4">Deliveries by Hour</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Deliveries by Hour</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={byHour}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -158,7 +158,7 @@ export default function Reports() {
 
             {/* Orders by priority */}
             <div className="card">
-              <h3 className="font-semibold text-gray-900 mb-4">Orders by Priority</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Orders by Priority</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie data={byPriority} cx="50%" cy="50%" outerRadius={80} dataKey="count" nameKey="priority" label={({ priority, count }) => `${priority}: ${count}`} labelLine={false}>
@@ -171,7 +171,7 @@ export default function Reports() {
 
             {/* Top drivers */}
             <div className="card">
-              <h3 className="font-semibold text-gray-900 mb-4">Top Driver Performance</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Top Driver Performance</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={((dashData as Record<string, unknown>)?.topDrivers as unknown[] || []).slice(0, 5)} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
@@ -189,7 +189,7 @@ export default function Reports() {
       {activeTab === 'orders' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="font-semibold text-gray-900">Orders Report</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-slate-100">Orders Report</h3>
             <button onClick={() => exportCSV(ordersReport, 'orders-report')} className="btn-secondary">
               <Download className="w-4 h-4" /> Export CSV
             </button>
@@ -198,7 +198,7 @@ export default function Reports() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100">
+                  <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
                     {['Period', 'Total Orders', 'Delivered', 'Cancelled', 'Revenue', 'Avg Distance (km)'].map(h => (
                       <th key={h} className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{h}</th>
                     ))}
@@ -207,12 +207,12 @@ export default function Reports() {
                 <tbody>
                   {(ordersReport as Array<{ period: string; total_orders: number; delivered: number; cancelled: number; revenue: number; avg_distance: number }>).map((row, i) => (
                     <tr key={i} className="table-row">
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.period}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{row.total_orders}</td>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-slate-100">{row.period}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{row.total_orders}</td>
                       <td className="px-4 py-3 text-sm text-green-600 font-medium">{row.delivered}</td>
                       <td className="px-4 py-3 text-sm text-red-500">{row.cancelled}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-gray-900">${(row.revenue || 0).toFixed(2)}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{(row.avg_distance || 0).toFixed(1)}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-slate-100">${(row.revenue || 0).toFixed(2)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-slate-400">{(row.avg_distance || 0).toFixed(1)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -225,7 +225,7 @@ export default function Reports() {
       {activeTab === 'drivers' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="font-semibold text-gray-900">Driver Performance Report</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-slate-100">Driver Performance Report</h3>
             <button onClick={() => exportCSV(driversReport, 'drivers-report')} className="btn-secondary">
               <Download className="w-4 h-4" /> Export CSV
             </button>
@@ -234,7 +234,7 @@ export default function Reports() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100">
+                  <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
                     {['Driver', 'Status', 'Total Trips', 'This Month', 'On-Time %', 'Rating', 'Revenue (Month)', 'Avg Time (min)'].map(h => (
                       <th key={h} className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{h}</th>
                     ))}
@@ -243,18 +243,18 @@ export default function Reports() {
                 <tbody>
                   {(driversReport as Array<{ name: string; status: string; total_deliveries: number; orders_this_month: number; on_time_rate: number; rating: number; revenue_this_month: number; avg_delivery_minutes: number }>).map((driver, i) => (
                     <tr key={i} className="table-row">
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{driver.name}</td>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-slate-100">{driver.name}</td>
                       <td className="px-4 py-3">
                         <span className={`badge text-xs ${driver.status === 'available' ? 'bg-green-100 text-green-700' : driver.status === 'busy' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'}`}>
                           {driver.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{driver.total_deliveries}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{driver.total_deliveries}</td>
                       <td className="px-4 py-3 text-sm text-blue-600 font-medium">{driver.orders_this_month}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{(driver.on_time_rate || 0).toFixed(1)}%</td>
+                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{(driver.on_time_rate || 0).toFixed(1)}%</td>
                       <td className="px-4 py-3 text-sm text-yellow-500">â˜… {(driver.rating || 0).toFixed(1)}</td>
                       <td className="px-4 py-3 text-sm font-semibold text-green-600">${(driver.revenue_this_month || 0).toFixed(2)}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{(driver.avg_delivery_minutes || 0).toFixed(0)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-slate-400">{(driver.avg_delivery_minutes || 0).toFixed(0)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -267,7 +267,7 @@ export default function Reports() {
       {activeTab === 'fleet' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="font-semibold text-gray-900">Fleet Utilization Report</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-slate-100">Fleet Utilization Report</h3>
             <button onClick={() => exportCSV(fleetReport, 'fleet-report')} className="btn-secondary">
               <Download className="w-4 h-4" /> Export CSV
             </button>
@@ -276,7 +276,7 @@ export default function Reports() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100">
+                  <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
                     {['Truck', 'Type', 'Status', 'Mileage', 'Total Trips', 'Total km', 'Revenue', 'Fuel %', 'Driver'].map(h => (
                       <th key={h} className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{h}</th>
                     ))}
@@ -286,28 +286,28 @@ export default function Reports() {
                   {(fleetReport as Array<{ plate_number: string; make: string; model: string; type: string; status: string; mileage: number; total_trips: number; total_km: number; revenue_generated: number; fuel_level: number; current_driver: string }>).map((truck, i) => (
                     <tr key={i} className="table-row">
                       <td className="px-4 py-3">
-                        <p className="text-sm font-medium text-gray-900">{truck.plate_number}</p>
-                        <p className="text-xs text-gray-400">{truck.make} {truck.model}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{truck.plate_number}</p>
+                        <p className="text-xs text-gray-400 dark:text-slate-500">{truck.make} {truck.model}</p>
                       </td>
-                      <td className="px-4 py-3 text-xs text-gray-600">{truck.type}</td>
+                      <td className="px-4 py-3 text-xs text-gray-600 dark:text-slate-400">{truck.type}</td>
                       <td className="px-4 py-3">
                         <span className={`badge text-xs ${truck.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                           {truck.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{(truck.mileage || 0).toLocaleString()}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{(truck.mileage || 0).toLocaleString()}</td>
                       <td className="px-4 py-3 text-sm text-blue-600 font-medium">{truck.total_trips}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{(truck.total_km || 0).toFixed(0)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{(truck.total_km || 0).toFixed(0)}</td>
                       <td className="px-4 py-3 text-sm font-semibold text-green-600">${(truck.revenue_generated || 0).toFixed(0)}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 h-1.5 bg-gray-100 rounded-full">
+                          <div className="flex-1 h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full">
                             <div className={`h-1.5 rounded-full ${truck.fuel_level < 30 ? 'bg-red-400' : truck.fuel_level < 60 ? 'bg-yellow-400' : 'bg-green-500'}`} style={{ width: `${truck.fuel_level}%` }} />
                           </div>
-                          <span className="text-xs text-gray-500">{truck.fuel_level}%</span>
+                          <span className="text-xs text-gray-500 dark:text-slate-400">{truck.fuel_level}%</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-xs text-gray-600">{truck.current_driver || 'â€”'}</td>
+                      <td className="px-4 py-3 text-xs text-gray-600 dark:text-slate-400">{truck.current_driver || 'â€”'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -319,4 +319,5 @@ export default function Reports() {
     </div>
   );
 }
+
 

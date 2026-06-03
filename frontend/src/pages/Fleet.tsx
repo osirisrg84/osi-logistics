@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Plus, Search, X, Edit2, Trash2, Fuel, Wrench, AlertTriangle, Eye } from 'lucide-react';
 import { Truck } from '../types';
 import { trucksApi } from '../services/api';
@@ -59,10 +59,10 @@ function TruckForm({ truck, onClose, onSave }: TruckFormProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900">{truck ? 'Edit Truck' : 'Add New Truck'}</h2>
-          <button onClick={onClose}><X className="w-5 h-5 text-gray-500" /></button>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">{truck ? 'Edit Truck' : 'Add New Truck'}</h2>
+          <button onClick={onClose}><X className="w-5 h-5 text-gray-500 dark:text-slate-400" /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -97,7 +97,7 @@ function TruckForm({ truck, onClose, onSave }: TruckFormProps) {
               <input className="input" type="number" value={form.capacity_kg} onChange={e => setForm({...form, capacity_kg: e.target.value})} placeholder="5000" />
             </div>
             <div>
-              <label className="label">Volume (m³)</label>
+              <label className="label">Volume (mÂ³)</label>
               <input className="input" type="number" value={form.capacity_m3} onChange={e => setForm({...form, capacity_m3: e.target.value})} placeholder="20" />
             </div>
             <div>
@@ -199,7 +199,7 @@ export default function Fleet() {
           { label: 'Maintenance Due', value: stats.maintenance_due || 0, color: 'text-red-500', bg: 'bg-red-50' },
         ].map((s, i) => (
           <div key={i} className={`card ${s.bg} p-4`}>
-            <p className="text-xs text-gray-500">{s.label}</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
@@ -209,7 +209,7 @@ export default function Fleet() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
             <input className="input pl-9 w-48" placeholder="Search trucks..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <select className="input w-36" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
@@ -227,9 +227,9 @@ export default function Fleet() {
       {/* Trucks Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {loading ? (
-          <div className="col-span-3 text-center py-12 text-gray-400">Loading fleet...</div>
+          <div className="col-span-3 text-center py-12 text-gray-400 dark:text-slate-500">Loading fleet...</div>
         ) : trucks.length === 0 ? (
-          <div className="col-span-3 text-center py-12 text-gray-400">No trucks found</div>
+          <div className="col-span-3 text-center py-12 text-gray-400 dark:text-slate-500">No trucks found</div>
         ) : trucks.map(truck => {
           const maintStatus = getMaintenanceStatus(truck.next_maintenance);
           return (
@@ -238,15 +238,15 @@ export default function Fleet() {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg font-bold text-gray-900">{truck.plate_number}</span>
+                    <span className="text-lg font-bold text-gray-900 dark:text-slate-100">{truck.plate_number}</span>
                     <TruckStatusBadge status={truck.status} />
                   </div>
-                  <p className="text-sm text-gray-600">{truck.year} {truck.make} {truck.model}</p>
-                  <p className="text-xs text-gray-400">{truck.type} · {truck.color}</p>
+                  <p className="text-sm text-gray-600 dark:text-slate-400">{truck.year} {truck.make} {truck.model}</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500">{truck.type} Â· {truck.color}</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => { setEditTruck(truck); setShowForm(true); }} className="p-1.5 hover:bg-gray-100 rounded-lg">
-                    <Edit2 className="w-3.5 h-3.5 text-gray-500" />
+                  <button onClick={() => { setEditTruck(truck); setShowForm(true); }} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
+                    <Edit2 className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
                   </button>
                   <button onClick={() => handleDelete(truck)} className="p-1.5 hover:bg-red-50 rounded-lg">
                     <Trash2 className="w-3.5 h-3.5 text-red-400" />
@@ -256,13 +256,13 @@ export default function Fleet() {
 
               {/* Capacity */}
               <div className="grid grid-cols-2 gap-2 mb-4">
-                <div className="bg-gray-50 rounded-lg p-2 text-center">
-                  <p className="text-xs text-gray-500">Capacity</p>
-                  <p className="text-sm font-bold text-gray-900">{truck.capacity_kg.toLocaleString()} kg</p>
+                <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-lg p-2 text-center">
+                  <p className="text-xs text-gray-500 dark:text-slate-400">Capacity</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{truck.capacity_kg.toLocaleString()} kg</p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-2 text-center">
-                  <p className="text-xs text-gray-500">Volume</p>
-                  <p className="text-sm font-bold text-gray-900">{truck.capacity_m3} m³</p>
+                <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-lg p-2 text-center">
+                  <p className="text-xs text-gray-500 dark:text-slate-400">Volume</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{truck.capacity_m3} mÂ³</p>
                 </div>
               </div>
 
@@ -274,7 +274,7 @@ export default function Fleet() {
                     {truck.fuel_level}%
                   </span>
                 </div>
-                <div className="h-1.5 bg-gray-100 rounded-full">
+                <div className="h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full">
                   <div
                     className={`h-1.5 rounded-full transition-all ${truck.fuel_level < 30 ? 'bg-red-400' : truck.fuel_level < 60 ? 'bg-yellow-400' : 'bg-green-500'}`}
                     style={{ width: `${truck.fuel_level}%` }}
@@ -284,7 +284,7 @@ export default function Fleet() {
 
               {/* Maintenance */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1 text-xs text-gray-500">
+                <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
                   <Wrench className="w-3 h-3" />
                   Next service: {format(new Date(truck.next_maintenance), 'MMM d, yyyy')}
                 </div>
@@ -294,7 +294,7 @@ export default function Fleet() {
               </div>
 
               {/* Mileage */}
-              <div className="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between text-xs text-gray-500">
+              <div className="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between text-xs text-gray-500 dark:text-slate-400">
                 <span>{truck.mileage.toLocaleString()} mi</span>
                 {truck.driver_name && (
                   <span className="flex items-center gap-1 text-blue-600">
@@ -325,3 +325,4 @@ export default function Fleet() {
     </div>
   );
 }
+

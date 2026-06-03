@@ -139,8 +139,8 @@ export default function Dashboard() {
             <CheckCircle className="w-5 h-5 text-green-600" />
           </div>
           <div>
-            <p className="text-xs text-gray-500">Delivered Today</p>
-            <p className="text-xl font-bold text-gray-900">{orderStats.delivered || 0}</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">Delivered Today</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-slate-100">{orderStats.delivered || 0}</p>
           </div>
         </div>
         <div className="card flex items-center gap-4">
@@ -148,8 +148,8 @@ export default function Dashboard() {
             <Clock className="w-5 h-5 text-yellow-600" />
           </div>
           <div>
-            <p className="text-xs text-gray-500">Avg Delivery Time</p>
-            <p className="text-xl font-bold text-gray-900">{(stats?.kpis.avg_delivery_hours || 0).toFixed(1)}h</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">Avg Delivery Time</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-slate-100">{(stats?.kpis.avg_delivery_hours || 0).toFixed(1)}h</p>
           </div>
         </div>
         <div className="card flex items-center gap-4">
@@ -157,8 +157,8 @@ export default function Dashboard() {
             <TrendingUp className="w-5 h-5 text-blue-600" />
           </div>
           <div>
-            <p className="text-xs text-gray-500">On-Time Rate</p>
-            <p className="text-xl font-bold text-gray-900">{(stats?.kpis.on_time_rate || 0).toFixed(1)}%</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">On-Time Rate</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-slate-100">{(stats?.kpis.on_time_rate || 0).toFixed(1)}%</p>
           </div>
         </div>
         <div className="card flex items-center gap-4">
@@ -166,8 +166,8 @@ export default function Dashboard() {
             <AlertTriangle className="w-5 h-5 text-red-500" />
           </div>
           <div>
-            <p className="text-xs text-gray-500">Pending Orders</p>
-            <p className="text-xl font-bold text-gray-900">{orderStats.pending || 0}</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">Pending Orders</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-slate-100">{orderStats.pending || 0}</p>
           </div>
         </div>
       </div>
@@ -177,7 +177,7 @@ export default function Dashboard() {
         {/* Revenue Chart */}
         <div className="card lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900">Revenue & Orders (7 days)</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-slate-100">Revenue & Orders (7 days)</h3>
             <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-lg">Last 7 days</span>
           </div>
           <ResponsiveContainer width="100%" height={220}>
@@ -206,7 +206,7 @@ export default function Dashboard() {
 
         {/* Order Status Pie */}
         <div className="card">
-          <h3 className="font-semibold text-gray-900 mb-4">Orders by Status</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Orders by Status</h3>
           <ResponsiveContainer width="100%" height={180}>
             <PieChart>
               <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={3} dataKey="value">
@@ -224,9 +224,9 @@ export default function Dashboard() {
               <div key={i} className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: d.color }} />
-                  <span className="capitalize text-gray-600">{d.name}</span>
+                  <span className="capitalize text-gray-600 dark:text-slate-400">{d.name}</span>
                 </div>
-                <span className="font-semibold text-gray-900">{d.value}</span>
+                <span className="font-semibold text-gray-900 dark:text-slate-100">{d.value}</span>
               </div>
             ))}
           </div>
@@ -237,7 +237,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Top Drivers */}
         <div className="card">
-          <h3 className="font-semibold text-gray-900 mb-4">Top Drivers</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Top Drivers</h3>
           <div className="space-y-3">
             {(stats?.topDrivers || []).slice(0, 5).map((driver, i) => (
               <div key={i} className="flex items-center gap-3">
@@ -247,16 +247,16 @@ export default function Dashboard() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-gray-900 truncate">{driver.name}</p>
-                    <span className="text-xs text-gray-500">{driver.total_deliveries} trips</span>
+                    <span className="text-xs text-gray-500 dark:text-slate-400">{driver.total_deliveries} trips</span>
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <div className="flex-1 h-1.5 bg-gray-100 rounded-full">
+                    <div className="flex-1 h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full">
                       <div
                         className="h-1.5 bg-orange-500 rounded-full"
                         style={{ width: `${driver.on_time_rate}%` }}
                       />
                     </div>
-                    <span className="text-xs text-gray-500">{driver.on_time_rate?.toFixed(0)}%</span>
+                    <span className="text-xs text-gray-500 dark:text-slate-400">{driver.on_time_rate?.toFixed(0)}%</span>
                     <span className="text-xs text-yellow-500">â˜… {driver.rating?.toFixed(1)}</span>
                   </div>
                 </div>
@@ -267,13 +267,13 @@ export default function Dashboard() {
 
         {/* Recent Activity */}
         <div className="card">
-          <h3 className="font-semibold text-gray-900 mb-4">Recent Activity</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Recent Activity</h3>
           <div className="space-y-3">
             {(stats?.recentActivity || []).slice(0, 6).map((activity, i) => (
               <div key={i} className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-2 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900">
+                  <p className="text-sm text-gray-900 dark:text-slate-100">
                     <span className="font-medium">{activity.order_number}</span>
                     {' '}â€”{' '}
                     <OrderStatusBadge status={activity.status as never} />
@@ -281,7 +281,7 @@ export default function Dashboard() {
                   <p className="text-xs text-gray-500 mt-0.5 truncate">
                     {activity.customer_name} Â· {activity.notes}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-400 dark:text-slate-500">
                     {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
                   </p>
                 </div>
@@ -293,7 +293,7 @@ export default function Dashboard() {
 
       {/* Fleet Stats */}
       <div className="card">
-        <h3 className="font-semibold text-gray-900 mb-4">Fleet Overview</h3>
+        <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Fleet Overview</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { label: 'Total Trucks', value: driverStats.total || 0, color: 'text-gray-900' },
@@ -304,7 +304,7 @@ export default function Dashboard() {
             <div key={i} className="text-center">
               <Truck className="w-6 h-6 mx-auto text-gray-300 mb-1" />
               <p className={`text-2xl font-bold ${item.color}`}>{item.value}</p>
-              <p className="text-xs text-gray-500">{item.label}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">{item.label}</p>
             </div>
           ))}
         </div>
@@ -312,4 +312,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
 

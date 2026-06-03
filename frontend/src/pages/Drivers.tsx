@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin } from 'lucide-react';
 import { Driver, DriverStatus } from '../types';
 import { driversApi, trucksApi } from '../services/api';
@@ -44,10 +44,10 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900">{driver ? 'Edit Driver' : 'Add New Driver'}</h2>
-          <button onClick={onClose}><X className="w-5 h-5 text-gray-500" /></button>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">{driver ? 'Edit Driver' : 'Add New Driver'}</h2>
+          <button onClick={onClose}><X className="w-5 h-5 text-gray-500 dark:text-slate-400" /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -113,10 +113,10 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900">Driver Profile</h2>
-          <button onClick={onClose}><X className="w-5 h-5 text-gray-500" /></button>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">Driver Profile</h2>
+          <button onClick={onClose}><X className="w-5 h-5 text-gray-500 dark:text-slate-400" /></button>
         </div>
         <div className="p-6 space-y-5">
           {/* Profile Header */}
@@ -125,7 +125,7 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
               {driver.avatar}
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900">{driver.name}</h3>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-slate-100">{driver.name}</h3>
               <DriverStatusBadge status={driver.status} className="mt-1" />
               <p className="text-xs text-gray-400 mt-1">Hired {format(new Date(driver.hire_date), 'MMM d, yyyy')}</p>
             </div>
@@ -143,26 +143,26 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
             </div>
             <div className="bg-green-50 rounded-xl p-3 text-center">
               <p className="text-2xl font-bold text-green-600">{driver.on_time_rate.toFixed(0)}%</p>
-              <p className="text-xs text-gray-500">On-Time</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">On-Time</p>
             </div>
           </div>
 
           {/* Contact */}
           <div className="space-y-2">
-            <a href={`tel:${driver.phone}`} className="flex items-center gap-3 bg-gray-50 rounded-xl p-3 hover:bg-gray-100 transition-colors">
-              <Phone className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-700">{driver.phone}</span>
+            <a href={`tel:${driver.phone}`} className="flex items-center gap-3 bg-gray-50 dark:bg-slate-900 rounded-xl p-3 hover:bg-gray-100 transition-colors">
+              <Phone className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+              <span className="text-sm text-gray-700 dark:text-slate-300">{driver.phone}</span>
             </a>
-            <a href={`mailto:${driver.email}`} className="flex items-center gap-3 bg-gray-50 rounded-xl p-3 hover:bg-gray-100 transition-colors">
-              <Mail className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-700">{driver.email}</span>
+            <a href={`mailto:${driver.email}`} className="flex items-center gap-3 bg-gray-50 dark:bg-slate-900 rounded-xl p-3 hover:bg-gray-100 transition-colors">
+              <Mail className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+              <span className="text-sm text-gray-700 dark:text-slate-300">{driver.email}</span>
             </a>
           </div>
 
           {/* License */}
-          <div className="bg-gray-50 rounded-xl p-4">
+          <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-xl p-4">
             <p className="text-xs font-semibold text-gray-700 mb-2">CDL LICENSE</p>
-            <p className="text-sm font-mono text-gray-900">{driver.license_number}</p>
+            <p className="text-sm font-mono text-gray-900 dark:text-slate-100">{driver.license_number}</p>
             <p className="text-xs text-gray-500 mt-1">Expires: {format(new Date(driver.license_expiry), 'MMMM d, yyyy')}</p>
           </div>
 
@@ -170,8 +170,8 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
           {(driver as Driver & { plate_number?: string }).plate_number && (
             <div className="bg-blue-50 rounded-xl p-4">
               <p className="text-xs font-semibold text-blue-700 mb-2 flex items-center gap-1"><Truck className="w-3 h-3" /> ASSIGNED TRUCK</p>
-              <p className="text-sm font-medium text-gray-900">
-                {(driver as Driver & { plate_number?: string; make?: string; model?: string }).plate_number} · {(driver as Driver & { make?: string; model?: string }).make} {(driver as Driver & { make?: string; model?: string }).model}
+              <p className="text-sm font-medium text-gray-900 dark:text-slate-100">
+                {(driver as Driver & { plate_number?: string; make?: string; model?: string }).plate_number} Â· {(driver as Driver & { make?: string; model?: string }).make} {(driver as Driver & { make?: string; model?: string }).model}
               </p>
             </div>
           )}
@@ -184,7 +184,7 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
                 {(recentOrders as Array<{ id: string; order_number: string; customer_name: string; status: string; delivered_at: string | null }>).slice(0, 5).map(order => (
                   <div key={order.id} className="flex items-center justify-between text-sm">
                     <div>
-                      <span className="font-medium text-gray-900">{order.order_number}</span>
+                      <span className="font-medium text-gray-900 dark:text-slate-100">{order.order_number}</span>
                       <span className="text-gray-400 ml-2">{order.customer_name}</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -192,7 +192,7 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
                         {order.status}
                       </span>
                       {order.delivered_at && (
-                        <span className="text-xs text-gray-400">{formatDistanceToNow(new Date(order.delivered_at), { addSuffix: true })}</span>
+                        <span className="text-xs text-gray-400 dark:text-slate-500">{formatDistanceToNow(new Date(order.delivered_at), { addSuffix: true })}</span>
                       )}
                     </div>
                   </div>
@@ -256,7 +256,7 @@ export default function Drivers() {
           { label: 'Offline', value: stats.offline || 0, color: 'text-gray-500', bg: 'bg-gray-50' },
         ].map((s, i) => (
           <div key={i} className={`card ${s.bg} p-4`}>
-            <p className="text-xs text-gray-500">{s.label}</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
@@ -266,7 +266,7 @@ export default function Drivers() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
             <input className="input pl-9 w-48" placeholder="Search drivers..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <select className="input w-36" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
@@ -282,9 +282,9 @@ export default function Drivers() {
       {/* Drivers Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {loading ? (
-          <div className="col-span-3 text-center py-12 text-gray-400">Loading...</div>
+          <div className="col-span-3 text-center py-12 text-gray-400 dark:text-slate-500">Loading...</div>
         ) : drivers.length === 0 ? (
-          <div className="col-span-3 text-center py-12 text-gray-400">No drivers found</div>
+          <div className="col-span-3 text-center py-12 text-gray-400 dark:text-slate-500">No drivers found</div>
         ) : drivers.map(driver => (
           <div key={driver.id} className="card hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-3">
@@ -297,16 +297,16 @@ export default function Drivers() {
                   {driver.avatar}
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900">{driver.name}</h3>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">{driver.name}</h3>
                   <DriverStatusBadge status={driver.status} className="mt-0.5" />
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <button onClick={() => setDetailId(driver.id)} className="p-1.5 hover:bg-gray-100 rounded-lg">
-                  <Eye className="w-3.5 h-3.5 text-gray-500" />
+                <button onClick={() => setDetailId(driver.id)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
+                  <Eye className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
                 </button>
-                <button onClick={() => { setEditDriver(driver); setShowForm(true); }} className="p-1.5 hover:bg-gray-100 rounded-lg">
-                  <Edit2 className="w-3.5 h-3.5 text-gray-500" />
+                <button onClick={() => { setEditDriver(driver); setShowForm(true); }} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
+                  <Edit2 className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
                 </button>
                 <button onClick={() => handleDelete(driver)} className="p-1.5 hover:bg-red-50 rounded-lg">
                   <Trash2 className="w-3.5 h-3.5 text-red-400" />
@@ -315,15 +315,15 @@ export default function Drivers() {
             </div>
 
             <div className="space-y-1.5 text-xs">
-              <div className="flex items-center gap-2 text-gray-500">
-                <Phone className="w-3 h-3 text-gray-400" /> {driver.phone}
+              <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
+                <Phone className="w-3 h-3 text-gray-400 dark:text-slate-500" /> {driver.phone}
               </div>
-              <div className="flex items-center gap-2 text-gray-500">
-                <Mail className="w-3 h-3 text-gray-400" /> {driver.email}
+              <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
+                <Mail className="w-3 h-3 text-gray-400 dark:text-slate-500" /> {driver.email}
               </div>
               {driver.plate_number && (
-                <div className="flex items-center gap-2 text-gray-500">
-                  <Truck className="w-3 h-3 text-gray-400" /> {driver.plate_number} · {driver.make} {driver.model}
+                <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
+                  <Truck className="w-3 h-3 text-gray-400 dark:text-slate-500" /> {driver.plate_number} Â· {driver.make} {driver.model}
                 </div>
               )}
               {driver.current_address && (
@@ -337,16 +337,16 @@ export default function Drivers() {
             </div>
 
             <div className="grid grid-cols-3 gap-2 mt-4">
-              <div className="text-center bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-500">Rating</p>
-                <p className="text-sm font-bold text-yellow-500">★ {driver.rating.toFixed(1)}</p>
+              <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-lg p-2">
+                <p className="text-xs text-gray-500 dark:text-slate-400">Rating</p>
+                <p className="text-sm font-bold text-yellow-500">â˜… {driver.rating.toFixed(1)}</p>
               </div>
-              <div className="text-center bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-500">Trips</p>
-                <p className="text-sm font-bold text-gray-900">{driver.total_deliveries}</p>
+              <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-lg p-2">
+                <p className="text-xs text-gray-500 dark:text-slate-400">Trips</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{driver.total_deliveries}</p>
               </div>
-              <div className="text-center bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-500">On-Time</p>
+              <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-lg p-2">
+                <p className="text-xs text-gray-500 dark:text-slate-400">On-Time</p>
                 <p className="text-sm font-bold text-green-600">{driver.on_time_rate.toFixed(0)}%</p>
               </div>
             </div>
@@ -373,3 +373,4 @@ export default function Drivers() {
     </div>
   );
 }
+
