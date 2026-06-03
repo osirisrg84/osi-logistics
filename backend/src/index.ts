@@ -86,10 +86,10 @@ app.post('/api/setup', (_req, res) => {
     }
   }
 
-  // Link driver account
+  // Link Carlos Rodriguez specifically as driver account
   const driverUser = db.prepare("SELECT id FROM users WHERE email = 'carlos.r@osilogistics.com'").get();
   if (!driverUser) {
-    const driver = db.prepare("SELECT id,name,email FROM drivers ORDER BY name LIMIT 1").get() as Record<string,string>|undefined;
+    const driver = db.prepare("SELECT id,name,email FROM drivers WHERE email = 'carlos.r@osilogistics.com' LIMIT 1").get() as Record<string,string>|undefined;
     if (driver) {
       const salt = randomBytes(16).toString('hex');
       db.prepare(`INSERT OR IGNORE INTO users (id,name,email,password_hash,salt,role,driver_id) VALUES (?,?,?,?,?,?,?)`)
