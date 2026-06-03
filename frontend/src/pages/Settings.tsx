@@ -363,11 +363,11 @@ export default function Settings() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">API & Integrations</h3>
             <div className="space-y-4">
               <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-xl p-4">
-                <p className="text-sm font-medium text-gray-900 mb-2">Backend API</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Backend API</p>
                 <p className="text-xs font-mono text-gray-600 bg-white rounded-lg p-2 border border-gray-200 dark:border-slate-600">http://localhost:3001/api</p>
               </div>
               <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-xl p-4">
-                <p className="text-sm font-medium text-gray-900 mb-2">WebSocket (Real-time)</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">WebSocket (Real-time)</p>
                 <p className="text-xs font-mono text-gray-600 bg-white rounded-lg p-2 border border-gray-200 dark:border-slate-600">ws://localhost:3001</p>
               </div>
               <div>
@@ -393,5 +393,6 @@ export default function Settings() {
     </div>
   );
 }
+
 
 

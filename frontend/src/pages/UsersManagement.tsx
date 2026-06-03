@@ -320,7 +320,7 @@ export default function UsersManagement() {
       {/* Recent logins */}
       {stats && stats.recent_logins.length > 0 && (
         <div className="card">
-          <h3 className="text-sm font-semibold text-gray-900 mb-4">Recent Sign-Ins</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Recent Sign-Ins</h3>
           <div className="space-y-2">
             {stats.recent_logins.map((login, i) => (
               <div key={i} className="flex items-center justify-between text-sm">
@@ -356,4 +356,5 @@ export default function UsersManagement() {
     </div>
   );
 }
+
 

@@ -23,7 +23,7 @@ function KpiCard({ title, value, sub, icon: Icon, color }: KpiCardProps) {
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs text-gray-500 font-medium">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</p>
           <p className="text-xs text-gray-400 mt-1">{sub}</p>
         </div>
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
@@ -319,5 +319,6 @@ export default function Reports() {
     </div>
   );
 }
+
 
 

@@ -265,7 +265,7 @@ export default function Tracking() {
                     {driver.avatar}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{driver.name}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">{driver.name}</p>
                     <DriverStatusBadge status={driver.status as never} className="mt-0.5" />
                   </div>
                 </div>
@@ -392,4 +392,5 @@ export default function Tracking() {
     </div>
   );
 }
+
 

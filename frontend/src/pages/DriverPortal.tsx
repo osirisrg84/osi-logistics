@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import {
@@ -24,7 +24,7 @@ L.Icon.Default.mergeOptions({
 const STATUS_FLOW: Record<string, { next: string; label: string; color: string }> = {
   assigned: { next: 'picked_up', label: 'Confirm Pickup', color: 'bg-blue-500 hover:bg-blue-600' },
   picked_up: { next: 'in_transit', label: 'Start Delivery', color: 'bg-purple-500 hover:bg-purple-600' },
-  in_transit: { next: 'delivered', label: 'Mark Delivered ✓', color: 'bg-green-500 hover:bg-green-600' },
+  in_transit: { next: 'delivered', label: 'Mark Delivered âœ“', color: 'bg-green-500 hover:bg-green-600' },
 };
 
 function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (id: string, status: string) => void }) {
@@ -44,7 +44,7 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-base font-bold text-gray-900">{order.order_number}</span>
+            <span className="text-base font-bold text-gray-900 dark:text-white">{order.order_number}</span>
             <PriorityBadge priority={order.priority} />
           </div>
           <OrderStatusBadge status={order.status} />
@@ -57,7 +57,7 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
 
       {/* Customer */}
       <div className="bg-gray-50 rounded-xl p-3">
-        <p className="text-sm font-semibold text-gray-900">{order.customer_name}</p>
+        <p className="text-sm font-semibold text-gray-900 dark:text-white">{order.customer_name}</p>
         <a href={`tel:${order.customer_phone}`} className="flex items-center gap-1 text-xs text-blue-600 mt-1 hover:text-blue-700">
           <Phone className="w-3 h-3" /> {order.customer_phone}
         </a>
@@ -90,16 +90,16 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-gray-50 rounded-lg p-2 text-center">
           <p className="text-xs text-gray-400">Weight</p>
-          <p className="text-sm font-semibold text-gray-900">{order.weight_kg} kg</p>
+          <p className="text-sm font-semibold text-gray-900 dark:text-white">{order.weight_kg} kg</p>
         </div>
         <div className="bg-gray-50 rounded-lg p-2 text-center">
           <p className="text-xs text-gray-400">Created</p>
-          <p className="text-xs font-medium text-gray-900">{formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}</p>
+          <p className="text-xs font-medium text-gray-900 dark:text-slate-100">{formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}</p>
         </div>
         <div className="bg-gray-50 rounded-lg p-2 text-center">
           <p className="text-xs text-gray-400">ETA</p>
-          <p className="text-xs font-medium text-gray-900">
-            {order.estimated_delivery ? format(new Date(order.estimated_delivery), 'HH:mm') : '—'}
+          <p className="text-xs font-medium text-gray-900 dark:text-slate-100">
+            {order.estimated_delivery ? format(new Date(order.estimated_delivery), 'HH:mm') : 'â€”'}
           </p>
         </div>
       </div>
@@ -234,7 +234,7 @@ export default function DriverPortal() {
                   driverStatus === 'on_break' ? 'text-yellow-400' : 'text-slate-500'
                 }`}>{cfg.label}</span>
                 {driver?.plate_number && (
-                  <span className="text-xs text-slate-500">· {driver.make} {driver.model}</span>
+                  <span className="text-xs text-slate-500">Â· {driver.make} {driver.model}</span>
                 )}
               </div>
             </div>
@@ -245,7 +245,7 @@ export default function DriverPortal() {
         </div>
       </header>
 
-      {/* ── ONLINE / OFFLINE BUTTON ── */}
+      {/* â”€â”€ ONLINE / OFFLINE BUTTON â”€â”€ */}
       <div className="bg-slate-800 px-4 py-3 border-b border-slate-700">
         <div className="max-w-lg mx-auto">
           {driverStatus === 'offline' ? (
@@ -330,7 +330,7 @@ export default function DriverPortal() {
             <p className="text-xs text-gray-500">Today's Revenue</p>
           </div>
           <div className="text-center">
-            <p className="text-xl font-bold text-yellow-500">★ {driver?.rating?.toFixed(1) || '—'}</p>
+            <p className="text-xl font-bold text-yellow-500">â˜… {driver?.rating?.toFixed(1) || 'â€”'}</p>
             <p className="text-xs text-gray-500">My Rating</p>
           </div>
         </div>
@@ -360,7 +360,7 @@ export default function DriverPortal() {
         </div>
       )}
 
-      {/* Tabs + Content — only shown when not offline */}
+      {/* Tabs + Content â€” only shown when not offline */}
       {driverStatus !== 'offline' && <>
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-lg mx-auto flex">
@@ -409,7 +409,7 @@ export default function DriverPortal() {
               deliveredToday.map(order => (
                 <div key={order.id} className="bg-white rounded-xl border border-gray-100 p-4 flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">{order.order_number}</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{order.order_number}</p>
                     <p className="text-xs text-gray-500">{order.customer_name}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{order.delivery_address}</p>
                   </div>
@@ -437,7 +437,7 @@ export default function DriverPortal() {
               style={{ height: '100%', width: '100%' }}
             >
               <TileLayer
-                attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                attribution='Â© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               {driver && (
@@ -470,21 +470,21 @@ export default function DriverPortal() {
           <div className="mt-5 bg-white rounded-2xl border border-gray-100 p-5">
             <div className="flex items-center gap-3 mb-4">
               <User className="w-4 h-4 text-orange-500" />
-              <h3 className="text-sm font-semibold text-gray-900">My Profile</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">My Profile</h3>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {[
                 { label: 'Total Deliveries', value: driver.total_deliveries, icon: Package },
                 { label: 'On-Time Rate', value: `${driver.on_time_rate.toFixed(0)}%`, icon: Clock },
                 { label: 'License', value: driver.license_number, icon: Truck },
-                { label: 'Rating', value: `★ ${driver.rating.toFixed(1)}`, icon: Star },
+                { label: 'Rating', value: `â˜… ${driver.rating.toFixed(1)}`, icon: Star },
               ].map(({ label, value, icon: Icon }) => (
                 <div key={label} className="bg-gray-50 rounded-xl p-3">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Icon className="w-3 h-3 text-gray-400" />
                     <p className="text-xs text-gray-500">{label}</p>
                   </div>
-                  <p className="text-sm font-bold text-gray-900">{value}</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">{value}</p>
                 </div>
               ))}
             </div>
@@ -495,3 +495,4 @@ export default function DriverPortal() {
     </div>
   );
 }
+

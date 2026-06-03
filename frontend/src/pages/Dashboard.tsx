@@ -36,7 +36,7 @@ function StatCard({ title, value, sub, icon: Icon, color, trend }: StatCardProps
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="text-sm text-gray-500 font-medium">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</p>
           {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
           {trend !== undefined && (
             <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${trend >= 0 ? 'text-green-600' : 'text-red-500'}`}>
@@ -140,7 +140,7 @@ export default function Dashboard() {
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-slate-400">Delivered Today</p>
-            <p className="text-xl font-bold text-gray-900 dark:text-slate-100">{orderStats.delivered || 0}</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{orderStats.delivered || 0}</p>
           </div>
         </div>
         <div className="card flex items-center gap-4">
@@ -149,7 +149,7 @@ export default function Dashboard() {
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-slate-400">Avg Delivery Time</p>
-            <p className="text-xl font-bold text-gray-900 dark:text-slate-100">{(stats?.kpis.avg_delivery_hours || 0).toFixed(1)}h</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{(stats?.kpis.avg_delivery_hours || 0).toFixed(1)}h</p>
           </div>
         </div>
         <div className="card flex items-center gap-4">
@@ -158,7 +158,7 @@ export default function Dashboard() {
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-slate-400">On-Time Rate</p>
-            <p className="text-xl font-bold text-gray-900 dark:text-slate-100">{(stats?.kpis.on_time_rate || 0).toFixed(1)}%</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{(stats?.kpis.on_time_rate || 0).toFixed(1)}%</p>
           </div>
         </div>
         <div className="card flex items-center gap-4">
@@ -167,7 +167,7 @@ export default function Dashboard() {
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-slate-400">Pending Orders</p>
-            <p className="text-xl font-bold text-gray-900 dark:text-slate-100">{orderStats.pending || 0}</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{orderStats.pending || 0}</p>
           </div>
         </div>
       </div>
@@ -246,7 +246,7 @@ export default function Dashboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-gray-900 truncate">{driver.name}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">{driver.name}</p>
                     <span className="text-xs text-gray-500 dark:text-slate-400">{driver.total_deliveries} trips</span>
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
@@ -312,5 +312,7 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
 
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from 'react';
+﻿import { useState, useEffect, FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -107,7 +107,7 @@ export default function Register() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-1">Join OSI Logistics</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">Join OSI Logistics</h2>
           <p className="text-sm text-gray-500 mb-6">Fill in your details to get started</p>
 
           {error && (
@@ -133,7 +133,7 @@ export default function Register() {
                         : 'border-gray-200 text-gray-600 hover:border-gray-300'
                     }`}
                   >
-                    <div className="text-lg mb-0.5">{role === 'dispatcher' ? '📋' : '🚛'}</div>
+                    <div className="text-lg mb-0.5">{role === 'dispatcher' ? 'ðŸ“‹' : 'ðŸš›'}</div>
                     <div className="capitalize">{role}</div>
                     <div className="text-xs mt-0.5 font-normal text-gray-400">
                       {role === 'dispatcher' ? 'Full dashboard access' : 'Driver portal access'}
@@ -175,7 +175,7 @@ export default function Register() {
                   >
                     <option value="">Choose your profile...</option>
                     {availableDrivers.map(d => (
-                      <option key={d.id} value={d.id}>{d.name} · {d.phone}</option>
+                      <option key={d.id} value={d.id}>{d.name} Â· {d.phone}</option>
                     ))}
                   </select>
                 )}
@@ -266,3 +266,4 @@ export default function Register() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from 'react';
+﻿import { useState, useEffect, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, Search, Phone, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -87,7 +87,7 @@ export default function RegisterDriver() {
             <div key={s} className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold transition-colors ${
               s === step ? 'bg-blue-500 text-white' : s < step ? 'bg-green-500 text-white' : 'bg-slate-700 text-slate-400'
             }`}>
-              {s < step ? '✓' : s}
+              {s < step ? 'âœ“' : s}
             </div>
           ))}
           <span className="text-xs text-slate-400">Step {step} of 2</span>
@@ -104,13 +104,13 @@ export default function RegisterDriver() {
           <p className="text-slate-400 text-sm mt-1">{step === 1 ? 'Find your driver profile' : 'Set your password'}</p>
         </div>
 
-        {/* ── STEP 1: Select driver profile ── */}
+        {/* â”€â”€ STEP 1: Select driver profile â”€â”€ */}
         {step === 1 && (
           <div className="w-full max-w-sm space-y-4">
             <div className="bg-blue-900/20 border border-blue-800/30 rounded-2xl p-4">
               <p className="text-xs text-blue-300 font-medium mb-1">How does it work?</p>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Find your name in the list below — it comes from your employee record.
+                Find your name in the list below â€” it comes from your employee record.
                 If you don't appear, contact your dispatcher to have your profile created first.
               </p>
             </div>
@@ -159,7 +159,7 @@ export default function RegisterDriver() {
           </div>
         )}
 
-        {/* ── STEP 2: Set password ── */}
+        {/* â”€â”€ STEP 2: Set password â”€â”€ */}
         {step === 2 && selected && (
           <div className="w-full max-w-sm">
             {/* Selected profile card */}
@@ -180,7 +180,7 @@ export default function RegisterDriver() {
             </div>
 
             <div className="bg-white rounded-2xl shadow-2xl p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Set your password</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Set your password</h3>
               <p className="text-sm text-gray-500 mb-5">Choose a secure password for your driver account</p>
 
               {error && (
@@ -246,3 +246,4 @@ export default function RegisterDriver() {
     </div>
   );
 }
+

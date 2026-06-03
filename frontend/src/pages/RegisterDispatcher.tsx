@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+﻿import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ClipboardList, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -57,7 +57,7 @@ export default function RegisterDispatcher() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-1">New Dispatcher</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">New Dispatcher</h2>
           <p className="text-sm text-gray-500 mb-6">Full access to orders, fleet, tracking and reports</p>
 
           {error && (
@@ -165,3 +165,4 @@ export default function RegisterDispatcher() {
     </div>
   );
 }
+

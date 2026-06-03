@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+﻿import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Truck, Eye, EyeOff, AlertCircle, ArrowLeft, MapPin, Package, Star } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -54,7 +54,7 @@ export default function DriverLogin() {
             <Truck className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white">Driver Portal</h1>
-          <p className="text-slate-400 mt-2">OSI Logistics · Miami, FL</p>
+          <p className="text-slate-400 mt-2">OSI Logistics Â· Miami, FL</p>
         </div>
 
         {/* Feature pills */}
@@ -73,7 +73,7 @@ export default function DriverLogin() {
 
         {/* Card */}
         <div className="bg-white rounded-3xl shadow-2xl p-7 w-full max-w-sm">
-          <h2 className="text-xl font-bold text-gray-900 mb-1">Welcome back</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Welcome back</h2>
           <p className="text-sm text-gray-500 mb-5">Sign in to see your deliveries</p>
 
           {error && (
@@ -137,7 +137,7 @@ export default function DriverLogin() {
               className="w-full text-sm font-medium py-2.5 px-4 rounded-xl bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 transition-colors flex items-center gap-2"
             >
               <div className="w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">CR</div>
-              Carlos Rodriguez · Driver
+              Carlos Rodriguez Â· Driver
             </button>
           </div>
 
@@ -149,9 +149,10 @@ export default function DriverLogin() {
 
         <p className="text-xs text-slate-600 mt-6 text-center">
           Are you a dispatcher?{' '}
-          <Link to="/dispatcher" className="text-orange-400 hover:text-orange-300 font-medium">Dispatcher Portal →</Link>
+          <Link to="/dispatcher" className="text-orange-400 hover:text-orange-300 font-medium">Dispatcher Portal â†’</Link>
         </p>
       </div>
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+﻿import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Truck, Eye, EyeOff, AlertCircle, ArrowLeft, ClipboardList } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -60,11 +60,11 @@ export default function Login() {
             <ClipboardList className="w-7 h-7 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white">Dispatcher Portal</h1>
-          <p className="text-slate-400 text-sm mt-1">OSI Logistics — Operations Center</p>
+          <p className="text-slate-400 text-sm mt-1">OSI Logistics â€” Operations Center</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-1">Sign in</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">Sign in</h2>
           <p className="text-sm text-gray-500 mb-6">Access your dispatch dashboard</p>
 
           {error && (
@@ -131,17 +131,17 @@ export default function Login() {
               <button type="button" onClick={() => { setEmail('dispatcher@osilogistics.com'); setPassword('Dispatch123!'); }}
               className="col-span-2 text-sm font-medium py-2.5 px-4 rounded-xl bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 transition-colors flex items-center gap-2">
               <div className="w-7 h-7 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">DO</div>
-              Dispatcher OSI · dispatcher@osilogistics.com
+              Dispatcher OSI Â· dispatcher@osilogistics.com
             </button>
             </div>
             <div className="mt-3 flex flex-col gap-1 text-center">
               <p className="text-xs text-gray-400">
                 Admin?{' '}
-                <Link to="/admin" className="text-purple-500 hover:text-purple-600 font-medium">Admin Console →</Link>
+                <Link to="/admin" className="text-purple-500 hover:text-purple-600 font-medium">Admin Console â†’</Link>
               </p>
               <p className="text-xs text-gray-400">
                 Driver?{' '}
-                <Link to="/driver/login" className="text-blue-500 hover:text-blue-600 font-medium">Driver Portal →</Link>
+                <Link to="/driver/login" className="text-blue-500 hover:text-blue-600 font-medium">Driver Portal â†’</Link>
               </p>
             </div>
           </div>
@@ -150,3 +150,4 @@ export default function Login() {
     </div>
   );
 }
+
