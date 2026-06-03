@@ -191,7 +191,7 @@ export default function Tracking() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] gap-4 fade-in relative">
+    <div className="flex flex-col md:flex-row h-auto md:h-[calc(100vh-8rem)] gap-3 fade-in relative">
       {/* Status toasts */}
       <div className="fixed top-20 right-5 z-[9999] flex flex-col gap-2 pointer-events-none">
         {toasts.map(toast => (
@@ -213,7 +213,7 @@ export default function Tracking() {
         ))}
       </div>
       {/* Left Panel */}
-      <div className="w-72 flex flex-col gap-3 flex-shrink-0">
+      <div className="w-full md:w-72 flex flex-col gap-3 md:flex-shrink-0">
         {/* Status summary */}
         <div className="card p-4">
           <div className="flex items-center justify-between mb-3">
@@ -326,7 +326,7 @@ export default function Tracking() {
       </div>
 
       {/* Map */}
-      <div className="flex-1 rounded-xl overflow-hidden shadow-sm border border-gray-100">
+      <div className="flex-1 rounded-xl overflow-hidden shadow-sm border border-gray-100 h-72 md:h-auto">
         <MapContainer
           center={[25.7617, -80.1918]}
           zoom={11}

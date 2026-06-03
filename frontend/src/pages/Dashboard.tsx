@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import {
   Package, Users, Truck, TrendingUp, DollarSign,
   Clock, CheckCircle, AlertTriangle, Activity
@@ -98,7 +98,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 fade-in">
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
           title="Total Orders"
           value={orderStats.total || 0}
@@ -133,7 +133,7 @@ export default function Dashboard() {
       </div>
 
       {/* Secondary KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="card flex items-center gap-4">
           <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
             <CheckCircle className="w-5 h-5 text-green-600" />
@@ -173,7 +173,7 @@ export default function Dashboard() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Revenue Chart */}
         <div className="card lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
@@ -234,7 +234,7 @@ export default function Dashboard() {
       </div>
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Top Drivers */}
         <div className="card">
           <h3 className="font-semibold text-gray-900 mb-4">Top Drivers</h3>
@@ -257,7 +257,7 @@ export default function Dashboard() {
                       />
                     </div>
                     <span className="text-xs text-gray-500">{driver.on_time_rate?.toFixed(0)}%</span>
-                    <span className="text-xs text-yellow-500">★ {driver.rating?.toFixed(1)}</span>
+                    <span className="text-xs text-yellow-500">â˜… {driver.rating?.toFixed(1)}</span>
                   </div>
                 </div>
               </div>
@@ -275,11 +275,11 @@ export default function Dashboard() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-900">
                     <span className="font-medium">{activity.order_number}</span>
-                    {' '}—{' '}
+                    {' '}â€”{' '}
                     <OrderStatusBadge status={activity.status as never} />
                   </p>
                   <p className="text-xs text-gray-500 mt-0.5 truncate">
-                    {activity.customer_name} · {activity.notes}
+                    {activity.customer_name} Â· {activity.notes}
                   </p>
                   <p className="text-xs text-gray-400">
                     {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
@@ -294,7 +294,7 @@ export default function Dashboard() {
       {/* Fleet Stats */}
       <div className="card">
         <h3 className="font-semibold text-gray-900 mb-4">Fleet Overview</h3>
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { label: 'Total Trucks', value: driverStats.total || 0, color: 'text-gray-900' },
             { label: 'Active', value: driverStats.available || 0, color: 'text-green-600' },
@@ -312,3 +312,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

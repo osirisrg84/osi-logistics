@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Save, Bell, Map, Truck, Shield, Globe, Palette, Server } from 'lucide-react';
 
 interface SettingsSection {
@@ -68,11 +68,11 @@ export default function Settings() {
   };
 
   return (
-    <div className="flex gap-6 fade-in">
+    <div className="flex flex-col md:flex-row gap-4 fade-in">
       {/* Sidebar */}
-      <div className="w-48 flex-shrink-0">
-        <div className="card p-2">
-          <nav className="space-y-0.5">
+      <div className="w-full md:w-48 md:flex-shrink-0">
+        <div className="card p-2 flex md:block overflow-x-auto gap-1">
+          <nav className="flex md:flex-col gap-1 md:gap-0 md:space-y-0.5">
             {sections.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
@@ -131,9 +131,9 @@ export default function Settings() {
                 <label className="label">Currency</label>
                 <select className="input" value={companySettings.currency}
                   onChange={e => setCompanySettings({...companySettings, currency: e.target.value})}>
-                  <option value="USD">USD — US Dollar</option>
-                  <option value="EUR">EUR — Euro</option>
-                  <option value="MXN">MXN — Mexican Peso</option>
+                  <option value="USD">USD â€” US Dollar</option>
+                  <option value="EUR">EUR â€” Euro</option>
+                  <option value="MXN">MXN â€” Mexican Peso</option>
                 </select>
               </div>
               <div>
@@ -338,7 +338,7 @@ export default function Settings() {
             <h3 className="text-lg font-semibold text-gray-900 mb-5">Security Settings</h3>
             <div className="space-y-4">
               <div className="bg-green-50 border border-green-100 rounded-xl p-4">
-                <p className="text-sm font-medium text-green-800">✓ System is running securely</p>
+                <p className="text-sm font-medium text-green-800">âœ“ System is running securely</p>
                 <p className="text-xs text-green-600 mt-1">All connections are encrypted and data is stored locally</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -393,3 +393,4 @@ export default function Settings() {
     </div>
   );
 }
+

@@ -458,130 +458,136 @@ export default function Orders() {
   };
 
   return (
-    <div className="space-y-4 fade-in">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-sm text-gray-500">Total: <span className="font-semibold text-gray-900">{total} orders</span></h2>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Search */}
-          <div className="relative">
+    <div className="space-y-3 fade-in">
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+        <div className="flex items-center gap-2 flex-1 flex-wrap">
+          <div className="relative flex-1 min-w-0">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              className="input pl-9 w-48"
-              placeholder="Search orders..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
+            <input className="input pl-9 w-full" placeholder="Search orders..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
-
-          {/* Status Filter */}
-          <select className="input w-36" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+          <select className="input w-full sm:w-32" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
             <option value="">All Status</option>
             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
           </select>
-
-          {/* Priority Filter */}
-          <select className="input w-36" value={priorityFilter} onChange={e => setPriorityFilter(e.target.value)}>
+          <select className="input w-full sm:w-32" value={priorityFilter} onChange={e => setPriorityFilter(e.target.value)}>
             <option value="">All Priority</option>
             {PRIORITY_OPTIONS.map(p => <option key={p} value={p}>{p}</option>)}
           </select>
-
-          <button onClick={() => setShowCreate(true)} className="btn-primary">
-            <Plus className="w-4 h-4" /> New Order
-          </button>
         </div>
+        <button onClick={() => setShowCreate(true)} className="btn-primary w-full sm:w-auto justify-center">
+          <Plus className="w-4 h-4" /> New Order
+        </button>
       </div>
+      <p className="text-xs text-gray-500">{total} orders total</p>
 
-      {/* Orders Table */}
-      <div className="card p-0 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">ORDER</th>
-                <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">CUSTOMER</th>
-                <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3 hidden md:table-cell">DELIVERY</th>
-                <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">STATUS</th>
-                <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">PRIORITY</th>
-                <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3 hidden lg:table-cell">DRIVER</th>
-                <th className="text-right text-xs font-semibold text-gray-500 px-4 py-3 hidden lg:table-cell">PRICE</th>
-                <th className="text-right text-xs font-semibold text-gray-500 px-4 py-3 hidden md:table-cell">CREATED</th>
-                <th className="text-center text-xs font-semibold text-gray-500 px-4 py-3">ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan={9} className="text-center py-12 text-gray-400">Loading orders...</td></tr>
-              ) : orders.length === 0 ? (
-                <tr><td colSpan={9} className="text-center py-12 text-gray-400">No orders found</td></tr>
-              ) : (
-                orders.map(order => (
-                  <tr key={order.id} className="table-row">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <Package className="w-4 h-4 text-gray-400" />
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900">{order.order_number}</p>
-                          <p className="text-xs text-gray-400">{order.weight_kg}kg · {order.distance_km}km</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <p className="text-sm font-medium text-gray-900">{order.customer_name}</p>
-                      <p className="text-xs text-gray-400">{order.customer_phone}</p>
-                    </td>
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <p className="text-xs text-gray-600 max-w-[160px] truncate">{order.delivery_address}</p>
-                      {order.estimated_delivery && (
-                        <p className="text-xs text-gray-400">
-                          Est: {format(new Date(order.estimated_delivery), 'MM/dd HH:mm')}
-                        </p>
-                      )}
-                    </td>
-                    <td className="px-4 py-3"><OrderStatusBadge status={order.status} /></td>
-                    <td className="px-4 py-3"><PriorityBadge priority={order.priority} /></td>
-                    <td className="px-4 py-3 hidden lg:table-cell">
-                      {order.driver_name ? (
-                        <div>
-                          <p className="text-xs font-medium text-gray-900">{order.driver_name}</p>
-                          {order.plate_number && <p className="text-xs text-gray-400">{order.plate_number}</p>}
-                        </div>
-                      ) : (
-                        <span className="text-xs text-gray-400">Unassigned</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 hidden lg:table-cell text-right">
-                      <span className="text-sm font-semibold text-green-600">${order.price.toFixed(2)}</span>
-                    </td>
-                    <td className="px-4 py-3 hidden md:table-cell text-right">
-                      <p className="text-xs text-gray-500">{formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}</p>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-center gap-1">
-                        <button onClick={() => setDetailOrder(order)} className="p-1.5 hover:bg-gray-100 rounded-lg" title="View">
-                          <Eye className="w-3.5 h-3.5 text-gray-500" />
-                        </button>
-                        {order.status === 'pending' && (
-                          <button onClick={() => setAssignOrder(order)} className="p-1.5 hover:bg-blue-50 rounded-lg" title="Assign">
-                            <UserCheck className="w-3.5 h-3.5 text-blue-500" />
-                          </button>
-                        )}
-                        {['pending', 'cancelled'].includes(order.status) && (
-                          <button onClick={() => handleDelete(order.id)} className="p-1.5 hover:bg-red-50 rounded-lg" title="Delete">
-                            <Trash2 className="w-3.5 h-3.5 text-red-400" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
+      {/* Orders — cards on mobile, table on desktop */}
+      {loading ? (
+        <div className="text-center py-12 text-gray-400">Loading orders...</div>
+      ) : orders.length === 0 ? (
+        <div className="text-center py-12 text-gray-400">No orders found</div>
+      ) : (
+        <>
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-2">
+            {orders.map(order => (
+              <div key={order.id} className="card p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">{order.order_number}</p>
+                    <p className="text-xs text-gray-500">{order.customer_name}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-green-600">${order.price.toFixed(2)}</p>
+                    <OrderStatusBadge status={order.status} />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 truncate mb-2">{order.delivery_address}</p>
+                <div className="flex items-center justify-between">
+                  <PriorityBadge priority={order.priority} />
+                  <div className="flex gap-1">
+                    <button onClick={() => setDetailOrder(order)} className="p-1.5 hover:bg-gray-100 rounded-lg">
+                      <Eye className="w-4 h-4 text-gray-500" />
+                    </button>
+                    {order.status === 'pending' && (
+                      <button onClick={() => setAssignOrder(order)} className="p-1.5 hover:bg-blue-50 rounded-lg">
+                        <UserCheck className="w-4 h-4 text-blue-500" />
+                      </button>
+                    )}
+                    {['pending', 'cancelled'].includes(order.status) && (
+                      <button onClick={() => handleDelete(order.id)} className="p-1.5 hover:bg-red-50 rounded-lg">
+                        <Trash2 className="w-4 h-4 text-red-400" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden md:block card p-0 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-100">
+                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">ORDER</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">CUSTOMER</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">DELIVERY</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">STATUS</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">PRIORITY</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3 hidden lg:table-cell">DRIVER</th>
+                    <th className="text-right text-xs font-semibold text-gray-500 px-4 py-3">PRICE</th>
+                    <th className="text-center text-xs font-semibold text-gray-500 px-4 py-3">ACTIONS</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                </thead>
+                <tbody>
+                  {orders.map(order => (
+                    <tr key={order.id} className="table-row">
+                      <td className="px-4 py-3">
+                        <p className="text-sm font-semibold text-gray-900">{order.order_number}</p>
+                        <p className="text-xs text-gray-400">{order.weight_kg}kg · {order.distance_km}km</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="text-sm font-medium text-gray-900">{order.customer_name}</p>
+                        <p className="text-xs text-gray-400">{order.customer_phone}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="text-xs text-gray-600 max-w-[160px] truncate">{order.delivery_address}</p>
+                      </td>
+                      <td className="px-4 py-3"><OrderStatusBadge status={order.status} /></td>
+                      <td className="px-4 py-3"><PriorityBadge priority={order.priority} /></td>
+                      <td className="px-4 py-3 hidden lg:table-cell">
+                        <p className="text-xs text-gray-700">{order.driver_name || <span className="text-gray-400">Unassigned</span>}</p>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="text-sm font-semibold text-green-600">${order.price.toFixed(2)}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-center gap-1">
+                          <button onClick={() => setDetailOrder(order)} className="p-1.5 hover:bg-gray-100 rounded-lg">
+                            <Eye className="w-3.5 h-3.5 text-gray-500" />
+                          </button>
+                          {order.status === 'pending' && (
+                            <button onClick={() => setAssignOrder(order)} className="p-1.5 hover:bg-blue-50 rounded-lg">
+                              <UserCheck className="w-3.5 h-3.5 text-blue-500" />
+                            </button>
+                          )}
+                          {['pending', 'cancelled'].includes(order.status) && (
+                            <button onClick={() => handleDelete(order.id)} className="p-1.5 hover:bg-red-50 rounded-lg">
+                              <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Modals */}
       {showCreate && <CreateOrderModal onClose={() => setShowCreate(false)} onSave={fetchOrders} />}

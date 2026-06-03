@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell
@@ -112,16 +112,16 @@ export default function Reports() {
       {activeTab === 'overview' && (
         <>
           {/* KPI Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             <KpiCard title="Total Revenue" value={`$${((kpis?.total_revenue || 0)).toLocaleString('en-US', { maximumFractionDigits: 0 })}`} sub={`$${((kpis?.monthly_revenue || 0)).toFixed(0)} this month`} icon={DollarSign} color="bg-green-100 text-green-600" />
             <KpiCard title="Avg Order Value" value={`$${((kpis?.avg_order_value || 0)).toFixed(2)}`} sub="Per completed order" icon={Package} color="bg-blue-100 text-blue-600" />
             <KpiCard title="On-Time Rate" value={`${((kpis?.on_time_rate || 0)).toFixed(1)}%`} sub="Overall performance" icon={TrendingUp} color="bg-orange-100 text-orange-600" />
             <KpiCard title="Avg Delivery" value={`${((kpis?.avg_delivery_hours || 0)).toFixed(1)}h`} sub="Pickup to delivery" icon={Clock} color="bg-purple-100 text-purple-600" />
-            <KpiCard title="Customer Rating" value={`★ ${kpis?.customer_satisfaction?.toFixed(1) || '4.7'}`} sub="Average satisfaction" icon={Star} color="bg-yellow-100 text-yellow-600" />
+            <KpiCard title="Customer Rating" value={`â˜… ${kpis?.customer_satisfaction?.toFixed(1) || '4.7'}`} sub="Average satisfaction" icon={Star} color="bg-yellow-100 text-yellow-600" />
           </div>
 
           {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* Revenue trend */}
             <div className="card">
               <h3 className="font-semibold text-gray-900 mb-4">Revenue Trend (7 days)</h3>
@@ -252,7 +252,7 @@ export default function Reports() {
                       <td className="px-4 py-3 text-sm text-gray-700">{driver.total_deliveries}</td>
                       <td className="px-4 py-3 text-sm text-blue-600 font-medium">{driver.orders_this_month}</td>
                       <td className="px-4 py-3 text-sm text-gray-700">{(driver.on_time_rate || 0).toFixed(1)}%</td>
-                      <td className="px-4 py-3 text-sm text-yellow-500">★ {(driver.rating || 0).toFixed(1)}</td>
+                      <td className="px-4 py-3 text-sm text-yellow-500">â˜… {(driver.rating || 0).toFixed(1)}</td>
                       <td className="px-4 py-3 text-sm font-semibold text-green-600">${(driver.revenue_this_month || 0).toFixed(2)}</td>
                       <td className="px-4 py-3 text-sm text-gray-600">{(driver.avg_delivery_minutes || 0).toFixed(0)}</td>
                     </tr>
@@ -307,7 +307,7 @@ export default function Reports() {
                           <span className="text-xs text-gray-500">{truck.fuel_level}%</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-xs text-gray-600">{truck.current_driver || '—'}</td>
+                      <td className="px-4 py-3 text-xs text-gray-600">{truck.current_driver || 'â€”'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -319,3 +319,4 @@ export default function Reports() {
     </div>
   );
 }
+
