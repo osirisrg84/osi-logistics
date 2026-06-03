@@ -173,10 +173,12 @@ function seedUsers(db: DatabaseSync): void {
   insertUser.run(uuidv4(), 'Admin OSI', 'admin@osilogistics.com', hashPassword('Admin123!', adminSalt), adminSalt, 'admin', null);
   insertUser.run(uuidv4(), 'Dispatcher OSI', 'dispatcher@osilogistics.com', hashPassword('Dispatch123!', dispatchSalt), dispatchSalt, 'dispatcher', null);
 
-  const firstDriver = db.prepare("SELECT id, name, email FROM drivers ORDER BY name LIMIT 1").get() as Record<string, string> | undefined;
-  if (firstDriver) {
+  // Link Carlos Rodriguez as the demo driver account
+  const carlos = db.prepare("SELECT id, name, email FROM drivers WHERE email = 'carlos.r@osilogistics.com' LIMIT 1").get() as Record<string, string> | undefined;
+  const demoDriver = carlos || (db.prepare("SELECT id, name, email FROM drivers LIMIT 1").get() as Record<string, string> | undefined);
+  if (demoDriver) {
     const driverSalt = randomBytes(16).toString('hex');
-    insertUser.run(uuidv4(), firstDriver.name, firstDriver.email, hashPassword('Driver123!', driverSalt), driverSalt, 'driver', firstDriver.id);
+    insertUser.run(uuidv4(), demoDriver.name, demoDriver.email, hashPassword('Driver123!', driverSalt), driverSalt, 'driver', demoDriver.id);
   }
 
   console.log('   👤 admin@osilogistics.com / Admin123!');
