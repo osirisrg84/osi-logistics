@@ -7,16 +7,16 @@ import { useAuth } from '../context/AuthContext';
 
 const DISPATCHER_NAV = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/orders', icon: Package, label: 'Orders' },
-  { to: '/tracking', icon: MapPin, label: 'Live Tracking' },
-  { to: '/drivers', icon: Users, label: 'Drivers' },
-  { to: '/fleet', icon: Truck, label: 'Fleet' },
-  { to: '/reports',  icon: BarChart3, label: 'Reports'  },
-  { to: '/billing',  icon: Receipt,  label: 'Billing'  },
+  { to: '/orders',    icon: Package,         label: 'Orders' },
+  { to: '/tracking',  icon: MapPin,          label: 'Live Tracking' },
+  { to: '/drivers',   icon: Users,           label: 'Drivers' },
+  { to: '/fleet',     icon: Truck,           label: 'Fleet' },
+  { to: '/reports',   icon: BarChart3,       label: 'Reports' },
 ];
 
 const ADMIN_ONLY_NAV = [
-  { to: '/users', icon: UserCog, label: 'Users' },
+  { to: '/billing',  icon: Receipt,  label: 'Billing'  },
+  { to: '/users',    icon: UserCog,  label: 'Users'    },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
