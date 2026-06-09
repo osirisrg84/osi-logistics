@@ -157,7 +157,7 @@ router.post('/logout', (req: Request, res: Response) => {
 router.get('/drivers-list', (_req: Request, res: Response) => {
   const db = getDb();
   const drivers = db.prepare(`
-    SELECT d.id, d.name, d.email, d.phone,
+    SELECT d.id, d.name, d.email, d.equipment_type, d.company_name, d.mc_number,
            (SELECT COUNT(*) FROM users WHERE driver_id = d.id) as has_account
     FROM drivers d
     ORDER BY d.name ASC

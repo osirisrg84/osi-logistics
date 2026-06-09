@@ -41,6 +41,9 @@ export function initDatabase(): void {
       on_time_rate REAL NOT NULL DEFAULT 100.0,
       avatar TEXT NOT NULL DEFAULT '',
       hire_date TEXT NOT NULL,
+      equipment_type TEXT NOT NULL DEFAULT 'Dry Van',
+      company_name TEXT NOT NULL DEFAULT 'OSI Logistics LLC',
+      mc_number TEXT NOT NULL DEFAULT '',
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
@@ -188,6 +191,18 @@ export function initDatabase(): void {
   const orderCols = db.prepare('PRAGMA table_info(orders)').all() as Array<{ name: string }>;
   if (!orderCols.some(c => c.name === 'dispatcher_user_id')) {
     db.exec('ALTER TABLE orders ADD COLUMN dispatcher_user_id TEXT');
+  }
+
+  // Migrate: add equipment fields to drivers if not present
+  const driverCols = db.prepare('PRAGMA table_info(drivers)').all() as Array<{ name: string }>;
+  if (!driverCols.some(c => c.name === 'equipment_type')) {
+    db.exec("ALTER TABLE drivers ADD COLUMN equipment_type TEXT NOT NULL DEFAULT 'Dry Van'");
+  }
+  if (!driverCols.some(c => c.name === 'company_name')) {
+    db.exec("ALTER TABLE drivers ADD COLUMN company_name TEXT NOT NULL DEFAULT 'OSI Logistics LLC'");
+  }
+  if (!driverCols.some(c => c.name === 'mc_number')) {
+    db.exec("ALTER TABLE drivers ADD COLUMN mc_number TEXT NOT NULL DEFAULT ''");
   }
 
   // 1. Seed demo data first (creates drivers)
@@ -382,19 +397,19 @@ function seedDatabase(db: DatabaseSync): void {
   ];
 
   const drivers = [
-    { name: 'Carlos Rodriguez', phone: '(305) 555-0101', email: 'carlos.r@osilogistics.com', license: 'FL-CDL-100234', expiry: '2027-08-15', status: 'busy', rating: 4.9, deliveries: 1247, on_time: 97.2, hire: '2022-03-15', loc: miamiLocations[0], truck: trucks[0].id },
-    { name: 'Marcus Johnson', phone: '(305) 555-0102', email: 'marcus.j@osilogistics.com', license: 'FL-CDL-100456', expiry: '2026-11-20', status: 'busy', rating: 4.7, deliveries: 892, on_time: 94.8, hire: '2022-09-01', loc: miamiLocations[1], truck: trucks[1].id },
-    { name: 'Ana Martinez', phone: '(305) 555-0103', email: 'ana.m@osilogistics.com', license: 'FL-CDL-100789', expiry: '2027-03-10', status: 'available', rating: 4.95, deliveries: 2103, on_time: 98.5, hire: '2021-01-10', loc: miamiLocations[2], truck: trucks[2].id },
-    { name: 'David Thompson', phone: '(305) 555-0104', email: 'david.t@osilogistics.com', license: 'FL-CDL-101011', expiry: '2026-07-25', status: 'available', rating: 4.6, deliveries: 567, on_time: 92.1, hire: '2023-06-20', loc: miamiLocations[3], truck: trucks[3].id },
-    { name: 'Sofia Hernandez', phone: '(305) 555-0105', email: 'sofia.h@osilogistics.com', license: 'FL-CDL-101234', expiry: '2027-12-01', status: 'busy', rating: 4.8, deliveries: 1456, on_time: 96.3, hire: '2022-05-14', loc: miamiLocations[4], truck: trucks[4].id },
-    { name: 'James Wilson', phone: '(305) 555-0106', email: 'james.w@osilogistics.com', license: 'FL-CDL-101567', expiry: '2027-06-18', status: 'on_break', rating: 4.5, deliveries: 334, on_time: 91.0, hire: '2023-11-05', loc: miamiLocations[5], truck: trucks[5].id },
-    { name: 'Maria Garcia', phone: '(305) 555-0107', email: 'maria.g@osilogistics.com', license: 'FL-CDL-101890', expiry: '2026-09-30', status: 'offline', rating: 4.85, deliveries: 1789, on_time: 95.7, hire: '2021-08-22', loc: miamiLocations[6], truck: null },
-    { name: 'Robert Davis', phone: '(305) 555-0108', email: 'robert.d@osilogistics.com', license: 'FL-CDL-102123', expiry: '2027-02-14', status: 'available', rating: 4.75, deliveries: 723, on_time: 93.4, hire: '2023-02-28', loc: miamiLocations[7], truck: trucks[7].id },
+    { name: 'Carlos Rodriguez', phone: '(305) 555-0101', email: 'carlos.r@osilogistics.com', license: 'FL-CDL-100234', expiry: '2027-08-15', status: 'busy', rating: 4.9, deliveries: 1247, on_time: 97.2, hire: '2022-03-15', loc: miamiLocations[0], truck: trucks[0].id, equipment: 'Dry Van', company: 'OSI Logistics LLC', mc: 'MC-892341' },
+    { name: 'Marcus Johnson', phone: '(305) 555-0102', email: 'marcus.j@osilogistics.com', license: 'FL-CDL-100456', expiry: '2026-11-20', status: 'busy', rating: 4.7, deliveries: 892, on_time: 94.8, hire: '2022-09-01', loc: miamiLocations[1], truck: trucks[1].id, equipment: 'Reefer', company: 'OSI Logistics LLC', mc: 'MC-892341' },
+    { name: 'Ana Martinez', phone: '(305) 555-0103', email: 'ana.m@osilogistics.com', license: 'FL-CDL-100789', expiry: '2027-03-10', status: 'available', rating: 4.95, deliveries: 2103, on_time: 98.5, hire: '2021-01-10', loc: miamiLocations[2], truck: trucks[2].id, equipment: 'Reefer', company: 'OSI Logistics LLC', mc: 'MC-892341' },
+    { name: 'David Thompson', phone: '(305) 555-0104', email: 'david.t@osilogistics.com', license: 'FL-CDL-101011', expiry: '2026-07-25', status: 'available', rating: 4.6, deliveries: 567, on_time: 92.1, hire: '2023-06-20', loc: miamiLocations[3], truck: trucks[3].id, equipment: 'Flatbed', company: 'OSI Logistics LLC', mc: 'MC-892341' },
+    { name: 'Sofia Hernandez', phone: '(305) 555-0105', email: 'sofia.h@osilogistics.com', license: 'FL-CDL-101234', expiry: '2027-12-01', status: 'busy', rating: 4.8, deliveries: 1456, on_time: 96.3, hire: '2022-05-14', loc: miamiLocations[4], truck: trucks[4].id, equipment: 'Dry Van', company: 'OSI Logistics LLC', mc: 'MC-892341' },
+    { name: 'James Wilson', phone: '(305) 555-0106', email: 'james.w@osilogistics.com', license: 'FL-CDL-101567', expiry: '2027-06-18', status: 'on_break', rating: 4.5, deliveries: 334, on_time: 91.0, hire: '2023-11-05', loc: miamiLocations[5], truck: trucks[5].id, equipment: 'Box Truck', company: 'OSI Logistics LLC', mc: 'MC-892341' },
+    { name: 'Maria Garcia', phone: '(305) 555-0107', email: 'maria.g@osilogistics.com', license: 'FL-CDL-101890', expiry: '2026-09-30', status: 'offline', rating: 4.85, deliveries: 1789, on_time: 95.7, hire: '2021-08-22', loc: miamiLocations[6], truck: null, equipment: 'Flatbed', company: 'OSI Logistics LLC', mc: 'MC-892341' },
+    { name: 'Robert Davis', phone: '(305) 555-0108', email: 'robert.d@osilogistics.com', license: 'FL-CDL-102123', expiry: '2027-02-14', status: 'available', rating: 4.75, deliveries: 723, on_time: 93.4, hire: '2023-02-28', loc: miamiLocations[7], truck: trucks[7].id, equipment: 'Dry Van', company: 'OSI Logistics LLC', mc: 'MC-892341' },
   ];
 
   const insertDriver = db.prepare(`
-    INSERT INTO drivers (id, name, phone, email, license_number, license_expiry, status, current_lat, current_lng, current_address, truck_id, rating, total_deliveries, on_time_rate, avatar, hire_date)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO drivers (id, name, phone, email, license_number, license_expiry, status, current_lat, current_lng, current_address, truck_id, rating, total_deliveries, on_time_rate, avatar, hire_date, equipment_type, company_name, mc_number)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const driverIds: string[] = [];
@@ -402,7 +417,7 @@ function seedDatabase(db: DatabaseSync): void {
     const id = uuidv4();
     driverIds.push(id);
     const initials = d.name.split(' ').map(n => n[0]).join('');
-    insertDriver.run(id, d.name, d.phone, d.email, d.license, d.expiry, d.status, d.loc.lat, d.loc.lng, d.loc.addr, d.truck, d.rating, d.deliveries, d.on_time, initials, d.hire);
+    insertDriver.run(id, d.name, d.phone, d.email, d.license, d.expiry, d.status, d.loc.lat, d.loc.lng, d.loc.addr, d.truck, d.rating, d.deliveries, d.on_time, initials, d.hire, d.equipment, d.company, d.mc);
   }
 
   const pickupLocations = [
