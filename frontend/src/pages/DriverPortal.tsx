@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Package, MapPin, CheckCircle, Truck, Phone,
   Clock, Star, Navigation, LogOut, User, Activity,
-  Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase
+  Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -122,7 +122,7 @@ const STATUS_CONFIG: Record<DriverStatus, { label: string; dot: string; bg: stri
   offline:   { label: 'Offline',     dot: 'bg-gray-400',   bg: 'bg-gray-100 dark:bg-slate-700',      text: 'text-gray-500 dark:text-slate-400' },
 };
 
-type Tab = 'active' | 'delivered' | 'map' | 'profile';
+type Tab = 'active' | 'delivered' | 'map' | 'profile' | 'payments';
 
 export default function DriverPortal() {
   const { user, driverProfile, logout } = useAuth();
@@ -499,50 +499,28 @@ export default function DriverPortal() {
             </div>
           )}
 
-          {/* Mis comisiones (8%) */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Clock className="w-4 h-4 text-orange-500" />
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Mis comisiones (8%)</h3>
-            </div>
-            {billingSummary && (
-              <div className="grid grid-cols-3 gap-2 mb-3 text-xs">
-                <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-2.5 text-center">
-                  <p className="text-red-400 mb-0.5">Total cobrado</p>
-                  <p className="font-bold text-red-600">${billingSummary.total_charged.toFixed(2)}</p>
-                </div>
-                <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-2.5 text-center">
-                  <p className="text-green-400 mb-0.5">Liquidado</p>
-                  <p className="font-bold text-green-600">${billingSummary.settled.toFixed(2)}</p>
-                </div>
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-2.5 text-center">
-                  <p className="text-yellow-400 mb-0.5">Pendiente</p>
-                  <p className="font-bold text-yellow-600">${billingSummary.pending.toFixed(2)}</p>
-                </div>
+          {/* Pagos shortcut */}
+          <button
+            onClick={() => setTab('payments')}
+            className="w-full bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 flex items-center justify-between hover:border-orange-300 dark:hover:border-orange-600 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
+                <Wallet className="w-4 h-4 text-orange-600 dark:text-orange-400" />
               </div>
-            )}
-            <div className="space-y-1.5">
-              {billingRows.length === 0 ? (
-                <p className="text-xs text-gray-400 dark:text-slate-500 text-center py-2">Sin comisiones registradas</p>
-              ) : billingRows.map(r => (
-                <div key={r.id} className="flex items-center justify-between py-2 border-b border-gray-50 dark:border-slate-700/50 last:border-0">
-                  <div>
-                    <p className="text-xs font-semibold text-gray-900 dark:text-white">{r.order_number}</p>
-                    <p className="text-[10px] text-gray-400 dark:text-slate-500">
-                      ${r.order_price.toFixed(2)} × 8% = <span className="text-red-500 font-semibold">${r.driver_charge.toFixed(2)}</span>
-                    </p>
-                  </div>
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                    r.status === 'settled'
-                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                      : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
-                  }`}>
-                    {r.status === 'settled' ? 'Liquidado' : 'Pendiente'}
-                  </span>
-                </div>
-              ))}
+              <div className="text-left">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">Mis Pagos a OSI</p>
+                {billingSummary && billingSummary.pending > 0 ? (
+                  <p className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">
+                    ${billingSummary.pending.toFixed(2)} pendiente
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-400 dark:text-slate-500">Ver historial de pagos</p>
+                )}
+              </div>
             </div>
-          </div>
+            <span className="text-gray-300 dark:text-slate-600 text-lg">›</span>
+          </button>
 
           {/* Lugares favoritos */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
@@ -645,13 +623,75 @@ export default function DriverPortal() {
         </div>
       )}
 
+      {/* Payments tab — always accessible */}
+      {tab === 'payments' && (
+        <div className="max-w-lg mx-auto px-4 py-5 space-y-4">
+          <div>
+            <h2 className="text-base font-bold text-gray-900 dark:text-white">Mis Pagos a OSI</h2>
+            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+              OSI Logistics cobra el <span className="font-semibold text-red-500">8%</span> por cada carga conseguida
+            </p>
+          </div>
+
+          {/* Summary */}
+          {billingSummary && (
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-3 text-center">
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 mb-1">Total cobrado</p>
+                <p className="text-lg font-bold text-red-600">${billingSummary.total_charged.toFixed(2)}</p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-3 text-center">
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 mb-1">Liquidado</p>
+                <p className="text-lg font-bold text-green-600">${billingSummary.settled.toFixed(2)}</p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-3 text-center">
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 mb-1">Pendiente</p>
+                <p className="text-lg font-bold text-yellow-600">${billingSummary.pending.toFixed(2)}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Records */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden">
+            {billingRows.length === 0 ? (
+              <div className="py-10 text-center">
+                <Wallet className="w-10 h-10 text-gray-200 dark:text-slate-700 mx-auto mb-2" />
+                <p className="text-sm text-gray-400 dark:text-slate-500">Sin pagos registrados</p>
+                <p className="text-xs text-gray-300 dark:text-slate-600 mt-1">Aparecen cuando se confirman tus entregas</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-50 dark:divide-slate-700/50">
+                {billingRows.map(r => (
+                  <div key={r.id} className="flex items-center justify-between px-4 py-3">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{r.order_number}</p>
+                      <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+                        ${r.order_price.toFixed(2)} × 8% = <span className="text-red-500 font-semibold">${r.driver_charge.toFixed(2)}</span>
+                      </p>
+                    </div>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                      r.status === 'settled'
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                    }`}>
+                      {r.status === 'settled' ? 'Liquidado' : 'Pendiente'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── Fixed Bottom Navigation ─────────────────────────── */}
       <nav className="fixed bottom-0 inset-x-0 z-40 bg-slate-900 border-t border-slate-700 flex items-stretch">
         {([
-          { id: 'active',    icon: Activity,     label: 'Active',   badge: activeOrders.length },
-          { id: 'delivered', icon: CheckCircle,  label: 'Done',     badge: deliveredToday.length },
-          { id: 'map',       icon: Navigation,   label: 'Map',      badge: 0 },
-          { id: 'profile',   icon: User,         label: 'Profile',  badge: 0 },
+          { id: 'active',    icon: Activity,    label: 'Active',  badge: activeOrders.length },
+          { id: 'delivered', icon: CheckCircle, label: 'Done',    badge: deliveredToday.length },
+          { id: 'map',       icon: Navigation,  label: 'Map',     badge: 0 },
+          { id: 'payments',  icon: Wallet,      label: 'Pagos',   badge: (billingSummary?.pending ?? 0) > 0 ? 1 : 0 },
+          { id: 'profile',   icon: User,        label: 'Perfil',  badge: 0 },
         ] as const).map(({ id, icon: Icon, label, badge }) => {
           const isActive = tab === id;
           return (

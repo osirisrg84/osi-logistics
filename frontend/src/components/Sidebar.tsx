@@ -1,17 +1,18 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Package, MapPin, Users, Truck,
-  BarChart3, Settings, Zap, Shield, UserCog, X, Receipt
+  BarChart3, Settings, Zap, Shield, UserCog, X, Receipt, TrendingUp
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const DISPATCHER_NAV = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/orders',    icon: Package,         label: 'Orders' },
-  { to: '/tracking',  icon: MapPin,          label: 'Live Tracking' },
-  { to: '/drivers',   icon: Users,           label: 'Drivers' },
-  { to: '/fleet',     icon: Truck,           label: 'Fleet' },
-  { to: '/reports',   icon: BarChart3,       label: 'Reports' },
+  { to: '/dashboard',    icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/orders',       icon: Package,         label: 'Orders' },
+  { to: '/tracking',     icon: MapPin,          label: 'Live Tracking' },
+  { to: '/drivers',      icon: Users,           label: 'Drivers' },
+  { to: '/fleet',        icon: Truck,           label: 'Fleet' },
+  { to: '/reports',      icon: BarChart3,       label: 'Reports' },
+  { to: '/commissions',  icon: TrendingUp,      label: 'Mis Comisiones' },
 ];
 
 const ADMIN_ONLY_NAV = [
