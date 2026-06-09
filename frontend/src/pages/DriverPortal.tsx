@@ -4,7 +4,7 @@ import L from 'leaflet';
 import {
   Package, MapPin, CheckCircle, Truck, Phone,
   Clock, Star, Navigation, LogOut, User, Activity,
-  Power, Coffee, AlertTriangle, Sun, Moon
+  Power, Coffee, AlertTriangle, Sun, Moon, Globe
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -13,6 +13,7 @@ import { Order, Driver, DriverStatus } from '../types';
 import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
 import { getSocket } from '../services/socket';
+import WorldMapView from '../components/WorldMapView';
 
 // Fix Leaflet icons
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
@@ -156,7 +157,7 @@ export default function DriverPortal() {
   const [togglingStatus, setTogglingStatus] = useState(false);
   const [activeOrders, setActiveOrders] = useState<Order[]>([]);
   const [deliveredToday, setDeliveredToday] = useState<Order[]>([]);
-  const [tab, setTab] = useState<'active' | 'delivered' | 'map'>('active');
+  const [tab, setTab] = useState<'active' | 'delivered' | 'map' | 'world'>('active');
   const [loading, setLoading] = useState(true);
 
   const fetchOrders = useCallback(async () => {
@@ -366,9 +367,10 @@ export default function DriverPortal() {
       <div className="bg-white dark:bg-slate-800 border-b border-gray-100 dark:border-slate-700">
         <div className="max-w-lg mx-auto flex">
           {[
-            { id: 'active', label: `Active (${activeOrders.length})`, icon: Activity },
-            { id: 'delivered', label: `Delivered (${deliveredToday.length})`, icon: CheckCircle },
-            { id: 'map', label: 'Map', icon: Navigation },
+            { id: 'active',    label: `Active (${activeOrders.length})`,        icon: Activity     },
+            { id: 'delivered', label: `Done (${deliveredToday.length})`,         icon: CheckCircle  },
+            { id: 'map',       label: 'My Map',                                  icon: Navigation   },
+            { id: 'world',     label: 'World',                                   icon: Globe        },
           ].map(({ id, label, icon: Icon }) => (
             <button key={id} onClick={() => setTab(id as typeof tab)}
               className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-medium border-b-2 transition-colors ${
@@ -469,8 +471,10 @@ export default function DriverPortal() {
           </div>
         )}
 
-        {/* Driver profile card */}
-        {driver && (
+        {tab === 'world' && <WorldMapView />}
+
+        {/* Driver profile card — hidden on world tab */}
+        {driver && tab !== 'world' && (
           <div className="mt-5 bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
             <div className="flex items-center gap-3 mb-4">
               <User className="w-4 h-4 text-orange-500" />
