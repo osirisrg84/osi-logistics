@@ -1,6 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
 import {
   Package, MapPin, CheckCircle, Truck, Phone,
   Clock, Star, Navigation, LogOut, User, Activity,
@@ -14,14 +12,8 @@ import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
 import { getSocket } from '../services/socket';
 import WorldMapView from '../components/WorldMapView';
+import Map3D from '../components/Map3D';
 
-// Fix Leaflet icons
-delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
 
 const STATUS_FLOW: Record<string, { next: string; label: string; color: string }> = {
   assigned: { next: 'picked_up', label: 'Confirm Pickup', color: 'bg-blue-500 hover:bg-blue-600' },
@@ -338,27 +330,41 @@ export default function DriverPortal() {
         </div>
       </div>
 
-      {/* Offline state */}
+      {/* Offline state — 3D map background with overlay */}
       {driverStatus === 'offline' && (
-        <div className="max-w-lg mx-auto px-4 py-12 text-center">
-          <div className="w-20 h-20 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-5">
-            <Power className="w-9 h-9 text-gray-300 dark:text-slate-500" />
+        <div className="relative" style={{ height: 'calc(100vh - 200px)', minHeight: 420 }}>
+          {/* 3D Map fills the entire area */}
+          <Map3D driver={driver} activeOrders={activeOrders} pitch={52} />
+
+          {/* Dark gradient at top for readability */}
+          <div className="absolute inset-x-0 top-0 h-16 pointer-events-none"
+            style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.25), transparent)' }} />
+
+          {/* Offline overlay card — centered */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 pointer-events-none">
+            <div className="bg-slate-900/80 backdrop-blur-md rounded-2xl px-6 py-5 text-center shadow-2xl border border-white/10 w-full max-w-xs pointer-events-auto">
+              <div className="w-14 h-14 bg-slate-700/80 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Power className="w-7 h-7 text-slate-400" />
+              </div>
+              <h3 className="text-base font-bold text-white mb-1">You're Offline</h3>
+              <p className="text-xs text-slate-400 mb-4">Go online to receive deliveries</p>
+              <button
+                onClick={() => setStatus('available')}
+                disabled={togglingStatus}
+                className="w-full bg-green-500 hover:bg-green-400 active:scale-95 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/30"
+              >
+                {togglingStatus
+                  ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  : <Power className="w-5 h-5" />
+                }
+                Go Online Now
+              </button>
+            </div>
           </div>
-          <h3 className="text-lg font-bold text-gray-700 dark:text-slate-200 mb-2">You're Offline</h3>
-          <p className="text-sm text-gray-400 dark:text-slate-400 mb-6">
-            Go online to start receiving and managing deliveries.
-          </p>
-          <button
-            onClick={() => setStatus('available')}
-            disabled={togglingStatus}
-            className="mx-auto bg-green-500 hover:bg-green-400 text-white font-bold px-8 py-3.5 rounded-2xl transition-all flex items-center gap-3 shadow-lg shadow-green-500/20"
-          >
-            {togglingStatus
-              ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              : <Power className="w-5 h-5" />
-            }
-            Go Online Now
-          </button>
+
+          {/* Bottom gradient */}
+          <div className="absolute inset-x-0 bottom-0 h-20 pointer-events-none"
+            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.3), transparent)' }} />
         </div>
       )}
 
@@ -436,38 +442,8 @@ export default function DriverPortal() {
         )}
 
         {tab === 'map' && driver && (
-          <div className="rounded-2xl overflow-hidden h-96 shadow-sm border border-gray-100 dark:border-slate-700">
-            <MapContainer
-              center={[driver.current_lat || 25.7617, driver.current_lng || -80.1918]}
-              zoom={13}
-              style={{ height: '100%', width: '100%' }}
-            >
-              <TileLayer
-                attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              {driver && (
-                <Marker position={[driver.current_lat, driver.current_lng]}>
-                  <Popup>
-                    <div className="text-sm">
-                      <p className="font-semibold">{driver.name}</p>
-                      <p className="text-gray-500">{driver.current_address}</p>
-                    </div>
-                  </Popup>
-                </Marker>
-              )}
-              {activeOrders.filter(o => o.delivery_lat && o.delivery_lng).map(order => (
-                <Marker key={order.id} position={[order.delivery_lat, order.delivery_lng]}>
-                  <Popup>
-                    <div className="text-sm">
-                      <p className="font-semibold">{order.order_number}</p>
-                      <p className="text-gray-500">{order.customer_name}</p>
-                      <p className="text-gray-400 text-xs">{order.delivery_address}</p>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
+          <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700" style={{ height: 420 }}>
+            <Map3D driver={driver} activeOrders={activeOrders} pitch={48} />
           </div>
         )}
 
