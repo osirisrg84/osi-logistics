@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Package, MapPin, CheckCircle, Truck, Phone,
   Clock, Star, Navigation, LogOut, User, Activity,
-  Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet
+  Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet, Building2
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -12,6 +12,19 @@ import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
 import { getSocket } from '../services/socket';
 import Map3D from '../components/Map3D';
+
+function calcAuthority(since: string): string {
+  if (!since) return '';
+  const start = new Date(since);
+  const now = new Date();
+  let years = now.getFullYear() - start.getFullYear();
+  let months = now.getMonth() - start.getMonth();
+  if (now.getDate() < start.getDate()) months--;
+  if (months < 0) { years--; months += 12; }
+  if (years === 0) return `${months} mes${months !== 1 ? 'es' : ''}`;
+  if (months === 0) return `${years} año${years !== 1 ? 's' : ''}`;
+  return `${years} año${years !== 1 ? 's' : ''}, ${months} mes${months !== 1 ? 'es' : ''}`;
+}
 
 const STATUS_FLOW: Record<string, { next: string; label: string; color: string }> = {
   assigned:  { next: 'picked_up', label: 'Confirm Pickup',    color: 'bg-blue-500 hover:bg-blue-600'   },
@@ -253,29 +266,20 @@ export default function DriverPortal() {
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-16">
 
       {/* ── Header ─────────────────────────────────────────── */}
-      <header className="bg-slate-900 text-white px-4 py-4">
+      <header className="bg-slate-900 text-white px-4 py-3">
         <div className="max-w-lg mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm relative ${
-              driverStatus === 'offline' ? 'bg-slate-600' : 'bg-orange-500'
-            }`}>
-              {driver?.avatar || user?.name?.charAt(0) || 'D'}
-              <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-900 ${cfg.dot}`} />
+          {/* OSI Logistics branding */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Truck className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="font-semibold text-sm">{driver?.name || user?.name}</p>
-              <div className="flex items-center gap-2">
-                <span className={`text-xs font-semibold ${
-                  driverStatus === 'available' ? 'text-green-400' :
-                  driverStatus === 'busy'      ? 'text-orange-400' :
-                  driverStatus === 'on_break'  ? 'text-yellow-400' : 'text-slate-500'
-                }`}>{cfg.label}</span>
-                {driver?.plate_number && (
-                  <span className="text-xs text-slate-500">· {driver.make} {driver.model}</span>
-                )}
-              </div>
+              <p className="text-sm font-bold text-white leading-tight">OSI Logistics</p>
+              <p className="text-[10px] text-slate-400 leading-tight">Driver Portal</p>
             </div>
           </div>
+
+          {/* Action buttons only */}
           <div className="flex items-center gap-1">
             <button onClick={toggleTheme} className="p-2 hover:bg-slate-800 rounded-lg transition-colors" title={dark ? 'Light mode' : 'Dark mode'}>
               {dark ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-slate-400" />}
@@ -289,6 +293,39 @@ export default function DriverPortal() {
 
       {/* ── Online / Offline controls ───────────────────────── */}
       <div className="bg-slate-800 px-4 py-3 border-b border-slate-700">
+        {/* Driver identity card */}
+        <div className="max-w-lg mx-auto mb-3">
+          <div className="flex items-center gap-3 bg-slate-700/50 border border-slate-600/50 rounded-2xl px-4 py-2.5">
+            {/* Avatar */}
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${
+              driverStatus === 'offline' ? 'bg-slate-500' : 'bg-orange-500'
+            }`}>
+              <span className="text-white">{user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'D'}</span>
+            </div>
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-white truncate">{driver?.name || user?.name}</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dot} ${driverStatus === 'available' ? 'pulse-dot' : ''}`} />
+                <span className={`text-xs font-medium ${
+                  driverStatus === 'available' ? 'text-green-400' :
+                  driverStatus === 'busy'      ? 'text-orange-400' :
+                  driverStatus === 'on_break'  ? 'text-yellow-400' : 'text-slate-400'
+                }`}>{cfg.label}</span>
+                {driver?.plate_number && (
+                  <span className="text-xs text-slate-500">· {driver.plate_number}</span>
+                )}
+              </div>
+            </div>
+            {/* Rating badge */}
+            {driver?.rating && (
+              <div className="flex items-center gap-1 bg-slate-600/60 rounded-xl px-2.5 py-1 flex-shrink-0">
+                <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                <span className="text-xs font-bold text-white">{driver.rating.toFixed(1)}</span>
+              </div>
+            )}
+          </div>
+        </div>
         <div className="max-w-lg mx-auto">
           {driverStatus === 'offline' ? (
             <button onClick={() => setStatus('available')} disabled={togglingStatus}
@@ -495,6 +532,36 @@ export default function DriverPortal() {
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">{driver.make} {driver.model}</p>
                   <p className="text-xs text-gray-500 dark:text-slate-400">{driver.plate_number}</p>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Empresa / Autoridad MC */}
+          {(driver.company_name || driver.mc_number) && (
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <Building2 className="w-4 h-4 text-green-500" />
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Empresa / Autoridad</h3>
+              </div>
+              <div className="space-y-2.5">
+                {driver.company_name && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500 dark:text-slate-400">Nombre de compañía</span>
+                    <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{driver.company_name}</span>
+                  </div>
+                )}
+                {driver.mc_number && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500 dark:text-slate-400">MC# / Póliza Comercial</span>
+                    <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">{driver.mc_number}</span>
+                  </div>
+                )}
+                {driver.authority_since && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> Tiempo con autoridad</span>
+                    <span className="text-sm font-semibold text-green-600 dark:text-green-400">{calcAuthority(driver.authority_since)}</span>
+                  </div>
+                )}
               </div>
             </div>
           )}
