@@ -196,7 +196,9 @@ export function initDatabase(): void {
   seedUsers(db);
   // 3. Seed sample favorites (safe to run every time — checks if empty first)
   seedFavorites(db);
-  // 4. Generate commissions for all existing delivered orders
+  // 4. Seed 3 example commission records if table is empty
+  seedCommissions(db);
+  // 5. Generate commissions for all existing delivered orders
   initCommissions(db);
 }
 
@@ -270,6 +272,54 @@ function seedFavorites(db: DatabaseSync): void {
   ins.run(uuidv4(), carlos.id, 'Home',     'Fort Myers, FL 33907',     'home');
   ins.run(uuidv4(), carlos.id, 'Michigan', 'Detroit, MI',              'frequent');
   ins.run(uuidv4(), carlos.id, 'OSI Warehouse', '1200 NW 22nd Ave, Miami, FL 33125', 'work');
+}
+
+function seedCommissions(db: DatabaseSync): void {
+  const count = (db.prepare('SELECT COUNT(*) as c FROM commissions').get() as { c: number }).c;
+  if (count > 0) return;
+
+  const carlos  = db.prepare("SELECT id FROM drivers WHERE email = 'carlos.r@osilogistics.com' LIMIT 1").get() as { id: string } | undefined;
+  const marcus  = db.prepare("SELECT id FROM drivers WHERE email = 'marcus.j@osilogistics.com' LIMIT 1").get() as { id: string } | undefined;
+  const sofia   = db.prepare("SELECT id FROM drivers WHERE email = 'sofia.h@osilogistics.com' LIMIT 1").get() as { id: string } | undefined;
+  const dispUser = db.prepare("SELECT id FROM users WHERE email = 'dispatcher@osilogistics.com' LIMIT 1").get() as { id: string } | undefined;
+
+  if (!carlos || !marcus || !sofia) return;
+
+  const ins = db.prepare(`
+    INSERT OR IGNORE INTO commissions
+      (id, order_id, order_number, driver_id, driver_name, dispatcher_user_id, dispatcher_name,
+       order_price, driver_charge, dispatcher_pay, net_osi, delivery_date, status, settled_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  // Example 1: Carlos — settled, $2,450 load
+  const price1 = 2450;
+  ins.run(uuidv4(), uuidv4(), 'OSI-0000001', carlos.id, 'Carlos Rodriguez',
+    dispUser?.id ?? null, dispUser ? 'Dispatcher OSI' : null,
+    price1, Math.round(price1 * 0.08 * 100) / 100,
+    Math.round(price1 * 0.05 * 100) / 100,
+    Math.round(price1 * 0.03 * 100) / 100,
+    '2026-06-02', 'settled', '2026-06-03 10:00:00');
+
+  // Example 2: Marcus — pending, $1,800 load
+  const price2 = 1800;
+  ins.run(uuidv4(), uuidv4(), 'OSI-0000002', marcus.id, 'Marcus Johnson',
+    dispUser?.id ?? null, dispUser ? 'Dispatcher OSI' : null,
+    price2, Math.round(price2 * 0.08 * 100) / 100,
+    Math.round(price2 * 0.05 * 100) / 100,
+    Math.round(price2 * 0.03 * 100) / 100,
+    '2026-06-05', 'pending', null);
+
+  // Example 3: Sofia — pending, $3,100 load
+  const price3 = 3100;
+  ins.run(uuidv4(), uuidv4(), 'OSI-0000003', sofia.id, 'Sofia Hernandez',
+    dispUser?.id ?? null, dispUser ? 'Dispatcher OSI' : null,
+    price3, Math.round(price3 * 0.08 * 100) / 100,
+    Math.round(price3 * 0.05 * 100) / 100,
+    Math.round(price3 * 0.03 * 100) / 100,
+    '2026-06-07', 'pending', null);
+
+  console.log('   💰 3 example commissions seeded');
 }
 
 function seedUsers(db: DatabaseSync): void {
