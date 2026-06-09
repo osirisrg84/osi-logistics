@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Outlet, useLocation, NavLink } from 'react-router-dom';
 import { LayoutDashboard, Package, MapPin, Users, BarChart3, MoreHorizontal } from 'lucide-react';
 import Sidebar from './Sidebar';
@@ -46,11 +46,15 @@ function BottomNav({ onMoreClick }: { onMoreClick: () => void }) {
 }
 
 export default function Layout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
+  const isFirstRender = useRef(true);
 
-  // Close sidebar on route change (mobile)
-  useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
+  // Close sidebar on route change (mobile), but keep open on initial login
+  useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return; }
+    setSidebarOpen(false);
+  }, [location.pathname]);
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-slate-950 overflow-hidden">
