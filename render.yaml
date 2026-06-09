@@ -1,11 +1,13 @@
 services:
   - type: web
     name: osi-logistics-backend
-    runtime: docker
+    runtime: node
     rootDir: backend
-    dockerfilePath: ./Dockerfile
+    buildCommand: npm install
+    startCommand: npm start
     healthCheckPath: /api/health
     plan: free
+    autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
