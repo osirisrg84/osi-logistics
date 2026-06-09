@@ -133,7 +133,7 @@ export default function Register() {
                         : 'border-gray-200 text-gray-600 hover:border-gray-300'
                     }`}
                   >
-                    <div className="text-lg mb-0.5">{role === 'dispatcher' ? 'ðŸ“‹' : 'ðŸš›'}</div>
+                    <div className="text-lg mb-0.5">{role === 'dispatcher' ? '📋' : '🚛'}</div>
                     <div className="capitalize">{role}</div>
                     <div className="text-xs mt-0.5 font-normal text-gray-400">
                       {role === 'dispatcher' ? 'Full dashboard access' : 'Driver portal access'}
@@ -175,7 +175,7 @@ export default function Register() {
                   >
                     <option value="">Choose your profile...</option>
                     {availableDrivers.map(d => (
-                      <option key={d.id} value={d.id}>{d.name} Â· {d.phone}</option>
+                      <option key={d.id} value={d.id}>{d.name} · {d.phone}</option>
                     ))}
                   </select>
                 )}

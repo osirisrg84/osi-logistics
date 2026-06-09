@@ -51,7 +51,7 @@ export default function AdminLogin() {
             <Shield className="w-7 h-7 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white">Admin Console</h1>
-          <p className="text-slate-400 text-sm mt-1">OSI Logistics â€” System Administration</p>
+          <p className="text-slate-400 text-sm mt-1">OSI Logistics — System Administration</p>
         </div>
 
         {/* Feature list */}
@@ -73,7 +73,7 @@ export default function AdminLogin() {
             <div className="w-2 h-2 bg-purple-500 rounded-full" />
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Administrator Sign In</h2>
           </div>
-          <p className="text-sm text-gray-500 mb-6 ml-4">Restricted access â€” authorized personnel only</p>
+          <p className="text-sm text-gray-500 mb-6 ml-4">Restricted access — authorized personnel only</p>
 
           {error && (
             <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl mb-4">
@@ -133,16 +133,16 @@ export default function AdminLogin() {
               className="w-full text-sm font-medium py-2.5 px-4 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition-colors flex items-center gap-2"
             >
               <div className="w-7 h-7 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">AO</div>
-              Admin OSI Â· admin@osilogistics.com
+              Admin OSI · admin@osilogistics.com
             </button>
             <div className="mt-3 flex flex-col gap-1 text-center">
               <p className="text-xs text-gray-400">
                 Dispatcher?{' '}
-                <Link to="/dispatcher" className="text-orange-500 hover:text-orange-600 font-medium">Dispatcher Portal â†’</Link>
+                <Link to="/dispatcher" className="text-orange-500 hover:text-orange-600 font-medium">Dispatcher Portal →</Link>
               </p>
               <p className="text-xs text-gray-400">
                 Driver?{' '}
-                <Link to="/driver/login" className="text-blue-500 hover:text-blue-600 font-medium">Driver Portal â†’</Link>
+                <Link to="/driver/login" className="text-blue-500 hover:text-blue-600 font-medium">Driver Portal →</Link>
               </p>
             </div>
           </div>

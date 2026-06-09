@@ -97,7 +97,7 @@ function TruckForm({ truck, onClose, onSave }: TruckFormProps) {
               <input className="input" type="number" value={form.capacity_kg} onChange={e => setForm({...form, capacity_kg: e.target.value})} placeholder="5000" />
             </div>
             <div>
-              <label className="label">Volume (mÂ³)</label>
+              <label className="label">Volume (m³)</label>
               <input className="input" type="number" value={form.capacity_m3} onChange={e => setForm({...form, capacity_m3: e.target.value})} placeholder="20" />
             </div>
             <div>
@@ -242,7 +242,7 @@ export default function Fleet() {
                     <TruckStatusBadge status={truck.status} />
                   </div>
                   <p className="text-sm text-gray-600 dark:text-slate-400">{truck.year} {truck.make} {truck.model}</p>
-                  <p className="text-xs text-gray-400 dark:text-slate-500">{truck.type} Â· {truck.color}</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500">{truck.type} · {truck.color}</p>
                 </div>
                 <div className="flex items-center gap-1">
                   <button onClick={() => { setEditTruck(truck); setShowForm(true); }} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
@@ -262,7 +262,7 @@ export default function Fleet() {
                 </div>
                 <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-lg p-2 text-center">
                   <p className="text-xs text-gray-500 dark:text-slate-400">Volume</p>
-                  <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{truck.capacity_m3} mÂ³</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{truck.capacity_m3} m³</p>
                 </div>
               </div>
 

@@ -135,7 +135,7 @@ export default function Tracking() {
       setLastUpdate(new Date());
     });
 
-    // Driver came online â€” fetch their full profile and add to map
+    // Driver came online — fetch their full profile and add to map
     socket.on('driver_status_changed', async (event: StatusEvent) => {
       if (event.status === 'offline') return; // handled by driver_went_offline
       setDrivers(prev => {
@@ -144,7 +144,7 @@ export default function Tracking() {
           // Just update status
           return prev.map(d => d.id === event.id ? { ...d, status: event.status as Driver['status'] } : d);
         }
-        // New driver came online â€” add minimal record, full data comes from API call below
+        // New driver came online — add minimal record, full data comes from API call below
         return [...prev, {
           id: event.id, name: event.name, status: event.status as Driver['status'],
           current_lat: event.lat, current_lng: event.lng, current_address: '',
@@ -161,7 +161,7 @@ export default function Tracking() {
       showToast({ id: `${event.id}-${Date.now()}`, name: event.name, online: true });
     });
 
-    // Driver went offline â€” remove from map
+    // Driver went offline — remove from map
     socket.on('driver_went_offline', ({ id }: { id: string }) => {
       setDrivers(prev => {
         const driver = prev.find(d => d.id === id);
@@ -281,7 +281,7 @@ export default function Tracking() {
                 )}
                 {driver.plate_number && (
                   <p className="text-xs text-gray-400 mt-1 ml-12">
-                    {driver.make} {driver.model} Â· {driver.plate_number}
+                    {driver.make} {driver.model} · {driver.plate_number}
                   </p>
                 )}
               </button>
@@ -304,7 +304,7 @@ export default function Tracking() {
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="bg-slate-800 rounded-lg p-2">
                 <p className="text-slate-400">Rating</p>
-                <p className="font-semibold">â˜… {selectedDriver.rating.toFixed(1)}</p>
+                <p className="font-semibold">★ {selectedDriver.rating.toFixed(1)}</p>
               </div>
               <div className="bg-slate-800 rounded-lg p-2">
                 <p className="text-slate-400">Deliveries</p>
@@ -333,7 +333,7 @@ export default function Tracking() {
           style={{ height: '100%', width: '100%' }}
         >
           <TileLayer
-            attribution='Â© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <MapUpdater drivers={drivers} />
@@ -359,19 +359,19 @@ export default function Tracking() {
                   </div>
                   {driver.plate_number && (
                     <p className="text-xs text-gray-600 mb-1">
-                      ðŸš› {driver.make} {driver.model} Â· {driver.plate_number}
+                      🚛 {driver.make} {driver.model} · {driver.plate_number}
                     </p>
                   )}
                   {driver.order_number && (
                     <p className="text-xs text-blue-600 font-medium">
-                      ðŸ“¦ {driver.order_number}
+                      📦 {driver.order_number}
                     </p>
                   )}
                   {driver.delivery_address && (
                     <p className="text-xs text-gray-500 mt-1">{driver.delivery_address}</p>
                   )}
                   <p className="text-xs text-gray-400 mt-2">
-                    â˜… {driver.rating.toFixed(1)} Â· {driver.total_deliveries} trips
+                    ★ {driver.rating.toFixed(1)} · {driver.total_deliveries} trips
                   </p>
                 </div>
               </Popup>

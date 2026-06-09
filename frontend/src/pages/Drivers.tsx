@@ -171,7 +171,7 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
             <div className="bg-blue-50 rounded-xl p-4">
               <p className="text-xs font-semibold text-blue-700 mb-2 flex items-center gap-1"><Truck className="w-3 h-3" /> ASSIGNED TRUCK</p>
               <p className="text-sm font-medium text-gray-900 dark:text-slate-100">
-                {(driver as Driver & { plate_number?: string; make?: string; model?: string }).plate_number} Â· {(driver as Driver & { make?: string; model?: string }).make} {(driver as Driver & { make?: string; model?: string }).model}
+                {(driver as Driver & { plate_number?: string; make?: string; model?: string }).plate_number} · {(driver as Driver & { make?: string; model?: string }).make} {(driver as Driver & { make?: string; model?: string }).model}
               </p>
             </div>
           )}
@@ -323,7 +323,7 @@ export default function Drivers() {
               </div>
               {driver.plate_number && (
                 <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
-                  <Truck className="w-3 h-3 text-gray-400 dark:text-slate-500" /> {driver.plate_number} Â· {driver.make} {driver.model}
+                  <Truck className="w-3 h-3 text-gray-400 dark:text-slate-500" /> {driver.plate_number} · {driver.make} {driver.model}
                 </div>
               )}
               {driver.current_address && (
@@ -339,7 +339,7 @@ export default function Drivers() {
             <div className="grid grid-cols-3 gap-2 mt-4">
               <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-lg p-2">
                 <p className="text-xs text-gray-500 dark:text-slate-400">Rating</p>
-                <p className="text-sm font-bold text-yellow-500">â˜… {driver.rating.toFixed(1)}</p>
+                <p className="text-sm font-bold text-yellow-500">★ {driver.rating.toFixed(1)}</p>
               </div>
               <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-lg p-2">
                 <p className="text-xs text-gray-500 dark:text-slate-400">Trips</p>

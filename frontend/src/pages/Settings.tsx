@@ -131,9 +131,9 @@ export default function Settings() {
                 <label className="label">Currency</label>
                 <select className="input" value={companySettings.currency}
                   onChange={e => setCompanySettings({...companySettings, currency: e.target.value})}>
-                  <option value="USD">USD â€” US Dollar</option>
-                  <option value="EUR">EUR â€” Euro</option>
-                  <option value="MXN">MXN â€” Mexican Peso</option>
+                  <option value="USD">USD — US Dollar</option>
+                  <option value="EUR">EUR — Euro</option>
+                  <option value="MXN">MXN — Mexican Peso</option>
                 </select>
               </div>
               <div>
@@ -338,7 +338,7 @@ export default function Settings() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">Security Settings</h3>
             <div className="space-y-4">
               <div className="bg-green-50 border border-green-100 rounded-xl p-4">
-                <p className="text-sm font-medium text-green-800">âœ“ System is running securely</p>
+                <p className="text-sm font-medium text-green-800">✓ System is running securely</p>
                 <p className="text-xs text-green-600 mt-1">All connections are encrypted and data is stored locally</p>
               </div>
               <div className="grid grid-cols-2 gap-4">

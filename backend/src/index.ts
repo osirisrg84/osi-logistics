@@ -307,6 +307,24 @@ httpServer.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`📊 API available at http://localhost:${PORT}/api`);
   console.log(`🔌 Socket.io ready for real-time tracking\n`);
   startSimulation();
+  startKeepAlive();
 });
+
+function startKeepAlive(): void {
+  if (process.env.NODE_ENV !== 'production') return;
+
+  // Render free tier sleeps after 15 min inactivity — self-ping every 14 min
+  const selfUrl = `${process.env.RENDER_EXTERNAL_URL || 'https://osi-logistics-backend.onrender.com'}/api/health`;
+  console.log(`💓 Keep-alive enabled → pinging ${selfUrl} every 14 min`);
+
+  setInterval(async () => {
+    try {
+      const res = await fetch(selfUrl);
+      if (res.ok) console.log(`💓 Keep-alive ping OK (${new Date().toISOString()})`);
+    } catch {
+      // silently ignore — next ping will retry
+    }
+  }, 14 * 60 * 1000);
+}
 
 export { io };

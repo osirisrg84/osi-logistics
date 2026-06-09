@@ -145,7 +145,7 @@ function CreateOrderModal({ onClose, onSave }: OrderModalProps) {
                 <input className="input" type="number" value={form.weight_kg} onChange={e => setForm({...form, weight_kg: e.target.value})} placeholder="0" min="0" />
               </div>
               <div>
-                <label className="label">Volume (mÂ³)</label>
+                <label className="label">Volume (m³)</label>
                 <input className="input" type="number" value={form.volume_m3} onChange={e => setForm({...form, volume_m3: e.target.value})} placeholder="0" min="0" />
               </div>
               <div>
@@ -222,7 +222,7 @@ function AssignModal({ order, drivers, trucks, onClose, onSave }: AssignModalPro
         <div className="p-6 space-y-4">
           <div className="bg-orange-50 rounded-xl p-3">
             <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{order.order_number}</p>
-            <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name} Â· {order.delivery_address}</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name} · {order.delivery_address}</p>
           </div>
 
           <div>
@@ -231,7 +231,7 @@ function AssignModal({ order, drivers, trucks, onClose, onSave }: AssignModalPro
               <option value="">Choose a driver...</option>
               {availableDrivers.map(d => (
                 <option key={d.id} value={d.id}>
-                  {d.name} Â· â˜…{d.rating.toFixed(1)} Â· {d.total_deliveries} trips
+                  {d.name} · ★{d.rating.toFixed(1)} · {d.total_deliveries} trips
                 </option>
               ))}
             </select>
@@ -243,7 +243,7 @@ function AssignModal({ order, drivers, trucks, onClose, onSave }: AssignModalPro
               <option value="">Choose a truck...</option>
               {availableTrucks.map(t => (
                 <option key={t.id} value={t.id}>
-                  {t.plate_number} Â· {t.make} {t.model} Â· {t.capacity_kg}kg
+                  {t.plate_number} · {t.make} {t.model} · {t.capacity_kg}kg
                 </option>
               ))}
             </select>
@@ -481,7 +481,7 @@ export default function Orders() {
       </div>
       <p className="text-xs text-gray-500 dark:text-slate-400">{total} orders total</p>
 
-      {/* Orders â€” cards on mobile, table on desktop */}
+      {/* Orders — cards on mobile, table on desktop */}
       {loading ? (
         <div className="text-center py-12 text-gray-400 dark:text-slate-500">Loading orders...</div>
       ) : orders.length === 0 ? (
@@ -546,7 +546,7 @@ export default function Orders() {
                     <tr key={order.id} className="table-row">
                       <td className="px-4 py-3">
                         <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{order.order_number}</p>
-                        <p className="text-xs text-gray-400 dark:text-slate-500">{order.weight_kg}kg Â· {order.distance_km}km</p>
+                        <p className="text-xs text-gray-400 dark:text-slate-500">{order.weight_kg}kg · {order.distance_km}km</p>
                       </td>
                       <td className="px-4 py-3">
                         <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{order.customer_name}</p>

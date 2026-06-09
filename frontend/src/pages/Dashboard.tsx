@@ -257,7 +257,7 @@ export default function Dashboard() {
                       />
                     </div>
                     <span className="text-xs text-gray-500 dark:text-slate-400">{driver.on_time_rate?.toFixed(0)}%</span>
-                    <span className="text-xs text-yellow-500">â˜… {driver.rating?.toFixed(1)}</span>
+                    <span className="text-xs text-yellow-500">★ {driver.rating?.toFixed(1)}</span>
                   </div>
                 </div>
               </div>
@@ -275,11 +275,11 @@ export default function Dashboard() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-900 dark:text-slate-100">
                     <span className="font-medium">{activity.order_number}</span>
-                    {' '}â€”{' '}
+                    {' '}—{' '}
                     <OrderStatusBadge status={activity.status as never} />
                   </p>
                   <p className="text-xs text-gray-500 mt-0.5 truncate">
-                    {activity.customer_name} Â· {activity.notes}
+                    {activity.customer_name} · {activity.notes}
                   </p>
                   <p className="text-xs text-gray-400 dark:text-slate-500">
                     {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}

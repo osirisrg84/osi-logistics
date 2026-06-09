@@ -80,7 +80,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   return (
     <header className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 px-4 md:px-6 py-3 flex items-center justify-between flex-shrink-0">
       <div className="flex items-center gap-3">
-        {/* Hamburger â€” mobile only */}
+        {/* Hamburger — mobile only */}
         <button
           onClick={onMenuClick}
           className="md:hidden p-2 -ml-1 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
@@ -96,7 +96,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        {/* Search â€” hidden on small screens */}
+        {/* Search — hidden on small screens */}
         <div className="relative hidden lg:block">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input

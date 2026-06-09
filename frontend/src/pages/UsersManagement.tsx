@@ -291,7 +291,7 @@ export default function UsersManagement() {
                           <span className="text-xs text-gray-600 dark:text-slate-400">{user.driver_name}</span>
                         </div>
                       ) : (
-                        <span className="text-xs text-gray-400 dark:text-slate-500">â€”</span>
+                        <span className="text-xs text-gray-400 dark:text-slate-500">—</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-500 dark:text-slate-400">

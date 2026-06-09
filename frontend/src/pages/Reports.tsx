@@ -117,7 +117,7 @@ export default function Reports() {
             <KpiCard title="Avg Order Value" value={`$${((kpis?.avg_order_value || 0)).toFixed(2)}`} sub="Per completed order" icon={Package} color="bg-blue-100 text-blue-600" />
             <KpiCard title="On-Time Rate" value={`${((kpis?.on_time_rate || 0)).toFixed(1)}%`} sub="Overall performance" icon={TrendingUp} color="bg-orange-100 text-orange-600" />
             <KpiCard title="Avg Delivery" value={`${((kpis?.avg_delivery_hours || 0)).toFixed(1)}h`} sub="Pickup to delivery" icon={Clock} color="bg-purple-100 text-purple-600" />
-            <KpiCard title="Customer Rating" value={`â˜… ${kpis?.customer_satisfaction?.toFixed(1) || '4.7'}`} sub="Average satisfaction" icon={Star} color="bg-yellow-100 text-yellow-600" />
+            <KpiCard title="Customer Rating" value={`★ ${kpis?.customer_satisfaction?.toFixed(1) || '4.7'}`} sub="Average satisfaction" icon={Star} color="bg-yellow-100 text-yellow-600" />
           </div>
 
           {/* Charts */}
@@ -252,7 +252,7 @@ export default function Reports() {
                       <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{driver.total_deliveries}</td>
                       <td className="px-4 py-3 text-sm text-blue-600 font-medium">{driver.orders_this_month}</td>
                       <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{(driver.on_time_rate || 0).toFixed(1)}%</td>
-                      <td className="px-4 py-3 text-sm text-yellow-500">â˜… {(driver.rating || 0).toFixed(1)}</td>
+                      <td className="px-4 py-3 text-sm text-yellow-500">★ {(driver.rating || 0).toFixed(1)}</td>
                       <td className="px-4 py-3 text-sm font-semibold text-green-600">${(driver.revenue_this_month || 0).toFixed(2)}</td>
                       <td className="px-4 py-3 text-sm text-gray-600 dark:text-slate-400">{(driver.avg_delivery_minutes || 0).toFixed(0)}</td>
                     </tr>
@@ -307,7 +307,7 @@ export default function Reports() {
                           <span className="text-xs text-gray-500 dark:text-slate-400">{truck.fuel_level}%</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-xs text-gray-600 dark:text-slate-400">{truck.current_driver || 'â€”'}</td>
+                      <td className="px-4 py-3 text-xs text-gray-600 dark:text-slate-400">{truck.current_driver || '—'}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -1,12 +1,13 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import {
   Package, MapPin, CheckCircle, Truck, Phone,
   Clock, Star, Navigation, LogOut, User, Activity,
-  Power, Coffee, AlertTriangle
+  Power, Coffee, AlertTriangle, Sun, Moon
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { ordersApi, driversApi } from '../services/api';
 import { Order, Driver, DriverStatus } from '../types';
 import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
@@ -24,7 +25,7 @@ L.Icon.Default.mergeOptions({
 const STATUS_FLOW: Record<string, { next: string; label: string; color: string }> = {
   assigned: { next: 'picked_up', label: 'Confirm Pickup', color: 'bg-blue-500 hover:bg-blue-600' },
   picked_up: { next: 'in_transit', label: 'Start Delivery', color: 'bg-purple-500 hover:bg-purple-600' },
-  in_transit: { next: 'delivered', label: 'Mark Delivered âœ“', color: 'bg-green-500 hover:bg-green-600' },
+  in_transit: { next: 'delivered', label: 'Mark Delivered ✓', color: 'bg-green-500 hover:bg-green-600' },
 };
 
 function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (id: string, status: string) => void }) {
@@ -39,7 +40,7 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm p-5 space-y-4">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -51,14 +52,14 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
         </div>
         <div className="text-right">
           <p className="text-lg font-bold text-green-600">${order.price.toFixed(2)}</p>
-          <p className="text-xs text-gray-400">{order.distance_km} km</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">{order.distance_km} km</p>
         </div>
       </div>
 
       {/* Customer */}
-      <div className="bg-gray-50 rounded-xl p-3">
+      <div className="bg-gray-50 dark:bg-slate-700 rounded-xl p-3">
         <p className="text-sm font-semibold text-gray-900 dark:text-white">{order.customer_name}</p>
-        <a href={`tel:${order.customer_phone}`} className="flex items-center gap-1 text-xs text-blue-600 mt-1 hover:text-blue-700">
+        <a href={`tel:${order.customer_phone}`} className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 mt-1 hover:text-blue-700 dark:hover:text-blue-300">
           <Phone className="w-3 h-3" /> {order.customer_phone}
         </a>
       </div>
@@ -66,47 +67,47 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
       {/* Route */}
       <div className="space-y-2">
         <div className="flex items-start gap-3">
-          <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-            <MapPin className="w-3 h-3 text-orange-600" />
+          <div className="w-6 h-6 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+            <MapPin className="w-3 h-3 text-orange-600 dark:text-orange-400" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase">Pickup</p>
-            <p className="text-sm text-gray-700">{order.pickup_address}</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">Pickup</p>
+            <p className="text-sm text-gray-700 dark:text-slate-300">{order.pickup_address}</p>
           </div>
         </div>
-        <div className="ml-3 w-0.5 h-4 bg-gray-200" />
+        <div className="ml-3 w-0.5 h-4 bg-gray-200 dark:bg-slate-600" />
         <div className="flex items-start gap-3">
-          <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-            <MapPin className="w-3 h-3 text-green-600" />
+          <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+            <MapPin className="w-3 h-3 text-green-600 dark:text-green-400" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase">Delivery</p>
-            <p className="text-sm text-gray-700">{order.delivery_address}</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">Delivery</p>
+            <p className="text-sm text-gray-700 dark:text-slate-300">{order.delivery_address}</p>
           </div>
         </div>
       </div>
 
       {/* Details */}
       <div className="grid grid-cols-3 gap-2">
-        <div className="bg-gray-50 rounded-lg p-2 text-center">
-          <p className="text-xs text-gray-400">Weight</p>
+        <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
+          <p className="text-xs text-gray-400 dark:text-slate-500">Weight</p>
           <p className="text-sm font-semibold text-gray-900 dark:text-white">{order.weight_kg} kg</p>
         </div>
-        <div className="bg-gray-50 rounded-lg p-2 text-center">
-          <p className="text-xs text-gray-400">Created</p>
+        <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
+          <p className="text-xs text-gray-400 dark:text-slate-500">Created</p>
           <p className="text-xs font-medium text-gray-900 dark:text-slate-100">{formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}</p>
         </div>
-        <div className="bg-gray-50 rounded-lg p-2 text-center">
-          <p className="text-xs text-gray-400">ETA</p>
+        <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
+          <p className="text-xs text-gray-400 dark:text-slate-500">ETA</p>
           <p className="text-xs font-medium text-gray-900 dark:text-slate-100">
-            {order.estimated_delivery ? format(new Date(order.estimated_delivery), 'HH:mm') : 'â€”'}
+            {order.estimated_delivery ? format(new Date(order.estimated_delivery), 'HH:mm') : '—'}
           </p>
         </div>
       </div>
 
       {/* Description */}
       {order.description && (
-        <p className="text-xs text-gray-500 bg-blue-50 rounded-lg p-2">{order.description}</p>
+        <p className="text-xs text-gray-500 dark:text-slate-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">{order.description}</p>
       )}
 
       {/* Action button */}
@@ -128,7 +129,7 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
       )}
 
       {order.status === 'delivered' && (
-        <div className="flex items-center justify-center gap-2 text-green-600 bg-green-50 rounded-xl p-3">
+        <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-xl p-3">
           <CheckCircle className="w-5 h-5" />
           <span className="font-semibold text-sm">Delivered {order.delivered_at ? format(new Date(order.delivered_at), 'HH:mm') : ''}</span>
         </div>
@@ -138,14 +139,15 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
 }
 
 const STATUS_CONFIG: Record<DriverStatus, { label: string; dot: string; bg: string; text: string }> = {
-  available: { label: 'Online',    dot: 'bg-green-400',  bg: 'bg-green-50',  text: 'text-green-700' },
-  busy:      { label: 'On Delivery', dot: 'bg-orange-400', bg: 'bg-orange-50', text: 'text-orange-700' },
-  on_break:  { label: 'On Break',  dot: 'bg-yellow-400', bg: 'bg-yellow-50', text: 'text-yellow-700' },
-  offline:   { label: 'Offline',   dot: 'bg-gray-400',   bg: 'bg-gray-100',  text: 'text-gray-500' },
+  available: { label: 'Online',      dot: 'bg-green-400',  bg: 'bg-green-50 dark:bg-green-900/30',   text: 'text-green-700 dark:text-green-400' },
+  busy:      { label: 'On Delivery', dot: 'bg-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/30', text: 'text-orange-700 dark:text-orange-400' },
+  on_break:  { label: 'On Break',    dot: 'bg-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-400' },
+  offline:   { label: 'Offline',     dot: 'bg-gray-400',   bg: 'bg-gray-100 dark:bg-slate-700',      text: 'text-gray-500 dark:text-slate-400' },
 };
 
 export default function DriverPortal() {
   const { user, driverProfile, logout } = useAuth();
+  const { dark, toggle: toggleTheme } = useTheme();
   const driver = driverProfile as Driver | null;
 
   const [driverStatus, setDriverStatus] = useState<DriverStatus>(
@@ -179,7 +181,6 @@ export default function DriverPortal() {
   }, [user?.driver_id]);
 
   useEffect(() => {
-    // Sync status from driver profile
     if (driver?.status) setDriverStatus(driver.status as DriverStatus);
   }, [driver?.status]);
 
@@ -213,7 +214,7 @@ export default function DriverPortal() {
   const cfg = STATUS_CONFIG[driverStatus];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       {/* Header */}
       <header className="bg-slate-900 text-white px-4 py-4">
         <div className="max-w-lg mx-auto flex items-center justify-between">
@@ -222,7 +223,6 @@ export default function DriverPortal() {
               driverStatus === 'offline' ? 'bg-slate-600' : 'bg-orange-500'
             }`}>
               {driver?.avatar || user?.name?.charAt(0) || 'D'}
-              {/* Live status dot */}
               <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-900 ${cfg.dot}`} />
             </div>
             <div>
@@ -234,22 +234,26 @@ export default function DriverPortal() {
                   driverStatus === 'on_break' ? 'text-yellow-400' : 'text-slate-500'
                 }`}>{cfg.label}</span>
                 {driver?.plate_number && (
-                  <span className="text-xs text-slate-500">Â· {driver.make} {driver.model}</span>
+                  <span className="text-xs text-slate-500">· {driver.make} {driver.model}</span>
                 )}
               </div>
             </div>
           </div>
-          <button onClick={logout} className="p-2 hover:bg-slate-800 rounded-lg transition-colors">
-            <LogOut className="w-4 h-4 text-slate-400" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button onClick={toggleTheme} className="p-2 hover:bg-slate-800 rounded-lg transition-colors" title={dark ? 'Light mode' : 'Dark mode'}>
+              {dark ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-slate-400" />}
+            </button>
+            <button onClick={logout} className="p-2 hover:bg-slate-800 rounded-lg transition-colors">
+              <LogOut className="w-4 h-4 text-slate-400" />
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* â”€â”€ ONLINE / OFFLINE BUTTON â”€â”€ */}
+      {/* Online / Offline controls */}
       <div className="bg-slate-800 px-4 py-3 border-b border-slate-700">
         <div className="max-w-lg mx-auto">
           {driverStatus === 'offline' ? (
-            /* Go Online */
             <button
               onClick={() => setStatus('available')}
               disabled={togglingStatus}
@@ -262,9 +266,7 @@ export default function DriverPortal() {
               <span className="text-base">Go Online</span>
             </button>
           ) : (
-            /* Online controls */
             <div className="space-y-2">
-              {/* Status indicator */}
               <div className={`flex items-center justify-between ${cfg.bg} rounded-xl px-4 py-2.5`}>
                 <div className="flex items-center gap-2">
                   <span className={`w-2 h-2 rounded-full ${cfg.dot} ${driverStatus === 'available' ? 'pulse-dot' : ''}`} />
@@ -280,7 +282,6 @@ export default function DriverPortal() {
                 </span>
               </div>
 
-              {/* Action buttons */}
               <div className="grid grid-cols-2 gap-2">
                 {driverStatus !== 'on_break' && (
                   <button
@@ -319,19 +320,19 @@ export default function DriverPortal() {
       </div>
 
       {/* Stats bar */}
-      <div className="bg-white border-b border-gray-100 px-4 py-3">
+      <div className="bg-white dark:bg-slate-800 border-b border-gray-100 dark:border-slate-700 px-4 py-3">
         <div className="max-w-lg mx-auto grid grid-cols-3 gap-3">
           <div className="text-center">
             <p className="text-xl font-bold text-orange-600">{activeOrders.length}</p>
-            <p className="text-xs text-gray-500">Active Orders</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">Active Orders</p>
           </div>
           <div className="text-center">
             <p className="text-xl font-bold text-green-600">${todayRevenue.toFixed(0)}</p>
-            <p className="text-xs text-gray-500">Today's Revenue</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">Today's Revenue</p>
           </div>
           <div className="text-center">
-            <p className="text-xl font-bold text-yellow-500">â˜… {driver?.rating?.toFixed(1) || 'â€”'}</p>
-            <p className="text-xs text-gray-500">My Rating</p>
+            <p className="text-xl font-bold text-yellow-500">★ {driver?.rating?.toFixed(1) || '—'}</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">My Rating</p>
           </div>
         </div>
       </div>
@@ -339,11 +340,11 @@ export default function DriverPortal() {
       {/* Offline state */}
       {driverStatus === 'offline' && (
         <div className="max-w-lg mx-auto px-4 py-12 text-center">
-          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
-            <Power className="w-9 h-9 text-gray-300" />
+          <div className="w-20 h-20 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-5">
+            <Power className="w-9 h-9 text-gray-300 dark:text-slate-500" />
           </div>
-          <h3 className="text-lg font-bold text-gray-700 mb-2">You're Offline</h3>
-          <p className="text-sm text-gray-400 mb-6">
+          <h3 className="text-lg font-bold text-gray-700 dark:text-slate-200 mb-2">You're Offline</h3>
+          <p className="text-sm text-gray-400 dark:text-slate-400 mb-6">
             Go online to start receiving and managing deliveries.
           </p>
           <button
@@ -360,9 +361,9 @@ export default function DriverPortal() {
         </div>
       )}
 
-      {/* Tabs + Content â€” only shown when not offline */}
+      {/* Tabs + Content */}
       {driverStatus !== 'offline' && <>
-      <div className="bg-white border-b border-gray-100">
+      <div className="bg-white dark:bg-slate-800 border-b border-gray-100 dark:border-slate-700">
         <div className="max-w-lg mx-auto flex">
           {[
             { id: 'active', label: `Active (${activeOrders.length})`, icon: Activity },
@@ -371,7 +372,9 @@ export default function DriverPortal() {
           ].map(({ id, label, icon: Icon }) => (
             <button key={id} onClick={() => setTab(id as typeof tab)}
               className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-medium border-b-2 transition-colors ${
-                tab === id ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                tab === id
+                  ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+                  : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300'
               }`}>
               <Icon className="w-3.5 h-3.5" />
               {label}
@@ -379,16 +382,17 @@ export default function DriverPortal() {
           ))}
         </div>
       </div>
+
       <div className="max-w-lg mx-auto px-4 py-5">
         {tab === 'active' && (
           <div className="space-y-4">
             {loading ? (
-              <div className="text-center py-12 text-gray-400">Loading orders...</div>
+              <div className="text-center py-12 text-gray-400 dark:text-slate-500">Loading orders...</div>
             ) : activeOrders.length === 0 ? (
               <div className="text-center py-16">
-                <Package className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-                <p className="text-gray-500 font-medium">No active orders</p>
-                <p className="text-gray-400 text-sm mt-1">New orders will appear here when assigned</p>
+                <Package className="w-12 h-12 text-gray-200 dark:text-slate-600 mx-auto mb-3" />
+                <p className="text-gray-500 dark:text-slate-400 font-medium">No active orders</p>
+                <p className="text-gray-400 dark:text-slate-500 text-sm mt-1">New orders will appear here when assigned</p>
               </div>
             ) : (
               activeOrders.map(order => (
@@ -402,21 +406,21 @@ export default function DriverPortal() {
           <div className="space-y-3">
             {deliveredToday.length === 0 ? (
               <div className="text-center py-16">
-                <CheckCircle className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-                <p className="text-gray-500 font-medium">No deliveries yet today</p>
+                <CheckCircle className="w-12 h-12 text-gray-200 dark:text-slate-600 mx-auto mb-3" />
+                <p className="text-gray-500 dark:text-slate-400 font-medium">No deliveries yet today</p>
               </div>
             ) : (
               deliveredToday.map(order => (
-                <div key={order.id} className="bg-white rounded-xl border border-gray-100 p-4 flex items-center justify-between">
+                <div key={order.id} className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-4 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-gray-900 dark:text-white">{order.order_number}</p>
-                    <p className="text-xs text-gray-500">{order.customer_name}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{order.delivery_address}</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name}</p>
+                    <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{order.delivery_address}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold text-green-600">${order.price.toFixed(2)}</p>
                     {order.delivered_at && (
-                      <p className="text-xs text-gray-400">{format(new Date(order.delivered_at), 'HH:mm')}</p>
+                      <p className="text-xs text-gray-400 dark:text-slate-500">{format(new Date(order.delivered_at), 'HH:mm')}</p>
                     )}
                     <div className="flex items-center justify-end gap-1 mt-1">
                       <CheckCircle className="w-3 h-3 text-green-500" />
@@ -430,14 +434,14 @@ export default function DriverPortal() {
         )}
 
         {tab === 'map' && driver && (
-          <div className="rounded-2xl overflow-hidden h-96 shadow-sm border border-gray-100">
+          <div className="rounded-2xl overflow-hidden h-96 shadow-sm border border-gray-100 dark:border-slate-700">
             <MapContainer
               center={[driver.current_lat || 25.7617, driver.current_lng || -80.1918]}
               zoom={13}
               style={{ height: '100%', width: '100%' }}
             >
               <TileLayer
-                attribution='Â© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               {driver && (
@@ -467,7 +471,7 @@ export default function DriverPortal() {
 
         {/* Driver profile card */}
         {driver && (
-          <div className="mt-5 bg-white rounded-2xl border border-gray-100 p-5">
+          <div className="mt-5 bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
             <div className="flex items-center gap-3 mb-4">
               <User className="w-4 h-4 text-orange-500" />
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white">My Profile</h3>
@@ -477,12 +481,12 @@ export default function DriverPortal() {
                 { label: 'Total Deliveries', value: driver.total_deliveries, icon: Package },
                 { label: 'On-Time Rate', value: `${driver.on_time_rate.toFixed(0)}%`, icon: Clock },
                 { label: 'License', value: driver.license_number, icon: Truck },
-                { label: 'Rating', value: `â˜… ${driver.rating.toFixed(1)}`, icon: Star },
+                { label: 'Rating', value: `★ ${driver.rating.toFixed(1)}`, icon: Star },
               ].map(({ label, value, icon: Icon }) => (
-                <div key={label} className="bg-gray-50 rounded-xl p-3">
+                <div key={label} className="bg-gray-50 dark:bg-slate-700 rounded-xl p-3">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <Icon className="w-3 h-3 text-gray-400" />
-                    <p className="text-xs text-gray-500">{label}</p>
+                    <Icon className="w-3 h-3 text-gray-400 dark:text-slate-500" />
+                    <p className="text-xs text-gray-500 dark:text-slate-400">{label}</p>
                   </div>
                   <p className="text-sm font-bold text-gray-900 dark:text-white">{value}</p>
                 </div>
@@ -495,4 +499,3 @@ export default function DriverPortal() {
     </div>
   );
 }
-
