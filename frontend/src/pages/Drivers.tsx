@@ -182,12 +182,16 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
           )}
 
           {/* Lugares favoritos */}
-          {favorites.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <MapPin className="w-3.5 h-3.5 text-orange-500" />
-                <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 uppercase tracking-wide">Lugares favoritos del driver</p>
-              </div>
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <MapPin className="w-3.5 h-3.5 text-orange-500" />
+              <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 uppercase tracking-wide">Lugares favoritos del driver</p>
+            </div>
+            {favorites.length === 0 ? (
+              <p className="text-xs text-gray-400 dark:text-slate-500 text-center py-3 bg-gray-50 dark:bg-slate-900 rounded-xl">
+                Sin lugares guardados
+              </p>
+            ) : (
               <div className="space-y-2">
                 {favorites.map(fav => (
                   <div key={fav.id} className="flex items-center gap-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl px-3 py-2.5">
@@ -199,8 +203,8 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Recent orders */}
           {recentOrders.length > 0 && (

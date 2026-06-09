@@ -170,6 +170,26 @@ export function initDatabase(): void {
   seedDatabase(db);
   // 2. Then seed users (needs drivers to already exist for driver account)
   seedUsers(db);
+  // 3. Seed sample favorites (safe to run every time — checks if empty first)
+  seedFavorites(db);
+}
+
+function seedFavorites(db: DatabaseSync): void {
+  const count = (db.prepare('SELECT COUNT(*) as c FROM driver_favorites').get() as { c: number }).c;
+  if (count > 0) return;
+
+  const carlos = db.prepare(
+    "SELECT id FROM drivers WHERE email = 'carlos.r@osilogistics.com' LIMIT 1"
+  ).get() as { id: string } | undefined;
+
+  if (!carlos) return;
+
+  const ins = db.prepare(
+    'INSERT INTO driver_favorites (id, driver_id, name, address, type) VALUES (?, ?, ?, ?, ?)'
+  );
+  ins.run(uuidv4(), carlos.id, 'Home',     'Fort Myers, FL 33907',     'home');
+  ins.run(uuidv4(), carlos.id, 'Michigan', 'Detroit, MI',              'frequent');
+  ins.run(uuidv4(), carlos.id, 'OSI Warehouse', '1200 NW 22nd Ave, Miami, FL 33125', 'work');
 }
 
 function seedUsers(db: DatabaseSync): void {
