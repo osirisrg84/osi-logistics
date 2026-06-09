@@ -148,21 +148,32 @@ export default function DriverPortal() {
   const [showAddFav, setShowAddFav] = useState(false);
   const [newFav, setNewFav] = useState({ name: '', address: '', type: 'home' as Favorite['type'] });
   const [savingFav, setSavingFav] = useState(false);
+  const [favError, setFavError] = useState('');
+
+  // Use driver.id as the primary ID — it comes directly from the loaded driverProfile
+  const driverId = driver?.id ?? user?.driver_id ?? '';
 
   const addFavorite = async () => {
-    if (!newFav.name.trim() || !newFav.address.trim() || !user?.driver_id) return;
+    if (!newFav.name.trim() || !newFav.address.trim() || !driverId) return;
     setSavingFav(true);
+    setFavError('');
     try {
-      const { data } = await driversApi.addFavorite(user.driver_id, newFav);
+      const { data } = await driversApi.addFavorite(driverId, newFav);
       setFavorites(prev => [...prev, data as Favorite]);
       setNewFav({ name: '', address: '', type: 'home' });
       setShowAddFav(false);
-    } catch { } finally { setSavingFav(false); }
+    } catch {
+      setFavError('No se pudo guardar. Intenta de nuevo.');
+    } finally {
+      setSavingFav(false);
+    }
   };
   const deleteFavorite = async (id: string) => {
-    if (!user?.driver_id) return;
-    await driversApi.deleteFavorite(user.driver_id, id);
-    setFavorites(prev => prev.filter(f => f.id !== id));
+    if (!driverId) return;
+    try {
+      await driversApi.deleteFavorite(driverId, id);
+      setFavorites(prev => prev.filter(f => f.id !== id));
+    } catch {}
   };
 
   const fetchOrders = useCallback(async () => {
@@ -188,8 +199,8 @@ export default function DriverPortal() {
 
   useEffect(() => {
     fetchOrders();
-    if (user?.driver_id) {
-      driversApi.getFavorites(user.driver_id)
+    if (driverId) {
+      driversApi.getFavorites(driverId)
         .then(r => setFavorites(r.data as Favorite[]))
         .catch(() => {});
     }
@@ -549,8 +560,11 @@ export default function DriverPortal() {
                   onChange={e => setNewFav(f => ({ ...f, address: e.target.value }))}
                   className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-400/40"
                 />
+                {favError && (
+                  <p className="text-xs text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2">{favError}</p>
+                )}
                 <div className="flex gap-2">
-                  <button onClick={() => { setShowAddFav(false); setNewFav({ name: '', address: '', type: 'home' }); }}
+                  <button onClick={() => { setShowAddFav(false); setFavError(''); setNewFav({ name: '', address: '', type: 'home' }); }}
                     className="flex-1 py-2 rounded-xl text-sm text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">
                     Cancelar
                   </button>
