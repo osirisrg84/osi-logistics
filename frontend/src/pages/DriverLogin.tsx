@@ -40,14 +40,13 @@ export default function DriverLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col">
-      {/* Top bar */}
-      <div className="px-5 pt-5">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> Back
-        </Link>
-      </div>
-
       <div className="flex-1 flex flex-col items-center justify-center px-5 pb-10">
+        {/* Back link — aligned with content */}
+        <div className="w-full max-w-md mb-2">
+          <Link to="/" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to portal selection
+          </Link>
+        </div>
         {/* Hero */}
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-blue-500 rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-2xl shadow-blue-500/30">
