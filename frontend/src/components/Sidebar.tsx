@@ -5,14 +5,17 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-const DISPATCHER_NAV = [
-  { to: '/dashboard',    icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/orders',       icon: Package,         label: 'Orders' },
-  { to: '/tracking',     icon: MapPin,          label: 'Live Tracking' },
-  { to: '/drivers',      icon: Users,           label: 'Drivers' },
-  { to: '/fleet',        icon: Truck,           label: 'Fleet' },
-  { to: '/reports',      icon: BarChart3,       label: 'Reports' },
-  { to: '/commissions',  icon: TrendingUp,      label: 'Mis Comisiones' },
+const SHARED_NAV = [
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/orders',    icon: Package,         label: 'Orders' },
+  { to: '/tracking',  icon: MapPin,          label: 'Live Tracking' },
+  { to: '/drivers',   icon: Users,           label: 'Drivers' },
+  { to: '/fleet',     icon: Truck,           label: 'Fleet' },
+  { to: '/reports',   icon: BarChart3,       label: 'Reports' },
+];
+
+const DISPATCHER_ONLY_NAV = [
+  { to: '/commissions', icon: TrendingUp, label: 'Mis Comisiones' },
 ];
 
 const ADMIN_ONLY_NAV = [
@@ -32,7 +35,7 @@ interface SidebarProps {
 export default function Sidebar({ onClose }: SidebarProps) {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
-  const topNav = DISPATCHER_NAV;
+  const topNav = isAdmin ? SHARED_NAV : [...SHARED_NAV, ...DISPATCHER_ONLY_NAV];
   const bottomNav = isAdmin ? ADMIN_ONLY_NAV : DISPATCHER_BOTTOM_NAV;
   const roleBadgeColor = isAdmin ? 'bg-purple-600' : 'bg-orange-500';
 
