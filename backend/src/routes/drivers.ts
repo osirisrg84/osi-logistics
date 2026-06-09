@@ -162,4 +162,44 @@ router.delete('/:id', (req: Request, res: Response) => {
   res.json({ success: true });
 });
 
+// ── Favorites ─────────────────────────────────────────────────────────────
+
+router.get('/:id/favorites', (req: Request, res: Response) => {
+  const db = getDb();
+  const favs = db.prepare(
+    'SELECT * FROM driver_favorites WHERE driver_id = ? ORDER BY created_at ASC'
+  ).all(req.params.id);
+  res.json(favs);
+});
+
+router.post('/:id/favorites', (req: Request, res: Response) => {
+  const db = getDb();
+  const { name, address, type = 'other' } = req.body;
+  if (!name || !address) return res.status(400).json({ error: 'name and address required' });
+
+  const count = (db.prepare(
+    'SELECT COUNT(*) as c FROM driver_favorites WHERE driver_id = ?'
+  ).get(req.params.id) as { c: number }).c;
+  if (count >= 5) return res.status(400).json({ error: 'Maximum 5 favorites per driver' });
+
+  const id = uuidv4();
+  db.prepare(
+    'INSERT INTO driver_favorites (id, driver_id, name, address, type) VALUES (?, ?, ?, ?, ?)'
+  ).run(id, req.params.id, name, address, type);
+
+  const fav = db.prepare('SELECT * FROM driver_favorites WHERE id = ?').get(id);
+  res.status(201).json(fav);
+});
+
+router.delete('/:id/favorites/:favId', (req: Request, res: Response) => {
+  const db = getDb();
+  const fav = db.prepare(
+    'SELECT id FROM driver_favorites WHERE id = ? AND driver_id = ?'
+  ).get(req.params.favId, req.params.id);
+  if (!fav) return res.status(404).json({ error: 'Favorite not found' });
+
+  db.prepare('DELETE FROM driver_favorites WHERE id = ?').run(req.params.favId);
+  res.json({ success: true });
+});
+
 export default router;

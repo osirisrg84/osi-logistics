@@ -101,11 +101,16 @@ interface DriverDetailProps {
   onClose: () => void;
 }
 
+interface Favorite { id: string; name: string; address: string; type: string; }
+const FAV_ICONS: Record<string, string> = { home: '🏠', work: '🏢', frequent: '⭐', other: '📍' };
+
 function DriverDetail({ driverId, onClose }: DriverDetailProps) {
   const [data, setData] = useState<{ driver: Driver; recentOrders: unknown[]; } | null>(null);
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
 
   useEffect(() => {
     driversApi.getById(driverId).then(r => setData(r.data));
+    driversApi.getFavorites(driverId).then(r => setFavorites(r.data as Favorite[])).catch(() => {});
   }, [driverId]);
 
   if (!data) return null;
@@ -173,6 +178,27 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
               <p className="text-sm font-medium text-gray-900 dark:text-slate-100">
                 {(driver as Driver & { plate_number?: string; make?: string; model?: string }).plate_number} · {(driver as Driver & { make?: string; model?: string }).make} {(driver as Driver & { make?: string; model?: string }).model}
               </p>
+            </div>
+          )}
+
+          {/* Lugares favoritos */}
+          {favorites.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <MapPin className="w-3.5 h-3.5 text-orange-500" />
+                <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 uppercase tracking-wide">Lugares favoritos del driver</p>
+              </div>
+              <div className="space-y-2">
+                {favorites.map(fav => (
+                  <div key={fav.id} className="flex items-center gap-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl px-3 py-2.5">
+                    <span className="text-base flex-shrink-0">{FAV_ICONS[fav.type] || '📍'}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{fav.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{fav.address}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

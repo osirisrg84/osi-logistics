@@ -59,6 +59,9 @@ export const driversApi = {
   update: (id: string, data: unknown) => api.put(`/drivers/${id}`, data),
   updateLocation: (id: string, data: unknown) => api.post(`/drivers/${id}/location`, data),
   delete: (id: string) => api.delete(`/drivers/${id}`),
+  getFavorites: (id: string) => api.get(`/drivers/${id}/favorites`),
+  addFavorite: (id: string, data: { name: string; address: string; type: string }) => api.post(`/drivers/${id}/favorites`, data),
+  deleteFavorite: (driverId: string, favId: string) => api.delete(`/drivers/${driverId}/favorites/${favId}`),
 };
 
 export const trucksApi = {

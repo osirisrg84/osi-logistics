@@ -139,30 +139,31 @@ export default function DriverPortal() {
   // ── Favorites ────────────────────────────────────────────
   interface Favorite { id: string; name: string; address: string; type: 'home' | 'work' | 'frequent' | 'other'; }
   const FAV_PRESETS = [
-    { type: 'home'     as const, label: 'Casa',           icon: '🏠' },
+    { type: 'home'     as const, label: 'Casa',            icon: '🏠' },
     { type: 'work'     as const, label: 'Zona de trabajo', icon: '🏢' },
     { type: 'frequent' as const, label: 'Lugar frecuente', icon: '⭐' },
     { type: 'other'    as const, label: 'Otro',            icon: '📍' },
   ];
-  const storageKey = `osi_driver_favs_${driver?.id || 'default'}`;
-  const [favorites, setFavorites] = useState<Favorite[]>(() => {
-    try { return JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch { return []; }
-  });
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [showAddFav, setShowAddFav] = useState(false);
   const [newFav, setNewFav] = useState({ name: '', address: '', type: 'home' as Favorite['type'] });
+  const [savingFav, setSavingFav] = useState(false);
 
-  const saveFavorites = (updated: Favorite[]) => {
-    setFavorites(updated);
-    localStorage.setItem(storageKey, JSON.stringify(updated));
+  const addFavorite = async () => {
+    if (!newFav.name.trim() || !newFav.address.trim() || !user?.driver_id) return;
+    setSavingFav(true);
+    try {
+      const { data } = await driversApi.addFavorite(user.driver_id, newFav);
+      setFavorites(prev => [...prev, data as Favorite]);
+      setNewFav({ name: '', address: '', type: 'home' });
+      setShowAddFav(false);
+    } catch { } finally { setSavingFav(false); }
   };
-  const addFavorite = () => {
-    if (!newFav.name.trim() || !newFav.address.trim()) return;
-    const fav: Favorite = { id: Date.now().toString(), ...newFav };
-    saveFavorites([...favorites, fav]);
-    setNewFav({ name: '', address: '', type: 'home' });
-    setShowAddFav(false);
+  const deleteFavorite = async (id: string) => {
+    if (!user?.driver_id) return;
+    await driversApi.deleteFavorite(user.driver_id, id);
+    setFavorites(prev => prev.filter(f => f.id !== id));
   };
-  const deleteFavorite = (id: string) => saveFavorites(favorites.filter(f => f.id !== id));
 
   const fetchOrders = useCallback(async () => {
     if (!user?.driver_id) return;
@@ -187,11 +188,16 @@ export default function DriverPortal() {
 
   useEffect(() => {
     fetchOrders();
+    if (user?.driver_id) {
+      driversApi.getFavorites(user.driver_id)
+        .then(r => setFavorites(r.data as Favorite[]))
+        .catch(() => {});
+    }
     const socket = getSocket();
     socket.emit('subscribe_orders');
     socket.on('order_updated', () => fetchOrders());
     return () => { socket.off('order_updated'); };
-  }, [fetchOrders]);
+  }, [fetchOrders, user?.driver_id]);
 
   const setStatus = async (newStatus: DriverStatus) => {
     if (!user?.driver_id || togglingStatus) return;
@@ -548,9 +554,12 @@ export default function DriverPortal() {
                     className="flex-1 py-2 rounded-xl text-sm text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">
                     Cancelar
                   </button>
-                  <button onClick={addFavorite} disabled={!newFav.name.trim() || !newFav.address.trim()}
+                  <button onClick={addFavorite} disabled={!newFav.name.trim() || !newFav.address.trim() || savingFav}
                     className="flex-1 py-2 rounded-xl text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5">
-                    <Plus className="w-4 h-4" /> Guardar
+                    {savingFav
+                      ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      : <><Plus className="w-4 h-4" /> Guardar</>
+                    }
                   </button>
                 </div>
               </div>

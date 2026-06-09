@@ -154,6 +154,16 @@ export function initDatabase(): void {
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
+
+    CREATE TABLE IF NOT EXISTS driver_favorites (
+      id TEXT PRIMARY KEY,
+      driver_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      address TEXT NOT NULL,
+      type TEXT NOT NULL DEFAULT 'other',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (driver_id) REFERENCES drivers(id) ON DELETE CASCADE
+    );
   `);
 
   // 1. Seed demo data first (creates drivers)
