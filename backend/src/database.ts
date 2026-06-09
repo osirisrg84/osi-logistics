@@ -155,6 +155,24 @@ export function initDatabase(): void {
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
 
+    CREATE TABLE IF NOT EXISTS commissions (
+      id TEXT PRIMARY KEY,
+      order_id TEXT NOT NULL UNIQUE,
+      order_number TEXT NOT NULL,
+      driver_id TEXT NOT NULL,
+      driver_name TEXT NOT NULL,
+      dispatcher_user_id TEXT,
+      dispatcher_name TEXT,
+      order_price REAL NOT NULL,
+      driver_charge REAL NOT NULL,
+      dispatcher_pay REAL NOT NULL,
+      net_osi REAL NOT NULL,
+      delivery_date TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      settled_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE TABLE IF NOT EXISTS driver_favorites (
       id TEXT PRIMARY KEY,
       driver_id TEXT NOT NULL,
@@ -166,12 +184,74 @@ export function initDatabase(): void {
     );
   `);
 
+  // Migrate: add dispatcher_user_id to orders if not present
+  const orderCols = db.prepare('PRAGMA table_info(orders)').all() as Array<{ name: string }>;
+  if (!orderCols.some(c => c.name === 'dispatcher_user_id')) {
+    db.exec('ALTER TABLE orders ADD COLUMN dispatcher_user_id TEXT');
+  }
+
   // 1. Seed demo data first (creates drivers)
   seedDatabase(db);
   // 2. Then seed users (needs drivers to already exist for driver account)
   seedUsers(db);
   // 3. Seed sample favorites (safe to run every time — checks if empty first)
   seedFavorites(db);
+  // 4. Generate commissions for all existing delivered orders
+  initCommissions(db);
+}
+
+export function createCommission(
+  orderId: string, orderNumber: string, driverId: string, driverName: string,
+  dispatcherUserId: string | null, dispatcherName: string | null,
+  orderPrice: number, deliveryDate: string | null
+): void {
+  const db = getDb();
+  const existing = db.prepare('SELECT id FROM commissions WHERE order_id = ?').get(orderId);
+  if (existing) return;
+  const driverCharge   = Math.round(orderPrice * 0.08 * 100) / 100;
+  const dispatcherPay  = Math.round(orderPrice * 0.05 * 100) / 100;
+  const netOsi         = Math.round((driverCharge - dispatcherPay) * 100) / 100;
+  db.prepare(`
+    INSERT INTO commissions
+      (id, order_id, order_number, driver_id, driver_name, dispatcher_user_id, dispatcher_name,
+       order_price, driver_charge, dispatcher_pay, net_osi, delivery_date)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(uuidv4(), orderId, orderNumber, driverId, driverName,
+    dispatcherUserId, dispatcherName, orderPrice, driverCharge, dispatcherPay, netOsi, deliveryDate);
+}
+
+function initCommissions(db: DatabaseSync): void {
+  const delivered = db.prepare(`
+    SELECT o.id, o.order_number, o.driver_id, o.price, o.delivered_at, o.dispatcher_user_id,
+           d.name as driver_name,
+           u.name as dispatcher_name
+    FROM orders o
+    JOIN drivers d ON o.driver_id = d.id
+    LEFT JOIN users u ON o.dispatcher_user_id = u.id
+    WHERE o.status = 'delivered' AND o.price > 0
+      AND o.id NOT IN (SELECT order_id FROM commissions)
+  `).all() as Array<{
+    id: string; order_number: string; driver_id: string; price: number;
+    delivered_at: string | null; dispatcher_user_id: string | null;
+    driver_name: string; dispatcher_name: string | null;
+  }>;
+
+  const ins = db.prepare(`
+    INSERT OR IGNORE INTO commissions
+      (id, order_id, order_number, driver_id, driver_name, dispatcher_user_id, dispatcher_name,
+       order_price, driver_charge, dispatcher_pay, net_osi, delivery_date)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  for (const o of delivered) {
+    const driverCharge  = Math.round(o.price * 0.08 * 100) / 100;
+    const dispPay       = Math.round(o.price * 0.05 * 100) / 100;
+    const netOsi        = Math.round((driverCharge - dispPay) * 100) / 100;
+    ins.run(uuidv4(), o.id, o.order_number, o.driver_id, o.driver_name,
+      o.dispatcher_user_id || null, o.dispatcher_name || null,
+      o.price, driverCharge, dispPay, netOsi, o.delivered_at);
+  }
+  if (delivered.length > 0) console.log(`   💰 ${delivered.length} commissions generated`);
 }
 
 function seedFavorites(db: DatabaseSync): void {

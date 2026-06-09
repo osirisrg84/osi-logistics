@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { ordersApi, driversApi } from '../services/api';
+import { ordersApi, driversApi, billingApi } from '../services/api';
 import { Order, Driver, DriverStatus } from '../types';
 import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -176,6 +176,15 @@ export default function DriverPortal() {
     } catch {}
   };
 
+  // ── Driver billing ────────────────────────────────────────
+  interface DriverBillingRow {
+    id: string; order_number: string; order_price: number;
+    driver_charge: number; delivery_date: string | null; status: 'pending' | 'settled';
+  }
+  interface DriverBillingSummary { total_charged: number; settled: number; pending: number; }
+  const [billingRows, setBillingRows] = useState<DriverBillingRow[]>([]);
+  const [billingSummary, setBillingSummary] = useState<DriverBillingSummary | null>(null);
+
   const fetchOrders = useCallback(async () => {
     if (!user?.driver_id) return;
     try {
@@ -202,6 +211,15 @@ export default function DriverPortal() {
     if (driverId) {
       driversApi.getFavorites(driverId)
         .then(r => setFavorites(r.data as Favorite[]))
+        .catch(() => {});
+      billingApi.getRecords({ driver_id: driverId })
+        .then(r => {
+          const rows = r.data as DriverBillingRow[];
+          setBillingRows(rows.slice(0, 20));
+          const total = rows.reduce((s, r) => s + r.driver_charge, 0);
+          const settled = rows.filter(r => r.status === 'settled').reduce((s, r) => s + r.driver_charge, 0);
+          setBillingSummary({ total_charged: total, settled, pending: total - settled });
+        })
         .catch(() => {});
     }
     const socket = getSocket();
@@ -480,6 +498,51 @@ export default function DriverPortal() {
               </div>
             </div>
           )}
+
+          {/* Mis comisiones (8%) */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Clock className="w-4 h-4 text-orange-500" />
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Mis comisiones (8%)</h3>
+            </div>
+            {billingSummary && (
+              <div className="grid grid-cols-3 gap-2 mb-3 text-xs">
+                <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-2.5 text-center">
+                  <p className="text-red-400 mb-0.5">Total cobrado</p>
+                  <p className="font-bold text-red-600">${billingSummary.total_charged.toFixed(2)}</p>
+                </div>
+                <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-2.5 text-center">
+                  <p className="text-green-400 mb-0.5">Liquidado</p>
+                  <p className="font-bold text-green-600">${billingSummary.settled.toFixed(2)}</p>
+                </div>
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-2.5 text-center">
+                  <p className="text-yellow-400 mb-0.5">Pendiente</p>
+                  <p className="font-bold text-yellow-600">${billingSummary.pending.toFixed(2)}</p>
+                </div>
+              </div>
+            )}
+            <div className="space-y-1.5">
+              {billingRows.length === 0 ? (
+                <p className="text-xs text-gray-400 dark:text-slate-500 text-center py-2">Sin comisiones registradas</p>
+              ) : billingRows.map(r => (
+                <div key={r.id} className="flex items-center justify-between py-2 border-b border-gray-50 dark:border-slate-700/50 last:border-0">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-900 dark:text-white">{r.order_number}</p>
+                    <p className="text-[10px] text-gray-400 dark:text-slate-500">
+                      ${r.order_price.toFixed(2)} × 8% = <span className="text-red-500 font-semibold">${r.driver_charge.toFixed(2)}</span>
+                    </p>
+                  </div>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                    r.status === 'settled'
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                      : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                  }`}>
+                    {r.status === 'settled' ? 'Liquidado' : 'Pendiente'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
 
           {/* Lugares favoritos */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">

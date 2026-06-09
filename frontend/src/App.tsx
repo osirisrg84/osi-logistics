@@ -15,6 +15,7 @@ import Tracking from './pages/Tracking';
 import Drivers from './pages/Drivers';
 import Fleet from './pages/Fleet';
 import Reports from './pages/Reports';
+import Billing from './pages/Billing';
 import Settings from './pages/Settings';
 import UsersManagement from './pages/UsersManagement';
 import DriverPortal from './pages/DriverPortal';
@@ -103,6 +104,7 @@ function AppRoutes() {
         <Route path="drivers"   element={<Drivers />} />
         <Route path="fleet"     element={<Fleet />} />
         <Route path="reports"   element={<Reports />} />
+        <Route path="billing"   element={<Billing />} />
         <Route path="settings"  element={<Settings />} />
 
         {/* Admin-only routes */}

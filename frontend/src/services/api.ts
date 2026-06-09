@@ -86,6 +86,15 @@ export const analyticsApi = {
   getFleetReport: () => api.get('/analytics/reports/fleet'),
 };
 
+export const billingApi = {
+  getSummary:        ()              => api.get('/billing/summary'),
+  getRecords:        (params?: Record<string, unknown>) => api.get('/billing/records', { params }),
+  getByDriver:       ()              => api.get('/billing/by-driver'),
+  getByDispatcher:   ()              => api.get('/billing/by-dispatcher'),
+  settleOne:         (id: string)    => api.put(`/billing/${id}/settle`),
+  settleDriverAll:   (driverId: string) => api.put(`/billing/driver/${driverId}/settle-all`),
+};
+
 export const notificationsApi = {
   getAll: () => api.get('/notifications'),
   markRead: (id: string) => api.put(`/notifications/${id}/read`),

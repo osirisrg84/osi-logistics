@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Package, MapPin, Users, Truck,
-  BarChart3, Settings, Zap, Shield, UserCog, X
+  BarChart3, Settings, Zap, Shield, UserCog, X, Receipt
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -11,7 +11,8 @@ const DISPATCHER_NAV = [
   { to: '/tracking', icon: MapPin, label: 'Live Tracking' },
   { to: '/drivers', icon: Users, label: 'Drivers' },
   { to: '/fleet', icon: Truck, label: 'Fleet' },
-  { to: '/reports', icon: BarChart3, label: 'Reports' },
+  { to: '/reports',  icon: BarChart3, label: 'Reports'  },
+  { to: '/billing',  icon: Receipt,  label: 'Billing'  },
 ];
 
 const ADMIN_ONLY_NAV = [

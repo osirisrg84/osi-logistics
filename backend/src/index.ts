@@ -13,6 +13,7 @@ import analyticsRouter from './routes/analytics';
 import notificationsRouter from './routes/notifications';
 import authRouter from './routes/auth';
 import adminRouter from './routes/admin';
+import billingRouter from './routes/billing';
 import { authenticate } from './middleware/auth';
 
 const PORT = process.env.PORT || 3001;
@@ -110,6 +111,7 @@ app.use('/api/tracking', authenticate, trackingRouter);
 app.use('/api/analytics', authenticate, analyticsRouter);
 app.use('/api/notifications', authenticate, notificationsRouter);
 app.use('/api/admin', authenticate, adminRouter);
+app.use('/api/billing', authenticate, billingRouter);
 
 io.on('connection', (socket) => {
   console.log(`Client connected: ${socket.id}`);

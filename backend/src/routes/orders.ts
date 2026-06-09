@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../database';
+import { getDb, createCommission } from '../database';
+
+type AuthRequest = Request & { user?: { id: string; name: string; role: string } };
 
 const router = Router();
 
@@ -133,10 +135,12 @@ router.put('/:id', (req: Request, res: Response) => {
   res.json(updated);
 });
 
-router.post('/:id/assign', (req: Request, res: Response) => {
+router.post('/:id/assign', (req: AuthRequest, res: Response) => {
   const db = getDb();
   const { driver_id, truck_id } = req.body;
   const now = new Date().toISOString();
+  const dispatcherId   = req.user?.id   || null;
+  const dispatcherName = req.user?.name || null;
 
   const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id) as Record<string, unknown> | undefined;
   if (!order) return res.status(404).json({ error: 'Order not found' });
@@ -145,9 +149,10 @@ router.post('/:id/assign', (req: Request, res: Response) => {
   if (!driver) return res.status(404).json({ error: 'Driver not found' });
 
   db.prepare(`
-    UPDATE orders SET status = 'assigned', driver_id = ?, truck_id = ?, assigned_at = ?
+    UPDATE orders SET status = 'assigned', driver_id = ?, truck_id = ?, assigned_at = ?,
+      dispatcher_user_id = COALESCE(dispatcher_user_id, ?)
     WHERE id = ?
-  `).run(driver_id, truck_id, now, req.params.id);
+  `).run(driver_id, truck_id, now, dispatcherId, req.params.id);
 
   db.prepare(`UPDATE drivers SET status = 'busy', truck_id = ? WHERE id = ?`).run(truck_id, driver_id);
 
@@ -188,6 +193,20 @@ router.post('/:id/status', (req: Request, res: Response) => {
     updates.actual_delivery = now;
     if (order.driver_id) {
       db.prepare(`UPDATE drivers SET status = 'available', total_deliveries = total_deliveries + 1 WHERE id = ?`).run(order.driver_id);
+      // Generate commission record
+      if ((order.price as number) > 0) {
+        const driver = db.prepare('SELECT name FROM drivers WHERE id = ?').get(order.driver_id as string) as { name: string } | undefined;
+        const dispUser = order.dispatcher_user_id
+          ? db.prepare('SELECT name FROM users WHERE id = ?').get(order.dispatcher_user_id as string) as { name: string } | undefined
+          : undefined;
+        createCommission(
+          req.params.id, order.order_number as string,
+          order.driver_id as string, driver?.name || '',
+          (order.dispatcher_user_id as string | null) || null,
+          dispUser?.name || null,
+          order.price as number, now
+        );
+      }
     }
   }
   if (status === 'cancelled') {
