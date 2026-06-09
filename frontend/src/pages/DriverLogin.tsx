@@ -39,14 +39,11 @@ export default function DriverLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center px-5 pb-10">
-        {/* Back link — aligned with content */}
-        <div className="w-full max-w-md mb-2">
-          <Link to="/" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors">
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to portal selection
-          </Link>
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Link to="/" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm mb-6 transition-colors">
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to portal selection
+        </Link>
         {/* Hero */}
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-blue-500 rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-2xl shadow-blue-500/30">
@@ -71,7 +68,7 @@ export default function DriverLogin() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-3xl shadow-2xl p-7 w-full max-w-sm">
+        <div className="bg-white rounded-3xl shadow-2xl p-7 w-full max-w-sm mx-auto">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Welcome back</h2>
           <p className="text-sm text-gray-500 mb-5">Sign in to see your deliveries</p>
 
