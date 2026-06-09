@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Package, MapPin, CheckCircle, Truck, Phone,
   Clock, Star, Navigation, LogOut, User, Activity,
-  Power, Coffee, AlertTriangle, Sun, Moon
+  Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -135,6 +135,34 @@ export default function DriverPortal() {
   const [deliveredToday, setDeliveredToday] = useState<Order[]>([]);
   const [tab, setTab] = useState<Tab>('active');
   const [loading, setLoading] = useState(true);
+
+  // ── Favorites ────────────────────────────────────────────
+  interface Favorite { id: string; name: string; address: string; type: 'home' | 'work' | 'frequent' | 'other'; }
+  const FAV_PRESETS = [
+    { type: 'home'     as const, label: 'Casa',           icon: '🏠' },
+    { type: 'work'     as const, label: 'Zona de trabajo', icon: '🏢' },
+    { type: 'frequent' as const, label: 'Lugar frecuente', icon: '⭐' },
+    { type: 'other'    as const, label: 'Otro',            icon: '📍' },
+  ];
+  const storageKey = `osi_driver_favs_${driver?.id || 'default'}`;
+  const [favorites, setFavorites] = useState<Favorite[]>(() => {
+    try { return JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch { return []; }
+  });
+  const [showAddFav, setShowAddFav] = useState(false);
+  const [newFav, setNewFav] = useState({ name: '', address: '', type: 'home' as Favorite['type'] });
+
+  const saveFavorites = (updated: Favorite[]) => {
+    setFavorites(updated);
+    localStorage.setItem(storageKey, JSON.stringify(updated));
+  };
+  const addFavorite = () => {
+    if (!newFav.name.trim() || !newFav.address.trim()) return;
+    const fav: Favorite = { id: Date.now().toString(), ...newFav };
+    saveFavorites([...favorites, fav]);
+    setNewFav({ name: '', address: '', type: 'home' });
+    setShowAddFav(false);
+  };
+  const deleteFavorite = (id: string) => saveFavorites(favorites.filter(f => f.id !== id));
 
   const fetchOrders = useCallback(async () => {
     if (!user?.driver_id) return;
@@ -435,6 +463,99 @@ export default function DriverPortal() {
               </div>
             </div>
           )}
+
+          {/* Lugares favoritos */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-orange-500" />
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Lugares favoritos</h3>
+              </div>
+              {favorites.length < 5 && !showAddFav && (
+                <button onClick={() => setShowAddFav(true)}
+                  className="flex items-center gap-1 text-xs text-orange-500 hover:text-orange-600 font-semibold transition-colors">
+                  <Plus className="w-3.5 h-3.5" /> Agregar
+                </button>
+              )}
+            </div>
+
+            {favorites.length === 0 && !showAddFav && (
+              <div className="text-center py-4">
+                <MapPin className="w-8 h-8 text-gray-200 dark:text-slate-700 mx-auto mb-2" />
+                <p className="text-xs text-gray-400 dark:text-slate-500">No hay lugares guardados</p>
+                <button onClick={() => setShowAddFav(true)}
+                  className="mt-2 text-xs text-orange-500 hover:text-orange-600 font-medium">
+                  + Agregar un lugar
+                </button>
+              </div>
+            )}
+
+            {favorites.length > 0 && (
+              <div className="space-y-2 mb-3">
+                {favorites.map(fav => {
+                  const preset = FAV_PRESETS.find(p => p.type === fav.type);
+                  return (
+                    <div key={fav.id} className="flex items-center gap-3 bg-gray-50 dark:bg-slate-700 rounded-xl px-3 py-2.5">
+                      <span className="text-lg flex-shrink-0">{preset?.icon || '📍'}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{fav.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{fav.address}</p>
+                      </div>
+                      <button onClick={() => deleteFavorite(fav.id)}
+                        className="text-gray-300 dark:text-slate-600 hover:text-red-400 transition-colors flex-shrink-0">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Add form */}
+            {showAddFav && (
+              <div className="border-t border-gray-100 dark:border-slate-700 pt-3 space-y-2.5">
+                <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Nuevo lugar</p>
+                {/* Type selector */}
+                <div className="grid grid-cols-4 gap-1.5">
+                  {FAV_PRESETS.map(p => (
+                    <button key={p.type} onClick={() => setNewFav(f => ({ ...f, type: p.type }))}
+                      className={`flex flex-col items-center gap-0.5 py-2 rounded-lg text-center transition-colors ${
+                        newFav.type === p.type
+                          ? 'bg-orange-100 dark:bg-orange-900/30 ring-1 ring-orange-400'
+                          : 'bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600'
+                      }`}>
+                      <span className="text-base">{p.icon}</span>
+                      <span className="text-[9px] text-gray-600 dark:text-slate-400 leading-tight">{p.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  placeholder="Nombre del lugar"
+                  value={newFav.name}
+                  onChange={e => setNewFav(f => ({ ...f, name: e.target.value }))}
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-400/40"
+                />
+                <input
+                  type="text"
+                  placeholder="Dirección"
+                  value={newFav.address}
+                  onChange={e => setNewFav(f => ({ ...f, address: e.target.value }))}
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-400/40"
+                />
+                <div className="flex gap-2">
+                  <button onClick={() => { setShowAddFav(false); setNewFav({ name: '', address: '', type: 'home' }); }}
+                    className="flex-1 py-2 rounded-xl text-sm text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">
+                    Cancelar
+                  </button>
+                  <button onClick={addFavorite} disabled={!newFav.name.trim() || !newFav.address.trim()}
+                    className="flex-1 py-2 rounded-xl text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5">
+                    <Plus className="w-4 h-4" /> Guardar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
