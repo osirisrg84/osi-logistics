@@ -26,6 +26,10 @@ export interface Driver {
   make?: string;
   model?: string;
   truck_type?: string;
+  equipment_type?: string;
+  company_name?: string;
+  mc_number?: string;
+  authority_since?: string;
   active_orders?: number;
   order_id?: string;
   order_number?: string;

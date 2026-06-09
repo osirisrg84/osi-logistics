@@ -1,11 +1,24 @@
 ﻿import { useState, useEffect } from 'react';
-import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin } from 'lucide-react';
+import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin, Building2, Clock } from 'lucide-react';
 import { Driver, DriverStatus } from '../types';
 import { driversApi, trucksApi } from '../services/api';
 import { DriverStatusBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
 
 const STATUS_OPTIONS: DriverStatus[] = ['available', 'busy', 'on_break', 'offline'];
+
+function calcAuthority(since: string): string {
+  if (!since) return '';
+  const start = new Date(since);
+  const now = new Date();
+  let years = now.getFullYear() - start.getFullYear();
+  let months = now.getMonth() - start.getMonth();
+  if (now.getDate() < start.getDate()) months--;
+  if (months < 0) { years--; months += 12; }
+  if (years === 0) return `${months} mes${months !== 1 ? 'es' : ''}`;
+  if (months === 0) return `${years} año${years !== 1 ? 's' : ''}`;
+  return `${years} año${years !== 1 ? 's' : ''}, ${months} mes${months !== 1 ? 'es' : ''}`;
+}
 
 interface DriverFormProps {
   driver?: Driver;
@@ -171,13 +184,56 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
             <p className="text-xs text-gray-500 mt-1">Expires: {format(new Date(driver.license_expiry), 'MMMM d, yyyy')}</p>
           </div>
 
-          {/* Current truck */}
-          {(driver as Driver & { plate_number?: string }).plate_number && (
-            <div className="bg-blue-50 rounded-xl p-4">
-              <p className="text-xs font-semibold text-blue-700 mb-2 flex items-center gap-1"><Truck className="w-3 h-3" /> ASSIGNED TRUCK</p>
-              <p className="text-sm font-medium text-gray-900 dark:text-slate-100">
-                {(driver as Driver & { plate_number?: string; make?: string; model?: string }).plate_number} · {(driver as Driver & { make?: string; model?: string }).make} {(driver as Driver & { make?: string; model?: string }).model}
+          {/* Equipment */}
+          {(driver.make || driver.equipment_type) && (
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
+              <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 flex items-center gap-2 mb-2">
+                <Truck className="w-3 h-3" /> EQUIPO
               </p>
+              <div className="flex items-center gap-3">
+                {driver.equipment_type && (
+                  <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold ${
+                    driver.equipment_type === 'Reefer'    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
+                    driver.equipment_type === 'Flatbed'   ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' :
+                    driver.equipment_type === 'Box Truck' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' :
+                    'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
+                  }`}>
+                    {driver.equipment_type}
+                  </span>
+                )}
+                {driver.make && driver.model && (
+                  <p className="text-sm font-medium text-gray-700 dark:text-slate-300">{driver.make} {driver.model}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Empresa / Autoridad MC */}
+          {(driver.company_name || driver.mc_number) && (
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
+              <p className="text-xs font-semibold text-green-700 dark:text-green-400 flex items-center gap-2 mb-3">
+                <Building2 className="w-3 h-3" /> EMPRESA / AUTORIDAD
+              </p>
+              <div className="space-y-2">
+                {driver.company_name && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500 dark:text-slate-400">Nombre de compañía</span>
+                    <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{driver.company_name}</span>
+                  </div>
+                )}
+                {driver.mc_number && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500 dark:text-slate-400">MC# / Póliza Comercial</span>
+                    <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">{driver.mc_number}</span>
+                  </div>
+                )}
+                {driver.authority_since && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> Tiempo con autoridad</span>
+                    <span className="text-sm font-medium text-green-700 dark:text-green-400">{calcAuthority(driver.authority_since)}</span>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -351,9 +407,20 @@ export default function Drivers() {
               <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
                 <Mail className="w-3 h-3 text-gray-400 dark:text-slate-500" /> {driver.email}
               </div>
-              {driver.plate_number && (
-                <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
-                  <Truck className="w-3 h-3 text-gray-400 dark:text-slate-500" /> {driver.plate_number} · {driver.make} {driver.model}
+              {(driver.equipment_type || driver.make) && (
+                <div className="flex items-center gap-2">
+                  <Truck className="w-3 h-3 text-gray-400 dark:text-slate-500 flex-shrink-0" />
+                  {driver.equipment_type && (
+                    <span className={`px-1.5 py-0.5 rounded text-xs font-semibold ${
+                      driver.equipment_type === 'Reefer'    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
+                      driver.equipment_type === 'Flatbed'   ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' :
+                      driver.equipment_type === 'Box Truck' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' :
+                      'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
+                    }`}>{driver.equipment_type}</span>
+                  )}
+                  {driver.make && driver.model && (
+                    <span className="text-gray-500 dark:text-slate-400">{driver.make} {driver.model}</span>
+                  )}
                 </div>
               )}
               {driver.current_address && (
