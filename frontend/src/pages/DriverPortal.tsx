@@ -359,7 +359,7 @@ export default function DriverPortal() {
       {/* ── Content area ───────────────────────────────────── */}
 
       {/* Offline: 3D map fullscreen */}
-      {driverStatus === 'offline' && tab !== 'profile' && (
+      {driverStatus === 'offline' && tab !== 'profile' && tab !== 'payments' && (
         <div className="relative" style={{ height: 'calc(100vh - 252px)', minHeight: 340 }}>
           <Map3D driver={driver} activeOrders={activeOrders} pitch={52} />
           <div className="absolute inset-x-0 top-0 h-16 pointer-events-none"
