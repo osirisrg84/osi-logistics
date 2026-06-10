@@ -7,12 +7,13 @@ import {
 import { useAuth } from '../context/AuthContext';
 
 const SHARED_NAV = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/orders',    icon: Package,         label: 'Orders' },
-  { to: '/tracking',  icon: MapPin,          label: 'Live Tracking' },
-  { to: '/drivers',   icon: Users,           label: 'Drivers' },
-  { to: '/fleet',     icon: Truck,           label: 'Fleet' },
-  { to: '/reports',   icon: BarChart3,       label: 'Reports' },
+  { to: '/dashboard',   icon: LayoutDashboard, label: 'Dashboard',   adminOnly: false },
+  { to: '/orders',      icon: Package,         label: 'Orders',      adminOnly: false },
+  { to: '/tracking',    icon: MapPin,          label: 'Live Tracking', adminOnly: false },
+  { to: '/drivers',     icon: Users,           label: 'Drivers',     adminOnly: false },
+  { to: '/fleet',       icon: Truck,           label: 'Fleet',       adminOnly: false },
+  { to: '/dispatchers', icon: Headset,         label: 'Dispatchers', adminOnly: true  },
+  { to: '/reports',     icon: BarChart3,       label: 'Reports',     adminOnly: false },
 ];
 
 const DISPATCHER_ONLY_NAV = [
@@ -20,10 +21,9 @@ const DISPATCHER_ONLY_NAV = [
 ];
 
 const ADMIN_ONLY_NAV = [
-  { to: '/billing',     icon: Receipt,  label: 'Billing'      },
-  { to: '/users',       icon: UserCog,  label: 'Users'        },
-  { to: '/dispatchers', icon: Headset,  label: 'Dispatchers'  },
-  { to: '/settings',    icon: Settings, label: 'Settings'     },
+  { to: '/billing',  icon: Receipt,  label: 'Billing'  },
+  { to: '/users',    icon: UserCog,  label: 'Users'    },
+  { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
 const DISPATCHER_BOTTOM_NAV = [
@@ -37,7 +37,9 @@ interface SidebarProps {
 export default function Sidebar({ onClose }: SidebarProps) {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
-  const topNav = isAdmin ? SHARED_NAV : [...SHARED_NAV, ...DISPATCHER_ONLY_NAV];
+  const topNav = isAdmin
+    ? SHARED_NAV.filter(n => !n.adminOnly || isAdmin)
+    : [...SHARED_NAV.filter(n => !n.adminOnly), ...DISPATCHER_ONLY_NAV];
   const bottomNav = isAdmin ? ADMIN_ONLY_NAV : DISPATCHER_BOTTOM_NAV;
   const roleBadgeColor = isAdmin ? 'bg-purple-600' : 'bg-orange-500';
 
