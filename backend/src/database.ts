@@ -217,6 +217,12 @@ export function initDatabase(): void {
   if (!driverCols.some(c => c.name === 'authority_since')) {
     db.exec("ALTER TABLE drivers ADD COLUMN authority_since TEXT NOT NULL DEFAULT ''");
   }
+  if (!driverCols.some(c => c.name === 'payment_method')) {
+    db.exec("ALTER TABLE drivers ADD COLUMN payment_method TEXT NOT NULL DEFAULT ''");
+  }
+  if (!driverCols.some(c => c.name === 'payment_details')) {
+    db.exec("ALTER TABLE drivers ADD COLUMN payment_details TEXT NOT NULL DEFAULT ''");
+  }
 
   // Patch demo drivers with varied company/MC/authority data (runs every startup — idempotent)
   const demoPatches = [

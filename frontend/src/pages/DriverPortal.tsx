@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Package, MapPin, CheckCircle, Truck, Phone,
   Clock, Star, Navigation, LogOut, User, Activity,
-  Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet, Building2
+  Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet, Building2, CreditCard, Edit2
 } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
 import { useAuth } from '../context/AuthContext';
@@ -164,6 +164,12 @@ export default function DriverPortal() {
   const [savingFav, setSavingFav] = useState(false);
   const [favError, setFavError] = useState('');
 
+  // ── Payment method ────────────────────────────────────────
+  const [editingPayment, setEditingPayment] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentDetails, setPaymentDetails] = useState('');
+  const [savingPayment, setSavingPayment] = useState(false);
+
   // Use driver.id as the primary ID — it comes directly from the loaded driverProfile
   const driverId = driver?.id ?? user?.driver_id ?? '';
 
@@ -218,7 +224,9 @@ export default function DriverPortal() {
 
   useEffect(() => {
     if (driver?.status) setDriverStatus(driver.status as DriverStatus);
-  }, [driver?.status]);
+    if (driver?.payment_method !== undefined) setPaymentMethod(driver.payment_method || '');
+    if (driver?.payment_details !== undefined) setPaymentDetails(driver.payment_details || '');
+  }, [driver?.status, driver?.payment_method, driver?.payment_details]);
 
   useEffect(() => {
     fetchOrders();
@@ -241,6 +249,18 @@ export default function DriverPortal() {
     socket.on('order_updated', () => fetchOrders());
     return () => { socket.off('order_updated'); };
   }, [fetchOrders, user?.driver_id]);
+
+  const savePayment = async () => {
+    if (!driverId) return;
+    setSavingPayment(true);
+    try {
+      await driversApi.update(driverId, { payment_method: paymentMethod, payment_details: paymentDetails });
+      setEditingPayment(false);
+    } catch {
+    } finally {
+      setSavingPayment(false);
+    }
+  };
 
   const setStatus = async (newStatus: DriverStatus) => {
     if (!user?.driver_id || togglingStatus) return;
@@ -662,6 +682,99 @@ export default function DriverPortal() {
               </div>
             )}
           </div>
+          {/* Método de pago */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-blue-500" />
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Método de pago</h3>
+              </div>
+              {!editingPayment && (
+                <button onClick={() => setEditingPayment(true)}
+                  className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600 font-semibold transition-colors">
+                  <Edit2 className="w-3.5 h-3.5" /> Editar
+                </button>
+              )}
+            </div>
+
+            {!editingPayment ? (
+              paymentMethod ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500 dark:text-slate-400">Tipo</span>
+                    <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{paymentMethod}</span>
+                  </div>
+                  {paymentDetails && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500 dark:text-slate-400">Detalles</span>
+                      <span className="text-sm font-mono text-gray-800 dark:text-slate-200">{paymentDetails}</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-3">
+                  <CreditCard className="w-8 h-8 text-gray-200 dark:text-slate-700 mx-auto mb-2" />
+                  <p className="text-xs text-gray-400 dark:text-slate-500">No hay método de pago registrado</p>
+                  <button onClick={() => setEditingPayment(true)}
+                    className="mt-2 text-xs text-blue-500 hover:text-blue-600 font-medium">
+                    + Agregar método de pago
+                  </button>
+                </div>
+              )
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs text-gray-500 dark:text-slate-400 mb-1 block">Tipo de pago</label>
+                  <select
+                    value={paymentMethod}
+                    onChange={e => setPaymentMethod(e.target.value)}
+                    className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400/40"
+                  >
+                    <option value="">Seleccionar...</option>
+                    <option>Zelle</option>
+                    <option>Direct Deposit (ACH)</option>
+                    <option>Check</option>
+                    <option>PayPal / Venmo</option>
+                    <option>Cash</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 dark:text-slate-400 mb-1 block">
+                    {paymentMethod === 'Zelle' ? 'Email o teléfono Zelle' :
+                     paymentMethod === 'Direct Deposit (ACH)' ? 'Routing # / Account #' :
+                     paymentMethod === 'PayPal / Venmo' ? 'Email o usuario' :
+                     'Detalles'}
+                  </label>
+                  <input
+                    type="text"
+                    value={paymentDetails}
+                    onChange={e => setPaymentDetails(e.target.value)}
+                    placeholder={
+                      paymentMethod === 'Zelle' ? 'ejemplo@email.com o (305) 555-0000' :
+                      paymentMethod === 'Direct Deposit (ACH)' ? '021000021 / 123456789' :
+                      paymentMethod === 'Check' ? 'Nombre completo en el cheque' :
+                      'Detalles del método...'
+                    }
+                    className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => { setEditingPayment(false); setPaymentMethod(driver?.payment_method || ''); setPaymentDetails(driver?.payment_details || ''); }}
+                    className="flex-1 py-2 rounded-xl text-sm text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">
+                    Cancelar
+                  </button>
+                  <button onClick={savePayment} disabled={savingPayment}
+                    className="flex-1 py-2 rounded-xl text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5">
+                    {savingPayment
+                      ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      : 'Guardar'
+                    }
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Pagos shortcut */}
           <button
             onClick={() => setTab('payments')}

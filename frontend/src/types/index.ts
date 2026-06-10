@@ -30,6 +30,8 @@ export interface Driver {
   company_name?: string;
   mc_number?: string;
   authority_since?: string;
+  payment_method?: string;
+  payment_details?: string;
   active_orders?: number;
   order_id?: string;
   order_number?: string;
