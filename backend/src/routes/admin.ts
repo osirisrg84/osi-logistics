@@ -93,6 +93,25 @@ router.delete('/users/:id', (req: Request, res: Response) => {
   res.json({ success: true });
 });
 
+router.get('/dispatchers', (_req: Request, res: Response) => {
+  const db = getDb();
+  const dispatchers = db.prepare(`
+    SELECT u.id, u.name, u.email, u.active, u.created_at,
+           COUNT(DISTINCT c.order_id)                                                        AS total_orders,
+           COALESCE(SUM(c.dispatcher_pay), 0)                                                AS total_earned,
+           COALESCE(SUM(CASE WHEN c.status = 'pending' THEN c.dispatcher_pay ELSE 0 END), 0) AS pending,
+           COALESCE(SUM(CASE WHEN c.status = 'settled' THEN c.dispatcher_pay ELSE 0 END), 0) AS settled,
+           COUNT(DISTINCT CASE WHEN o.status IN ('assigned','picked_up','in_transit') THEN o.id END) AS active_orders
+    FROM users u
+    LEFT JOIN commissions c ON u.id = c.dispatcher_user_id
+    LEFT JOIN orders o ON u.id = o.dispatcher_user_id
+    WHERE u.role = 'dispatcher'
+    GROUP BY u.id
+    ORDER BY total_earned DESC
+  `).all();
+  res.json(dispatchers);
+});
+
 router.get('/stats', (_req: Request, res: Response) => {
   const db = getDb();
   const stats = {

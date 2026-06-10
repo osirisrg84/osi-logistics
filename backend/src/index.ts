@@ -58,7 +58,7 @@ app.get('/api/health', (_req, res) => {
   const db = getDb();
   const userCount = (db.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number }).c;
   const driverCount = (db.prepare('SELECT COUNT(*) as c FROM drivers').get() as { c: number }).c;
-  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '2.4.0', userCount, driverCount });
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '2.5.0', userCount, driverCount });
 });
 
 // Temporary: force-create default users (safe to call multiple times)

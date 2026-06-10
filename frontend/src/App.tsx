@@ -19,6 +19,7 @@ import Billing from './pages/Billing';
 import DispatcherCommissions from './pages/DispatcherCommissions';
 import Settings from './pages/Settings';
 import UsersManagement from './pages/UsersManagement';
+import DispatcherProfiles from './pages/DispatcherProfiles';
 import DriverPortal from './pages/DriverPortal';
 
 function Spinner() {
@@ -112,6 +113,9 @@ function AppRoutes() {
         {/* Admin-only routes */}
         <Route path="users" element={
           <AdminGuard><UsersManagement /></AdminGuard>
+        } />
+        <Route path="dispatchers" element={
+          <AdminGuard><DispatcherProfiles /></AdminGuard>
         } />
       </Route>
 
