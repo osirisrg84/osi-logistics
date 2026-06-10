@@ -110,14 +110,9 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
         {/* Title bar */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-slate-700">
           <h2 className="text-base font-semibold text-gray-900 dark:text-white">Perfil del Dispatcher</h2>
-          <div className="flex items-center gap-1">
-            <button onClick={onEdit} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
-              <Edit2 className="w-4 h-4 text-gray-400 dark:text-slate-500" />
-            </button>
-            <button onClick={onClose} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
-              <X className="w-4 h-4 text-gray-400 dark:text-slate-500" />
-            </button>
-          </div>
+          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
+            <X className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+          </button>
         </div>
 
         <div className="p-5 space-y-4">
