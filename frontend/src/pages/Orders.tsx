@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Search, Filter, X, ChevronDown, Package,
-  MapPin, User, Truck, Clock, DollarSign, Eye, Edit2, Trash2, UserCheck
+  MapPin, User, Truck, Clock, DollarSign, Eye, Edit2, Trash2, UserCheck, CheckCircle
 } from 'lucide-react';
 import { Order, Driver, Truck as TruckType, OrderStatus, OrderPriority } from '../types';
 import { ordersApi, driversApi, trucksApi } from '../services/api';
@@ -20,38 +20,55 @@ interface OrderModalProps {
 function CreateOrderModal({ onClose, onSave }: OrderModalProps) {
   const [form, setForm] = useState({
     customer_name: '', customer_phone: '', customer_email: '',
-    pickup_address: '', pickup_lat: '25.7617', pickup_lng: '-80.1918',
-    delivery_address: '', delivery_lat: '25.7907', delivery_lng: '-80.1300',
-    priority: 'normal', weight_kg: '', volume_m3: '',
-    description: '', notes: '', price: '', distance_km: '',
-    estimated_delivery: '',
+    pickup_name: '', pickup_address: '',
+    delivery_name: '', delivery_address: '',
+    priority: 'normal', weight_kg: '', commodity: '',
+    notes: '', price: '', distance_mi: '', estimated_delivery: '',
   });
+  const [extraPickups, setExtraPickups] = useState<string[]>([]);
+  const [extraDeliveries, setExtraDeliveries] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.customer_name || !form.pickup_address || !form.delivery_address) {
-      setError('Please fill in all required fields');
+      setError('Por favor completa los campos requeridos');
       return;
     }
     setSaving(true);
     try {
+      let fullNotes = form.notes;
+      const validPickups = extraPickups.filter(a => a.trim());
+      const validDeliveries = extraDeliveries.filter(a => a.trim());
+      if (validPickups.length > 0)
+        fullNotes += `\n[RECOGIDAS ADICIONALES]\n${validPickups.map(a => `• ${a}`).join('\n')}`;
+      if (validDeliveries.length > 0)
+        fullNotes += `\n[ENTREGAS ADICIONALES]\n${validDeliveries.map(a => `• ${a}`).join('\n')}`;
+
       await ordersApi.create({
-        ...form,
-        pickup_lat: parseFloat(form.pickup_lat),
-        pickup_lng: parseFloat(form.pickup_lng),
-        delivery_lat: parseFloat(form.delivery_lat),
-        delivery_lng: parseFloat(form.delivery_lng),
+        customer_name: form.customer_name,
+        customer_phone: form.customer_phone,
+        customer_email: form.customer_email,
+        pickup_address: form.pickup_address,
+        pickup_contact: form.pickup_name,
+        pickup_lat: 25.7617, pickup_lng: -80.1918,
+        delivery_address: form.delivery_address,
+        delivery_contact: form.delivery_name,
+        delivery_lat: 25.7907, delivery_lng: -80.1300,
+        priority: form.priority,
         weight_kg: parseFloat(form.weight_kg) || 0,
-        volume_m3: parseFloat(form.volume_m3) || 0,
+        volume_m3: 0,
+        description: form.commodity,
+        notes: fullNotes.trim(),
         price: parseFloat(form.price) || 0,
-        distance_km: parseFloat(form.distance_km) || 0,
+        distance_km: Math.round(parseFloat(form.distance_mi || '0') * 1.60934 * 10) / 10,
+        estimated_delivery: form.estimated_delivery,
       });
       onSave();
       onClose();
     } catch {
-      setError('Failed to create order');
+      setError('Error al crear la orden');
     } finally {
       setSaving(false);
     }
@@ -61,16 +78,17 @@ function CreateOrderModal({ onClose, onSave }: OrderModalProps) {
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">Create New Order</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Nueva Orden</h2>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
             <X className="w-5 h-5 text-gray-500 dark:text-slate-400" />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {error && <div className="bg-red-50 text-red-700 text-sm px-3 py-2 rounded-lg border border-red-200">{error}</div>}
 
+          {/* Customer */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
               <User className="w-4 h-4 text-orange-500" /> Customer Information
             </h3>
             <div className="grid grid-cols-2 gap-3">
@@ -89,48 +107,83 @@ function CreateOrderModal({ onClose, onSave }: OrderModalProps) {
             </div>
           </div>
 
+          {/* Pickup */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
               <MapPin className="w-4 h-4 text-orange-500" /> Pickup Location
             </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2">
-                <label className="label">Pickup Address *</label>
-                <input className="input" value={form.pickup_address} onChange={e => setForm({...form, pickup_address: e.target.value})} placeholder="Full street address" required />
+            <div className="space-y-3">
+              <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30 rounded-xl p-3 space-y-2">
+                <p className="text-xs font-bold text-orange-600 dark:text-orange-400">Stop #1</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="label">Nombre del lugar</label>
+                    <input className="input" value={form.pickup_name} onChange={e => setForm({...form, pickup_name: e.target.value})} placeholder="Ej: ABC Warehouse" />
+                  </div>
+                  <div>
+                    <label className="label">Dirección *</label>
+                    <input className="input" value={form.pickup_address} onChange={e => setForm({...form, pickup_address: e.target.value})} placeholder="Full street address" required />
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="label">Latitude</label>
-                <input className="input" value={form.pickup_lat} onChange={e => setForm({...form, pickup_lat: e.target.value})} placeholder="25.7617" />
-              </div>
-              <div>
-                <label className="label">Longitude</label>
-                <input className="input" value={form.pickup_lng} onChange={e => setForm({...form, pickup_lng: e.target.value})} placeholder="-80.1918" />
-              </div>
+              {extraPickups.map((addr, i) => (
+                <div key={i} className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30 rounded-xl p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-orange-600 dark:text-orange-400">Stop #{i + 2}</p>
+                    <button type="button" onClick={() => setExtraPickups(prev => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <input className="input" value={addr} onChange={e => setExtraPickups(prev => prev.map((a, j) => j === i ? e.target.value : a))} placeholder="Dirección adicional de recogida" />
+                </div>
+              ))}
+              <button type="button" onClick={() => setExtraPickups(prev => [...prev, ''])}
+                className="flex items-center gap-1.5 text-xs text-orange-500 hover:text-orange-600 font-semibold transition-colors">
+                <Plus className="w-3.5 h-3.5" /> Agregar parada de recogida
+              </button>
             </div>
           </div>
 
+          {/* Delivery */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
               <MapPin className="w-4 h-4 text-green-500" /> Delivery Location
             </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2">
-                <label className="label">Delivery Address *</label>
-                <input className="input" value={form.delivery_address} onChange={e => setForm({...form, delivery_address: e.target.value})} placeholder="Full street address" required />
+            <div className="space-y-3">
+              <div className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30 rounded-xl p-3 space-y-2">
+                <p className="text-xs font-bold text-green-600 dark:text-green-400">Stop #1</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="label">Nombre del lugar</label>
+                    <input className="input" value={form.delivery_name} onChange={e => setForm({...form, delivery_name: e.target.value})} placeholder="Ej: Cliente XYZ" />
+                  </div>
+                  <div>
+                    <label className="label">Dirección *</label>
+                    <input className="input" value={form.delivery_address} onChange={e => setForm({...form, delivery_address: e.target.value})} placeholder="Full street address" required />
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="label">Latitude</label>
-                <input className="input" value={form.delivery_lat} onChange={e => setForm({...form, delivery_lat: e.target.value})} placeholder="25.7907" />
-              </div>
-              <div>
-                <label className="label">Longitude</label>
-                <input className="input" value={form.delivery_lng} onChange={e => setForm({...form, delivery_lng: e.target.value})} placeholder="-80.1300" />
-              </div>
+              {extraDeliveries.map((addr, i) => (
+                <div key={i} className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30 rounded-xl p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-green-600 dark:text-green-400">Stop #{i + 2}</p>
+                    <button type="button" onClick={() => setExtraDeliveries(prev => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <input className="input" value={addr} onChange={e => setExtraDeliveries(prev => prev.map((a, j) => j === i ? e.target.value : a))} placeholder="Dirección adicional de entrega" />
+                </div>
+              ))}
+              <button type="button" onClick={() => setExtraDeliveries(prev => [...prev, ''])}
+                className="flex items-center gap-1.5 text-xs text-green-500 hover:text-green-600 font-semibold transition-colors">
+                <Plus className="w-3.5 h-3.5" /> Agregar parada de entrega
+              </button>
             </div>
           </div>
 
+          {/* Shipment Details */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
               <Package className="w-4 h-4 text-orange-500" /> Shipment Details
             </h3>
             <div className="grid grid-cols-3 gap-3">
@@ -145,24 +198,20 @@ function CreateOrderModal({ onClose, onSave }: OrderModalProps) {
                 <input className="input" type="number" value={form.weight_kg} onChange={e => setForm({...form, weight_kg: e.target.value})} placeholder="0" min="0" />
               </div>
               <div>
-                <label className="label">Volume (m³)</label>
-                <input className="input" type="number" value={form.volume_m3} onChange={e => setForm({...form, volume_m3: e.target.value})} placeholder="0" min="0" />
-              </div>
-              <div>
                 <label className="label">Price ($)</label>
                 <input className="input" type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} placeholder="0.00" min="0" step="0.01" />
               </div>
               <div>
-                <label className="label">Distance (km)</label>
-                <input className="input" type="number" value={form.distance_km} onChange={e => setForm({...form, distance_km: e.target.value})} placeholder="0" min="0" />
+                <label className="label">Distance (mi)</label>
+                <input className="input" type="number" value={form.distance_mi} onChange={e => setForm({...form, distance_mi: e.target.value})} placeholder="0" min="0" />
               </div>
-              <div>
+              <div className="col-span-2">
                 <label className="label">Est. Delivery</label>
                 <input className="input" type="datetime-local" value={form.estimated_delivery} onChange={e => setForm({...form, estimated_delivery: e.target.value})} />
               </div>
               <div className="col-span-3">
-                <label className="label">Description</label>
-                <input className="input" value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Cargo description" />
+                <label className="label">Commodity</label>
+                <input className="input" value={form.commodity} onChange={e => setForm({...form, commodity: e.target.value})} placeholder="Ej: Fresh produce, Electronics, Automotive parts..." />
               </div>
               <div className="col-span-3">
                 <label className="label">Notes</label>
@@ -173,8 +222,10 @@ function CreateOrderModal({ onClose, onSave }: OrderModalProps) {
 
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">Cancel</button>
-            <button type="submit" disabled={saving} className="btn-primary flex-1 justify-center">
-              {saving ? 'Creating...' : 'Create Order'}
+            <button type="submit" disabled={saving} className="btn-primary flex-1 justify-center gap-2">
+              {saving
+                ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                : 'Create Order'}
             </button>
           </div>
         </form>
@@ -417,6 +468,12 @@ export default function Orders() {
   const [assignOrder, setAssignOrder] = useState<Order | null>(null);
   const [detailOrder, setDetailOrder] = useState<Order | null>(null);
   const [total, setTotal] = useState(0);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 4500);
+  };
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -459,6 +516,14 @@ export default function Orders() {
 
   return (
     <div className="space-y-3 fade-in">
+      {/* Toast notification */}
+      {toast && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-green-600 text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-2xl shadow-green-600/30 animate-fade-in">
+          <CheckCircle className="w-5 h-5 flex-shrink-0" />
+          {toast}
+        </div>
+      )}
+
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
         <div className="flex items-center gap-2 flex-1 flex-wrap">
@@ -590,7 +655,7 @@ export default function Orders() {
       )}
 
       {/* Modals */}
-      {showCreate && <CreateOrderModal onClose={() => setShowCreate(false)} onSave={fetchOrders} />}
+      {showCreate && <CreateOrderModal onClose={() => setShowCreate(false)} onSave={() => { fetchOrders(); showToast('¡Orden creada exitosamente! 🚛'); }} />}
       {assignOrder && <AssignModal order={assignOrder} drivers={drivers} trucks={trucks} onClose={() => setAssignOrder(null)} onSave={fetchOrders} />}
       {detailOrder && <DetailModal order={detailOrder} onClose={() => setDetailOrder(null)} onRefresh={fetchOrders} />}
     </div>
