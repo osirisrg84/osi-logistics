@@ -105,116 +105,113 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm overflow-hidden" onClick={e => e.stopPropagation()}>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
 
-        {/* Header band */}
-        <div className="bg-gradient-to-r from-orange-500 to-orange-400 px-5 pt-5 pb-8 relative">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-semibold text-orange-100 uppercase tracking-wide">Dispatcher</span>
-            <div className="flex items-center gap-1">
-              <button onClick={onEdit} className="p-1.5 hover:bg-white/20 rounded-lg transition-colors">
-                <Edit2 className="w-4 h-4 text-white" />
-              </button>
-              <button onClick={onClose} className="p-1.5 hover:bg-white/20 rounded-lg transition-colors">
-                <X className="w-4 h-4 text-white" />
-              </button>
-            </div>
+        {/* Title bar */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-slate-700">
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">Perfil del Dispatcher</h2>
+          <div className="flex items-center gap-1">
+            <button onClick={onEdit} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
+              <Edit2 className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+            </button>
+            <button onClick={onClose} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
+              <X className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+            </button>
           </div>
+        </div>
+
+        <div className="p-5 space-y-4">
+          {/* Identity */}
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-white text-xl font-bold border border-white/30">
+            <div className="w-14 h-14 bg-orange-500 rounded-2xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
               {initials}
             </div>
-            <div>
-              <p className="text-lg font-bold text-white leading-tight">{dispatcher.name}</p>
-              <a href={`mailto:${dispatcher.email}`} className="text-orange-100 text-xs hover:text-white flex items-center gap-1 mt-0.5">
-                <Mail className="w-3 h-3" /> {dispatcher.email}
-              </a>
+            <div className="flex-1 min-w-0">
+              <p className="text-base font-bold text-gray-900 dark:text-white">{dispatcher.name}</p>
+              <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full mt-0.5 ${
+                dispatcher.active
+                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                  : 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${dispatcher.active ? 'bg-green-500' : 'bg-gray-400'}`} />
+                {dispatcher.active ? 'Activo' : 'Inactivo'}
+              </span>
             </div>
           </div>
-        </div>
 
-        {/* Status pill — overlapping */}
-        <div className="px-5 -mt-4 flex items-center gap-2 mb-4">
-          <span className={`flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full shadow-md ${
-            dispatcher.active
-              ? 'bg-green-500 text-white'
-              : 'bg-gray-400 text-white'
-          }`}>
-            {dispatcher.active ? <CheckCircle className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
-            {dispatcher.active ? 'Activo' : 'Inactivo'}
-          </span>
-          <span className="text-xs text-gray-400 dark:text-slate-500">
-            Desde {format(new Date(dispatcher.created_at), 'MMM d, yyyy')}
-          </span>
-        </div>
+          {/* Inline contact info — driver card style */}
+          <div className="space-y-1.5 text-xs">
+            {dispatcher.phone && (
+              <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
+                <Phone className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500 flex-shrink-0" />
+                <span>{dispatcher.phone}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
+              <Mail className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500 flex-shrink-0" />
+              <a href={`mailto:${dispatcher.email}`} className="text-blue-500 hover:text-blue-600 truncate">{dispatcher.email}</a>
+            </div>
+            <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
+              <Shield className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500 flex-shrink-0" />
+              {dispatcher.ssn ? (
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono">{showSSN ? dispatcher.ssn : maskSSN(dispatcher.ssn)}</span>
+                  <button onClick={() => setShowSSN(!showSSN)} className="hover:text-gray-700 dark:hover:text-slate-200">
+                    {showSSN ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              ) : (
+                <button onClick={onEdit} className="text-orange-500 hover:text-orange-600 font-medium">+ Agregar SSN</button>
+              )}
+            </div>
+            {!dispatcher.phone && (
+              <div className="flex items-center gap-2 text-gray-400 dark:text-slate-500">
+                <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+                <button onClick={onEdit} className="text-orange-500 hover:text-orange-600 font-medium">+ Agregar teléfono</button>
+              </div>
+            )}
+            <div className="flex items-center gap-2 text-gray-400 dark:text-slate-500">
+              <ClipboardList className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>Desde {format(new Date(dispatcher.created_at), 'MMM d, yyyy')}</span>
+            </div>
+          </div>
 
-        <div className="px-5 pb-5 space-y-4">
-          {/* Stats row — compact 3 cols */}
+          {/* Stats row */}
           <div className="grid grid-cols-3 gap-2">
             {[
-              { label: 'Órdenes', value: dispatcher.total_orders, color: 'text-orange-600' },
-              { label: 'Activas',  value: dispatcher.active_orders, color: 'text-blue-600' },
+              { label: 'Órdenes',  value: dispatcher.total_orders,              color: 'text-gray-900 dark:text-white' },
+              { label: 'Activas',  value: dispatcher.active_orders,             color: 'text-blue-600' },
               { label: 'Ganado',   value: `$${dispatcher.total_earned.toFixed(0)}`, color: 'text-green-600' },
             ].map(s => (
-              <div key={s.label} className="bg-gray-50 dark:bg-slate-700/60 rounded-xl py-3 text-center">
-                <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
+              <div key={s.label} className="bg-gray-50 dark:bg-slate-700/60 rounded-xl py-2.5 text-center">
+                <p className={`text-base font-bold ${s.color}`}>{s.value}</p>
                 <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">{s.label}</p>
               </div>
             ))}
           </div>
 
-          {/* Contact & Tax */}
-          <div className="bg-gray-50 dark:bg-slate-700/40 rounded-xl p-4 space-y-2.5">
-            <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1">Contacto y Taxes</p>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400"><Phone className="w-3 h-3" /> Teléfono</span>
-              {dispatcher.phone
-                ? <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{dispatcher.phone}</span>
-                : <button onClick={onEdit} className="text-xs text-orange-500 hover:text-orange-600 font-medium">+ Agregar</button>
-              }
-            </div>
-            <div className="border-t border-gray-200 dark:border-slate-600" />
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400"><Shield className="w-3 h-3" /> SSN</span>
-              <div className="flex items-center gap-1.5">
-                {dispatcher.ssn ? (
-                  <>
-                    <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">
-                      {showSSN ? dispatcher.ssn : maskSSN(dispatcher.ssn)}
-                    </span>
-                    <button onClick={() => setShowSSN(!showSSN)} className="p-0.5 hover:bg-gray-200 dark:hover:bg-slate-600 rounded">
-                      {showSSN ? <EyeOff className="w-3.5 h-3.5 text-gray-400" /> : <Eye className="w-3.5 h-3.5 text-gray-400" />}
-                    </button>
-                  </>
-                ) : (
-                  <button onClick={onEdit} className="text-xs text-orange-500 hover:text-orange-600 font-medium">+ Agregar</button>
-                )}
-              </div>
-            </div>
-          </div>
-
           {/* Commissions */}
-          <div className="bg-gray-50 dark:bg-slate-700/40 rounded-xl p-4 space-y-2.5">
-            <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1">Comisiones · 5% por orden</p>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500 dark:text-slate-400">Total generado</span>
-              <span className="text-sm font-bold text-gray-900 dark:text-white">${dispatcher.total_earned.toFixed(2)}</span>
+          <div className="bg-gray-50 dark:bg-slate-700/40 rounded-xl p-4 space-y-2">
+            <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Comisiones · 5% por orden</p>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-500 dark:text-slate-400">Total generado</span>
+              <span className="font-bold text-gray-900 dark:text-white">${dispatcher.total_earned.toFixed(2)}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500 dark:text-slate-400">Liquidado</span>
-              <span className="text-sm font-semibold text-green-600">${dispatcher.settled.toFixed(2)}</span>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-500 dark:text-slate-400">Liquidado</span>
+              <span className="font-semibold text-green-600">${dispatcher.settled.toFixed(2)}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500 dark:text-slate-400">Pendiente</span>
-              <span className="text-sm font-semibold text-yellow-600">${dispatcher.pending.toFixed(2)}</span>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-500 dark:text-slate-400">Pendiente</span>
+              <span className="font-semibold text-yellow-600">${dispatcher.pending.toFixed(2)}</span>
             </div>
             {dispatcher.total_earned > 0 && (
               <div className="pt-1">
-                <div className="flex justify-between text-[10px] text-gray-400 mb-1">
+                <div className="flex justify-between text-[10px] text-gray-400 dark:text-slate-500 mb-1">
                   <span>Progreso liquidación</span><span>{pct}%</span>
                 </div>
-                <div className="h-2 bg-gray-200 dark:bg-slate-600 rounded-full overflow-hidden">
-                  <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                <div className="h-1.5 bg-gray-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                  <div className="h-full bg-green-500 rounded-full" style={{ width: `${pct}%` }} />
                 </div>
               </div>
             )}
