@@ -186,26 +186,26 @@ export default function Header({ onMenuClick }: HeaderProps) {
         {/* User menu */}
         <div className="relative" ref={userMenuRef}>
           <button onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+            className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
             <div className={`w-7 h-7 ${user?.role === 'admin' ? 'bg-purple-600' : 'bg-orange-500'} rounded-full flex items-center justify-center text-white text-xs font-bold`}>
               {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'U'}
             </div>
             <div className="hidden md:block text-left">
-              <p className="text-xs font-semibold text-gray-900 leading-none">{user?.name}</p>
-              <p className="text-xs text-gray-400 capitalize mt-0.5">{user?.role}</p>
+              <p className="text-xs font-semibold text-gray-900 dark:text-slate-100 leading-none">{user?.name}</p>
+              <p className="text-xs text-gray-400 dark:text-slate-500 capitalize mt-0.5">{user?.role}</p>
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-gray-400 hidden md:block" />
+            <ChevronDown className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500 hidden md:block" />
           </button>
 
           {showUserMenu && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 z-50 slide-in py-1">
+            <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 z-50 slide-in py-1">
               <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-700">
                 <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{user?.name}</p>
-                <p className="text-xs text-gray-400 truncate">{user?.email}</p>
-                <span className={`badge mt-1 capitalize ${user?.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'}`}>{user?.role}</span>
+                <p className="text-xs text-gray-400 dark:text-slate-500 truncate">{user?.email}</p>
+                <span className={`badge mt-1 capitalize ${user?.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300' : 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300'}`}>{user?.role}</span>
               </div>
               <button onClick={() => { setShowUserMenu(false); logout(); }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
                 <LogOut className="w-4 h-4" />
                 Sign Out
               </button>
