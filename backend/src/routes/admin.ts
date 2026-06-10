@@ -96,7 +96,7 @@ router.delete('/users/:id', (req: Request, res: Response) => {
 router.get('/dispatchers', (_req: Request, res: Response) => {
   const db = getDb();
   const dispatchers = db.prepare(`
-    SELECT u.id, u.name, u.email, u.active, u.created_at,
+    SELECT u.id, u.name, u.email, u.phone, u.ssn, u.active, u.created_at,
            COUNT(DISTINCT c.order_id)                                                        AS total_orders,
            COALESCE(SUM(c.dispatcher_pay), 0)                                                AS total_earned,
            COALESCE(SUM(CASE WHEN c.status = 'pending' THEN c.dispatcher_pay ELSE 0 END), 0) AS pending,
@@ -110,6 +110,22 @@ router.get('/dispatchers', (_req: Request, res: Response) => {
     ORDER BY total_earned DESC
   `).all();
   res.json(dispatchers);
+});
+
+router.put('/dispatchers/:id', (req: Request, res: Response) => {
+  const db = getDb();
+  const { phone, ssn } = req.body;
+  const user = db.prepare("SELECT id FROM users WHERE id = ? AND role = 'dispatcher'").get(req.params.id);
+  if (!user) return res.status(404).json({ error: 'Dispatcher not found' });
+
+  const updates: Record<string, string> = {};
+  if (phone !== undefined) updates.phone = phone;
+  if (ssn   !== undefined) updates.ssn   = ssn;
+  if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'Nothing to update' });
+
+  const fields = Object.keys(updates).map(f => `${f} = ?`).join(', ');
+  db.prepare(`UPDATE users SET ${fields} WHERE id = ?`).run(...Object.values(updates), req.params.id);
+  res.json({ success: true });
 });
 
 router.get('/stats', (_req: Request, res: Response) => {

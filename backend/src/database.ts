@@ -188,6 +188,15 @@ export function initDatabase(): void {
     );
   `);
 
+  // Migrate: add phone and ssn to users if not present
+  const userCols = db.prepare('PRAGMA table_info(users)').all() as Array<{ name: string }>;
+  if (!userCols.some(c => c.name === 'phone')) {
+    db.exec("ALTER TABLE users ADD COLUMN phone TEXT NOT NULL DEFAULT ''");
+  }
+  if (!userCols.some(c => c.name === 'ssn')) {
+    db.exec("ALTER TABLE users ADD COLUMN ssn TEXT NOT NULL DEFAULT ''");
+  }
+
   // Migrate: add dispatcher_user_id to orders if not present
   const orderCols = db.prepare('PRAGMA table_info(orders)').all() as Array<{ name: string }>;
   if (!orderCols.some(c => c.name === 'dispatcher_user_id')) {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, ClipboardList, Package, DollarSign, TrendingUp, Clock, X, Mail, CheckCircle, AlertCircle } from 'lucide-react';
+import { Search, ClipboardList, Package, DollarSign, TrendingUp, Clock, X, Mail, CheckCircle, AlertCircle, Phone, Shield, Eye, EyeOff, Edit2 } from 'lucide-react';
 import api from '../services/api';
 import { format, formatDistanceToNow } from 'date-fns';
 
@@ -7,6 +7,8 @@ interface DispatcherProfile {
   id: string;
   name: string;
   email: string;
+  phone: string;
+  ssn: string;
   active: number;
   created_at: string;
   total_orders: number;
@@ -16,12 +18,88 @@ interface DispatcherProfile {
   active_orders: number;
 }
 
+function maskSSN(ssn: string): string {
+  if (!ssn) return '—';
+  const digits = ssn.replace(/\D/g, '');
+  if (digits.length < 4) return '***-**-' + ssn.slice(-digits.length).padStart(4, '*');
+  return `***-**-${digits.slice(-4)}`;
+}
+
+interface EditModalProps {
+  dispatcher: DispatcherProfile;
+  onClose: () => void;
+  onSaved: (updated: Partial<DispatcherProfile>) => void;
+}
+
+function EditModal({ dispatcher, onClose, onSaved }: EditModalProps) {
+  const [phone, setPhone] = useState(dispatcher.phone || '');
+  const [ssn,   setSSN]   = useState(dispatcher.ssn   || '');
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      await api.put(`/admin/dispatchers/${dispatcher.id}`, { phone, ssn });
+      onSaved({ phone, ssn });
+      onClose();
+    } catch {
+      /* ignore */
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-slate-700">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Editar información de pago</h3>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
+            <X className="w-4 h-4 text-gray-500" />
+          </button>
+        </div>
+        <div className="p-5 space-y-4">
+          <div>
+            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5 block">Teléfono</label>
+            <input
+              className="input w-full"
+              placeholder="(305) 555-0000"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5 block flex items-center gap-1">
+              <Shield className="w-3 h-3" /> SSN (Social Security Number)
+            </label>
+            <input
+              className="input w-full font-mono"
+              placeholder="XXX-XX-XXXX"
+              value={ssn}
+              onChange={e => setSSN(e.target.value)}
+            />
+            <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-1">Información confidencial — solo visible para admins</p>
+          </div>
+          <div className="flex gap-2 pt-1">
+            <button onClick={onClose} className="btn-secondary flex-1 text-sm">Cancelar</button>
+            <button onClick={handleSave} disabled={saving} className="btn-primary flex-1 text-sm">
+              {saving ? 'Guardando...' : 'Guardar'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface DetailModalProps {
   dispatcher: DispatcherProfile;
   onClose: () => void;
+  onEdit: () => void;
 }
 
-function DetailModal({ dispatcher, onClose }: DetailModalProps) {
+function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
+  const [showSSN, setShowSSN] = useState(false);
   const initials = dispatcher.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
   return (
@@ -29,9 +107,14 @@ function DetailModal({ dispatcher, onClose }: DetailModalProps) {
       <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Perfil del Dispatcher</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
-            <X className="w-5 h-5 text-gray-500 dark:text-slate-400" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button onClick={onEdit} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg" title="Editar">
+              <Edit2 className="w-4 h-4 text-gray-500 dark:text-slate-400" />
+            </button>
+            <button onClick={onClose} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
+              <X className="w-4 h-4 text-gray-500 dark:text-slate-400" />
+            </button>
+          </div>
         </div>
         <div className="p-6 space-y-5">
           {/* Header */}
@@ -57,6 +140,35 @@ function DetailModal({ dispatcher, onClose }: DetailModalProps) {
                 <span className="text-xs text-gray-400 dark:text-slate-500">
                   · Desde {format(new Date(dispatcher.created_at), 'MMM d, yyyy')}
                 </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact & Tax info */}
+          <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4 space-y-3">
+            <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 uppercase tracking-wide">Información de contacto y pagos</p>
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1.5"><Phone className="w-3 h-3" /> Teléfono</span>
+                <span className="text-sm font-medium text-gray-800 dark:text-slate-200">
+                  {dispatcher.phone || <span className="text-gray-400 dark:text-slate-500 italic">No registrado</span>}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1.5"><Shield className="w-3 h-3" /> SSN</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">
+                    {dispatcher.ssn
+                      ? (showSSN ? dispatcher.ssn : maskSSN(dispatcher.ssn))
+                      : <span className="text-gray-400 dark:text-slate-500 italic text-xs">No registrado</span>
+                    }
+                  </span>
+                  {dispatcher.ssn && (
+                    <button onClick={() => setShowSSN(!showSSN)} className="p-0.5 hover:bg-gray-200 dark:hover:bg-slate-700 rounded">
+                      {showSSN ? <EyeOff className="w-3.5 h-3.5 text-gray-400" /> : <Eye className="w-3.5 h-3.5 text-gray-400" />}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -126,6 +238,7 @@ export default function DispatcherProfiles() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<DispatcherProfile | null>(null);
+  const [editing, setEditing] = useState<DispatcherProfile | null>(null);
 
   useEffect(() => {
     api.get('/admin/dispatchers')
@@ -133,6 +246,11 @@ export default function DispatcherProfiles() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  function handleSaved(id: string, updated: Partial<DispatcherProfile>) {
+    setDispatchers(prev => prev.map(d => d.id === id ? { ...d, ...updated } : d));
+    setSelected(prev => prev?.id === id ? { ...prev, ...updated } : prev);
+  }
 
   const filtered = dispatchers.filter(d =>
     !search || d.name.toLowerCase().includes(search.toLowerCase()) || d.email.toLowerCase().includes(search.toLowerCase())
@@ -200,6 +318,24 @@ export default function DispatcherProfiles() {
                   </div>
                 </div>
 
+                {/* Contact chips */}
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  {d.phone ? (
+                    <span className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
+                      <Phone className="w-2.5 h-2.5" /> {d.phone}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-gray-400 dark:text-slate-500 italic">Sin teléfono</span>
+                  )}
+                  <span className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full ${
+                    d.ssn
+                      ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900/30'
+                      : 'text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-700 italic'
+                  }`}>
+                    <Shield className="w-2.5 h-2.5" /> {d.ssn ? 'SSN registrado' : 'Sin SSN'}
+                  </span>
+                </div>
+
                 {/* Stats row */}
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-2 text-center">
@@ -242,7 +378,21 @@ export default function DispatcherProfiles() {
         </div>
       )}
 
-      {selected && <DetailModal dispatcher={selected} onClose={() => setSelected(null)} />}
+      {selected && !editing && (
+        <DetailModal
+          dispatcher={selected}
+          onClose={() => setSelected(null)}
+          onEdit={() => setEditing(selected)}
+        />
+      )}
+
+      {editing && (
+        <EditModal
+          dispatcher={editing}
+          onClose={() => setEditing(null)}
+          onSaved={updated => handleSaved(editing.id, updated)}
+        />
+      )}
     </div>
   );
 }
