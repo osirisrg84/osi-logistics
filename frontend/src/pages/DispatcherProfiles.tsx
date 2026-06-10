@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, ClipboardList, Package, DollarSign, TrendingUp, Clock, X, Mail, CheckCircle, AlertCircle, Phone, Shield, Eye, EyeOff, Edit2 } from 'lucide-react';
+import { Search, ClipboardList, Package, DollarSign, TrendingUp, Clock, X, Mail, CheckCircle, AlertCircle, Phone, Shield, Eye, EyeOff, Edit2, Trash2 } from 'lucide-react';
 import api from '../services/api';
 import { format } from 'date-fns';
 
@@ -239,6 +239,15 @@ export default function DispatcherProfiles() {
       .finally(() => setLoading(false));
   }, []);
 
+  async function handleDelete(d: DispatcherProfile) {
+    if (!confirm(`¿Eliminar a ${d.name}? Esta acción no se puede deshacer.`)) return;
+    try {
+      await api.delete(`/admin/users/${d.id}`);
+      setDispatchers(prev => prev.filter(x => x.id !== d.id));
+      if (selected?.id === d.id) setSelected(null);
+    } catch {}
+  }
+
   function handleSaved(id: string, updated: Partial<DispatcherProfile>) {
     setDispatchers(prev => prev.map(d => d.id === id ? { ...d, ...updated } : d));
     setSelected(prev => prev?.id === id ? { ...prev, ...updated } : prev);
@@ -288,30 +297,38 @@ export default function DispatcherProfiles() {
           {filtered.map(d => {
             const initials = d.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
             return (
-              <button
-                key={d.id}
-                onClick={() => setSelected(d)}
-                className="card p-5 text-left hover:border-orange-300 dark:hover:border-orange-600 hover:shadow-lg transition-all group"
-              >
+              <div key={d.id} className="card p-5 hover:border-orange-300 dark:hover:border-orange-600 hover:shadow-lg transition-all">
                 {/* Header */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0 group-hover:bg-orange-600 transition-colors">
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                     {initials}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{d.name}</p>
                     <p className="text-xs text-gray-400 dark:text-slate-500 truncate">{d.email}</p>
                     <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full mt-0.5 ${
-                      d.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                      d.active ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400'
                     }`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${d.active ? 'bg-green-500' : 'bg-gray-400'}`} />
                       {d.active ? 'Activo' : 'Inactivo'}
                     </span>
                   </div>
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                    <button onClick={() => setSelected(d)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                      <Eye className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500" />
+                    </button>
+                    <button onClick={() => setEditing(d)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                      <Edit2 className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500" />
+                    </button>
+                    <button onClick={() => handleDelete(d)} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                      <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Contact chips */}
-                <div className="flex flex-wrap gap-1.5 mb-4">
+                <div className="flex flex-wrap gap-1.5 mb-3">
                   {d.phone ? (
                     <span className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
                       <Phone className="w-2.5 h-2.5" /> {d.phone}
@@ -329,7 +346,7 @@ export default function DispatcherProfiles() {
                 </div>
 
                 {/* Stats row */}
-                <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="grid grid-cols-3 gap-2 mb-3">
                   <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-2 text-center">
                     <p className="text-base font-bold text-orange-600">{d.total_orders}</p>
                     <p className="text-[10px] text-gray-400 dark:text-slate-500">Órdenes</p>
@@ -364,7 +381,7 @@ export default function DispatcherProfiles() {
                   <ClipboardList className="w-3 h-3 inline mr-1" />
                   Miembro desde {format(new Date(d.created_at), 'MMM yyyy')}
                 </p>
-              </button>
+              </div>
             );
           })}
         </div>
