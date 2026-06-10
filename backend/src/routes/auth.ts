@@ -154,6 +154,66 @@ router.post('/logout', (req: Request, res: Response) => {
   res.json({ success: true });
 });
 
+router.post('/register-driver', (req: Request, res: Response) => {
+  const db = getDb();
+  const {
+    name, email, password, phone,
+    license_number, license_expiry, hire_date,
+    equipment_type = 'Dry Van', company_name = 'OSI Logistics LLC',
+    mc_number = '', authority_since = '',
+  } = req.body;
+
+  if (!name || !email || !password || !phone || !license_number || !license_expiry || !hire_date) {
+    return res.status(400).json({ error: 'All required fields must be filled in' });
+  }
+  if (password.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  }
+
+  const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase());
+  if (existingUser) return res.status(409).json({ error: 'An account with this email already exists' });
+
+  const existingDriver = db.prepare('SELECT id FROM drivers WHERE email = ?').get(email.toLowerCase());
+  if (existingDriver) return res.status(409).json({ error: 'A driver profile with this email already exists' });
+
+  const driverId = uuidv4();
+  const initials = name.split(' ').map((n: string) => n[0]).join('').slice(0, 2);
+
+  db.prepare(`
+    INSERT INTO drivers
+      (id, name, phone, email, license_number, license_expiry, status,
+       current_lat, current_lng, current_address,
+       rating, total_deliveries, on_time_rate, avatar, hire_date,
+       equipment_type, company_name, mc_number, authority_since)
+    VALUES (?, ?, ?, ?, ?, ?, 'offline', 25.7617, -80.1918, 'Miami, FL',
+            5.0, 0, 100.0, ?, ?, ?, ?, ?, ?)
+  `).run(driverId, name, phone, email.toLowerCase(), license_number, license_expiry,
+    initials, hire_date, equipment_type, company_name, mc_number, authority_since);
+
+  const salt = randomBytes(16).toString('hex');
+  const passwordHash = hashPassword(password, salt);
+  const userId = uuidv4();
+
+  db.prepare(`
+    INSERT INTO users (id, name, email, password_hash, salt, role, driver_id)
+    VALUES (?, ?, ?, ?, ?, 'driver', ?)
+  `).run(userId, name, email.toLowerCase(), passwordHash, salt, driverId);
+
+  db.prepare(`
+    INSERT INTO notifications (id, type, title, message, read)
+    VALUES (?, 'driver', 'New Driver Registered', ?, 0)
+  `).run(uuidv4(), `${name} has registered as a new driver.`);
+
+  const token = createSession(userId);
+  const driverProfile = db.prepare('SELECT * FROM drivers WHERE id = ?').get(driverId);
+
+  res.status(201).json({
+    token,
+    user: { id: userId, name, email: email.toLowerCase(), role: 'driver', driver_id: driverId },
+    driverProfile,
+  });
+});
+
 router.get('/drivers-list', (_req: Request, res: Response) => {
   const db = getDb();
   const drivers = db.prepare(`
