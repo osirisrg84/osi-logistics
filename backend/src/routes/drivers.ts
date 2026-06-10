@@ -76,15 +76,20 @@ router.post('/', (req: Request, res: Response) => {
     name, phone, email, license_number, license_expiry,
     hire_date, current_lat = 25.7617, current_lng = -80.1918,
     current_address = 'Miami, FL',
+    equipment_type = 'Dry Van',
+    company_name = 'OSI Logistics LLC',
+    mc_number = '',
+    authority_since = '',
   } = req.body;
 
   const initials = name.split(' ').map((n: string) => n[0]).join('');
 
   db.prepare(`
     INSERT INTO drivers (id, name, phone, email, license_number, license_expiry,
-      status, current_lat, current_lng, current_address, avatar, hire_date)
-    VALUES (?, ?, ?, ?, ?, ?, 'available', ?, ?, ?, ?, ?)
-  `).run(id, name, phone, email, license_number, license_expiry, current_lat, current_lng, current_address, initials, hire_date);
+      status, current_lat, current_lng, current_address, avatar, hire_date,
+      equipment_type, company_name, mc_number, authority_since)
+    VALUES (?, ?, ?, ?, ?, ?, 'available', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, name, phone, email, license_number, license_expiry, current_lat, current_lng, current_address, initials, hire_date, equipment_type, company_name, mc_number, authority_since);
 
   db.prepare(`
     INSERT INTO notifications (id, type, title, message, read, related_id)
