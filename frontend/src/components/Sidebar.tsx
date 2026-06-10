@@ -46,7 +46,13 @@ export default function Sidebar({ onClose }: SidebarProps) {
       <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img src={osiLogo} alt="OSI Logistics" className="h-9 w-auto object-contain rounded-md flex-shrink-0" />
-          <div className="text-slate-400 text-xs leading-tight">{isAdmin ? 'Admin Console' : 'Dispatch Center'}</div>
+          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+            isAdmin
+              ? 'text-purple-300 bg-purple-500/20 border-purple-500/30'
+              : 'text-orange-300 bg-orange-500/20 border-orange-500/30'
+          }`}>
+            {isAdmin ? 'Admin Console' : 'Dispatch Center'}
+          </span>
         </div>
         {/* Close button — mobile only */}
         {onClose && (

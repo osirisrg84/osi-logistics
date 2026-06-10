@@ -84,9 +84,16 @@ export default function Header({ onMenuClick }: HeaderProps) {
         {/* OSI Logo — mobile only, tapping opens sidebar */}
         <button
           onClick={onMenuClick}
-          className="md:hidden -ml-1 rounded-lg p-0.5 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+          className="md:hidden -ml-1 rounded-lg p-0.5 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-2"
         >
           <img src={osiLogo} alt="OSI Logistics" className="h-9 w-auto object-contain rounded-md" />
+          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+            user?.role === 'admin'
+              ? 'text-purple-700 bg-purple-50 border-purple-200 dark:text-purple-300 dark:bg-purple-500/20 dark:border-purple-500/30'
+              : 'text-orange-700 bg-orange-50 border-orange-200 dark:text-orange-300 dark:bg-orange-500/20 dark:border-orange-500/30'
+          }`}>
+            {user?.role === 'admin' ? 'Admin Console' : 'Dispatch Center'}
+          </span>
         </button>
         {/* Page title — desktop only */}
         <div className="hidden md:block">

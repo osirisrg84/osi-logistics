@@ -272,7 +272,9 @@ export default function DriverPortal() {
           {/* OSI Logistics branding */}
           <div className="flex items-center gap-2.5">
             <img src={osiLogo} alt="OSI Logistics" className="h-9 w-auto object-contain rounded-md flex-shrink-0" />
-            <p className="text-[10px] text-slate-400 leading-tight">Driver Portal</p>
+            <span className="text-xs font-semibold text-blue-300 bg-blue-500/20 border border-blue-500/30 px-2.5 py-1 rounded-full">
+              Driver Portal
+            </span>
           </div>
 
           {/* Action buttons only */}
