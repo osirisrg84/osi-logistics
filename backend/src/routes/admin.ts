@@ -114,13 +114,21 @@ router.get('/dispatchers', (_req: Request, res: Response) => {
 
 router.put('/dispatchers/:id', (req: Request, res: Response) => {
   const db = getDb();
-  const { phone, ssn } = req.body;
+  const { name, email, phone, ssn, active, password } = req.body;
   const user = db.prepare("SELECT id FROM users WHERE id = ? AND role = 'dispatcher'").get(req.params.id);
   if (!user) return res.status(404).json({ error: 'Dispatcher not found' });
 
-  const updates: Record<string, string> = {};
-  if (phone !== undefined) updates.phone = phone;
-  if (ssn   !== undefined) updates.ssn   = ssn;
+  const updates: Record<string, unknown> = {};
+  if (name   !== undefined) updates.name   = name;
+  if (email  !== undefined) updates.email  = email.toLowerCase();
+  if (phone  !== undefined) updates.phone  = phone;
+  if (ssn    !== undefined) updates.ssn    = ssn;
+  if (active !== undefined) updates.active = active ? 1 : 0;
+  if (password) {
+    const salt = randomBytes(16).toString('hex');
+    updates.password_hash = scryptSync(password, salt, 64).toString('hex');
+    updates.salt = salt;
+  }
   if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'Nothing to update' });
 
   const fields = Object.keys(updates).map(f => `${f} = ?`).join(', ');

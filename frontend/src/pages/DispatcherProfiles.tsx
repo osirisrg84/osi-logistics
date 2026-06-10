@@ -32,18 +32,24 @@ interface EditModalProps {
 }
 
 function EditModal({ dispatcher, onClose, onSaved }: EditModalProps) {
-  const [phone, setPhone] = useState(dispatcher.phone || '');
-  const [ssn,   setSSN]   = useState(dispatcher.ssn   || '');
-  const [saving, setSaving] = useState(false);
+  const [name,     setName]     = useState(dispatcher.name  || '');
+  const [email,    setEmail]    = useState(dispatcher.email || '');
+  const [phone,    setPhone]    = useState(dispatcher.phone || '');
+  const [ssn,      setSSN]      = useState(dispatcher.ssn   || '');
+  const [active,   setActive]   = useState(!!dispatcher.active);
+  const [password, setPassword] = useState('');
+  const [showPwd,  setShowPwd]  = useState(false);
+  const [saving,   setSaving]   = useState(false);
 
   async function handleSave() {
     setSaving(true);
     try {
-      await api.put(`/admin/dispatchers/${dispatcher.id}`, { phone, ssn });
-      onSaved({ phone, ssn });
+      const payload: Record<string, unknown> = { name, email, phone, ssn, active };
+      if (password) payload.password = password;
+      await api.put(`/admin/dispatchers/${dispatcher.id}`, payload);
+      onSaved({ name, email, phone, ssn, active: active ? 1 : 0 });
       onClose();
     } catch {
-      /* ignore */
     } finally {
       setSaving(false);
     }
@@ -53,33 +59,70 @@ function EditModal({ dispatcher, onClose, onSaved }: EditModalProps) {
     <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-slate-700">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Editar información de pago</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Editar dispatcher</h3>
           <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
             <X className="w-4 h-4 text-gray-500" />
           </button>
         </div>
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-3">
+
+          {/* Name */}
           <div>
-            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5 block">Teléfono</label>
-            <input
-              className="input w-full"
-              placeholder="(305) 555-0000"
-              value={phone}
-              onChange={e => setPhone(e.target.value)}
-            />
+            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block">Nombre</label>
+            <input className="input w-full" placeholder="Nombre completo" value={name} onChange={e => setName(e.target.value)} />
           </div>
+
+          {/* Email */}
           <div>
-            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5 block flex items-center gap-1">
-              <Shield className="w-3 h-3" /> SSN (Social Security Number)
+            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block">Email</label>
+            <input className="input w-full" type="email" placeholder="email@osilogistics.com" value={email} onChange={e => setEmail(e.target.value)} />
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block">Teléfono</label>
+            <input className="input w-full" placeholder="(305) 555-0000" value={phone} onChange={e => setPhone(e.target.value)} />
+          </div>
+
+          {/* SSN */}
+          <div>
+            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block flex items-center gap-1">
+              <Shield className="w-3 h-3" /> SSN
             </label>
-            <input
-              className="input w-full font-mono"
-              placeholder="XXX-XX-XXXX"
-              value={ssn}
-              onChange={e => setSSN(e.target.value)}
-            />
-            <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-1">Información confidencial — solo visible para admins</p>
+            <input className="input w-full font-mono" placeholder="XXX-XX-XXXX" value={ssn} onChange={e => setSSN(e.target.value)} />
+            <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">Confidencial — solo visible para admins</p>
           </div>
+
+          {/* Password */}
+          <div>
+            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block">Nueva contraseña <span className="text-gray-400 font-normal">(dejar vacío para no cambiar)</span></label>
+            <div className="relative">
+              <input
+                className="input w-full pr-9"
+                type={showPwd ? 'text' : 'password'}
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+              <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Active toggle */}
+          <div className="flex items-center justify-between py-1">
+            <span className="text-xs font-medium text-gray-600 dark:text-slate-400">Estado de cuenta</span>
+            <button
+              type="button"
+              onClick={() => setActive(!active)}
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${active ? 'bg-green-500' : 'bg-gray-300 dark:bg-slate-600'}`}
+            >
+              <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${active ? 'translate-x-4' : 'translate-x-0.5'}`} />
+            </button>
+          </div>
+
+          {/* Actions */}
           <div className="flex gap-2 pt-1">
             <button onClick={onClose} className="btn-secondary flex-1 text-sm">Cancelar</button>
             <button onClick={handleSave} disabled={saving} className="btn-primary flex-1 text-sm">
