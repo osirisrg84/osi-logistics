@@ -393,8 +393,8 @@ export default function DriverPortal() {
 
       {/* ── Content area ───────────────────────────────────── */}
 
-      {/* Offline: 3D map fullscreen */}
-      {driverStatus === 'offline' && tab !== 'profile' && tab !== 'payments' && (
+      {/* Offline: 3D map fullscreen — solo cuando tab es 'active' */}
+      {driverStatus === 'offline' && tab === 'active' && (
         <div className="relative" style={{ height: 'calc(100vh - 252px)', minHeight: 340 }}>
           <Map3D driver={driver} activeOrders={activeOrders} pitch={52} />
           <div className="absolute inset-x-0 top-0 h-16 pointer-events-none"
@@ -420,8 +420,8 @@ export default function DriverPortal() {
         </div>
       )}
 
-      {/* Online content */}
-      {driverStatus !== 'offline' && (
+      {/* Tab content — visible online siempre, y offline para delivered/map */}
+      {(driverStatus !== 'offline' || tab === 'delivered' || tab === 'map') && (
         <div className="max-w-lg mx-auto px-4 py-5">
 
           {tab === 'active' && (
