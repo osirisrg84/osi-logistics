@@ -57,7 +57,9 @@ export default function Landing() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-center p-6">
       {/* Header */}
       <div className="text-center mb-12">
-        <img src={osiLogo} alt="OSI Logistics" className="h-24 w-auto object-contain mx-auto mb-4 rounded-2xl shadow-2xl shadow-black/40" />
+        <a href="https://www.osilogistics.com/" target="_blank" rel="noopener noreferrer">
+          <img src={osiLogo} alt="OSI Logistics" className="h-24 w-auto object-contain mx-auto mb-4 rounded-2xl shadow-2xl shadow-black/40 hover:opacity-90 transition-opacity cursor-pointer" />
+        </a>
         <p className="text-slate-400 text-lg">Dispatch Management Platform</p>
       </div>
 
