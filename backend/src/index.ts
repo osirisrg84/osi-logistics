@@ -14,6 +14,7 @@ import notificationsRouter from './routes/notifications';
 import authRouter from './routes/auth';
 import adminRouter from './routes/admin';
 import billingRouter from './routes/billing';
+import pushRouter, { sendPushToAll } from './routes/push';
 import { authenticate } from './middleware/auth';
 
 const PORT = process.env.PORT || 3001;
@@ -112,6 +113,7 @@ app.use('/api/analytics', authenticate, analyticsRouter);
 app.use('/api/notifications', authenticate, notificationsRouter);
 app.use('/api/admin', authenticate, adminRouter);
 app.use('/api/billing', authenticate, billingRouter);
+app.use('/api/push', pushRouter);
 
 io.on('connection', (socket) => {
   console.log(`Client connected: ${socket.id}`);
@@ -122,6 +124,10 @@ io.on('connection', (socket) => {
 
   socket.on('subscribe_orders', () => {
     socket.join('orders');
+  });
+
+  socket.on('subscribe_dispatchers', () => {
+    socket.join('dispatchers');
   });
 
   socket.on('disconnect', () => {
@@ -206,12 +212,21 @@ function startSimulation(): void {
   appEvents.on('driver:status_changed', (event: DriverStatusEvent) => {
     // Broadcast to all dispatcher clients subscribed to tracking
     io.to('tracking').emit('driver_status_changed', event);
+    // Also broadcast to dispatcher room so Layout can show toast
+    io.to('dispatchers').emit('driver_status_changed', event);
+
+    if (event.status === 'available') {
+      sendPushToAll({
+        title: '🟢 Driver Online',
+        body: `${event.name} está disponible y listo para entregas`,
+        driverId: event.id,
+      });
+    }
 
     if (event.status !== 'offline') {
       addToSimulation(event.id);
     } else {
       simStates.delete(event.id);
-      // Tell dispatchers to remove this driver from the map
       io.to('tracking').emit('driver_went_offline', { id: event.id });
     }
   });
