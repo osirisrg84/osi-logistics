@@ -281,9 +281,28 @@ export default function DriverPortal() {
         osc.start(start);
         osc.stop(start + 0.35);
       });
-    } catch {
-      // AudioContext not available — silent fail
-    }
+    } catch {}
+  };
+
+  const playOfflineSound = () => {
+    try {
+      const ctx = new AudioContext();
+      const notes = [783.99, 659.25, 523.25]; // G5 E5 C5 — acorde descendente
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const start = ctx.currentTime + i * 0.14;
+        gain.gain.setValueAtTime(0, start);
+        gain.gain.linearRampToValueAtTime(0.2, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.4);
+        osc.start(start);
+        osc.stop(start + 0.4);
+      });
+    } catch {}
   };
 
   const setStatus = async (newStatus: DriverStatus) => {
@@ -293,6 +312,7 @@ export default function DriverPortal() {
       await driversApi.update(user.driver_id, { status: newStatus });
       setDriverStatus(newStatus);
       if (newStatus === 'available') playOnlineSound();
+      if (newStatus === 'offline') playOfflineSound();
     } catch {
     } finally {
       setTogglingStatus(false);
