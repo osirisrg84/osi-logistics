@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, ClipboardList, Package, DollarSign, TrendingUp, Clock, X, Mail, CheckCircle, AlertCircle, Phone, Shield, Eye, EyeOff, Edit2 } from 'lucide-react';
 import api from '../services/api';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 
 interface DispatcherProfile {
   id: string;
@@ -101,132 +101,124 @@ interface DetailModalProps {
 function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
   const [showSSN, setShowSSN] = useState(false);
   const initials = dispatcher.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  const pct = dispatcher.total_earned > 0 ? Math.round((dispatcher.settled / dispatcher.total_earned) * 100) : 0;
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Perfil del Dispatcher</h2>
-          <div className="flex items-center gap-1">
-            <button onClick={onEdit} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg" title="Editar">
-              <Edit2 className="w-4 h-4 text-gray-500 dark:text-slate-400" />
-            </button>
-            <button onClick={onClose} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
-              <X className="w-4 h-4 text-gray-500 dark:text-slate-400" />
-            </button>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm overflow-hidden" onClick={e => e.stopPropagation()}>
+
+        {/* Header band */}
+        <div className="bg-gradient-to-r from-orange-500 to-orange-400 px-5 pt-5 pb-8 relative">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-semibold text-orange-100 uppercase tracking-wide">Dispatcher</span>
+            <div className="flex items-center gap-1">
+              <button onClick={onEdit} className="p-1.5 hover:bg-white/20 rounded-lg transition-colors">
+                <Edit2 className="w-4 h-4 text-white" />
+              </button>
+              <button onClick={onClose} className="p-1.5 hover:bg-white/20 rounded-lg transition-colors">
+                <X className="w-4 h-4 text-white" />
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="p-6 space-y-5">
-          {/* Header */}
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-white text-xl font-bold border border-white/30">
               {initials}
             </div>
             <div>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">{dispatcher.name}</p>
-              <a href={`mailto:${dispatcher.email}`} className="flex items-center gap-1.5 text-xs text-blue-500 hover:text-blue-600 mt-0.5">
+              <p className="text-lg font-bold text-white leading-tight">{dispatcher.name}</p>
+              <a href={`mailto:${dispatcher.email}`} className="text-orange-100 text-xs hover:text-white flex items-center gap-1 mt-0.5">
                 <Mail className="w-3 h-3" /> {dispatcher.email}
               </a>
-              <div className="flex items-center gap-1.5 mt-1">
-                {dispatcher.active ? (
-                  <span className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-                    <CheckCircle className="w-3 h-3" /> Activo
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                    <AlertCircle className="w-3 h-3" /> Inactivo
-                  </span>
-                )}
-                <span className="text-xs text-gray-400 dark:text-slate-500">
-                  · Desde {format(new Date(dispatcher.created_at), 'MMM d, yyyy')}
-                </span>
-              </div>
             </div>
           </div>
+        </div>
 
-          {/* Contact & Tax info */}
-          <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4 space-y-3">
-            <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 uppercase tracking-wide">Información de contacto y pagos</p>
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1.5"><Phone className="w-3 h-3" /> Teléfono</span>
-                <span className="text-sm font-medium text-gray-800 dark:text-slate-200">
-                  {dispatcher.phone || <span className="text-gray-400 dark:text-slate-500 italic">No registrado</span>}
-                </span>
+        {/* Status pill — overlapping */}
+        <div className="px-5 -mt-4 flex items-center gap-2 mb-4">
+          <span className={`flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full shadow-md ${
+            dispatcher.active
+              ? 'bg-green-500 text-white'
+              : 'bg-gray-400 text-white'
+          }`}>
+            {dispatcher.active ? <CheckCircle className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
+            {dispatcher.active ? 'Activo' : 'Inactivo'}
+          </span>
+          <span className="text-xs text-gray-400 dark:text-slate-500">
+            Desde {format(new Date(dispatcher.created_at), 'MMM d, yyyy')}
+          </span>
+        </div>
+
+        <div className="px-5 pb-5 space-y-4">
+          {/* Stats row — compact 3 cols */}
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label: 'Órdenes', value: dispatcher.total_orders, color: 'text-orange-600' },
+              { label: 'Activas',  value: dispatcher.active_orders, color: 'text-blue-600' },
+              { label: 'Ganado',   value: `$${dispatcher.total_earned.toFixed(0)}`, color: 'text-green-600' },
+            ].map(s => (
+              <div key={s.label} className="bg-gray-50 dark:bg-slate-700/60 rounded-xl py-3 text-center">
+                <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
+                <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">{s.label}</p>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1.5"><Shield className="w-3 h-3" /> SSN</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">
-                    {dispatcher.ssn
-                      ? (showSSN ? dispatcher.ssn : maskSSN(dispatcher.ssn))
-                      : <span className="text-gray-400 dark:text-slate-500 italic text-xs">No registrado</span>
-                    }
-                  </span>
-                  {dispatcher.ssn && (
-                    <button onClick={() => setShowSSN(!showSSN)} className="p-0.5 hover:bg-gray-200 dark:hover:bg-slate-700 rounded">
+            ))}
+          </div>
+
+          {/* Contact & Tax */}
+          <div className="bg-gray-50 dark:bg-slate-700/40 rounded-xl p-4 space-y-2.5">
+            <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1">Contacto y Taxes</p>
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400"><Phone className="w-3 h-3" /> Teléfono</span>
+              {dispatcher.phone
+                ? <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{dispatcher.phone}</span>
+                : <button onClick={onEdit} className="text-xs text-orange-500 hover:text-orange-600 font-medium">+ Agregar</button>
+              }
+            </div>
+            <div className="border-t border-gray-200 dark:border-slate-600" />
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400"><Shield className="w-3 h-3" /> SSN</span>
+              <div className="flex items-center gap-1.5">
+                {dispatcher.ssn ? (
+                  <>
+                    <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">
+                      {showSSN ? dispatcher.ssn : maskSSN(dispatcher.ssn)}
+                    </span>
+                    <button onClick={() => setShowSSN(!showSSN)} className="p-0.5 hover:bg-gray-200 dark:hover:bg-slate-600 rounded">
                       {showSSN ? <EyeOff className="w-3.5 h-3.5 text-gray-400" /> : <Eye className="w-3.5 h-3.5 text-gray-400" />}
                     </button>
-                  )}
-                </div>
+                  </>
+                ) : (
+                  <button onClick={onEdit} className="text-xs text-orange-500 hover:text-orange-600 font-medium">+ Agregar</button>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Stats grid */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-orange-600">{dispatcher.total_orders}</p>
-              <p className="text-xs text-gray-500 dark:text-slate-400 flex items-center justify-center gap-1 mt-1">
-                <Package className="w-3 h-3" /> Órdenes gestionadas
-              </p>
+          {/* Commissions */}
+          <div className="bg-gray-50 dark:bg-slate-700/40 rounded-xl p-4 space-y-2.5">
+            <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1">Comisiones · 5% por orden</p>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-500 dark:text-slate-400">Total generado</span>
+              <span className="text-sm font-bold text-gray-900 dark:text-white">${dispatcher.total_earned.toFixed(2)}</span>
             </div>
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-blue-600">{dispatcher.active_orders}</p>
-              <p className="text-xs text-gray-500 dark:text-slate-400 flex items-center justify-center gap-1 mt-1">
-                <Clock className="w-3 h-3" /> Órdenes activas
-              </p>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-500 dark:text-slate-400">Liquidado</span>
+              <span className="text-sm font-semibold text-green-600">${dispatcher.settled.toFixed(2)}</span>
             </div>
-          </div>
-
-          {/* Commissions breakdown */}
-          <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4 space-y-3">
-            <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-2">
-              <DollarSign className="w-3.5 h-3.5 text-orange-500" /> Comisiones (5% por orden)
-            </p>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500 dark:text-slate-400">Total generado</span>
-                <span className="text-sm font-bold text-gray-900 dark:text-white">${dispatcher.total_earned.toFixed(2)}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500 dark:text-slate-400">Liquidado</span>
-                <span className="text-sm font-semibold text-green-600">${dispatcher.settled.toFixed(2)}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500 dark:text-slate-400">Pendiente</span>
-                <span className="text-sm font-semibold text-yellow-600">${dispatcher.pending.toFixed(2)}</span>
-              </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-500 dark:text-slate-400">Pendiente</span>
+              <span className="text-sm font-semibold text-yellow-600">${dispatcher.pending.toFixed(2)}</span>
             </div>
             {dispatcher.total_earned > 0 && (
-              <div className="mt-2">
-                <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
-                  <span>Progreso liquidación</span>
-                  <span>{Math.round((dispatcher.settled / dispatcher.total_earned) * 100)}%</span>
+              <div className="pt-1">
+                <div className="flex justify-between text-[10px] text-gray-400 mb-1">
+                  <span>Progreso liquidación</span><span>{pct}%</span>
                 </div>
-                <div className="h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-green-500 rounded-full transition-all"
-                    style={{ width: `${(dispatcher.settled / dispatcher.total_earned) * 100}%` }}
-                  />
+                <div className="h-2 bg-gray-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                  <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
                 </div>
               </div>
             )}
           </div>
-
-          <p className="text-xs text-center text-gray-400 dark:text-slate-500">
-            Miembro desde {formatDistanceToNow(new Date(dispatcher.created_at), { addSuffix: true })}
-          </p>
         </div>
       </div>
     </div>
