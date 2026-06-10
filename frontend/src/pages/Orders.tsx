@@ -151,7 +151,7 @@ function CreateOrderModal({ onClose, onSave }: OrderModalProps) {
             </h3>
             <div className="space-y-3">
               <div className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30 rounded-xl p-3 space-y-2">
-                <p className="text-xs font-bold text-green-600 dark:text-green-400">Stop #1</p>
+                <p className="text-xs font-bold text-green-600 dark:text-green-400">Stop #2</p>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="label">Nombre del lugar</label>
@@ -166,7 +166,7 @@ function CreateOrderModal({ onClose, onSave }: OrderModalProps) {
               {extraDeliveries.map((addr, i) => (
                 <div key={i} className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30 rounded-xl p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-bold text-green-600 dark:text-green-400">Stop #{i + 2}</p>
+                    <p className="text-xs font-bold text-green-600 dark:text-green-400">Stop #{i + 3}</p>
                     <button type="button" onClick={() => setExtraDeliveries(prev => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600">
                       <X className="w-3.5 h-3.5" />
                     </button>
