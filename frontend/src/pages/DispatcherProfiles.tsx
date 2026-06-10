@@ -333,14 +333,13 @@ export default function DispatcherProfiles() {
             const initials = d.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
             return (
               <div key={d.id} className="card p-5 hover:border-orange-300 dark:hover:border-orange-600 hover:shadow-lg transition-all">
-                {/* Header */}
+                {/* Header row: avatar + info + actions */}
                 <div className="flex items-start gap-3 mb-3">
                   <div className="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                     {initials}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{d.name}</p>
-                    <p className="text-xs text-gray-400 dark:text-slate-500 truncate">{d.email}</p>
                     <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full mt-0.5 ${
                       d.active ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400'
                     }`}>
@@ -348,7 +347,6 @@ export default function DispatcherProfiles() {
                       {d.active ? 'Activo' : 'Inactivo'}
                     </span>
                   </div>
-                  {/* Action buttons */}
                   <div className="flex items-center gap-0.5 flex-shrink-0">
                     <button onClick={() => setSelected(d)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
                       <Eye className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500" />
@@ -362,22 +360,22 @@ export default function DispatcherProfiles() {
                   </div>
                 </div>
 
-                {/* Contact chips */}
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  {d.phone ? (
-                    <span className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
-                      <Phone className="w-2.5 h-2.5" /> {d.phone}
+                {/* Contact info — driver card style */}
+                <div className="space-y-1.5 text-xs mb-3">
+                  <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
+                    <Phone className="w-3 h-3 text-gray-400 dark:text-slate-500 flex-shrink-0" />
+                    <span>{d.phone || <span className="italic text-gray-300 dark:text-slate-600">Sin teléfono</span>}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
+                    <Mail className="w-3 h-3 text-gray-400 dark:text-slate-500 flex-shrink-0" />
+                    <span className="truncate text-blue-500">{d.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-3 h-3 text-gray-400 dark:text-slate-500 flex-shrink-0" />
+                    <span className={`text-xs font-medium ${d.ssn ? 'text-green-600 dark:text-green-400' : 'italic text-gray-300 dark:text-slate-600'}`}>
+                      {d.ssn ? 'SSN registrado' : 'Sin SSN'}
                     </span>
-                  ) : (
-                    <span className="text-[10px] text-gray-400 dark:text-slate-500 italic">Sin teléfono</span>
-                  )}
-                  <span className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full ${
-                    d.ssn
-                      ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900/30'
-                      : 'text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-700 italic'
-                  }`}>
-                    <Shield className="w-2.5 h-2.5" /> {d.ssn ? 'SSN registrado' : 'Sin SSN'}
-                  </span>
+                  </div>
                 </div>
 
                 {/* Stats row */}
