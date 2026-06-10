@@ -722,7 +722,10 @@ export default function DriverPortal() {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-blue-500" />
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Método de pago</h3>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Cómo pago a OSI</h3>
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500">Método con el que liquidas el 8% a OSI Logistics</p>
+                </div>
               </div>
               {!editingPayment && (
                 <button onClick={() => setEditingPayment(true)}
@@ -736,7 +739,7 @@ export default function DriverPortal() {
               paymentMethod ? (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-slate-400">Tipo</span>
+                    <span className="text-xs text-gray-500 dark:text-slate-400">Método</span>
                     <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{paymentMethod}</span>
                   </div>
                   {paymentDetails && (
@@ -749,10 +752,10 @@ export default function DriverPortal() {
               ) : (
                 <div className="text-center py-3">
                   <CreditCard className="w-8 h-8 text-gray-200 dark:text-slate-700 mx-auto mb-2" />
-                  <p className="text-xs text-gray-400 dark:text-slate-500">No hay método de pago registrado</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500">No has registrado cómo pagas a OSI</p>
                   <button onClick={() => setEditingPayment(true)}
                     className="mt-2 text-xs text-blue-500 hover:text-blue-600 font-medium">
-                    + Agregar método de pago
+                    + Agregar método
                   </button>
                 </div>
               )
