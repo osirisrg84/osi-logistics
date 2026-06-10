@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Package, MapPin, CheckCircle, Truck, Phone,
   Clock, Star, Navigation, LogOut, User, Activity,
-  Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet, Building2, CreditCard, Edit2
+  Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet, Building2, CreditCard, Edit2,
+  Lock, ShieldCheck, Send
 } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
 import { useAuth } from '../context/AuthContext';
@@ -277,6 +278,41 @@ export default function DriverPortal() {
   const handleStatusUpdate = async (orderId: string, status: string) => {
     await ordersApi.updateStatus(orderId, { status });
     await fetchOrders();
+  };
+
+  // ── Payment modal ─────────────────────────────────────
+  type PayTab = 'card' | 'zelle' | 'ach' | 'paypal';
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [payTab, setPayTab] = useState<PayTab>('card');
+  const [payAmount, setPayAmount] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvc, setCardCvc] = useState('');
+  const [cardName, setCardName] = useState('');
+  const [payProcessing, setPayProcessing] = useState(false);
+  const [paySuccess, setPaySuccess] = useState(false);
+
+  const openPayModal = () => {
+    setPayAmount(billingSummary ? billingSummary.pending.toFixed(2) : '');
+    setPayTab('card');
+    setCardNumber(''); setCardExpiry(''); setCardCvc(''); setCardName('');
+    setPaySuccess(false);
+    setShowPayModal(true);
+  };
+
+  const formatCardNumber = (v: string) =>
+    v.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
+  const formatExpiry = (v: string) => {
+    const d = v.replace(/\D/g, '').slice(0, 4);
+    return d.length >= 3 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
+  };
+
+  const handlePay = async () => {
+    setPayProcessing(true);
+    // TODO: replace with real Stripe PaymentIntent call
+    await new Promise(r => setTimeout(r, 1800));
+    setPayProcessing(false);
+    setPaySuccess(true);
   };
 
   const isBusy = activeOrders.some(o => ['picked_up', 'in_transit'].includes(o.status));
@@ -710,92 +746,101 @@ export default function DriverPortal() {
       {/* Payments tab — always accessible */}
       {tab === 'payments' && (
         <div className="max-w-lg mx-auto px-4 py-5 space-y-4">
-          <div>
-            <h2 className="text-base font-bold text-gray-900 dark:text-white">Mis Pagos a OSI</h2>
-            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-              OSI Logistics cobra el <span className="font-semibold text-red-500">8%</span> por cada carga conseguida
-            </p>
-          </div>
 
-          {/* Método de pago */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-blue-500" />
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Cómo pago a OSI</h3>
-                  <p className="text-[10px] text-gray-400 dark:text-slate-500">Método con el que liquidas el 8% a OSI Logistics</p>
+          {/* Balance card */}
+          {billingSummary && (
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-5 text-white">
+              <p className="text-xs text-slate-400 mb-1">Balance pendiente con OSI</p>
+              <p className="text-3xl font-bold text-yellow-400">${billingSummary.pending.toFixed(2)}</p>
+              <p className="text-xs text-slate-400 mt-1">OSI cobra el <span className="text-red-400 font-semibold">8%</span> por cada carga entregada</p>
+              <div className="mt-4 space-y-1.5">
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-400">Progreso de pago</span>
+                  <span className="text-white font-medium">
+                    {billingSummary.total_charged > 0 ? Math.round((billingSummary.settled / billingSummary.total_charged) * 100) : 0}%
+                  </span>
+                </div>
+                <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-green-500 rounded-full transition-all"
+                    style={{ width: `${billingSummary.total_charged > 0 ? (billingSummary.settled / billingSummary.total_charged) * 100 : 0}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-[10px] text-slate-500 pt-0.5">
+                  <span>Pagado: <span className="text-green-400 font-semibold">${billingSummary.settled.toFixed(2)}</span></span>
+                  <span>Total: <span className="text-slate-300 font-semibold">${billingSummary.total_charged.toFixed(2)}</span></span>
                 </div>
               </div>
-              {!editingPayment && (
-                <button onClick={() => setEditingPayment(true)}
-                  className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600 font-semibold transition-colors">
-                  <Edit2 className="w-3.5 h-3.5" /> Editar
+              {billingSummary.pending > 0 && (
+                <button
+                  onClick={openPayModal}
+                  className="mt-4 w-full bg-green-500 hover:bg-green-400 active:scale-95 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
+                >
+                  <CreditCard className="w-4 h-4" /> Realizar Pago
                 </button>
               )}
+              {billingSummary.pending === 0 && billingSummary.total_charged > 0 && (
+                <div className="mt-4 flex items-center justify-center gap-2 bg-green-500/10 border border-green-500/30 rounded-xl py-2.5">
+                  <ShieldCheck className="w-4 h-4 text-green-400" />
+                  <span className="text-sm font-semibold text-green-400">Al día con OSI ✓</span>
+                </div>
+              )}
             </div>
+          )}
 
+          {/* Método de pago a OSI */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4">
             {!editingPayment ? (
-              paymentMethod ? (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-slate-400">Método</span>
-                    <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{paymentMethod}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <CreditCard className="w-4 h-4 text-blue-500" />
                   </div>
-                  {paymentDetails && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500 dark:text-slate-400">Detalles</span>
-                      <span className="text-sm font-mono text-gray-800 dark:text-slate-200">{paymentDetails}</span>
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {paymentMethod || 'Sin método registrado'}
+                    </p>
+                    <p className="text-xs text-gray-400 dark:text-slate-500">
+                      {paymentDetails || 'Cómo le pagas a OSI Logistics'}
+                    </p>
+                  </div>
                 </div>
-              ) : (
-                <div className="text-center py-3">
-                  <CreditCard className="w-8 h-8 text-gray-200 dark:text-slate-700 mx-auto mb-2" />
-                  <p className="text-xs text-gray-400 dark:text-slate-500">No has registrado cómo pagas a OSI</p>
-                  <button onClick={() => setEditingPayment(true)}
-                    className="mt-2 text-xs text-blue-500 hover:text-blue-600 font-medium">
-                    + Agregar método
-                  </button>
-                </div>
-              )
+                <button onClick={() => setEditingPayment(true)}
+                  className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600 font-semibold transition-colors flex-shrink-0">
+                  <Edit2 className="w-3.5 h-3.5" /> {paymentMethod ? 'Editar' : 'Agregar'}
+                </button>
+              </div>
             ) : (
               <div className="space-y-3">
-                <div>
-                  <label className="text-xs text-gray-500 dark:text-slate-400 mb-1 block">Tipo de pago</label>
-                  <select
-                    value={paymentMethod}
-                    onChange={e => setPaymentMethod(e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400/40"
-                  >
-                    <option value="">Seleccionar...</option>
-                    <option>Zelle</option>
-                    <option>Direct Deposit (ACH)</option>
-                    <option>Check</option>
-                    <option>PayPal / Venmo</option>
-                    <option>Cash</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500 dark:text-slate-400 mb-1 block">
-                    {paymentMethod === 'Zelle' ? 'Email o teléfono Zelle' :
-                     paymentMethod === 'Direct Deposit (ACH)' ? 'Routing # / Account #' :
-                     paymentMethod === 'PayPal / Venmo' ? 'Email o usuario' :
-                     'Detalles'}
-                  </label>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-blue-500" /> ¿Cómo le pagas a OSI?
+                </p>
+                <select
+                  value={paymentMethod}
+                  onChange={e => setPaymentMethod(e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400/40"
+                >
+                  <option value="">Seleccionar método...</option>
+                  <option>Zelle</option>
+                  <option>Direct Deposit (ACH)</option>
+                  <option>Check</option>
+                  <option>PayPal / Venmo</option>
+                  <option>Cash</option>
+                </select>
+                {paymentMethod && (
                   <input
                     type="text"
                     value={paymentDetails}
                     onChange={e => setPaymentDetails(e.target.value)}
                     placeholder={
-                      paymentMethod === 'Zelle' ? 'ejemplo@email.com o (305) 555-0000' :
-                      paymentMethod === 'Direct Deposit (ACH)' ? '021000021 / 123456789' :
+                      paymentMethod === 'Zelle' ? 'Email o teléfono Zelle' :
+                      paymentMethod === 'Direct Deposit (ACH)' ? 'Routing # / Account #' :
                       paymentMethod === 'Check' ? 'Nombre completo en el cheque' :
-                      'Detalles del método...'
+                      paymentMethod === 'PayPal / Venmo' ? 'Email o usuario' : 'Detalles...'
                     }
                     className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40"
                   />
-                </div>
+                )}
                 <div className="flex gap-2">
                   <button onClick={() => { setEditingPayment(false); setPaymentMethod(driver?.payment_method || ''); setPaymentDetails(driver?.payment_details || ''); }}
                     className="flex-1 py-2 rounded-xl text-sm text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">
@@ -803,62 +848,296 @@ export default function DriverPortal() {
                   </button>
                   <button onClick={savePayment} disabled={savingPayment}
                     className="flex-1 py-2 rounded-xl text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5">
-                    {savingPayment
-                      ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      : 'Guardar'
-                    }
+                    {savingPayment ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Guardar'}
                   </button>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Summary */}
-          {billingSummary && (
-            <div className="grid grid-cols-3 gap-2">
-              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-3 text-center">
-                <p className="text-[10px] text-gray-500 dark:text-slate-400 mb-1">Total cobrado</p>
-                <p className="text-lg font-bold text-red-600">${billingSummary.total_charged.toFixed(2)}</p>
-              </div>
-              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-3 text-center">
-                <p className="text-[10px] text-gray-500 dark:text-slate-400 mb-1">Liquidado</p>
-                <p className="text-lg font-bold text-green-600">${billingSummary.settled.toFixed(2)}</p>
-              </div>
-              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-3 text-center">
-                <p className="text-[10px] text-gray-500 dark:text-slate-400 mb-1">Pendiente</p>
-                <p className="text-lg font-bold text-yellow-600">${billingSummary.pending.toFixed(2)}</p>
-              </div>
-            </div>
-          )}
-
           {/* Records */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden">
-            {billingRows.length === 0 ? (
-              <div className="py-10 text-center">
-                <Wallet className="w-10 h-10 text-gray-200 dark:text-slate-700 mx-auto mb-2" />
-                <p className="text-sm text-gray-400 dark:text-slate-500">Sin pagos registrados</p>
-                <p className="text-xs text-gray-300 dark:text-slate-600 mt-1">Aparecen cuando se confirman tus entregas</p>
+          <div>
+            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide px-1 mb-2">Historial de cobros</p>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden">
+              {billingRows.length === 0 ? (
+                <div className="py-10 text-center">
+                  <Wallet className="w-10 h-10 text-gray-200 dark:text-slate-700 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500 dark:text-slate-400">Todo al día 👍</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">Aquí aparecerán los cobros cuando entregues cargas</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-50 dark:divide-slate-700/50">
+                  {billingRows.map(r => (
+                    <div key={r.id} className="flex items-center justify-between px-4 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${r.status === 'settled' ? 'bg-green-400' : 'bg-yellow-400'}`} />
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white">{r.order_number}</p>
+                          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+                            ${r.order_price.toFixed(2)} carga · 8% = <span className="font-semibold text-gray-600 dark:text-slate-300">${r.driver_charge.toFixed(2)}</span>
+                          </p>
+                        </div>
+                      </div>
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                        r.status === 'settled'
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                          : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                      }`}>
+                        {r.status === 'settled' ? '✓ Pagado' : 'Pendiente'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Payment Modal ──────────────────────────────────── */}
+      {showPayModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
+
+            {paySuccess ? (
+              /* ── Success state ── */
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <ShieldCheck className="w-8 h-8 text-green-500" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">¡Pago enviado!</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">
+                  <span className="font-semibold text-green-600">${parseFloat(payAmount || '0').toFixed(2)}</span> procesado correctamente
+                </p>
+                <p className="text-xs text-gray-400 dark:text-slate-500 mb-6">OSI Logistics recibirá la confirmación en breve.</p>
+                <button
+                  onClick={() => setShowPayModal(false)}
+                  className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-2xl transition-colors"
+                >
+                  Cerrar
+                </button>
               </div>
             ) : (
-              <div className="divide-y divide-gray-50 dark:divide-slate-700/50">
-                {billingRows.map(r => (
-                  <div key={r.id} className="flex items-center justify-between px-4 py-3">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{r.order_number}</p>
-                      <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-                        ${r.order_price.toFixed(2)} × 8% = <span className="text-red-500 font-semibold">${r.driver_charge.toFixed(2)}</span>
-                      </p>
-                    </div>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                      r.status === 'settled'
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
-                    }`}>
-                      {r.status === 'settled' ? 'Liquidado' : 'Pendiente'}
-                    </span>
+              <>
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-gray-100 dark:border-slate-700">
+                  <div>
+                    <h3 className="text-base font-bold text-gray-900 dark:text-white">Realizar Pago a OSI</h3>
+                    <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Selecciona método y monto</p>
                   </div>
-                ))}
-              </div>
+                  <button onClick={() => setShowPayModal(false)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
+                    <X className="w-4 h-4 text-gray-400" />
+                  </button>
+                </div>
+
+                <div className="p-5 space-y-4">
+                  {/* Amount input */}
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Monto a pagar</label>
+                    <div className="relative mt-1.5">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">$</span>
+                      <input
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        value={payAmount}
+                        onChange={e => setPayAmount(e.target.value)}
+                        className="w-full pl-7 pr-4 py-2.5 text-lg font-bold rounded-xl border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-400/40"
+                      />
+                    </div>
+                    {billingSummary && parseFloat(payAmount) > 0 && (
+                      <p className="text-xs text-gray-400 dark:text-slate-500 mt-1 px-1">
+                        Balance pendiente: <span className="font-semibold text-yellow-500">${billingSummary.pending.toFixed(2)}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Method tabs */}
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Método de pago</label>
+                    <div className="grid grid-cols-4 gap-1.5 mt-1.5">
+                      {([
+                        { id: 'card',   label: '💳 Tarjeta' },
+                        { id: 'zelle',  label: '📱 Zelle' },
+                        { id: 'ach',    label: '🏦 ACH' },
+                        { id: 'paypal', label: 'P PayPal' },
+                      ] as { id: PayTab; label: string }[]).map(m => (
+                        <button
+                          key={m.id}
+                          onClick={() => setPayTab(m.id)}
+                          className={`py-2 rounded-xl text-xs font-semibold transition-colors ${
+                            payTab === m.id
+                              ? 'bg-slate-900 dark:bg-slate-700 text-white'
+                              : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700'
+                          }`}
+                        >
+                          {m.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Card form */}
+                  {payTab === 'card' && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="label text-xs">Número de tarjeta</label>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="1234 5678 9012 3456"
+                          value={cardNumber}
+                          onChange={e => setCardNumber(formatCardNumber(e.target.value))}
+                          className="input font-mono tracking-widest"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="label text-xs">Vencimiento</label>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="MM/AA"
+                            value={cardExpiry}
+                            onChange={e => setCardExpiry(formatExpiry(e.target.value))}
+                            className="input font-mono"
+                          />
+                        </div>
+                        <div>
+                          <label className="label text-xs">CVV</label>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="123"
+                            maxLength={4}
+                            value={cardCvc}
+                            onChange={e => setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                            className="input font-mono"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="label text-xs">Nombre en la tarjeta</label>
+                        <input
+                          type="text"
+                          placeholder="CARLOS RODRIGUEZ"
+                          value={cardName}
+                          onChange={e => setCardName(e.target.value.toUpperCase())}
+                          className="input uppercase"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Zelle */}
+                  {payTab === 'zelle' && (
+                    <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700/40 rounded-2xl p-4 space-y-2">
+                      <p className="text-sm font-semibold text-purple-800 dark:text-purple-300 flex items-center gap-2">
+                        <Send className="w-4 h-4" /> Enviar por Zelle
+                      </p>
+                      <p className="text-xs text-purple-600 dark:text-purple-400">Envía el monto exacto a:</p>
+                      <div className="bg-white dark:bg-slate-800 rounded-xl px-4 py-3 space-y-1.5">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500 dark:text-slate-400">Email</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">pagos@osilogistics.com</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500 dark:text-slate-400">Teléfono</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">+1 (305) 000-0000</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500 dark:text-slate-400">A nombre de</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">OSI Logistics Inc.</span>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-purple-500 dark:text-purple-400">Incluye tu nombre completo en el memo del Zelle.</p>
+                    </div>
+                  )}
+
+                  {/* ACH */}
+                  {payTab === 'ach' && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/40 rounded-2xl p-4 space-y-2">
+                      <p className="text-sm font-semibold text-blue-800 dark:text-blue-300 flex items-center gap-2">
+                        🏦 Transferencia ACH / Wire
+                      </p>
+                      <div className="bg-white dark:bg-slate-800 rounded-xl px-4 py-3 space-y-1.5">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500 dark:text-slate-400">Banco</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">Bank of America</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500 dark:text-slate-400">Routing #</span>
+                          <span className="font-mono font-semibold text-gray-900 dark:text-white">026009593</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500 dark:text-slate-400">Account #</span>
+                          <span className="font-mono font-semibold text-gray-900 dark:text-white">••••••4821</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500 dark:text-slate-400">Beneficiario</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">OSI Logistics Inc.</span>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-blue-500 dark:text-blue-400">Incluye tu nombre y Driver ID en el memo.</p>
+                    </div>
+                  )}
+
+                  {/* PayPal */}
+                  {payTab === 'paypal' && (
+                    <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700/40 rounded-2xl p-4 space-y-2">
+                      <p className="text-sm font-semibold text-indigo-800 dark:text-indigo-300">PayPal</p>
+                      <div className="bg-white dark:bg-slate-800 rounded-xl px-4 py-3 space-y-1.5">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500 dark:text-slate-400">PayPal.me</span>
+                          <span className="font-semibold text-indigo-600 dark:text-indigo-400">@OSILogistics</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500 dark:text-slate-400">Email</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">pagos@osilogistics.com</span>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-indigo-500 dark:text-indigo-400">Envía como "Familia y amigos" para evitar comisiones.</p>
+                    </div>
+                  )}
+
+                  {/* Stripe security badge */}
+                  {payTab === 'card' && (
+                    <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-400 dark:text-slate-500">
+                      <Lock className="w-3 h-3" />
+                      Pagos seguros con <span className="font-semibold text-[#635bff]">Stripe</span>
+                    </div>
+                  )}
+
+                  {/* Action buttons */}
+                  <div className="flex gap-3 pt-1">
+                    <button
+                      onClick={() => setShowPayModal(false)}
+                      className="flex-1 py-3 rounded-2xl text-sm font-semibold text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    {payTab === 'card' ? (
+                      <button
+                        onClick={handlePay}
+                        disabled={payProcessing || !payAmount || parseFloat(payAmount) <= 0 || !cardNumber || !cardExpiry || !cardCvc || !cardName}
+                        className="flex-1 py-3 rounded-2xl text-sm font-bold text-white bg-green-500 hover:bg-green-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
+                      >
+                        {payProcessing
+                          ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Procesando...</>
+                          : <><ShieldCheck className="w-4 h-4" /> Pagar ${parseFloat(payAmount || '0').toFixed(2)}</>
+                        }
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setShowPayModal(false)}
+                        className="flex-1 py-3 rounded-2xl text-sm font-bold text-white bg-green-500 hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <CheckCircle className="w-4 h-4" /> Entendido
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </div>
