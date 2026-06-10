@@ -57,7 +57,7 @@ function CreateOrderModal({ onClose, onSave }: OrderModalProps) {
         delivery_contact: form.delivery_name,
         delivery_lat: 25.7907, delivery_lng: -80.1300,
         priority: form.priority,
-        weight_kg: parseFloat(form.weight_kg) || 0,
+        weight_kg: Math.round(parseFloat(form.weight_kg || '0') * 0.453592 * 10) / 10,
         volume_m3: 0,
         description: form.commodity,
         notes: fullNotes.trim(),
@@ -194,7 +194,7 @@ function CreateOrderModal({ onClose, onSave }: OrderModalProps) {
                 </select>
               </div>
               <div>
-                <label className="label">Weight (kg)</label>
+                <label className="label">Weight (lbs)</label>
                 <input className="input" type="number" value={form.weight_kg} onChange={e => setForm({...form, weight_kg: e.target.value})} placeholder="0" min="0" />
               </div>
               <div>
