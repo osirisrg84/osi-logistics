@@ -4,6 +4,7 @@ import {
   Clock, Star, Navigation, LogOut, User, Activity,
   Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet, Building2
 } from 'lucide-react';
+import osiLogo from '../assets/osi-logo.jpeg';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { ordersApi, driversApi, billingApi } from '../services/api';
@@ -270,13 +271,8 @@ export default function DriverPortal() {
         <div className="max-w-lg mx-auto flex items-center justify-between">
           {/* OSI Logistics branding */}
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Truck className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-white leading-tight">OSI Logistics</p>
-              <p className="text-[10px] text-slate-400 leading-tight">Driver Portal</p>
-            </div>
+            <img src={osiLogo} alt="OSI Logistics" className="h-9 w-auto object-contain rounded-md flex-shrink-0" />
+            <p className="text-[10px] text-slate-400 leading-tight">Driver Portal</p>
           </div>
 
           {/* Action buttons only */}

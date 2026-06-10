@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Bell, Search, RefreshCw, X, Check, LogOut, ChevronDown, Menu, Sun, Moon } from 'lucide-react';
+import { Bell, Search, RefreshCw, X, Check, LogOut, ChevronDown, Shield, Truck, ClipboardList, Sun, Moon } from 'lucide-react';
+import osiLogo from '../assets/osi-logo.jpeg';
 import { notificationsApi } from '../services/api';
 import { Notification } from '../types';
 import { getSocket } from '../services/socket';
@@ -80,16 +81,17 @@ export default function Header({ onMenuClick }: HeaderProps) {
   return (
     <header className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 px-4 md:px-6 py-3 flex items-center justify-between flex-shrink-0">
       <div className="flex items-center gap-3">
-        {/* Hamburger — mobile only */}
+        {/* OSI Logo — mobile only, tapping opens sidebar */}
         <button
           onClick={onMenuClick}
-          className="md:hidden p-2 -ml-1 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+          className="md:hidden -ml-1 rounded-lg p-0.5 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
         >
-          <Menu className="w-5 h-5" />
+          <img src={osiLogo} alt="OSI Logistics" className="h-9 w-auto object-contain rounded-md" />
         </button>
-        <div>
-          <h1 className="text-base md:text-lg font-semibold text-gray-900">{title}</h1>
-          <p className="text-xs text-gray-400 dark:text-slate-500 hidden sm:block">
+        {/* Page title — desktop only */}
+        <div className="hidden md:block">
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h1>
+          <p className="text-xs text-gray-400 dark:text-slate-500">
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </div>
