@@ -2,6 +2,7 @@
 import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin, Building2, Clock } from 'lucide-react';
 import { Driver, DriverStatus } from '../types';
 import { driversApi, trucksApi } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { DriverStatusBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
 
@@ -320,6 +321,8 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
 }
 
 export default function Drivers() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [stats, setStats] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -421,9 +424,11 @@ export default function Drivers() {
                 <button onClick={() => { setEditDriver(driver); setShowForm(true); }} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
                   <Edit2 className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
                 </button>
-                <button onClick={() => handleDelete(driver)} className="p-1.5 hover:bg-red-50 rounded-lg">
-                  <Trash2 className="w-3.5 h-3.5 text-red-400" />
-                </button>
+                {isAdmin && (
+                  <button onClick={() => handleDelete(driver)} className="p-1.5 hover:bg-red-50 rounded-lg">
+                    <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                  </button>
+                )}
               </div>
             </div>
 
