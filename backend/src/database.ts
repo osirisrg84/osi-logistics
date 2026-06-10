@@ -188,14 +188,20 @@ export function initDatabase(): void {
     );
   `);
 
-  // Migrate: add phone and ssn to users if not present
+  // Migrate: extend users profile columns
   const userCols = db.prepare('PRAGMA table_info(users)').all() as Array<{ name: string }>;
-  if (!userCols.some(c => c.name === 'phone')) {
-    db.exec("ALTER TABLE users ADD COLUMN phone TEXT NOT NULL DEFAULT ''");
-  }
-  if (!userCols.some(c => c.name === 'ssn')) {
-    db.exec("ALTER TABLE users ADD COLUMN ssn TEXT NOT NULL DEFAULT ''");
-  }
+  const addUserCol = (col: string, def: string) => {
+    if (!userCols.some(c => c.name === col))
+      db.exec(`ALTER TABLE users ADD COLUMN ${col} ${def}`);
+  };
+  addUserCol('phone',              "TEXT NOT NULL DEFAULT ''");
+  addUserCol('ssn',                "TEXT NOT NULL DEFAULT ''");
+  addUserCol('date_of_birth',      "TEXT NOT NULL DEFAULT ''");
+  addUserCol('city',               "TEXT NOT NULL DEFAULT ''");
+  addUserCol('years_experience',   "INTEGER NOT NULL DEFAULT 0");
+  addUserCol('previous_companies', "TEXT NOT NULL DEFAULT ''");
+  addUserCol('languages',          "TEXT NOT NULL DEFAULT ''");
+  addUserCol('availability',       "TEXT NOT NULL DEFAULT 'full-time'");
 
   // Migrate: add dispatcher_user_id to orders if not present
   const orderCols = db.prepare('PRAGMA table_info(orders)').all() as Array<{ name: string }>;

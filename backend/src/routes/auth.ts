@@ -64,12 +64,15 @@ router.post('/login', (req: Request, res: Response) => {
 
 router.post('/register', (req: Request, res: Response) => {
   const db = getDb();
-  const { name, email, password, role = 'dispatcher', driver_id = null } = req.body;
+  const {
+    name, email, password, role = 'dispatcher', driver_id = null,
+    phone = '', date_of_birth = '', city = '',
+    years_experience = 0, previous_companies = '', languages = '', availability = 'full-time',
+  } = req.body;
 
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'Name, email, and password are required' });
   }
-
   if (password.length < 8) {
     return res.status(400).json({ error: 'Password must be at least 8 characters' });
   }
@@ -82,9 +85,8 @@ router.post('/register', (req: Request, res: Response) => {
   if (role === 'driver' && driver_id) {
     const driver = db.prepare('SELECT id FROM drivers WHERE id = ?').get(driver_id);
     if (!driver) return res.status(400).json({ error: 'Driver profile not found' });
-
-    const existing = db.prepare('SELECT id FROM users WHERE driver_id = ?').get(driver_id);
-    if (existing) return res.status(409).json({ error: 'This driver profile already has an account' });
+    const existingDriver = db.prepare('SELECT id FROM users WHERE driver_id = ?').get(driver_id);
+    if (existingDriver) return res.status(409).json({ error: 'This driver profile already has an account' });
   }
 
   const salt = randomBytes(16).toString('hex');
@@ -92,9 +94,12 @@ router.post('/register', (req: Request, res: Response) => {
   const id = uuidv4();
 
   db.prepare(`
-    INSERT INTO users (id, name, email, password_hash, salt, role, driver_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(id, name, email.toLowerCase(), passwordHash, salt, role, driver_id);
+    INSERT INTO users
+      (id, name, email, password_hash, salt, role, driver_id,
+       phone, date_of_birth, city, years_experience, previous_companies, languages, availability)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, name, email.toLowerCase(), passwordHash, salt, role, driver_id,
+    phone, date_of_birth, city, years_experience, previous_companies, languages, availability);
 
   const token = createSession(id);
 
