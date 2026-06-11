@@ -202,6 +202,8 @@ export function initDatabase(): void {
   addUserCol('previous_companies', "TEXT NOT NULL DEFAULT ''");
   addUserCol('languages',          "TEXT NOT NULL DEFAULT ''");
   addUserCol('availability',       "TEXT NOT NULL DEFAULT 'full-time'");
+  addUserCol('payout_method',      "TEXT NOT NULL DEFAULT ''");
+  addUserCol('payout_details',     "TEXT NOT NULL DEFAULT ''");
 
   // Migrate: add dispatcher_user_id to orders if not present
   const orderCols = db.prepare('PRAGMA table_info(orders)').all() as Array<{ name: string }>;

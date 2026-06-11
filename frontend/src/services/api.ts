@@ -95,6 +95,11 @@ export const billingApi = {
   settleDriverAll:   (driverId: string) => api.put(`/billing/driver/${driverId}/settle-all`),
 };
 
+export const userApi = {
+  getProfile:    () => api.get('/auth/profile'),
+  updateProfile: (data: { payout_method: string; payout_details: string }) => api.put('/auth/profile', data),
+};
+
 export const notificationsApi = {
   getAll: () => api.get('/notifications'),
   markRead: (id: string) => api.put(`/notifications/${id}/read`),

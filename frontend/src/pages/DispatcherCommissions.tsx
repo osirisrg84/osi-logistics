@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   TrendingUp, CheckCircle2, Clock, RefreshCw,
-  ChevronDown, DollarSign, Package
+  ChevronDown, DollarSign, Package,
+  Wallet, Smartphone, Building2, FileText, CreditCard,
+  Send, Pencil, PlusCircle, AlertCircle,
 } from 'lucide-react';
-import { billingApi } from '../services/api';
+import { billingApi, userApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { format } from 'date-fns';
 
@@ -18,7 +20,93 @@ interface CommissionRow {
   settled_at: string | null;
 }
 
+type PayoutDetails = Record<string, string>;
+
+const PAYOUT_METHODS = [
+  {
+    id: 'zelle',  label: 'Zelle',
+    icon: Smartphone,
+    color: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-purple-50 dark:bg-purple-900/20',
+    border: 'border-purple-200 dark:border-purple-700/30',
+    activeBorder: 'border-purple-400 dark:border-purple-500',
+  },
+  {
+    id: 'ach',    label: 'ACH / Dep. Directo',
+    icon: Building2,
+    color: 'text-blue-600 dark:text-blue-400',
+    bg: 'bg-blue-50 dark:bg-blue-900/20',
+    border: 'border-blue-200 dark:border-blue-700/30',
+    activeBorder: 'border-blue-400 dark:border-blue-500',
+  },
+  {
+    id: 'wire',   label: 'Wire Transfer',
+    icon: Send,
+    color: 'text-green-600 dark:text-green-400',
+    bg: 'bg-green-50 dark:bg-green-900/20',
+    border: 'border-green-200 dark:border-green-700/30',
+    activeBorder: 'border-green-400 dark:border-green-500',
+  },
+  {
+    id: 'paypal', label: 'PayPal',
+    icon: CreditCard,
+    color: 'text-blue-700 dark:text-blue-400',
+    bg: 'bg-blue-50 dark:bg-blue-900/20',
+    border: 'border-blue-200 dark:border-blue-700/30',
+    activeBorder: 'border-blue-400 dark:border-blue-500',
+  },
+  {
+    id: 'venmo',  label: 'Venmo',
+    icon: CreditCard,
+    color: 'text-cyan-600 dark:text-cyan-400',
+    bg: 'bg-cyan-50 dark:bg-cyan-900/20',
+    border: 'border-cyan-200 dark:border-cyan-700/30',
+    activeBorder: 'border-cyan-400 dark:border-cyan-500',
+  },
+  {
+    id: 'check',  label: 'Check',
+    icon: FileText,
+    color: 'text-gray-600 dark:text-slate-300',
+    bg: 'bg-gray-50 dark:bg-slate-700/50',
+    border: 'border-gray-200 dark:border-slate-600',
+    activeBorder: 'border-gray-400 dark:border-slate-400',
+  },
+  {
+    id: 'cash',   label: 'Efectivo',
+    icon: DollarSign,
+    color: 'text-emerald-600 dark:text-emerald-400',
+    bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+    border: 'border-emerald-200 dark:border-emerald-700/30',
+    activeBorder: 'border-emerald-400 dark:border-emerald-500',
+  },
+];
+
 function fmt(n: number) { return `$${n.toFixed(2)}`; }
+function maskAccount(s: string) { return s.length > 4 ? `****${s.slice(-4)}` : s; }
+
+function payoutSummary(method: string, details: PayoutDetails): string {
+  switch (method) {
+    case 'zelle':  return details.contact || '—';
+    case 'ach':    return `${details.bank || 'Banco'} · ${maskAccount(details.account || '')} · ${details.type === 'savings' ? 'Savings' : 'Checking'}`;
+    case 'wire':   return `${details.bank || 'Banco'} · ${maskAccount(details.account || '')}${details.swift ? ` · ${details.swift}` : ''}`;
+    case 'paypal': return details.email || '—';
+    case 'venmo':  return details.username || '—';
+    case 'check':  return `A nombre de: ${details.payable_to || '—'}`;
+    case 'cash':   return 'OSI coordinará la entrega en efectivo';
+    default:       return '—';
+  }
+}
+
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1.5">
+        {label}{required && <span className="text-red-400 ml-0.5">*</span>}
+      </label>
+      {children}
+    </div>
+  );
+}
 
 function StatusChip({ status }: { status: 'pending' | 'settled' }) {
   return (
@@ -33,11 +121,43 @@ function StatusChip({ status }: { status: 'pending' | 'settled' }) {
   );
 }
 
+function PayoutDisplay({ method, details }: { method: string; details: PayoutDetails }) {
+  const cfg = PAYOUT_METHODS.find(m => m.id === method);
+  if (!cfg) return null;
+  const Icon = cfg.icon;
+  return (
+    <div className={`flex items-center gap-4 ${cfg.bg} rounded-2xl p-4 border ${cfg.border}`}>
+      <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center shadow-sm flex-shrink-0 border border-gray-100 dark:border-slate-700">
+        <Icon className={`w-6 h-6 ${cfg.color}`} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          <p className="text-sm font-bold text-gray-900 dark:text-white">{cfg.label}</p>
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-1.5 py-0.5 rounded-full">
+            <CheckCircle2 className="w-3 h-3" /> Activo
+          </span>
+        </div>
+        <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{payoutSummary(method, details)}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function DispatcherCommissions() {
   const { user } = useAuth();
-  const [rows, setRows] = useState<CommissionRow[]>([]);
+
+  // Commissions
+  const [rows, setRows]           = useState<CommissionRow[]>([]);
   const [statusFilter, setStatusFilter] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]     = useState(true);
+
+  // Payout method
+  const [payoutMethod,  setPayoutMethod]  = useState('');
+  const [payoutDetails, setPayoutDetails] = useState<PayoutDetails>({});
+  const [editingPayout, setEditingPayout] = useState(false);
+  const [savingPayout,  setSavingPayout]  = useState(false);
+  const [origMethod,    setOrigMethod]    = useState('');
+  const [origDetails,   setOrigDetails]   = useState<PayoutDetails>({});
 
   const load = useCallback(async () => {
     if (!user?.id) return;
@@ -54,12 +174,54 @@ export default function DispatcherCommissions() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Load payout profile
+  useEffect(() => {
+    userApi.getProfile().then(({ data }) => {
+      setPayoutMethod(data.payout_method || '');
+      try { setPayoutDetails(data.payout_details ? JSON.parse(data.payout_details) : {}); }
+      catch { setPayoutDetails({}); }
+    }).catch(() => {});
+  }, []);
+
+  const startEdit = () => {
+    setOrigMethod(payoutMethod);
+    setOrigDetails({ ...payoutDetails });
+    setEditingPayout(true);
+  };
+
+  const cancelEdit = () => {
+    setPayoutMethod(origMethod);
+    setPayoutDetails(origDetails);
+    setEditingPayout(false);
+  };
+
+  const changeMethod = (id: string) => {
+    setPayoutMethod(id);
+    setPayoutDetails({});
+  };
+
+  const updateDetail = (key: string, value: string) =>
+    setPayoutDetails(d => ({ ...d, [key]: value }));
+
+  const savePayout = async () => {
+    setSavingPayout(true);
+    try {
+      await userApi.updateProfile({
+        payout_method: payoutMethod,
+        payout_details: JSON.stringify(payoutDetails),
+      });
+      setEditingPayout(false);
+    } catch { }
+    finally { setSavingPayout(false); }
+  };
+
   const total   = rows.reduce((s, r) => s + r.dispatcher_pay, 0);
   const settled = rows.filter(r => r.status === 'settled').reduce((s, r) => s + r.dispatcher_pay, 0);
   const pending = rows.filter(r => r.status === 'pending').reduce((s, r) => s + r.dispatcher_pay, 0);
 
   return (
     <div className="space-y-5 fade-in">
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -85,7 +247,6 @@ export default function DispatcherCommissions() {
           <p className="text-2xl font-bold text-gray-900 dark:text-white">{fmt(total)}</p>
           <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">5% · {rows.length} cargas</p>
         </div>
-
         <div className="card p-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
@@ -96,7 +257,6 @@ export default function DispatcherCommissions() {
           <p className="text-2xl font-bold text-green-600">{fmt(settled)}</p>
           <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{rows.filter(r => r.status === 'settled').length} liquidadas</p>
         </div>
-
         <div className="card p-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
@@ -107,7 +267,6 @@ export default function DispatcherCommissions() {
           <p className="text-2xl font-bold text-yellow-600">{fmt(pending)}</p>
           <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{rows.filter(r => r.status === 'pending').length} por cobrar</p>
         </div>
-
         <div className="card p-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
@@ -118,6 +277,174 @@ export default function DispatcherCommissions() {
           <p className="text-2xl font-bold text-gray-900 dark:text-white">{rows.length}</p>
           <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">gestionadas</p>
         </div>
+      </div>
+
+      {/* ── Payout Method Section ──────────────────────────── */}
+      {/* Alert banner: pending amount but no payout method */}
+      {pending > 0 && !payoutMethod && !editingPayout && (
+        <div className="flex items-center gap-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/40 rounded-2xl px-4 py-3">
+          <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+          <p className="text-xs text-yellow-700 dark:text-yellow-300 flex-1">
+            Tienes <strong>{fmt(pending)}</strong> pendientes. Configura tu método de cobro para que OSI pueda enviarte el pago.
+          </p>
+          <button onClick={startEdit} className="text-xs font-bold text-yellow-700 dark:text-yellow-300 hover:underline flex-shrink-0">
+            Configurar
+          </button>
+        </div>
+      )}
+
+      <div className="card p-5">
+        {/* Card header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+              <Wallet className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-gray-900 dark:text-white">Método de cobro</h2>
+              <p className="text-xs text-gray-400 dark:text-slate-500">Cómo OSI Logistics te envía tus pagos</p>
+            </div>
+          </div>
+          {!editingPayout && payoutMethod && (
+            <button onClick={startEdit}
+              className="flex items-center gap-1.5 text-xs text-blue-500 hover:text-blue-600 font-semibold transition-colors">
+              <Pencil className="w-3.5 h-3.5" /> Editar
+            </button>
+          )}
+        </div>
+
+        {editingPayout ? (
+          <div className="space-y-4">
+            {/* Method grid selector */}
+            <div>
+              <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-2">Selecciona un método</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                {PAYOUT_METHODS.map(m => {
+                  const Icon = m.icon;
+                  const isSelected = payoutMethod === m.id;
+                  return (
+                    <button key={m.id} type="button" onClick={() => changeMethod(m.id)}
+                      className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
+                        isSelected
+                          ? `${m.bg} ${m.activeBorder} ${m.color} shadow-sm`
+                          : 'bg-gray-50 dark:bg-slate-700/50 border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-500'
+                      }`}>
+                      <Icon className="w-4 h-4 flex-shrink-0" />
+                      <span className="truncate">{m.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Dynamic fields */}
+            {payoutMethod === 'zelle' && (
+              <Field label="Email o teléfono de Zelle" required>
+                <input className="input" type="text" placeholder="305-555-0101 o correo@email.com"
+                  value={payoutDetails.contact || ''} onChange={e => updateDetail('contact', e.target.value)} />
+              </Field>
+            )}
+
+            {(payoutMethod === 'ach' || payoutMethod === 'wire') && (
+              <div className="space-y-3">
+                <Field label="Nombre del banco" required>
+                  <input className="input" type="text" placeholder="Chase, Wells Fargo, Bank of America..."
+                    value={payoutDetails.bank || ''} onChange={e => updateDetail('bank', e.target.value)} />
+                </Field>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Routing #" required>
+                    <input className="input font-mono" type="text" placeholder="021000021"
+                      maxLength={9}
+                      value={payoutDetails.routing || ''} onChange={e => updateDetail('routing', e.target.value)} />
+                  </Field>
+                  <Field label="Account #" required>
+                    <input className="input font-mono" type="text" placeholder="000123456789"
+                      value={payoutDetails.account || ''} onChange={e => updateDetail('account', e.target.value)} />
+                  </Field>
+                </div>
+                {payoutMethod === 'ach' ? (
+                  <Field label="Tipo de cuenta">
+                    <select className="input" value={payoutDetails.type || 'checking'} onChange={e => updateDetail('type', e.target.value)}>
+                      <option value="checking">Checking</option>
+                      <option value="savings">Savings</option>
+                    </select>
+                  </Field>
+                ) : (
+                  <Field label="SWIFT / BIC (opcional)">
+                    <input className="input font-mono" type="text" placeholder="CHASUS33"
+                      value={payoutDetails.swift || ''} onChange={e => updateDetail('swift', e.target.value)} />
+                  </Field>
+                )}
+              </div>
+            )}
+
+            {payoutMethod === 'paypal' && (
+              <Field label="Email de PayPal" required>
+                <input className="input" type="email" placeholder="tu@email.com"
+                  value={payoutDetails.email || ''} onChange={e => updateDetail('email', e.target.value)} />
+              </Field>
+            )}
+
+            {payoutMethod === 'venmo' && (
+              <Field label="Usuario de Venmo" required>
+                <input className="input" type="text" placeholder="@tu-usuario"
+                  value={payoutDetails.username || ''} onChange={e => updateDetail('username', e.target.value)} />
+              </Field>
+            )}
+
+            {payoutMethod === 'check' && (
+              <div className="space-y-3">
+                <Field label="A nombre de (Payable to)" required>
+                  <input className="input" type="text" placeholder="Tu nombre completo legal"
+                    value={payoutDetails.payable_to || ''} onChange={e => updateDetail('payable_to', e.target.value)} />
+                </Field>
+                <Field label="Dirección de envío" required>
+                  <input className="input" type="text" placeholder="123 Main St, Miami FL 33125"
+                    value={payoutDetails.address || ''} onChange={e => updateDetail('address', e.target.value)} />
+                </Field>
+              </div>
+            )}
+
+            {payoutMethod === 'cash' && (
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700/30 rounded-xl p-3.5">
+                <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                  Recibirás tus pagos en efectivo. OSI Logistics coordinará el método de entrega contigo directamente.
+                </p>
+              </div>
+            )}
+
+            {/* Save / Cancel */}
+            <div className="flex gap-2 pt-1">
+              <button onClick={cancelEdit}
+                className="flex-1 py-2.5 rounded-xl text-sm text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors font-medium">
+                Cancelar
+              </button>
+              <button onClick={savePayout} disabled={savingPayout || !payoutMethod}
+                className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-blue-500 hover:bg-blue-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5">
+                {savingPayout
+                  ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  : <><CheckCircle2 className="w-4 h-4" /> Guardar método</>
+                }
+              </button>
+            </div>
+          </div>
+        ) : payoutMethod ? (
+          <PayoutDisplay method={payoutMethod} details={payoutDetails} />
+        ) : (
+          <div className="border-2 border-dashed border-gray-200 dark:border-slate-600 rounded-2xl p-7 text-center">
+            <div className="w-12 h-12 bg-gray-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-3">
+              <Wallet className="w-6 h-6 text-gray-400 dark:text-slate-500" />
+            </div>
+            <p className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1">Sin método de cobro configurado</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mb-4">
+              Agrega tu método preferido para que OSI pueda enviarte tus comisiones
+            </p>
+            <button onClick={startEdit}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold rounded-xl transition-colors shadow-sm shadow-blue-500/20">
+              <PlusCircle className="w-3.5 h-3.5" /> Configurar método de cobro
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Filter */}
