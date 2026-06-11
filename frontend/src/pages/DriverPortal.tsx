@@ -482,11 +482,11 @@ export default function DriverPortal() {
 
       {/* Offline: 3D map fullscreen — solo cuando tab es 'active' */}
       {driverStatus === 'offline' && tab === 'active' && (
-        <div className="relative" style={{ height: 'calc(100vh - 252px)', minHeight: 340 }}>
+        <div className="relative" style={{ height: 'calc(100vh - 380px)', minHeight: 320 }}>
           <Map3D driver={driver} activeOrders={activeOrders} pitch={52} />
           <div className="absolute inset-x-0 top-0 h-16 pointer-events-none"
             style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.25), transparent)' }} />
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 pointer-events-none">
+          <div className="absolute inset-0 flex flex-col items-center justify-start pt-6 px-6 pointer-events-none">
             <div className="bg-slate-950/85 backdrop-blur-xl rounded-3xl px-6 py-6 text-center shadow-2xl border border-white/10 w-full max-w-xs pointer-events-auto">
               {/* Icon */}
               <div className="w-16 h-16 bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl border border-white/5">
