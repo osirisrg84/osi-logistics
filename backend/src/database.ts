@@ -205,6 +205,12 @@ export function initDatabase(): void {
   addUserCol('payout_method',      "TEXT NOT NULL DEFAULT ''");
   addUserCol('payout_details',     "TEXT NOT NULL DEFAULT ''");
 
+  // Migrate: add target_driver_id to notifications if not present
+  const notifCols = db.prepare('PRAGMA table_info(notifications)').all() as Array<{ name: string }>;
+  if (!notifCols.some(c => c.name === 'target_driver_id')) {
+    db.exec("ALTER TABLE notifications ADD COLUMN target_driver_id TEXT");
+  }
+
   // Migrate: add dispatcher_user_id to orders if not present
   const orderCols = db.prepare('PRAGMA table_info(orders)').all() as Array<{ name: string }>;
   if (!orderCols.some(c => c.name === 'dispatcher_user_id')) {

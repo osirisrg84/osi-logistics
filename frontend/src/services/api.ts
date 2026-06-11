@@ -106,6 +106,8 @@ export const notificationsApi = {
   markAllRead: () => api.put('/notifications/read-all'),
   delete: (id: string) => api.delete(`/notifications/${id}`),
   deleteRead: () => api.delete('/notifications'),
+  getDriverNotifs: (driverId: string) => api.get(`/notifications/driver/${driverId}`),
+  markDriverAllRead: (driverId: string) => api.put(`/notifications/driver/${driverId}/read-all`),
 };
 
 export default api;

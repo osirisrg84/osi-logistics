@@ -37,4 +37,21 @@ router.delete('/', (_req: Request, res: Response) => {
   res.json({ success: true });
 });
 
+router.get('/driver/:driverId', (req: Request, res: Response) => {
+  const db = getDb();
+  const notifications = db.prepare(`
+    SELECT * FROM notifications WHERE target_driver_id = ? ORDER BY created_at DESC LIMIT 50
+  `).all(req.params.driverId);
+  const unread = (db.prepare(
+    'SELECT COUNT(*) as c FROM notifications WHERE target_driver_id = ? AND read = 0'
+  ).get(req.params.driverId) as { c: number }).c;
+  res.json({ notifications, unread });
+});
+
+router.put('/driver/:driverId/read-all', (req: Request, res: Response) => {
+  const db = getDb();
+  db.prepare('UPDATE notifications SET read = 1 WHERE target_driver_id = ?').run(req.params.driverId);
+  res.json({ success: true });
+});
+
 export default router;

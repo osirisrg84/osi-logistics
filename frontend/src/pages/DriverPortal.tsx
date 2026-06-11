@@ -3,12 +3,12 @@ import {
   Package, MapPin, CheckCircle, Truck, Phone,
   Clock, Star, Navigation, LogOut, User, Activity,
   Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet, Building2, CreditCard,
-  Lock, ShieldCheck, Send
+  Lock, ShieldCheck, Send, Bell, BellOff, CheckCheck
 } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { ordersApi, driversApi, billingApi } from '../services/api';
+import { ordersApi, driversApi, billingApi, notificationsApi } from '../services/api';
 import { Order, Driver, DriverStatus } from '../types';
 import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -151,6 +151,15 @@ export default function DriverPortal() {
   const [tab, setTab] = useState<Tab>('active');
   const [loading, setLoading] = useState(true);
 
+  // ── Notifications ─────────────────────────────────────────
+  interface DriverNotif {
+    id: string; type: string; title: string; message: string;
+    read: number; created_at: string; related_id: string | null;
+  }
+  const [driverNotifs, setDriverNotifs] = useState<DriverNotif[]>([]);
+  const [showNotifs, setShowNotifs] = useState(false);
+  const unreadCount = driverNotifs.filter(n => n.read === 0).length;
+
   // ── Favorites ────────────────────────────────────────────
   interface Favorite { id: string; name: string; address: string; type: 'home' | 'work' | 'frequent' | 'other'; }
   const FAV_PRESETS = [
@@ -238,11 +247,24 @@ export default function DriverPortal() {
         })
         .catch(() => {});
     }
+    if (driverId) {
+      notificationsApi.getDriverNotifs(driverId)
+        .then(r => setDriverNotifs(r.data.notifications as DriverNotif[]))
+        .catch(() => {});
+    }
+
     const socket = getSocket();
     socket.emit('subscribe_orders');
+    if (driverId) socket.emit('driver:subscribe', driverId);
     socket.on('order_updated', () => fetchOrders());
-    return () => { socket.off('order_updated'); };
-  }, [fetchOrders, user?.driver_id]);
+    socket.on('driver:notification', (notif: DriverNotif) => {
+      setDriverNotifs(prev => [notif, ...prev]);
+    });
+    return () => {
+      socket.off('order_updated');
+      socket.off('driver:notification');
+    };
+  }, [fetchOrders, user?.driver_id, driverId]);
 
 
   const playOnlineSound = () => {
@@ -364,6 +386,14 @@ export default function DriverPortal() {
               <button onClick={toggleTheme} className="p-2 rounded-xl hover:bg-white/10 transition-colors">
                 {dark ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-slate-300" />}
               </button>
+              <button onClick={() => setShowNotifs(v => !v)} className="relative p-2 rounded-xl hover:bg-white/10 transition-colors">
+                <Bell className="w-4 h-4 text-slate-300" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center leading-none">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
               <button onClick={logout} className="p-2 rounded-xl hover:bg-white/10 transition-colors">
                 <LogOut className="w-4 h-4 text-slate-400" />
               </button>
@@ -482,6 +512,86 @@ export default function DriverPortal() {
           </div>
         </div>
       </div>
+
+      {/* ── Notification panel ─────────────────────────────── */}
+      {showNotifs && (
+        <div className="fixed inset-0 z-50 flex flex-col" onClick={() => setShowNotifs(false)}>
+          <div className="absolute inset-x-0 top-0 bg-black/50" style={{ height: '100%' }} />
+          <div
+            className="relative bg-[#0f1e35] border-b border-white/10 shadow-2xl max-h-[80vh] flex flex-col"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Panel header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <Bell className="w-4 h-4 text-blue-400" />
+                <span className="text-sm font-bold text-white">Notificaciones</span>
+                {unreadCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500 text-white">{unreadCount}</span>
+                )}
+              </div>
+              <div className="flex items-center gap-1">
+                {unreadCount > 0 && (
+                  <button
+                    onClick={async () => {
+                      if (!driverId) return;
+                      await notificationsApi.markDriverAllRead(driverId);
+                      setDriverNotifs(prev => prev.map(n => ({ ...n, read: 1 })));
+                    }}
+                    className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 px-2 py-1 rounded-lg hover:bg-white/5 transition-colors"
+                  >
+                    <CheckCheck className="w-3.5 h-3.5" /> Leer todo
+                  </button>
+                )}
+                <button onClick={() => setShowNotifs(false)} className="p-1.5 rounded-lg hover:bg-white/10 transition-colors">
+                  <X className="w-4 h-4 text-slate-400" />
+                </button>
+              </div>
+            </div>
+
+            {/* Notif list */}
+            <div className="overflow-y-auto flex-1">
+              {driverNotifs.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-2">
+                  <BellOff className="w-8 h-8 text-slate-600" />
+                  <p className="text-sm text-slate-500">Sin notificaciones</p>
+                </div>
+              ) : (
+                driverNotifs.map(notif => (
+                  <div
+                    key={notif.id}
+                    onClick={async () => {
+                      if (notif.read === 0) {
+                        await notificationsApi.markRead(notif.id);
+                        setDriverNotifs(prev => prev.map(n => n.id === notif.id ? { ...n, read: 1 } : n));
+                      }
+                    }}
+                    className={`flex items-start gap-3 px-4 py-3.5 border-b border-white/5 cursor-pointer transition-colors ${
+                      notif.read === 0 ? 'bg-blue-500/8 hover:bg-blue-500/12' : 'hover:bg-white/3'
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                      notif.type === 'order' ? 'bg-blue-500/20' : 'bg-slate-700'
+                    }`}>
+                      {notif.type === 'order' ? <Package className="w-4 h-4 text-blue-400" /> : <Bell className="w-4 h-4 text-slate-400" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className={`text-sm font-semibold truncate ${notif.read === 0 ? 'text-white' : 'text-slate-300'}`}>{notif.title}</p>
+                        {notif.read === 0 && <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{notif.message}</p>
+                      <p className="text-[10px] text-slate-600 mt-1">
+                        {(() => { try { return formatDistanceToNow(new Date(notif.created_at), { addSuffix: true }); } catch { return ''; } })()}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Content area ───────────────────────────────────── */}
 

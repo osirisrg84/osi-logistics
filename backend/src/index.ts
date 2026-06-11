@@ -130,6 +130,10 @@ io.on('connection', (socket) => {
     socket.join('dispatchers');
   });
 
+  socket.on('driver:subscribe', (driverId: string) => {
+    socket.join(`driver:${driverId}`);
+  });
+
   socket.on('disconnect', () => {
     console.log(`Client disconnected: ${socket.id}`);
   });
@@ -207,6 +211,11 @@ function startSimulation(): void {
   `).all() as Array<{ id: string }>;
 
   onlineDrivers.forEach(d => addToSimulation(d.id));
+
+  // Push notifications to individual driver rooms
+  appEvents.on('driver:notification', ({ driverId, notification }: { driverId: string; notification: unknown }) => {
+    io.to(`driver:${driverId}`).emit('driver:notification', notification);
+  });
 
   // React to driver status changes
   appEvents.on('driver:status_changed', (event: DriverStatusEvent) => {

@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { getDb, createCommission } from '../database';
+import { appEvents } from '../events';
 
 type AuthRequest = Request & { user?: { id: string; name: string; role: string } };
 
@@ -165,6 +166,27 @@ router.post('/:id/assign', (req: AuthRequest, res: Response) => {
     INSERT INTO notifications (id, type, title, message, read, related_id)
     VALUES (?, 'order', 'Order Assigned', ?, 0, ?)
   `).run(uuidv4(), `Order ${order.order_number} assigned to ${driver.name}`, req.params.id);
+
+  const driverNotifId = uuidv4();
+  const driverNotifMsg = `Se te asignó la orden ${order.order_number}. Confirma el pickup cuando estés listo.`;
+  db.prepare(`
+    INSERT INTO notifications (id, type, title, message, read, related_id, target_driver_id)
+    VALUES (?, 'order', 'Nueva orden asignada', ?, 0, ?, ?)
+  `).run(driverNotifId, driverNotifMsg, req.params.id, driver_id);
+
+  appEvents.emit('driver:notification', {
+    driverId: driver_id,
+    notification: {
+      id: driverNotifId,
+      type: 'order',
+      title: 'Nueva orden asignada',
+      message: driverNotifMsg,
+      read: 0,
+      related_id: req.params.id,
+      target_driver_id: driver_id,
+      created_at: new Date().toISOString(),
+    },
+  });
 
   const updated = db.prepare(`
     SELECT o.*, d.name as driver_name, t.plate_number
