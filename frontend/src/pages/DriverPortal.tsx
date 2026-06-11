@@ -349,63 +349,81 @@ export default function DriverPortal() {
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-16">
 
       {/* ── Header + Driver Hero ────────────────────────────── */}
-      <div className="bg-gradient-to-b from-slate-950 to-slate-900">
+      <div className={dark
+        ? 'bg-gradient-to-b from-[#06091a] via-[#0c1228] to-[#101827]'
+        : 'bg-white border-b border-gray-200 shadow-sm'}>
+
         {/* Top bar */}
-        <div className="px-4 pt-3 pb-2">
+        <div className="px-4 pt-4 pb-2">
           <div className="max-w-lg mx-auto flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <img src={osiLogo} alt="OSI Logistics" className="h-8 w-auto object-contain rounded-md flex-shrink-0" />
-              <span className="text-xs font-semibold text-blue-300 bg-blue-500/20 border border-blue-500/30 px-2.5 py-1 rounded-full tracking-wide">
-                Driver Portal
-              </span>
+              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full tracking-wide ${
+                dark ? 'text-blue-300 bg-blue-500/20 border border-blue-500/30'
+                     : 'text-blue-600 bg-blue-50 border border-blue-200'
+              }`}>Driver Portal</span>
             </div>
-            <div className="flex items-center gap-1">
-              <button onClick={toggleTheme} className="p-2 hover:bg-white/10 rounded-xl transition-colors" title={dark ? 'Light mode' : 'Dark mode'}>
-                {dark ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-slate-400" />}
+            <div className="flex items-center gap-0.5">
+              <button onClick={toggleTheme} className={`p-2 rounded-xl transition-colors ${dark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
+                {dark ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-gray-500" />}
               </button>
-              <button onClick={logout} className="p-2 hover:bg-white/10 rounded-xl transition-colors">
-                <LogOut className="w-4 h-4 text-slate-400" />
+              <button onClick={logout} className={`p-2 rounded-xl transition-colors ${dark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
+                <LogOut className={`w-4 h-4 ${dark ? 'text-slate-400' : 'text-gray-500'}`} />
               </button>
             </div>
           </div>
         </div>
 
         {/* Driver identity hero */}
-        <div className="px-4 pt-1 pb-4">
+        <div className="px-4 pt-2 pb-4">
           <div className="max-w-lg mx-auto">
-            <div className="flex items-center gap-4 mb-4">
+
+            {/* Driver card */}
+            <div className={`flex items-center gap-4 rounded-2xl px-4 py-3.5 mb-4 ${
+              dark ? 'bg-white/5 border border-white/8' : 'bg-gray-50 border border-gray-200'
+            }`}>
               {/* Avatar */}
-              <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-lg flex-shrink-0 shadow-lg ${
-                driverStatus === 'offline'   ? 'bg-slate-600' :
-                driverStatus === 'available' ? 'bg-gradient-to-br from-orange-400 to-orange-600' :
-                driverStatus === 'busy'      ? 'bg-gradient-to-br from-blue-400 to-blue-600' :
-                                              'bg-gradient-to-br from-yellow-400 to-yellow-600'
-              }`}>
-                <span className="text-white">{user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'D'}</span>
-                {/* Status dot */}
-                <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-slate-900 ${cfg.dot} ${driverStatus === 'available' ? 'pulse-dot' : ''}`} />
-              </div>
-              {/* Name & status */}
-              <div className="flex-1 min-w-0">
-                <p className="text-base font-bold text-white leading-tight truncate">{driver?.name || user?.name}</p>
-                <p className="text-xs text-slate-400 mt-0.5 truncate">
-                  {driver?.equipment_type && <span className="text-slate-300">{driver.equipment_type}</span>}
-                  {driver?.plate_number && <span className="text-slate-500"> · {driver.plate_number}</span>}
-                </p>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                    driverStatus === 'available' ? 'bg-green-500/20 text-green-400' :
-                    driverStatus === 'busy'      ? 'bg-blue-500/20 text-blue-400' :
-                    driverStatus === 'on_break'  ? 'bg-yellow-500/20 text-yellow-400' :
-                                                  'bg-slate-700 text-slate-400'
-                  }`}>{cfg.label}</span>
+              <div className="relative flex-shrink-0">
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl shadow-lg ${
+                  driverStatus === 'offline'   ? (dark ? 'bg-slate-700' : 'bg-gray-400') :
+                  driverStatus === 'available' ? 'bg-gradient-to-br from-orange-400 to-orange-600' :
+                  driverStatus === 'busy'      ? 'bg-gradient-to-br from-blue-400 to-blue-600' :
+                                                'bg-gradient-to-br from-yellow-400 to-yellow-500'
+                }`}>
+                  <span className="text-white drop-shadow-sm">{user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'D'}</span>
                 </div>
+                <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 ${
+                  dark ? 'border-[#0f172a]' : 'border-gray-50'
+                } ${cfg.dot} ${driverStatus === 'available' ? 'pulse-dot' : ''}`} />
               </div>
-              {/* Rating */}
+
+              {/* Name & info */}
+              <div className="flex-1 min-w-0">
+                <p className={`text-base font-bold leading-tight truncate ${dark ? 'text-white' : 'text-gray-900'}`}>
+                  {driver?.name || user?.name}
+                </p>
+                <p className={`text-xs mt-0.5 truncate ${dark ? 'text-slate-400' : 'text-gray-500'}`}>
+                  {driver?.equipment_type || 'Driver'}
+                  {driver?.plate_number && <span className={dark ? 'text-slate-600' : 'text-gray-400'}> · {driver.plate_number}</span>}
+                </p>
+                <span className={`inline-flex items-center gap-1 text-xs font-semibold mt-1.5 px-2 py-0.5 rounded-full ${
+                  driverStatus === 'available' ? 'bg-green-500/15 text-green-500' :
+                  driverStatus === 'busy'      ? 'bg-blue-500/15 text-blue-500' :
+                  driverStatus === 'on_break'  ? 'bg-yellow-500/15 text-yellow-500' :
+                  dark ? 'bg-slate-700/80 text-slate-400' : 'bg-gray-200 text-gray-500'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} ${driverStatus === 'available' ? 'pulse-dot' : ''}`} />
+                  {cfg.label}
+                </span>
+              </div>
+
+              {/* Rating badge */}
               {driver?.rating && (
-                <div className="flex flex-col items-center bg-white/5 border border-white/10 rounded-2xl px-3 py-2 flex-shrink-0">
-                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 mb-0.5" />
-                  <span className="text-sm font-bold text-white">{driver.rating.toFixed(1)}</span>
+                <div className={`flex flex-col items-center rounded-2xl px-3 py-2 flex-shrink-0 ${
+                  dark ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-amber-50 border border-amber-200'
+                }`}>
+                  <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                  <span className={`text-sm font-bold mt-0.5 ${dark ? 'text-white' : 'text-gray-900'}`}>{driver.rating.toFixed(1)}</span>
                 </div>
               )}
             </div>
@@ -413,44 +431,53 @@ export default function DriverPortal() {
             {/* Status controls */}
             {driverStatus === 'offline' ? (
               <button onClick={() => setStatus('available')} disabled={togglingStatus}
-                className="w-full bg-gradient-to-r from-green-500 to-green-400 hover:from-green-400 hover:to-green-300 active:scale-95 disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3 shadow-xl shadow-green-500/30">
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-400 hover:from-green-400 hover:to-emerald-300 active:scale-[0.98] disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3 shadow-2xl shadow-green-500/40">
                 {togglingStatus
                   ? <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  : <Power className="w-5 h-5" />}
+                  : <Power className="w-5 h-5 drop-shadow" />}
                 <span className="text-base tracking-wide">Go Online</span>
               </button>
             ) : (
               <div className="space-y-2">
-                <div className={`flex items-center justify-between ${cfg.bg} rounded-xl px-4 py-2.5 border border-white/5`}>
+                <div className={`flex items-center justify-between rounded-xl px-4 py-2.5 ${
+                  dark ? `${cfg.bg} border border-white/5` : 'bg-gray-100 border border-gray-200'
+                }`}>
                   <div className="flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full ${cfg.dot} ${driverStatus === 'available' ? 'pulse-dot' : ''}`} />
-                    <span className={`text-sm font-semibold ${cfg.text}`}>{cfg.label}</span>
+                    <span className={`text-sm font-semibold ${dark ? cfg.text : 'text-gray-800'}`}>{cfg.label}</span>
                     {isBusy && driverStatus !== 'busy' && (
-                      <span className="text-xs text-orange-400 flex items-center gap-1">
+                      <span className="text-xs text-orange-500 flex items-center gap-1">
                         <AlertTriangle className="w-3 h-3" /> Active delivery
                       </span>
                     )}
                   </div>
-                  <span className={`text-xs font-medium ${cfg.text} opacity-70`}>
+                  <span className={`text-xs font-medium ${dark ? `${cfg.text} opacity-70` : 'text-gray-500'}`}>
                     {activeOrders.length} order{activeOrders.length !== 1 ? 's' : ''} active
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {driverStatus !== 'on_break' ? (
                     <button onClick={() => setStatus('on_break')} disabled={togglingStatus || isBusy}
-                      className="flex items-center justify-center gap-2 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 font-semibold py-2.5 rounded-xl transition-colors disabled:opacity-40 text-sm"
-                      title={isBusy ? 'Finish your delivery first' : 'Take a break'}>
+                      className={`flex items-center justify-center gap-2 font-semibold py-2.5 rounded-xl transition-colors disabled:opacity-40 text-sm border ${
+                        dark ? 'bg-yellow-500/10 hover:bg-yellow-500/20 border-yellow-500/30 text-yellow-400'
+                             : 'bg-yellow-50 hover:bg-yellow-100 border-yellow-300 text-yellow-700'
+                      }`}>
                       <Coffee className="w-4 h-4" /> Take a Break
                     </button>
                   ) : (
                     <button onClick={() => setStatus('available')} disabled={togglingStatus}
-                      className="flex items-center justify-center gap-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 text-green-400 font-semibold py-2.5 rounded-xl transition-colors text-sm">
+                      className={`flex items-center justify-center gap-2 font-semibold py-2.5 rounded-xl transition-colors text-sm border ${
+                        dark ? 'bg-green-500/10 hover:bg-green-500/20 border-green-500/30 text-green-400'
+                             : 'bg-green-50 hover:bg-green-100 border-green-300 text-green-700'
+                      }`}>
                       <Power className="w-4 h-4" /> Resume
                     </button>
                   )}
                   <button onClick={() => setStatus('offline')} disabled={togglingStatus || isBusy}
-                    className="flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-semibold py-2.5 rounded-xl transition-colors disabled:opacity-40 text-sm"
-                    title={isBusy ? 'Finish your delivery first' : 'Go offline'}>
+                    className={`flex items-center justify-center gap-2 font-semibold py-2.5 rounded-xl transition-colors disabled:opacity-40 text-sm border ${
+                      dark ? 'bg-red-500/10 hover:bg-red-500/20 border-red-500/30 text-red-400'
+                           : 'bg-red-50 hover:bg-red-100 border-red-300 text-red-600'
+                    }`}>
                     <Power className="w-4 h-4" /> Go Offline
                   </button>
                 </div>
@@ -461,18 +488,24 @@ export default function DriverPortal() {
 
         {/* ── Stats bar ──────────────────────────────────────── */}
         <div className="px-4 pb-4">
-          <div className="max-w-lg mx-auto grid grid-cols-3 gap-2.5">
-            <div className="bg-white/5 border border-white/10 rounded-2xl px-3 py-3 text-center">
-              <p className="text-xl font-bold text-orange-400">{activeOrders.length}</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">Active Orders</p>
+          <div className="max-w-lg mx-auto grid grid-cols-3 gap-2">
+            <div className={`rounded-2xl px-2 py-3 text-center ${
+              dark ? 'bg-white/4 border border-white/8' : 'bg-orange-50 border border-orange-100'
+            }`}>
+              <p className={`text-xl font-bold ${dark ? 'text-orange-400' : 'text-orange-500'}`}>{activeOrders.length}</p>
+              <p className={`text-[11px] mt-0.5 ${dark ? 'text-slate-500' : 'text-orange-400/80'}`}>Active Orders</p>
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl px-3 py-3 text-center">
-              <p className="text-xl font-bold text-green-400">${todayRevenue.toFixed(0)}</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">Today's Revenue</p>
+            <div className={`rounded-2xl px-2 py-3 text-center ${
+              dark ? 'bg-white/4 border border-white/8' : 'bg-green-50 border border-green-100'
+            }`}>
+              <p className={`text-xl font-bold ${dark ? 'text-green-400' : 'text-green-600'}`}>${todayRevenue.toFixed(0)}</p>
+              <p className={`text-[11px] mt-0.5 ${dark ? 'text-slate-500' : 'text-green-500/80'}`}>Today's Revenue</p>
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl px-3 py-3 text-center">
-              <p className="text-xl font-bold text-yellow-400">★ {driver?.rating?.toFixed(1) || '—'}</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">My Rating</p>
+            <div className={`rounded-2xl px-2 py-3 text-center ${
+              dark ? 'bg-white/4 border border-white/8' : 'bg-amber-50 border border-amber-100'
+            }`}>
+              <p className={`text-xl font-bold ${dark ? 'text-yellow-400' : 'text-amber-500'}`}>★ {driver?.rating?.toFixed(1) || '—'}</p>
+              <p className={`text-[11px] mt-0.5 ${dark ? 'text-slate-500' : 'text-amber-400/80'}`}>My Rating</p>
             </div>
           </div>
         </div>
@@ -486,27 +519,36 @@ export default function DriverPortal() {
           <Map3D driver={driver} activeOrders={activeOrders} pitch={52} />
           <div className="absolute inset-x-0 top-0 h-16 pointer-events-none"
             style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.25), transparent)' }} />
-          <div className="absolute inset-0 flex flex-col items-center justify-start pt-6 px-6 pointer-events-none">
-            <div className="bg-slate-950/85 backdrop-blur-xl rounded-3xl px-6 py-6 text-center shadow-2xl border border-white/10 w-full max-w-xs pointer-events-auto">
-              {/* Icon */}
-              <div className="w-16 h-16 bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl border border-white/5">
-                <Power className="w-8 h-8 text-slate-400" />
+          <div className="absolute inset-0 flex flex-col items-center justify-start pt-5 px-5 pointer-events-none">
+            <div className={`backdrop-blur-xl rounded-3xl px-6 py-6 text-center shadow-2xl w-full max-w-sm pointer-events-auto ${
+              dark
+                ? 'bg-slate-950/90 border border-white/10'
+                : 'bg-white/95 border border-gray-200 shadow-xl'
+            }`}>
+              {/* Icon with ring */}
+              <div className="relative w-16 h-16 mx-auto mb-4">
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg border ${
+                  dark ? 'bg-gradient-to-br from-slate-700 to-slate-800 border-white/5'
+                       : 'bg-gradient-to-br from-gray-100 to-gray-200 border-gray-300'
+                }`}>
+                  <Power className={`w-8 h-8 ${dark ? 'text-slate-400' : 'text-gray-500'}`} />
+                </div>
               </div>
               {/* Text */}
-              <h3 className="text-lg font-bold text-white mb-1 tracking-tight">You're Offline</h3>
-              <p className="text-xs text-slate-400 mb-1">No active deliveries at this time</p>
-              <p className="text-xs text-slate-500 mb-5">Go online to start receiving orders from OSI Logistics</p>
+              <h3 className={`text-lg font-bold mb-1 tracking-tight ${dark ? 'text-white' : 'text-gray-900'}`}>You're Offline</h3>
+              <p className={`text-sm mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>No active deliveries at this time</p>
+              <p className={`text-xs mb-5 ${dark ? 'text-slate-600' : 'text-gray-400'}`}>Go online to start receiving orders from OSI Logistics</p>
               {/* CTA */}
               <button onClick={() => setStatus('available')} disabled={togglingStatus}
-                className="w-full bg-gradient-to-r from-green-500 to-green-400 hover:from-green-400 hover:to-green-300 active:scale-95 disabled:opacity-60 text-white font-bold py-3.5 rounded-2xl transition-all flex items-center justify-center gap-2.5 shadow-xl shadow-green-500/30 text-sm">
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-400 hover:from-green-400 hover:to-emerald-300 active:scale-[0.98] disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2.5 shadow-xl shadow-green-500/35 text-sm">
                 {togglingStatus
                   ? <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                   : <Power className="w-4 h-4" />}
-                Go Online Now
+                <span className="tracking-wide">Go Online Now</span>
               </button>
               {/* Driver name */}
               {(driver?.name || user?.name) && (
-                <p className="text-[11px] text-slate-600 mt-3">{driver?.name || user?.name} · OSI Logistics</p>
+                <p className={`text-[11px] mt-3 ${dark ? 'text-slate-700' : 'text-gray-400'}`}>{driver?.name || user?.name} · OSI Logistics</p>
               )}
             </div>
           </div>
