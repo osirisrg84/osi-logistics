@@ -41,6 +41,7 @@ export default function RegisterDispatcher() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [declared, setDeclared] = useState(false);
 
   const set = (field: keyof typeof form) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -297,9 +298,31 @@ export default function RegisterDispatcher() {
             </div>
           </div>
 
+          {/* Declaration */}
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <div className="relative flex-shrink-0 mt-0.5">
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={declared}
+                onChange={e => setDeclared(e.target.checked)}
+              />
+              <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                declared
+                  ? 'bg-orange-500 border-orange-500'
+                  : 'border-slate-400 bg-transparent group-hover:border-orange-400'
+              }`}>
+                {declared && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+              </div>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Declaro que la información suministrada en este registro es <span className="text-slate-300 font-medium">veraz, completa y actualizada</span>. Autorizo la validación de los datos proporcionados con el fin de verificar su autenticidad y garantizar el correcto uso de los servicios ofrecidos por OSI Logistics.
+            </p>
+          </label>
+
           {/* Submit */}
-          <button type="submit" disabled={loading}
-            className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-3.5 rounded-2xl transition-colors flex items-center justify-center gap-2 text-base shadow-xl shadow-orange-500/20">
+          <button type="submit" disabled={loading || !declared}
+            className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-2xl transition-colors flex items-center justify-center gap-2 text-base shadow-xl shadow-orange-500/20">
             {loading
               ? <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Creating account...</>
               : <><ClipboardList className="w-4 h-4" /> Create Dispatcher Account</>
