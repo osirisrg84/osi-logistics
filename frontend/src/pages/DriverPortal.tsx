@@ -220,9 +220,7 @@ export default function DriverPortal() {
 
   useEffect(() => {
     if (driver?.status) setDriverStatus(driver.status as DriverStatus);
-    if (driver?.payment_method !== undefined) setPaymentMethod(driver.payment_method || '');
-    if (driver?.payment_details !== undefined) setPaymentDetails(driver.payment_details || '');
-  }, [driver?.status, driver?.payment_method, driver?.payment_details]);
+  }, [driver?.status]);
 
   useEffect(() => {
     fetchOrders();
