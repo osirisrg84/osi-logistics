@@ -830,26 +830,30 @@ export default function DriverPortal() {
 
           {/* Balance card */}
           {billingSummary && (
-            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-5 text-white">
-              <p className="text-xs text-slate-400 mb-1">Balance pendiente con OSI</p>
-              <p className="text-3xl font-bold text-yellow-400">${billingSummary.pending.toFixed(2)}</p>
-              <p className="text-xs text-slate-400 mt-1">OSI cobra el <span className="text-red-400 font-semibold">8%</span> por cada carga entregada</p>
+            <div className={`rounded-2xl p-5 ${
+              dark
+                ? 'bg-gradient-to-br from-slate-800 to-slate-900 text-white'
+                : 'bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-300'
+            }`}>
+              <p className={`text-xs mb-1 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Balance pendiente con OSI</p>
+              <p className={`text-3xl font-bold ${dark ? 'text-yellow-400' : 'text-orange-500'}`}>${billingSummary.pending.toFixed(2)}</p>
+              <p className={`text-xs mt-1 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>OSI cobra el <span className={`font-semibold ${dark ? 'text-red-400' : 'text-red-500'}`}>8%</span> por cada carga entregada</p>
               <div className="mt-4 space-y-1.5">
                 <div className="flex justify-between text-xs">
-                  <span className="text-slate-400">Progreso de pago</span>
-                  <span className="text-white font-medium">
+                  <span className={dark ? 'text-slate-400' : 'text-slate-500'}>Progreso de pago</span>
+                  <span className={`font-medium ${dark ? 'text-white' : 'text-slate-700'}`}>
                     {billingSummary.total_charged > 0 ? Math.round((billingSummary.settled / billingSummary.total_charged) * 100) : 0}%
                   </span>
                 </div>
-                <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                <div className={`h-2 rounded-full overflow-hidden ${dark ? 'bg-slate-700' : 'bg-slate-300'}`}>
                   <div
                     className="h-full bg-green-500 rounded-full transition-all"
                     style={{ width: `${billingSummary.total_charged > 0 ? (billingSummary.settled / billingSummary.total_charged) * 100 : 0}%` }}
                   />
                 </div>
-                <div className="flex justify-between text-[10px] text-slate-500 pt-0.5">
-                  <span>Pagado: <span className="text-green-400 font-semibold">${billingSummary.settled.toFixed(2)}</span></span>
-                  <span>Total: <span className="text-slate-300 font-semibold">${billingSummary.total_charged.toFixed(2)}</span></span>
+                <div className="flex justify-between text-[10px] pt-0.5">
+                  <span className={dark ? 'text-slate-500' : 'text-slate-400'}>Pagado: <span className="text-green-500 font-semibold">${billingSummary.settled.toFixed(2)}</span></span>
+                  <span className={dark ? 'text-slate-500' : 'text-slate-400'}>Total: <span className={`font-semibold ${dark ? 'text-slate-300' : 'text-slate-600'}`}>${billingSummary.total_charged.toFixed(2)}</span></span>
                 </div>
               </div>
               {billingSummary.pending > 0 && (
