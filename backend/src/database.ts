@@ -374,22 +374,29 @@ function seedCommissions(db: DatabaseSync): void {
 }
 
 function seedUsers(db: DatabaseSync): void {
-  const insertUser = db.prepare(`
-    INSERT OR IGNORE INTO users (id, name, email, password_hash, salt, role, driver_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `);
+  // Upsert helper: insert if not exists, always reset password to demo value
+  const upsertDemoUser = (name: string, email: string, password: string, role: string, driverId: string | null) => {
+    const salt = randomBytes(16).toString('hex');
+    const hash = hashPassword(password, salt);
+    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+    if (existing) {
+      db.prepare('UPDATE users SET password_hash = ?, salt = ?, name = ?, active = 1 WHERE email = ?')
+        .run(hash, salt, name, email);
+    } else {
+      db.prepare('INSERT INTO users (id, name, email, password_hash, salt, role, driver_id) VALUES (?, ?, ?, ?, ?, ?, ?)')
+        .run(uuidv4(), name, email, hash, salt, role, driverId);
+    }
+  };
 
-  // Admin + Dispatcher (always created)
-  const adminSalt = randomBytes(16).toString('hex');
-  const dispatchSalt = randomBytes(16).toString('hex');
-  insertUser.run(uuidv4(), 'Admin OSI',       'admin@osilogistics.com',      hashPassword('Admin123!',    adminSalt),    adminSalt,    'admin',      null);
-  insertUser.run(uuidv4(), 'Dispatcher OSI',  'dispatcher@osilogistics.com', hashPassword('Dispatch123!', dispatchSalt), dispatchSalt, 'dispatcher', null);
+  upsertDemoUser('Admin OSI',      'admin@osilogistics.com',      'Admin123!',    'admin',      null);
+  upsertDemoUser('Maria Gonzalez', 'dispatcher@osilogistics.com', 'Dispatch123!', 'dispatcher', null);
 
-  // Driver: Carlos Rodriguez specifically (drivers already exist at this point)
+  // Driver: Carlos Rodriguez
   const carlos = db.prepare("SELECT id, name, email FROM drivers WHERE email = 'carlos.r@osilogistics.com' LIMIT 1").get() as Record<string, string> | undefined;
   if (carlos) {
-    const driverSalt = randomBytes(16).toString('hex');
-    insertUser.run(uuidv4(), carlos.name, carlos.email, hashPassword('Driver123!', driverSalt), driverSalt, 'driver', carlos.id);
+    upsertDemoUser(carlos.name, carlos.email, 'Driver123!', 'driver', carlos.id);
+    // Ensure driver_id is linked even if user already existed
+    db.prepare("UPDATE users SET driver_id = ? WHERE email = ? AND role = 'driver'").run(carlos.id, carlos.email);
     console.log('   👤 carlos.r@osilogistics.com / Driver123!');
   }
 
