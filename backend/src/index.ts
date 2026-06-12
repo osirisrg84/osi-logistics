@@ -15,6 +15,7 @@ import authRouter from './routes/auth';
 import adminRouter from './routes/admin';
 import billingRouter from './routes/billing';
 import pushRouter, { sendPushToAll } from './routes/push';
+import chatRouter from './routes/chat';
 import { authenticate } from './middleware/auth';
 
 const PORT = process.env.PORT || 3001;
@@ -23,6 +24,8 @@ const PORT = process.env.PORT || 3001;
 const allowedOrigins: string[] = [
   'http://localhost:5173',
   'http://localhost:3000',
+  'https://osilogistics.com',
+  'https://www.osilogistics.com',
 ];
 if (process.env.FRONTEND_URL) {
   process.env.FRONTEND_URL.split(',').forEach(u => allowedOrigins.push(u.trim()));
@@ -54,6 +57,7 @@ app.use(express.json());
 
 // Public routes
 app.use('/api/auth', authRouter);
+app.use('/api/chat', chatRouter);
 
 app.get('/api/health', (_req, res) => {
   const db = getDb();
