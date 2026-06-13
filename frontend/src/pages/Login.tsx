@@ -49,7 +49,7 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Link to="/" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm mb-6 transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to portal selection
+          <ArrowLeft className="w-3.5 h-3.5" /> Volver a selección de portal
         </Link>
 
         {/* Hero */}
@@ -64,9 +64,9 @@ export default function Login() {
         {/* Feature pills */}
         <div className="flex flex-wrap justify-center gap-2 mb-8">
           {[
-            { icon: Truck,       text: 'Manage fleet' },
-            { icon: Users,       text: 'Assign drivers' },
-            { icon: BarChart2,   text: 'Operations reports' },
+            { icon: Truck,       text: 'Gestionar flota' },
+            { icon: Users,       text: 'Asignar conductores' },
+            { icon: BarChart2,   text: 'Reportes de operaciones' },
           ].map(({ icon: Icon, text }) => (
             <div key={text} className="flex items-center gap-1.5 bg-slate-700/50 rounded-full px-3 py-1.5 text-xs text-slate-300">
               <Icon className="w-3 h-3 text-orange-400" />
@@ -77,8 +77,8 @@ export default function Login() {
 
         {/* Card */}
         <div className="bg-white rounded-3xl shadow-2xl p-7 w-full max-w-sm mx-auto">
-          <h2 className="text-xl font-bold text-gray-900 mb-1">Welcome back</h2>
-          <p className="text-sm text-gray-500 mb-5">Sign in to your dispatch dashboard</p>
+          <h2 className="text-xl font-bold text-gray-900 mb-1">Bienvenido de nuevo</h2>
+          <p className="text-sm text-gray-500 mb-5">Inicia sesión en tu panel de despacho</p>
 
           {error && (
             <div className="flex items-start gap-2 bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-2xl mb-4">
@@ -146,14 +146,14 @@ export default function Login() {
           </div>
 
           <p className="text-xs text-gray-400 text-center mt-4">
-            New dispatcher?{' '}
-            <Link to="/dispatcher/register" className="text-orange-500 hover:text-orange-600 font-medium">Create account</Link>
+            ¿Eres nuevo dispatcher?{' '}
+            <Link to="/dispatcher/register" className="text-orange-500 hover:text-orange-600 font-medium">Crear cuenta</Link>
           </p>
         </div>
 
         <p className="text-xs text-slate-600 mt-6 text-center">
-          Are you a driver?{' '}
-          <Link to="/driver/login" className="text-blue-400 hover:text-blue-300 font-medium">Driver Portal →</Link>
+          ¿Eres conductor?{' '}
+          <Link to="/driver/login" className="text-blue-400 hover:text-blue-300 font-medium">Portal Conductor →</Link>
         </p>
       </div>
     </div>

@@ -42,7 +42,7 @@ export default function DriverLogin() {
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Link to="/" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm mb-6 transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to portal selection
+          <ArrowLeft className="w-3.5 h-3.5" /> Volver a selección de portal
         </Link>
         {/* Hero */}
         <div className="text-center mb-8">
@@ -56,9 +56,9 @@ export default function DriverLogin() {
         {/* Feature pills */}
         <div className="flex flex-wrap justify-center gap-2 mb-8">
           {[
-            { icon: Package, text: 'View your orders' },
-            { icon: MapPin, text: 'Live navigation' },
-            { icon: Star, text: 'Track performance' },
+            { icon: Package, text: 'Ver tus órdenes' },
+            { icon: MapPin, text: 'Navegación en vivo' },
+            { icon: Star, text: 'Seguir desempeño' },
           ].map(({ icon: Icon, text }) => (
             <div key={text} className="flex items-center gap-1.5 bg-slate-700/50 rounded-full px-3 py-1.5 text-xs text-slate-300">
               <Icon className="w-3 h-3 text-blue-400" />
@@ -69,8 +69,8 @@ export default function DriverLogin() {
 
         {/* Card */}
         <div className="bg-white rounded-3xl shadow-2xl p-7 w-full max-w-sm mx-auto">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Welcome back</h2>
-          <p className="text-sm text-gray-500 mb-5">Sign in to see your deliveries</p>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Bienvenido de nuevo</h2>
+          <p className="text-sm text-gray-500 mb-5">Inicia sesión para ver tus entregas</p>
 
           {error && (
             <div className="flex items-start gap-2 bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-2xl mb-4">
@@ -138,14 +138,14 @@ export default function DriverLogin() {
           </div>
 
           <p className="text-xs text-gray-400 text-center mt-4">
-            Don't have an account?{' '}
-            <Link to="/driver/register" className="text-blue-500 hover:text-blue-600 font-medium">Register here</Link>
+            ¿No tienes una cuenta?{' '}
+            <Link to="/driver/register" className="text-blue-500 hover:text-blue-600 font-medium">Regístrate aquí</Link>
           </p>
         </div>
 
         <p className="text-xs text-slate-600 mt-6 text-center">
-          Are you a dispatcher?{' '}
-          <Link to="/dispatcher" className="text-orange-400 hover:text-orange-300 font-medium">Dispatcher Portal →</Link>
+          ¿Eres un dispatcher?{' '}
+          <Link to="/dispatcher" className="text-orange-400 hover:text-orange-300 font-medium">Portal Dispatcher →</Link>
         </p>
       </div>
     </div>
