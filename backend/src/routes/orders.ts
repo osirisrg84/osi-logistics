@@ -277,9 +277,10 @@ router.post('/:id/offer', (req: AuthRequest, res: Response) => {
   if (!driver) return res.status(404).json({ error: 'Driver not found' });
 
   db.prepare(`
-    UPDATE orders SET status = 'offered', offered_to_driver_id = ?, offered_to_truck_id = ?, offered_at = ?
+    UPDATE orders SET status = 'offered', offered_to_driver_id = ?, offered_to_truck_id = ?, offered_at = ?,
+      dispatcher_user_id = COALESCE(dispatcher_user_id, ?)
     WHERE id = ?
-  `).run(driver_id, truck_id, now, req.params.id);
+  `).run(driver_id, truck_id, now, req.user?.id || null, req.params.id);
 
   db.prepare(`
     INSERT INTO order_history (id, order_id, status, notes, created_by)
