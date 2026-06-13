@@ -394,7 +394,7 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
               <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{(order.distance_km * 0.621371).toFixed(1)} mi</p>
             </div>
             <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
-              <p className="text-xs text-gray-500 dark:text-slate-400">Price</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Rate</p>
               <p className="text-sm font-semibold text-green-600">${(Math.round(order.price / 100) * 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
           </div>
