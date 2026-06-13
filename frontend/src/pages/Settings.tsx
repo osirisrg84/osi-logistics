@@ -235,7 +235,7 @@ export default function Settings() {
                     onChange={e => setDispatchSettings({...dispatchSettings, max_orders_per_driver: parseInt(e.target.value)})} min="1" max="10" />
                 </div>
                 <div>
-                  <label className="label">Assignment Radius (km)</label>
+                  <label className="label">Assignment Radius (mi)</label>
                   <input className="input" type="number" value={dispatchSettings.assignment_radius_km}
                     onChange={e => setDispatchSettings({...dispatchSettings, assignment_radius_km: parseInt(e.target.value)})} min="5" max="500" />
                 </div>
