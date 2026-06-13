@@ -966,7 +966,7 @@ export default function DriverPortal() {
               </div>
 
               {/* ── Navigation Buttons ───────────────────────── */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <a href={
                     activeOrders.length > 0 && activeOrders[0].status === 'assigned'
                       ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(activeOrders[0].pickup_address)}`
@@ -975,32 +975,22 @@ export default function DriverPortal() {
                         : 'https://maps.google.com'
                   }
                   target="_blank" rel="noopener noreferrer"
-                  className="flex flex-col items-center gap-2 p-4 rounded-2xl text-white font-bold transition-all active:scale-95"
+                  className="flex items-center justify-center px-3 py-2 rounded-xl text-white font-bold transition-all active:scale-95 text-xs"
                   style={{
-                    background: 'linear-gradient(135deg, #1a73e8 0%, #0b57d0 100%)',
-                    boxShadow: '0 6px 24px rgba(26,115,232,0.45), inset 0 1px 0 rgba(255,255,255,0.15)'
+                    background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
+                    boxShadow: '0 3px 12px rgba(22,163,74,0.4)'
                   }}>
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EA4335"/>
-                    <path d="M12 2C14.76 2 17.22 3.38 18.73 5.5L12 9V2z" fill="#FBBC04"/>
-                    <path d="M12 2v7l6.73-3.5C17.22 3.38 14.76 2 12 2z" fill="#FBBC04" opacity="0"/>
-                    <circle cx="12" cy="9" r="2.8" fill="white"/>
-                    <circle cx="12" cy="9" r="1.6" fill="#1a73e8"/>
-                  </svg>
-                  <span className="text-sm font-bold tracking-tight">Google Maps</span>
-                  <span className="text-[10px] opacity-75 font-medium">Navegación GPS</span>
+                  Google Maps
                 </a>
 
                 <a href="https://truckerpath.com"
                   target="_blank" rel="noopener noreferrer"
-                  className="flex flex-col items-center gap-2 p-4 rounded-2xl text-white font-bold transition-all active:scale-95"
+                  className="flex items-center justify-center px-3 py-2 rounded-xl text-white font-bold transition-all active:scale-95 text-xs"
                   style={{
-                    background: 'linear-gradient(135deg, #f97316 0%, #c2410c 100%)',
-                    boxShadow: '0 6px 24px rgba(249,115,22,0.45), inset 0 1px 0 rgba(255,255,255,0.15)'
+                    background: 'linear-gradient(135deg, #1a73e8 0%, #0b57d0 100%)',
+                    boxShadow: '0 3px 12px rgba(26,115,232,0.4)'
                   }}>
-                  <Truck className="w-7 h-7 drop-shadow-sm" />
-                  <span className="text-sm font-bold tracking-tight">Trucker Path</span>
-                  <span className="text-[10px] opacity-75 font-medium">GPS para camiones</span>
+                  Trucker Path
                 </a>
               </div>
 
