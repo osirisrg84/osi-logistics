@@ -111,6 +111,22 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
         <p className="text-xs text-gray-500 dark:text-slate-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">{order.description}</p>
       )}
 
+      {/* Dispatcher info */}
+      {(order.dispatcher_name || order.dispatcher_user_id) && (
+        <div className="flex items-center gap-3 bg-orange-50 dark:bg-orange-900/15 border border-orange-100 dark:border-orange-800/30 rounded-xl px-3 py-2.5">
+          <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+            {order.dispatcher_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || 'DS'}
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide font-medium">Assigned by</p>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">{order.dispatcher_name || 'Dispatcher'}</p>
+            <p className="text-[10px] text-orange-500 font-medium">
+              #{(order.dispatcher_id || order.dispatcher_user_id || '').slice(0, 8).toUpperCase()}
+            </p>
+          </div>
+        </div>
+      )}
+
       {flow && order.status !== 'delivered' && order.status !== 'cancelled' && (
         <button onClick={handleUpdate} disabled={updating}
           className={`w-full text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 ${flow.color}`}>

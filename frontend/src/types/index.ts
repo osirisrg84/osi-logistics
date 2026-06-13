@@ -100,6 +100,9 @@ export interface Order {
   driver_name?: string;
   driver_phone?: string;
   plate_number?: string;
+  dispatcher_user_id?: string | null;
+  dispatcher_name?: string | null;
+  dispatcher_id?: string | null;
 }
 
 export interface OrderHistory {

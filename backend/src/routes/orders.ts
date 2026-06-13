@@ -15,11 +15,13 @@ router.get('/', (req: Request, res: Response) => {
     SELECT o.*,
            d.name as driver_name, d.phone as driver_phone,
            t.plate_number, t.make, t.model,
-           od.name as offered_driver_name
+           od.name as offered_driver_name,
+           u.name as dispatcher_name, u.id as dispatcher_id
     FROM orders o
     LEFT JOIN drivers d ON o.driver_id = d.id
     LEFT JOIN trucks t ON o.truck_id = t.id
     LEFT JOIN drivers od ON o.offered_to_driver_id = od.id
+    LEFT JOIN users u ON o.dispatcher_user_id = u.id
     WHERE 1=1
   `;
   const params: unknown[] = [];
@@ -66,11 +68,13 @@ router.get('/:id', (req: Request, res: Response) => {
     SELECT o.*,
            d.name as driver_name, d.phone as driver_phone, d.email as driver_email,
            t.plate_number, t.make, t.model, t.type as truck_type,
-           od.name as offered_driver_name
+           od.name as offered_driver_name,
+           u.name as dispatcher_name, u.id as dispatcher_id
     FROM orders o
     LEFT JOIN drivers d ON o.driver_id = d.id
     LEFT JOIN trucks t ON o.truck_id = t.id
     LEFT JOIN drivers od ON o.offered_to_driver_id = od.id
+    LEFT JOIN users u ON o.dispatcher_user_id = u.id
     WHERE o.id = ?
   `).get(req.params.id);
 
