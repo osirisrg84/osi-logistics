@@ -19,7 +19,7 @@ function Field({ label, required, children }: { label: string; required?: boolea
   );
 }
 
-const LANGUAGES = ['English', 'Spanish', 'Portuguese', 'French', 'Creole'];
+const LANGUAGES = ['English', 'Spanish'];
 const AVAILABILITY_OPTIONS = [
   { value: 'full-time',  label: 'Full-time' },
   { value: 'part-time',  label: 'Part-time' },
