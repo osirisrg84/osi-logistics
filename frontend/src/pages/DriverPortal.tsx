@@ -550,14 +550,14 @@ export default function DriverPortal() {
   const onTimeRt  = driver?.on_time_rate || 0;
   const drvRating = driver?.rating || 0;
   const ACHIEVEMENTS = [
-    { icon: '🚀', label: 'First Mile',       desc: 'Complete your first delivery',   unlocked: totalDel  >= 1,   current: Math.min(totalDel, 1),    target: 1,    showProgress: false },
-    { icon: '📦', label: 'Getting Moving',   desc: '10 deliveries completed',         unlocked: totalDel  >= 10,  current: Math.min(totalDel, 10),   target: 10,   showProgress: true  },
-    { icon: '⭐', label: 'Rising Star',      desc: '25 deliveries completed',         unlocked: totalDel  >= 25,  current: Math.min(totalDel, 25),   target: 25,   showProgress: true  },
-    { icon: '💪', label: 'Road Warrior',     desc: '50 deliveries completed',         unlocked: totalDel  >= 50,  current: Math.min(totalDel, 50),   target: 50,   showProgress: true  },
-    { icon: '🏆', label: 'Elite Driver',     desc: '100 deliveries completed',        unlocked: totalDel  >= 100, current: Math.min(totalDel, 100),  target: 100,  showProgress: true  },
-    { icon: '⏰', label: 'On-Time Pro',      desc: '95%+ on-time delivery rate',      unlocked: onTimeRt  >= 95,  current: Math.min(onTimeRt, 95),   target: 95,   showProgress: false },
-    { icon: '🌟', label: '5-Star Driver',    desc: 'Driver rating 4.8 or above',      unlocked: drvRating >= 4.8, current: drvRating,                 target: 4.8,  showProgress: false },
-    { icon: '✅', label: 'Profile Complete', desc: 'All profile sections filled in',  unlocked: profileScore >= 5, current: profileScore,             target: 5,    showProgress: true  },
+    { icon: '🚀', label: 'Primera Milla',          desc: 'Completa tu primera entrega',         unlocked: totalDel  >= 1,   current: Math.min(totalDel, 1),    target: 1,    showProgress: false },
+    { icon: '📦', label: 'Arrancando',             desc: '10 entregas completadas',             unlocked: totalDel  >= 10,  current: Math.min(totalDel, 10),   target: 10,   showProgress: true  },
+    { icon: '⭐', label: 'Estrella en Ascenso',    desc: '25 entregas completadas',             unlocked: totalDel  >= 25,  current: Math.min(totalDel, 25),   target: 25,   showProgress: true  },
+    { icon: '💪', label: 'Guerrero del Camino',    desc: '50 entregas completadas',             unlocked: totalDel  >= 50,  current: Math.min(totalDel, 50),   target: 50,   showProgress: true  },
+    { icon: '🏆', label: 'Driver Élite',           desc: '100 entregas completadas',            unlocked: totalDel  >= 100, current: Math.min(totalDel, 100),  target: 100,  showProgress: true  },
+    { icon: '⏰', label: 'Pro Puntualidad',         desc: '95%+ de entregas a tiempo',           unlocked: onTimeRt  >= 95,  current: Math.min(onTimeRt, 95),   target: 95,   showProgress: false },
+    { icon: '🌟', label: 'Driver 5 Estrellas',     desc: 'Calificación de 4.8 o superior',      unlocked: drvRating >= 4.8, current: drvRating,                 target: 4.8,  showProgress: false },
+    { icon: '✅', label: 'Perfil Completo',         desc: 'Todas las secciones del perfil llenas', unlocked: profileScore >= 5, current: profileScore,           target: 5,    showProgress: true  },
   ];
   const unlockedCount = ACHIEVEMENTS.filter(a => a.unlocked).length;
 
@@ -1220,13 +1220,13 @@ export default function DriverPortal() {
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
                   <Award className="w-4 h-4 text-amber-500" />
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Achievements</h3>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Logros</h3>
                 </div>
                 <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full">
                   {unlockedCount} / {ACHIEVEMENTS.length}
                 </span>
               </div>
-              <p className="text-xs text-gray-400 dark:text-slate-500">Keep delivering to unlock more milestones</p>
+              <p className="text-xs text-gray-400 dark:text-slate-500">Sigue entregando para desbloquear más logros</p>
               {/* Overall progress */}
               <div className="mt-3 h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-amber-400 to-yellow-300 rounded-full transition-all"
@@ -1254,7 +1254,7 @@ export default function DriverPortal() {
                       </p>
                       {a.unlocked ? (
                         <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded-full flex-shrink-0 uppercase tracking-wide">
-                          Unlocked
+                          Desbloqueado
                         </span>
                       ) : (
                         <Lock className="w-3.5 h-3.5 text-gray-300 dark:text-slate-600 flex-shrink-0" />
