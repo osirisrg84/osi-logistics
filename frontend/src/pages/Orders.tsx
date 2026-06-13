@@ -387,11 +387,11 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
               <p className="text-xs text-gray-500 dark:text-slate-400">Weight</p>
-              <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{order.weight_kg} kg</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{(order.weight_kg * 2.20462).toFixed(0)} lbs</p>
             </div>
             <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
               <p className="text-xs text-gray-500 dark:text-slate-400">Distance</p>
-              <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{order.distance_km} km</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{(order.distance_km * 0.621371).toFixed(1)} mi</p>
             </div>
             <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
               <p className="text-xs text-gray-500 dark:text-slate-400">Price</p>
@@ -638,7 +638,7 @@ export default function Orders() {
                     <tr key={order.id} className="table-row">
                       <td className="px-4 py-3">
                         <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{order.order_number}</p>
-                        <p className="text-xs text-gray-400 dark:text-slate-500">{order.weight_kg}kg · {order.distance_km}km</p>
+                        <p className="text-xs text-gray-400 dark:text-slate-500">{(order.weight_kg * 2.20462).toFixed(0)}lbs · {(order.distance_km * 0.621371).toFixed(1)}mi</p>
                       </td>
                       <td className="px-4 py-3">
                         <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{order.customer_name}</p>
