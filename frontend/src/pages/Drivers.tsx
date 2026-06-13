@@ -97,7 +97,7 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
             <div>
               <label className="label">Equipment Type</label>
               <select className="input" value={form.equipment_type} onChange={e => setForm({...form, equipment_type: e.target.value})}>
-                {['Dry Van', 'Reefer', 'Flatbed', 'Box Truck'].map(t => <option key={t} value={t}>{t}</option>)}
+                {['Dry Van', 'Reefer', 'Flatbed', 'Box Truck', 'Power Only', 'Hotshot', 'Tanker'].map(t => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
             <div>
