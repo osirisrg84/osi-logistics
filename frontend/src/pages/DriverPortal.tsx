@@ -706,8 +706,9 @@ export default function DriverPortal() {
                    style={{ background: 'linear-gradient(90deg, transparent, rgba(167,243,208,0.9), transparent)' }} />
               <div className="absolute top-1 left-[38%] w-3 h-3 rounded-full opacity-40 blur-[3px]"
                    style={{ background: 'radial-gradient(circle, #a7f3d0, transparent)' }} />
-              <p className="text-xl font-black relative"
+              <p className="font-black relative leading-tight"
                  style={{
+                   fontSize: 'clamp(12px, 3.8vw, 18px)',
                    background: 'linear-gradient(160deg, #6ee7b7 0%, #34d399 25%, #ffffff 48%, #34d399 65%, #059669 100%)',
                    WebkitBackgroundClip: 'text',
                    WebkitTextFillColor: 'transparent',
@@ -1312,7 +1313,7 @@ export default function DriverPortal() {
                 ? 'bg-gradient-to-br from-slate-800 to-slate-900 text-white'
                 : 'bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-300'
             }`}>
-              <p className={`text-xs mb-2 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Por cada carga entregada, OSI toma solo el <span className={`font-semibold ${dark ? 'text-slate-300' : 'text-slate-600'}`}>8%</span>. Tú te quedas con el <span className={`font-semibold ${dark ? 'text-green-400' : 'text-green-600'}`}>92%</span>.</p>
+              <p className={`text-xs mb-2 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Por cada carga entregada, OSI toma solo el <span className={`font-semibold ${dark ? 'text-slate-300' : 'text-slate-600'}`}>8%</span>.</p>
               <p className={`text-sm mb-1 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Balance pendiente</p>
               <p className={`text-3xl font-bold ${dark ? 'text-yellow-400' : 'text-orange-500'}`}>${billingSummary.pending.toFixed(2)}</p>
               <div className="mt-4 space-y-1.5">
