@@ -14,7 +14,7 @@ router.get('/', (req: Request, res: Response) => {
   let query = `
     SELECT o.*,
            d.name as driver_name, d.phone as driver_phone,
-           t.plate_number, t.make, t.model,
+           t.plate_number, t.make, t.model, t.type as truck_type,
            od.name as offered_driver_name,
            u.name as dispatcher_name, u.id as dispatcher_id
     FROM orders o

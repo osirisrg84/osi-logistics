@@ -68,6 +68,7 @@ export interface Order {
   offered_to_driver_id?: string | null;
   offered_to_truck_id?: string | null;
   offered_at?: string | null;
+  truck_type?: string | null;
   created_at: string;
   assigned_at: string | null;
   picked_up_at: string | null;
