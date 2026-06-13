@@ -900,7 +900,7 @@ export default function DriverPortal() {
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Building2 className="w-4 h-4 text-green-500" />
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Empresa / Autoridad</h3>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Company / Authority</h3>
               </div>
               <div className="space-y-2.5">
                 {driver.company_name && (
