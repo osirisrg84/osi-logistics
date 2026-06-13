@@ -1653,7 +1653,7 @@ export default function DriverPortal() {
                         <div>
                           <p className="text-sm font-semibold text-gray-900 dark:text-white">{r.order_number}</p>
                           <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-                            ${r.order_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} carga · 8% = <span className="font-semibold text-gray-600 dark:text-slate-300">${r.driver_charge.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            ${r.order_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} rate · 8% = <span className="font-semibold text-gray-600 dark:text-slate-300">${r.driver_charge.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                           </p>
                         </div>
                       </div>
