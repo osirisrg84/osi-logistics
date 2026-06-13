@@ -96,7 +96,7 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
           <p className="text-sm font-semibold text-gray-900 dark:text-white">{(order.weight_kg * 2.20462).toFixed(0)} lbs</p>
         </div>
         <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
-          <p className="text-xs text-gray-400 dark:text-slate-500">Created</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">Creado</p>
           <p className="text-xs font-medium text-gray-900 dark:text-slate-100">{formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}</p>
         </div>
         <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
@@ -109,7 +109,7 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
 
       {order.description && (
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">
-          <p className="text-[10px] font-semibold text-blue-500 dark:text-blue-400 uppercase tracking-wide mb-0.5">Mercancía</p>
+          <p className="text-[10px] font-semibold text-blue-500 dark:text-blue-400 uppercase tracking-wide mb-0.5">Commodity</p>
           <p className="text-xs text-gray-600 dark:text-slate-400">{order.description}</p>
         </div>
       )}
@@ -121,7 +121,7 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
             {order.dispatcher_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || 'DS'}
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide font-medium">Assigned by</p>
+            <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide font-medium">Asignado por</p>
             <p className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">{order.dispatcher_name || 'Dispatcher'}</p>
             <p className="text-[10px] text-orange-500 font-medium">
               #{(order.dispatcher_id || order.dispatcher_user_id || '').slice(0, 8).toUpperCase()}
