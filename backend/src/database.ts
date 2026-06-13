@@ -551,16 +551,16 @@ function seedDatabase(db: DatabaseSync): void {
 
   const priorities = ['low', 'normal', 'normal', 'high', 'urgent'];
   const descriptions = [
-    'Electronic components and peripherals',
-    'Refrigerated food items - temperature sensitive',
-    'Construction materials and equipment',
-    'Medical supplies and pharmaceuticals',
-    'Automotive parts and accessories',
-    'Fashion merchandise and textiles',
-    'Home appliances and furniture',
-    'Fresh produce and organic goods',
-    'Industrial machinery parts',
-    'Consumer electronics',
+    'Componentes electrónicos y periféricos',
+    'Alimentos refrigerados - sensibles a la temperatura',
+    'Materiales y equipos de construcción',
+    'Suministros médicos y productos farmacéuticos',
+    'Repuestos y accesorios automotrices',
+    'Mercancía de moda y textiles',
+    'Electrodomésticos y muebles',
+    'Productos frescos y orgánicos',
+    'Partes de maquinaria industrial',
+    'Electrónica de consumo',
   ];
 
   for (let i = 0; i < orderStatuses.length; i++) {
