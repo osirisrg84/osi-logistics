@@ -111,7 +111,7 @@ export default function RegisterDriver() {
             </div>
 
             <Field label="Nombre Completo" required>
-              <input className="input" type="text" placeholder="John Smith"
+              <input className="input" type="text" placeholder="Diego Fuentes"
                 value={form.name} onChange={set('name')} required autoFocus />
             </Field>
 
