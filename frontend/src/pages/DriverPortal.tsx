@@ -963,7 +963,7 @@ export default function DriverPortal() {
                       <div className="px-5 pt-5 pb-4">
                         <p className="text-[10px] font-bold text-emerald-300/60 uppercase tracking-widest mb-1">Today's Revenue</p>
                         <p className="text-4xl font-black text-white tracking-tight">${fmt(grossRevenue)}</p>
-                        <p className="text-xs text-emerald-200/50 mt-1">{deliveredToday.length} entrega{deliveredToday.length !== 1 ? 's' : ''} completada{deliveredToday.length !== 1 ? 's' : ''} hoy</p>
+                        <p className="text-xs text-emerald-200/50 mt-1">{deliveredToday.length} entrega{deliveredToday.length !== 1 ? 's' : ''} completada{deliveredToday.length !== 1 ? 's' : ''} esta semana</p>
                       </div>
                       <div className="grid grid-cols-2 border-t border-white/10">
                         <div className="px-5 py-3 border-r border-white/10">
@@ -981,15 +981,15 @@ export default function DriverPortal() {
                     <div className="grid grid-cols-3 gap-2">
                       <div className="bg-white dark:bg-slate-800 rounded-2xl p-3 text-center border border-gray-100 dark:border-slate-700">
                         <p className="text-2xl font-black text-gray-900 dark:text-white">{deliveredToday.length}</p>
-                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Cargas</p>
+                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Loads</p>
                       </div>
                       <div className="bg-white dark:bg-slate-800 rounded-2xl p-3 text-center border border-gray-100 dark:border-slate-700">
                         <p className="text-base font-black text-gray-900 dark:text-white">${fmt(avgPerLoad, 0)}</p>
-                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Promedio</p>
+                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Average</p>
                       </div>
                       <div className="bg-white dark:bg-slate-800 rounded-2xl p-3 text-center border border-gray-100 dark:border-slate-700">
                         <p className="text-base font-black text-green-600">${fmt(bestLoad, 0)}</p>
-                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Mejor</p>
+                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Best</p>
                       </div>
                     </div>
 
@@ -997,12 +997,12 @@ export default function DriverPortal() {
                     {totalMiles > 0 && (
                       <div className="bg-white dark:bg-slate-800 rounded-2xl px-5 py-4 border border-gray-100 dark:border-slate-700 flex items-center justify-between">
                         <div>
-                          <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Millas hoy</p>
+                          <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Total Miles</p>
                           <p className="text-xl font-black text-gray-900 dark:text-white">{totalMiles.toFixed(1)} <span className="text-sm font-normal text-gray-400">mi</span></p>
                         </div>
                         <div className="w-px h-10 bg-gray-100 dark:bg-slate-700" />
                         <div className="text-right">
-                          <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Rate / milla</p>
+                          <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Rate / Mile</p>
                           <p className="text-xl font-black text-blue-600">${ratePerMile.toFixed(2)}<span className="text-sm font-normal text-gray-400">/mi</span></p>
                         </div>
                       </div>
