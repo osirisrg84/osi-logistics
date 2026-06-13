@@ -1254,7 +1254,7 @@ export default function DriverPortal() {
                       </p>
                       {a.unlocked ? (
                         <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded-full flex-shrink-0 uppercase tracking-wide">
-                          Desbloqueado
+                          Unlocked
                         </span>
                       ) : (
                         <Lock className="w-3.5 h-3.5 text-gray-300 dark:text-slate-600 flex-shrink-0" />
