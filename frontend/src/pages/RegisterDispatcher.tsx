@@ -83,17 +83,18 @@ export default function RegisterDispatcher() {
     try {
       const previous_companies = companies.filter(c => c.trim()).join(', ');
       await authApi.register({
-        name:               form.name,
-        email:              form.email,
-        password:           form.password,
-        role:               'dispatcher',
-        phone:              form.phone,
-        date_of_birth:      form.date_of_birth,
-        city:               form.city,
-        years_experience:   parseInt(form.years_experience) || 0,
+        name:                 form.name,
+        email:                form.email,
+        password:             form.password,
+        role:                 'dispatcher',
+        phone:                form.phone,
+        date_of_birth:        form.date_of_birth,
+        city:                 form.city,
+        years_experience:     parseInt(form.years_experience) || 0,
         previous_companies,
-        languages:          languages.join(', '),
-        availability:       form.availability,
+        languages:            languages.join(', '),
+        availability:         form.availability,
+        equipment_experience: equipmentExp.join(', '),
       });
       await login(form.email, form.password);
       navigate('/dashboard', { replace: true });

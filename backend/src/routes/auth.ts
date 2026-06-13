@@ -68,6 +68,7 @@ router.post('/register', (req: Request, res: Response) => {
     name, email, password, role = 'dispatcher', driver_id = null,
     phone = '', date_of_birth = '', city = '',
     years_experience = 0, previous_companies = '', languages = '', availability = 'full-time',
+    equipment_experience = '',
   } = req.body;
 
   if (!name || !email || !password) {
@@ -96,10 +97,10 @@ router.post('/register', (req: Request, res: Response) => {
   db.prepare(`
     INSERT INTO users
       (id, name, email, password_hash, salt, role, driver_id,
-       phone, date_of_birth, city, years_experience, previous_companies, languages, availability)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       phone, date_of_birth, city, years_experience, previous_companies, languages, availability, equipment_experience)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(id, name, email.toLowerCase(), passwordHash, salt, role, driver_id,
-    phone, date_of_birth, city, years_experience, previous_companies, languages, availability);
+    phone, date_of_birth, city, years_experience, previous_companies, languages, availability, equipment_experience);
 
   const token = createSession(id);
 

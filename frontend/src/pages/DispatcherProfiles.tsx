@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, ClipboardList, Package, DollarSign, TrendingUp, Clock, X, Mail, CheckCircle, AlertCircle, Phone, Shield, Eye, EyeOff, Edit2, Trash2 } from 'lucide-react';
+import { Search, ClipboardList, Package, DollarSign, TrendingUp, Clock, X, Mail, CheckCircle, AlertCircle, Phone, Shield, Eye, EyeOff, Edit2, Trash2, Truck } from 'lucide-react';
 import api from '../services/api';
 import { format } from 'date-fns';
 
@@ -16,6 +16,7 @@ interface DispatcherProfile {
   pending: number;
   settled: number;
   active_orders: number;
+  equipment_experience: string;
 }
 
 function maskSSN(ssn: string): string {
@@ -254,6 +255,33 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
               </div>
             )}
           </div>
+
+          {/* Equipment experience */}
+          {dispatcher.equipment_experience && (
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
+              <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest flex items-center gap-1.5 mb-3">
+                <Truck className="w-3 h-3" /> Experiencia en loads
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {dispatcher.equipment_experience.split(',').map(eq => eq.trim()).filter(Boolean).map(eq => {
+                  const colors: Record<string, string> = {
+                    'Dry Van':    'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
+                    'Reefer':     'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+                    'Flatbed':    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
+                    'Box Truck':  'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+                    'Power Only': 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+                    'Hotshot':    'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300',
+                    'Tanker':     'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
+                  };
+                  return (
+                    <span key={eq} className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold ${colors[eq] || 'bg-gray-100 text-gray-700'}`}>
+                      {eq}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

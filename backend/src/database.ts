@@ -202,8 +202,9 @@ export function initDatabase(): void {
   addUserCol('previous_companies', "TEXT NOT NULL DEFAULT ''");
   addUserCol('languages',          "TEXT NOT NULL DEFAULT ''");
   addUserCol('availability',       "TEXT NOT NULL DEFAULT 'full-time'");
-  addUserCol('payout_method',      "TEXT NOT NULL DEFAULT ''");
-  addUserCol('payout_details',     "TEXT NOT NULL DEFAULT ''");
+  addUserCol('payout_method',        "TEXT NOT NULL DEFAULT ''");
+  addUserCol('payout_details',       "TEXT NOT NULL DEFAULT ''");
+  addUserCol('equipment_experience', "TEXT NOT NULL DEFAULT ''");
 
   // Migrate: add target_driver_id to notifications if not present
   const notifCols = db.prepare('PRAGMA table_info(notifications)').all() as Array<{ name: string }>;
