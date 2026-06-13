@@ -274,7 +274,7 @@ export default function Settings() {
                   onChange={e => setTrackingSettings({...trackingSettings, idle_threshold_min: parseInt(e.target.value)})} min="1" max="60" />
               </div>
               <div>
-                <label className="label">Speed Alert Threshold (km/h)</label>
+                <label className="label">Speed Alert Threshold (mi/h)</label>
                 <input className="input" type="number" value={trackingSettings.max_speed_kmh}
                   onChange={e => setTrackingSettings({...trackingSettings, max_speed_kmh: parseInt(e.target.value)})} min="60" max="200" />
               </div>
