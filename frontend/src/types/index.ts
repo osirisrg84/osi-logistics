@@ -34,6 +34,7 @@ export interface Driver {
   payment_details?: string;
   truck_number?: string;
   trailer_number?: string;
+  truck_make?: string;
   driver_code?: string;
   active_orders?: number;
   order_id?: string;
