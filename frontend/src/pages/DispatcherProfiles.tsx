@@ -457,6 +457,17 @@ export default function DispatcherProfiles() {
                   </div>
                 )}
 
+                {/* Equipment experience */}
+                {d.equipment_experience && (
+                  <div className="flex flex-wrap gap-1 mt-3">
+                    {d.equipment_experience.split(',').map(eq => eq.trim()).filter(Boolean).map(eq => (
+                      <span key={eq} className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold ${EQ_COLORS[eq] || 'bg-gray-100 text-gray-600'}`}>
+                        {eq}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
                 <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-3">
                   <ClipboardList className="w-3 h-3 inline mr-1" />
                   Miembro desde {format(new Date(d.created_at), 'MMM yyyy')}
