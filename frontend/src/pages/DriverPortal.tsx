@@ -837,11 +837,30 @@ export default function DriverPortal() {
               <p className={`text-xs mb-5 ${dark ? 'text-slate-600' : 'text-gray-400'}`}>Conéctate para empezar a recibir ofertas de OSI Logistics</p>
               {/* CTA */}
               <button onClick={() => setStatus('available')} disabled={togglingStatus}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-400 hover:from-green-400 hover:to-emerald-300 active:scale-[0.98] disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2.5 shadow-xl shadow-green-500/35 text-sm">
+                className="w-full relative overflow-hidden active:scale-[0.97] disabled:opacity-60 transition-all duration-150 flex items-center justify-center gap-2.5 text-sm font-black tracking-widest uppercase"
+                style={{
+                  borderRadius: 14,
+                  padding: '14px 20px',
+                  color: '#fff',
+                  background: 'linear-gradient(180deg, #22c55e 0%, #15803d 40%, #14532d 100%)',
+                  boxShadow: '0 2px 0 #052e16, 0 6px 24px rgba(21,128,61,0.55), inset 0 1px 0 rgba(255,255,255,0.25)',
+                  border: '1.5px solid rgba(255,255,255,0.12)',
+                  backgroundImage: [
+                    'linear-gradient(180deg, #22c55e 0%, #15803d 40%, #14532d 100%)',
+                    'repeating-linear-gradient(90deg, transparent 0px, transparent 7px, rgba(0,0,0,0.08) 7px, rgba(0,0,0,0.08) 8px)',
+                    'linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 45%, rgba(0,0,0,0.15) 100%)',
+                  ].join(', '),
+                  textShadow: '0 1px 3px rgba(0,0,0,0.4)',
+                  letterSpacing: '0.12em',
+                }}>
+                {/* Sheen sweep */}
+                <span className="absolute inset-0 pointer-events-none" style={{
+                  background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.13) 50%, transparent 70%)',
+                }} />
                 {togglingStatus
                   ? <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  : <Power className="w-4 h-4" />}
-                <span className="tracking-wide">Go Online Now</span>
+                  : <Power className="w-4 h-4 drop-shadow" />}
+                <span>Go Online Now</span>
               </button>
               {/* Driver name */}
               {(driver?.name || user?.name) && (
