@@ -565,7 +565,7 @@ export default function DriverPortal() {
   const unlockedCount = ACHIEVEMENTS.filter(a => a.unlocked).length;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-16">
+    <div className={`min-h-screen pb-16 ${driverStatus === 'offline' && tab === 'active' ? 'bg-[#0a1628]' : 'bg-gray-50 dark:bg-slate-900'}`}>
 
       {/* ── Header + Driver Hero — always dark/premium ──────── */}
       <div className="bg-gradient-to-b from-[#0a1628] via-[#0f1e35] to-[#132640]">
@@ -700,7 +700,8 @@ export default function DriverPortal() {
               <p className="text-xl font-bold text-orange-400">{activeOrders.length}</p>
               <p className="text-[11px] mt-0.5 text-slate-500">Active Orders</p>
             </div>
-            <div className="rounded-2xl px-2 py-3 text-center relative overflow-hidden"
+            <button onClick={() => setTab('delivered')}
+              className="rounded-2xl px-2 py-3 text-center relative overflow-hidden active:scale-95 transition-transform w-full"
                  style={{
                    background: 'linear-gradient(135deg, rgba(4,120,87,0.35) 0%, rgba(16,185,129,0.18) 40%, rgba(52,211,153,0.28) 70%, rgba(6,95,70,0.4) 100%)',
                    border: '1px solid rgba(52,211,153,0.45)',
@@ -724,7 +725,7 @@ export default function DriverPortal() {
                 ${todayRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
               <p className="text-[11px] mt-0.5 text-emerald-400/70">Today's Revenue</p>
-            </div>
+            </button>
             <div className="rounded-2xl px-2 py-3 text-center bg-white/6 border border-white/10">
               <Award className="w-4 h-4 text-orange-400 mx-auto" />
               <p className="text-xl font-bold text-orange-400 mt-0.5">{unlockedCount}<span className="text-sm text-orange-500/60 font-normal">/8</span></p>
