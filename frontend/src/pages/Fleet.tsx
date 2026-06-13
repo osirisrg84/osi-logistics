@@ -30,7 +30,7 @@ function TruckForm({ truck, onClose, onSave }: TruckFormProps) {
   });
   const [saving, setSaving] = useState(false);
 
-  const TRUCK_TYPES = ['Box Truck', 'Refrigerated', 'Flatbed', 'Van', 'Semi-Truck', 'Tanker'];
+  const TRUCK_TYPES = ['Dry Van', 'Reefer', 'Flatbed', 'Box Truck', 'Power Only', 'Hotshot', 'Tanker'];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
