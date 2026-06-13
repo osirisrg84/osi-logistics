@@ -130,7 +130,7 @@ export default function RegisterDispatcher() {
             </div>
 
             <Field label="Nombre Completo" required>
-              <input className="input" type="text" placeholder="Jane Smith"
+              <input className="input" type="text" placeholder="Valeria Cruz"
                 value={form.name} onChange={set('name')} required autoFocus />
             </Field>
 
