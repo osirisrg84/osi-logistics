@@ -4,7 +4,7 @@ import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, 
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
-const EQUIPMENT_TYPES = ['Dry Van', 'Reefer', 'Flatbed', 'Box Truck', 'Step Deck', 'Tanker', 'Van'];
+const EQUIPMENT_TYPES = ['Dry Van', 'Reefer', 'Flatbed', 'Box Truck', 'Power Only', 'Hotshot', 'Tanker'];
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
