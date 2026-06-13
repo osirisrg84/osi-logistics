@@ -1294,7 +1294,7 @@ export default function DriverPortal() {
             }`}>
               <p className={`text-xs mb-1 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Balance pendiente con OSI</p>
               <p className={`text-3xl font-bold ${dark ? 'text-yellow-400' : 'text-orange-500'}`}>${billingSummary.pending.toFixed(2)}</p>
-              <p className={`text-xs mt-1 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>OSI cobra el <span className={`font-semibold ${dark ? 'text-red-400' : 'text-red-500'}`}>8%</span> por cada carga entregada</p>
+              <p className={`text-xs mt-1 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Por cada carga entregada, OSI toma solo el <span className={`font-semibold ${dark ? 'text-slate-300' : 'text-slate-600'}`}>8%</span>. Tú te quedas con el <span className={`font-semibold ${dark ? 'text-green-400' : 'text-green-600'}`}>92%</span>.</p>
               <div className="mt-4 space-y-1.5">
                 <div className="flex justify-between text-xs">
                   <span className={dark ? 'text-slate-400' : 'text-slate-500'}>Progreso de pago</span>
