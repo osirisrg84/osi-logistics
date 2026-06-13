@@ -1347,8 +1347,8 @@ export default function DriverPortal() {
               <div className="flex items-center justify-between">
                 <span className="text-3xl font-bold text-green-600 dark:text-green-400">${pendingOffer.price.toFixed(2)}</span>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-gray-700 dark:text-slate-300">{pendingOffer.distance_km} km</p>
-                  <p className="text-xs text-gray-400 dark:text-slate-500">{pendingOffer.weight_kg} kg</p>
+                  <p className="text-sm font-semibold text-gray-700 dark:text-slate-300">{(pendingOffer.distance_km * 0.621371).toFixed(1)} mi</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500">{(pendingOffer.weight_kg * 2.20462).toFixed(0)} lbs</p>
                 </div>
               </div>
 
@@ -1358,7 +1358,7 @@ export default function DriverPortal() {
                   <MapPin className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">Recogida</p>
+                  <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">Pickup</p>
                   <p className="text-sm text-gray-800 dark:text-slate-200 leading-snug">{pendingOffer.pickup_address}</p>
                 </div>
               </div>
@@ -1369,7 +1369,7 @@ export default function DriverPortal() {
                   <Navigation className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wide">Destino</p>
+                  <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wide">Delivery</p>
                   <p className="text-sm text-gray-800 dark:text-slate-200 leading-snug">{pendingOffer.delivery_address}</p>
                 </div>
               </div>
