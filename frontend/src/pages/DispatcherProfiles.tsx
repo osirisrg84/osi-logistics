@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, ClipboardList, Package, DollarSign, TrendingUp, Clock, X, Mail, CheckCircle, AlertCircle, Phone, Shield, Eye, EyeOff, Edit2, Trash2, Truck, Hash } from 'lucide-react';
+import type { ReactNode } from 'react';
 import api from '../services/api';
 import { format } from 'date-fns';
 
@@ -153,7 +154,7 @@ const EQ_COLORS: Record<string, string> = {
   'Tanker':     'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
 };
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionLabel({ children }: { children: ReactNode }) {
   return (
     <p className="text-[9px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-2.5">{children}</p>
   );
@@ -166,121 +167,126 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
   const eqList = dispatcher.equipment_experience?.split(',').map(e => e.trim()).filter(Boolean) ?? [];
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm max-h-[92vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm max-h-[92vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
 
-        {/* ── Hero header ── */}
-        <div className="relative bg-gradient-to-br from-orange-500 to-orange-600 rounded-t-2xl px-5 pt-5 pb-6">
-          <button onClick={onClose} className="absolute top-4 right-4 p-1.5 bg-white/20 hover:bg-white/30 rounded-lg transition-colors">
-            <X className="w-4 h-4 text-white" />
-          </button>
+        {/* ── Title bar ── */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Perfil del Dispatcher</h2>
+          <button onClick={onClose}><X className="w-5 h-5 text-gray-500 dark:text-slate-400" /></button>
+        </div>
+
+        <div className="p-6 space-y-5">
+          {/* ── Profile header ── */}
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0 shadow-lg">
+            <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
               {initials}
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-white text-lg font-bold leading-tight">{dispatcher.name}</p>
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-slate-100">{dispatcher.name}</h3>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                  dispatcher.active ? 'bg-green-400/30 text-green-100' : 'bg-white/20 text-white/70'
+                  dispatcher.active
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400'
                 }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${dispatcher.active ? 'bg-green-300' : 'bg-white/50'}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full ${dispatcher.active ? 'bg-green-500' : 'bg-gray-400'}`} />
                   {dispatcher.active ? 'Activo' : 'Inactivo'}
                 </span>
                 {dispatcher.dispatcher_code && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-white/20 text-white px-2 py-0.5 rounded-full tracking-widest">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/20 px-2 py-0.5 rounded-full tracking-widest">
                     <Hash className="w-2.5 h-2.5" /> ID {dispatcher.dispatcher_code}
                   </span>
                 )}
               </div>
-              <p className="text-white/60 text-[10px] mt-1">Miembro desde {format(new Date(dispatcher.created_at), 'MMM d, yyyy')}</p>
+              <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">Miembro desde {format(new Date(dispatcher.created_at), 'MMM d, yyyy')}</p>
             </div>
           </div>
 
-          {/* Stats inside hero */}
-          <div className="grid grid-cols-3 gap-2 mt-4">
+          {/* ── Stats ── */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-orange-600">{dispatcher.total_orders}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400 flex items-center justify-center gap-1"><Package className="w-3 h-3" /> Órdenes</p>
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-blue-600">{dispatcher.active_orders}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Activas</p>
+            </div>
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 text-center">
+              <p className="text-xl font-bold text-green-600">${dispatcher.total_earned.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Ganado</p>
+            </div>
+          </div>
+
+          {/* ── Contact ── */}
+          <div className="space-y-2">
+            {dispatcher.phone ? (
+              <a href={`tel:${dispatcher.phone}`} className="flex items-center gap-3 bg-gray-50 dark:bg-slate-900 rounded-xl p-3 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                <Phone className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+                <span className="text-sm text-gray-700 dark:text-slate-300">{dispatcher.phone}</span>
+              </a>
+            ) : (
+              <div className="flex items-center gap-3 bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
+                <Phone className="w-4 h-4 text-gray-300 dark:text-slate-600" />
+                <button onClick={onEdit} className="text-sm text-orange-500 hover:text-orange-600 font-medium">+ Agregar teléfono</button>
+              </div>
+            )}
+            <a href={`mailto:${dispatcher.email}`} className="flex items-center gap-3 bg-gray-50 dark:bg-slate-900 rounded-xl p-3 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+              <Mail className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+              <span className="text-sm text-blue-500 truncate">{dispatcher.email}</span>
+            </a>
+          </div>
+
+          {/* ── Commissions ── */}
+          <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4 space-y-3">
+            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Comisiones · 5% por orden</p>
             {[
-              { label: 'Órdenes',  value: dispatcher.total_orders,                  color: 'text-white' },
-              { label: 'Activas',  value: dispatcher.active_orders,                 color: 'text-blue-200' },
-              { label: 'Ganado',   value: `$${dispatcher.total_earned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, color: 'text-green-200' },
-            ].map(s => (
-              <div key={s.label} className="bg-white/15 backdrop-blur rounded-xl py-2.5 text-center">
-                <p className={`text-base font-bold ${s.color}`}>{s.value}</p>
-                <p className="text-[10px] text-white/60 mt-0.5">{s.label}</p>
+              { label: 'Total generado', value: `$${dispatcher.total_earned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, cls: 'font-bold text-gray-900 dark:text-white' },
+              { label: 'Liquidado',      value: `$${dispatcher.settled.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,      cls: 'font-semibold text-green-600 dark:text-green-400' },
+              { label: 'Pendiente',      value: `$${dispatcher.pending.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,      cls: 'font-semibold text-yellow-600 dark:text-yellow-400' },
+            ].map(r => (
+              <div key={r.label} className="flex justify-between items-center text-sm">
+                <span className="text-gray-500 dark:text-slate-400">{r.label}</span>
+                <span className={r.cls}>{r.value}</span>
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* ── Body ── */}
-        <div className="p-5 space-y-5">
-
-          {/* Contact */}
-          <div>
-            <SectionLabel>Contacto</SectionLabel>
-            <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl divide-y divide-gray-100 dark:divide-slate-600/50">
-              {dispatcher.phone ? (
-                <a href={`tel:${dispatcher.phone}`} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors rounded-t-xl">
-                  <Phone className="w-4 h-4 text-orange-400 flex-shrink-0" />
-                  <span className="text-sm text-gray-700 dark:text-slate-300">{dispatcher.phone}</span>
-                </a>
-              ) : (
-                <div className="flex items-center gap-3 px-4 py-3">
-                  <Phone className="w-4 h-4 text-gray-300 dark:text-slate-600 flex-shrink-0" />
-                  <button onClick={onEdit} className="text-sm text-orange-500 hover:text-orange-600 font-medium">+ Agregar teléfono</button>
+            {dispatcher.total_earned > 0 && (
+              <div className="pt-1">
+                <div className="flex justify-between text-[10px] text-gray-400 dark:text-slate-500 mb-1.5">
+                  <span>Progreso de liquidación</span><span className="font-semibold">{pct}%</span>
                 </div>
-              )}
-              <a href={`mailto:${dispatcher.email}`} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
-                <Mail className="w-4 h-4 text-orange-400 flex-shrink-0" />
-                <span className="text-sm text-blue-500 hover:text-blue-600 truncate">{dispatcher.email}</span>
-              </a>
-              <div className="flex items-center gap-3 px-4 py-3 rounded-b-xl">
-                <Shield className="w-4 h-4 text-orange-400 flex-shrink-0" />
-                {dispatcher.ssn ? (
-                  <div className="flex items-center gap-2 flex-1">
-                    <span className="text-sm font-mono text-gray-700 dark:text-slate-300">{showSSN ? dispatcher.ssn : maskSSN(dispatcher.ssn)}</span>
-                    <button onClick={() => setShowSSN(!showSSN)} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 ml-auto">
-                      {showSSN ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-                ) : (
-                  <button onClick={onEdit} className="text-sm text-orange-500 hover:text-orange-600 font-medium">+ Agregar SSN</button>
-                )}
+                <div className="h-1.5 bg-gray-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                  <div className="h-full bg-green-500 rounded-full" style={{ width: `${pct}%` }} />
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
-          {/* Commissions */}
-          <div>
-            <SectionLabel>Comisiones · 5% por orden</SectionLabel>
-            <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 space-y-3">
-              {[
-                { label: 'Total generado', value: `$${dispatcher.total_earned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, color: 'text-gray-900 dark:text-white font-bold' },
-                { label: 'Liquidado',      value: `$${dispatcher.settled.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,      color: 'text-green-600 dark:text-green-400 font-semibold' },
-                { label: 'Pendiente',      value: `$${dispatcher.pending.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,      color: 'text-yellow-600 dark:text-yellow-400 font-semibold' },
-              ].map(r => (
-                <div key={r.label} className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500 dark:text-slate-400">{r.label}</span>
-                  <span className={r.color}>{r.value}</span>
+          {/* ── Tax / SSN ── */}
+          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4">
+            <p className="text-xs font-semibold text-purple-700 dark:text-purple-400 flex items-center gap-2 mb-3">
+              <Shield className="w-3 h-3" /> INFORMACIÓN FISCAL · 1099
+            </p>
+            {dispatcher.ssn ? (
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500 dark:text-slate-400">SSN</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">{showSSN ? dispatcher.ssn : maskSSN(dispatcher.ssn)}</span>
+                  <button onClick={() => setShowSSN(!showSSN)} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300">
+                    {showSSN ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
                 </div>
-              ))}
-              {dispatcher.total_earned > 0 && (
-                <div className="pt-1">
-                  <div className="flex justify-between text-[10px] text-gray-400 dark:text-slate-500 mb-1.5">
-                    <span>Progreso de liquidación</span><span className="font-semibold">{pct}%</span>
-                  </div>
-                  <div className="h-2 bg-gray-200 dark:bg-slate-600 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
-                  </div>
-                </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <button onClick={onEdit} className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 font-medium">+ Agregar SSN</button>
+            )}
           </div>
 
-          {/* Equipment experience */}
+          {/* ── Equipment experience ── */}
           {eqList.length > 0 && (
             <div>
-              <SectionLabel>Experiencia en loads</SectionLabel>
+              <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-3">Experiencia en loads</p>
               <div className="flex flex-wrap gap-2">
                 {eqList.map(eq => (
                   <span key={eq} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold ${EQ_COLORS[eq] || 'bg-gray-100 text-gray-700'}`}>

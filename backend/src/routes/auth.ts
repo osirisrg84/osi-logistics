@@ -232,12 +232,12 @@ router.get('/profile', (req: Request, res: Response) => {
   if (!token) return res.status(401).json({ error: 'No token' });
   const db = getDb();
   const row = db.prepare(`
-    SELECT u.payout_method, u.payout_details
+    SELECT u.payout_method, u.payout_details, u.ssn
     FROM sessions s JOIN users u ON s.user_id = u.id
     WHERE s.token = ? AND s.expires_at > datetime('now')
-  `).get(token) as { payout_method: string; payout_details: string } | undefined;
+  `).get(token) as { payout_method: string; payout_details: string; ssn: string } | undefined;
   if (!row) return res.status(401).json({ error: 'Invalid session' });
-  res.json({ payout_method: row.payout_method, payout_details: row.payout_details });
+  res.json({ payout_method: row.payout_method, payout_details: row.payout_details, ssn: row.ssn });
 });
 
 router.put('/profile', (req: Request, res: Response) => {
@@ -248,9 +248,16 @@ router.put('/profile', (req: Request, res: Response) => {
     SELECT user_id FROM sessions WHERE token = ? AND expires_at > datetime('now')
   `).get(token) as { user_id: string } | undefined;
   if (!session) return res.status(401).json({ error: 'Invalid session' });
-  const { payout_method = '', payout_details = '' } = req.body;
-  db.prepare('UPDATE users SET payout_method = ?, payout_details = ? WHERE id = ?')
-    .run(payout_method, payout_details, session.user_id);
+  const { payout_method, payout_details, ssn } = req.body;
+  const updates: string[] = [];
+  const vals: unknown[] = [];
+  if (payout_method !== undefined) { updates.push('payout_method = ?'); vals.push(payout_method); }
+  if (payout_details !== undefined) { updates.push('payout_details = ?'); vals.push(payout_details); }
+  if (ssn             !== undefined) { updates.push('ssn = ?');            vals.push(ssn); }
+  if (updates.length) {
+    vals.push(session.user_id);
+    db.prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`).run(...vals);
+  }
   res.json({ success: true });
 });
 

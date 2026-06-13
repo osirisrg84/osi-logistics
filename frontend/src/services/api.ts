@@ -100,7 +100,7 @@ export const billingApi = {
 
 export const userApi = {
   getProfile:    () => api.get('/auth/profile'),
-  updateProfile: (data: { payout_method: string; payout_details: string }) => api.put('/auth/profile', data),
+  updateProfile: (data: { payout_method?: string; payout_details?: string; ssn?: string }) => api.put('/auth/profile', data),
 };
 
 export const notificationsApi = {
