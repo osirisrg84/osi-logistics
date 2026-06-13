@@ -45,7 +45,7 @@ export default function Landing() {
       {/* Header */}
       <div className="text-center mb-12">
         <a href="https://www.osilogistics.com/" target="_blank" rel="noopener noreferrer">
-          <img src={osiLogo} alt="OSI Logistics" className="h-14 sm:h-20 w-auto object-contain mx-auto mb-4 rounded-2xl shadow-2xl shadow-black/40 hover:opacity-90 transition-opacity cursor-pointer" />
+          <img src={osiLogo} alt="OSI Logistics" className="h-16 sm:h-20 w-auto object-contain mx-auto mb-7 sm:mb-5 rounded-2xl shadow-2xl shadow-black/40 hover:opacity-90 transition-opacity cursor-pointer" />
         </a>
         <p className="text-slate-300 text-lg font-medium">Dispatch & Owner</p>
         <p className="text-slate-500 text-sm mt-0.5">Management Platform</p>
