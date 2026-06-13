@@ -159,7 +159,7 @@ export default function Tracking() {
   };
 
   const mapPanel = (
-    <div className="flex-1 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700 h-[calc(100vh-10rem)] md:h-auto">
+    <div className="w-full rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700 h-[calc(100vh-10rem)] md:h-[calc(100vh-8rem)]">
       <MapContainer center={[25.7617, -80.1918]} zoom={11} style={{ height: '100%', width: '100%' }}>
         <TileLayer
           attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -191,15 +191,15 @@ export default function Tracking() {
                     {driver.current_address}
                   </p>
                 )}
-                {driver.plate_number && (
-                  <p className="text-xs text-gray-600 mb-1">🚛 {driver.make} {driver.model} · {driver.plate_number}</p>
+                {(driver as typeof driver & { equipment_type?: string }).equipment_type && (
+                  <p className="text-xs text-gray-600 mb-1">🚛 {(driver as typeof driver & { equipment_type?: string }).equipment_type} · {driver.make} {driver.model}</p>
                 )}
-                {driver.order_number && (
+                {driver.order_number && driver.status !== 'available' && (
                   <p className="text-xs text-blue-600 font-medium flex items-center gap-1">
                     <MapPin className="w-3 h-3 text-orange-500" /> {driver.order_number}
                   </p>
                 )}
-                {driver.delivery_address && (
+                {driver.delivery_address && driver.status !== 'available' && (
                   <p className="text-xs text-gray-500 mt-0.5 pl-4">{driver.delivery_address}</p>
                 )}
                 <p className="text-xs text-gray-400 mt-2">★ {driver.rating.toFixed(1)} · {driver.total_deliveries} trips</p>
@@ -325,7 +325,11 @@ export default function Tracking() {
                       <DriverStatusBadge status={driver.status as never} className="mt-0.5" />
                     </div>
                     {/* Live indicator */}
-                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse flex-shrink-0" title="Ubicación en tiempo real" />
+                    <span className={`w-2 h-2 rounded-full animate-pulse flex-shrink-0 ${
+                      driver.status === 'available' ? 'bg-green-400' :
+                      driver.status === 'busy'      ? 'bg-red-400'   :
+                      driver.status === 'on_break'  ? 'bg-yellow-400': 'bg-gray-400'
+                    }`} title="Ubicación en tiempo real" />
                   </div>
 
                   {/* Current real-time location */}
@@ -339,8 +343,8 @@ export default function Tracking() {
                     </div>
                   )}
 
-                  {/* Active order destination */}
-                  {driver.order_number && (
+                  {/* Active order destination — solo si tiene orden activa */}
+                  {driver.order_number && driver.status !== 'available' && (
                     <div className="mt-1.5 ml-12">
                       <div className="flex items-center gap-1 mb-0.5">
                         <MapPin className="w-3 h-3 text-orange-500 flex-shrink-0" />
@@ -352,9 +356,21 @@ export default function Tracking() {
                     </div>
                   )}
 
-                  {driver.plate_number && (
-                    <p className="text-xs text-gray-400 dark:text-slate-500 mt-1.5 ml-12">
-                      🚛 {driver.make} {driver.model} · {driver.plate_number}
+                  {/* Equipment type */}
+                  {(driver as typeof driver & { equipment_type?: string }).equipment_type && (
+                    <p className="text-xs text-gray-400 dark:text-slate-500 mt-1.5 ml-12 flex items-center gap-1.5">
+                      🚛
+                      <span className={`px-1.5 py-0.5 rounded text-xs font-semibold ${
+                        (driver as typeof driver & { equipment_type?: string }).equipment_type === 'Reefer'    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
+                        (driver as typeof driver & { equipment_type?: string }).equipment_type === 'Flatbed'   ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' :
+                        (driver as typeof driver & { equipment_type?: string }).equipment_type === 'Box Truck' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' :
+                        'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
+                      }`}>
+                        {(driver as typeof driver & { equipment_type?: string }).equipment_type}
+                      </span>
+                      {driver.make && driver.model && (
+                        <span>{driver.make} {driver.model}</span>
+                      )}
                     </p>
                   )}
                 </button>
@@ -404,7 +420,7 @@ export default function Tracking() {
         </div>
 
         {/* Map — desktop always, mobile hidden (toggle handles it) */}
-        <div className="hidden md:block flex-1">
+        <div className="hidden md:flex flex-1">
           {mapPanel}
         </div>
 
