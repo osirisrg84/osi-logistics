@@ -834,7 +834,7 @@ export default function DriverPortal() {
               {/* Text */}
               <h3 className={`text-lg font-bold mb-1 tracking-tight ${dark ? 'text-white' : 'text-gray-900'}`}>You're Offline</h3>
               <p className={`text-sm mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Sin entregas activas por el momento</p>
-              <p className={`text-xs mb-5 ${dark ? 'text-slate-600' : 'text-gray-400'}`}>Conéctate para empezar a recibir órdenes de OSI Logistics</p>
+              <p className={`text-xs mb-5 ${dark ? 'text-slate-600' : 'text-gray-400'}`}>Conéctate para empezar a recibir ofertas de OSI Logistics</p>
               {/* CTA */}
               <button onClick={() => setStatus('available')} disabled={togglingStatus}
                 className="w-full bg-gradient-to-r from-green-500 to-emerald-400 hover:from-green-400 hover:to-emerald-300 active:scale-[0.98] disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2.5 shadow-xl shadow-green-500/35 text-sm">
