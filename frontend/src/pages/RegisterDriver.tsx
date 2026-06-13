@@ -23,7 +23,7 @@ export default function RegisterDriver() {
 
   const [form, setForm] = useState({
     name: '', phone: '', email: '', password: '', confirm: '',
-    license_number: '', license_expiry: '', hire_date: '',
+    license_number: '', license_expiry: '',
     equipment_type: 'Dry Van', mc_number: '', company_name: '', authority_since: '',
   });
   const [showPw, setShowPw] = useState(false);
@@ -58,7 +58,6 @@ export default function RegisterDriver() {
         phone:          form.phone,
         license_number: form.license_number,
         license_expiry: form.license_expiry,
-        hire_date:      form.hire_date,
         equipment_type: form.equipment_type,
         mc_number:      form.mc_number,
         company_name:   form.company_name,
@@ -184,10 +183,6 @@ export default function RegisterDriver() {
               </Field>
             </div>
 
-            <Field label="Hire Date" required>
-              <input className="input w-full" type="date"
-                value={form.hire_date} onChange={set('hire_date')} required />
-            </Field>
           </div>
 
           {/* Company / Equipment */}
