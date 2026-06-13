@@ -908,8 +908,143 @@ export default function DriverPortal() {
           )}
 
           {tab === 'map' && driver && (
-            <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700" style={{ height: 420 }}>
-              <Map3D driver={driver} activeOrders={activeOrders} pitch={48} />
+            <div className="space-y-4">
+
+              {/* ── Premium Map Container ─────────────────────── */}
+              <div className="relative rounded-3xl overflow-hidden" style={{
+                height: 400,
+                boxShadow: '0 0 0 1px rgba(56,189,248,0.3), 0 0 30px rgba(56,189,248,0.15), 0 0 60px rgba(56,189,248,0.07)'
+              }}>
+                <Map3D driver={driver} activeOrders={activeOrders} pitch={54} />
+
+                {/* Tech grid overlay */}
+                <div className="absolute inset-0 pointer-events-none" style={{
+                  background: 'linear-gradient(rgba(56,189,248,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.025) 1px, transparent 1px)',
+                  backgroundSize: '44px 44px'
+                }} />
+
+                {/* Top HUD bar */}
+                <div className="absolute top-0 inset-x-0 px-4 py-3 pointer-events-none" style={{
+                  background: 'linear-gradient(to bottom, rgba(2,6,23,0.82), transparent)'
+                }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
+                      <span className="text-[10px] font-bold text-cyan-400 tracking-[0.15em] uppercase">Live Tracking</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-cyan-300/60">
+                      {driver.current_lat?.toFixed(4)}°N · {Math.abs(driver.current_lng ?? 0).toFixed(4)}°W
+                    </span>
+                  </div>
+                </div>
+
+                {/* Bottom HUD bar */}
+                <div className="absolute bottom-0 inset-x-0 px-4 py-3 pointer-events-none" style={{
+                  background: 'linear-gradient(to top, rgba(2,6,23,0.82), transparent)'
+                }}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono text-white/40 truncate max-w-[55%]">{driver.current_address}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                      <span className="text-[10px] font-mono text-white/50 tracking-widest">{cfg.label.toUpperCase()}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Corner tech brackets */}
+                {(['top-2.5 left-2.5 border-t-2 border-l-2','top-2.5 right-2.5 border-t-2 border-r-2',
+                   'bottom-2.5 left-2.5 border-b-2 border-l-2','bottom-2.5 right-2.5 border-b-2 border-r-2'] as string[]).map((cls, i) => (
+                  <div key={i} className={`absolute w-5 h-5 ${cls} border-cyan-400/60 pointer-events-none rounded-sm`} />
+                ))}
+
+                {/* Center scan line */}
+                <div className="absolute inset-x-0 pointer-events-none" style={{
+                  top: '50%', height: 1,
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(56,189,248,0.4) 30%, rgba(56,189,248,0.8) 50%, rgba(56,189,248,0.4) 70%, transparent 100%)',
+                  animation: 'none', opacity: 0.5
+                }} />
+              </div>
+
+              {/* ── Navigation Buttons ───────────────────────── */}
+              <div className="grid grid-cols-2 gap-3">
+                <a href={
+                    activeOrders.length > 0 && activeOrders[0].status === 'assigned'
+                      ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(activeOrders[0].pickup_address)}`
+                      : activeOrders.length > 0
+                        ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(activeOrders[0].delivery_address)}`
+                        : 'https://maps.google.com'
+                  }
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-2 p-4 rounded-2xl text-white font-bold transition-all active:scale-95"
+                  style={{
+                    background: 'linear-gradient(135deg, #1a73e8 0%, #0b57d0 100%)',
+                    boxShadow: '0 6px 24px rgba(26,115,232,0.45), inset 0 1px 0 rgba(255,255,255,0.15)'
+                  }}>
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EA4335"/>
+                    <path d="M12 2C14.76 2 17.22 3.38 18.73 5.5L12 9V2z" fill="#FBBC04"/>
+                    <path d="M12 2v7l6.73-3.5C17.22 3.38 14.76 2 12 2z" fill="#FBBC04" opacity="0"/>
+                    <circle cx="12" cy="9" r="2.8" fill="white"/>
+                    <circle cx="12" cy="9" r="1.6" fill="#1a73e8"/>
+                  </svg>
+                  <span className="text-sm font-bold tracking-tight">Google Maps</span>
+                  <span className="text-[10px] opacity-75 font-medium">Navegación GPS</span>
+                </a>
+
+                <a href="https://truckerpath.com"
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-2 p-4 rounded-2xl text-white font-bold transition-all active:scale-95"
+                  style={{
+                    background: 'linear-gradient(135deg, #f97316 0%, #c2410c 100%)',
+                    boxShadow: '0 6px 24px rgba(249,115,22,0.45), inset 0 1px 0 rgba(255,255,255,0.15)'
+                  }}>
+                  <Truck className="w-7 h-7 drop-shadow-sm" />
+                  <span className="text-sm font-bold tracking-tight">Trucker Path</span>
+                  <span className="text-[10px] opacity-75 font-medium">GPS para camiones</span>
+                </a>
+              </div>
+
+              {/* ── Active order quick nav ───────────────────── */}
+              {activeOrders.length > 0 && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 rounded-2xl p-4">
+                  <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                    <Navigation className="w-3 h-3" /> Orden activa
+                  </p>
+                  {activeOrders[0].status === 'assigned' && (
+                    <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(activeOrders[0].pickup_address)}`}
+                       target="_blank" rel="noopener noreferrer"
+                       className="flex items-center justify-between bg-white dark:bg-blue-900/30 rounded-xl px-3 py-2.5 hover:bg-blue-50 dark:hover:bg-blue-800/30 transition-colors">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                          <MapPin className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Ir al Pickup</p>
+                          <p className="text-xs font-semibold text-gray-800 dark:text-slate-200 truncate max-w-[200px]">{activeOrders[0].pickup_address}</p>
+                        </div>
+                      </div>
+                      <Navigation className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                    </a>
+                  )}
+                  {['picked_up','in_transit'].includes(activeOrders[0].status) && (
+                    <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(activeOrders[0].delivery_address)}`}
+                       target="_blank" rel="noopener noreferrer"
+                       className="flex items-center justify-between bg-white dark:bg-blue-900/30 rounded-xl px-3 py-2.5 hover:bg-blue-50 dark:hover:bg-blue-800/30 transition-colors">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                          <MapPin className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Ir al Delivery</p>
+                          <p className="text-xs font-semibold text-gray-800 dark:text-slate-200 truncate max-w-[200px]">{activeOrders[0].delivery_address}</p>
+                        </div>
+                      </div>
+                      <Navigation className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                    </a>
+                  )}
+                </div>
+              )}
+
             </div>
           )}
 

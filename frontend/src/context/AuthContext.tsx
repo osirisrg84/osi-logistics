@@ -50,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data } = await authApi.login(email, password);
     localStorage.setItem('osi_token', data.token);
     localStorage.setItem('osi_user', JSON.stringify(data.user));
+    sessionStorage.setItem('open_sidebar', '1');
     setUser(data.user);
     setDriverProfile(data.driverProfile || null);
   };

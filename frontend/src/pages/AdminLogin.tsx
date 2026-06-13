@@ -132,7 +132,7 @@ export default function AdminLogin() {
               onClick={() => { setEmail('admin@osilogistics.com'); setPassword('Admin123!'); }}
               className="w-full text-sm font-medium py-2.5 px-4 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition-colors flex items-center gap-2"
             >
-              <div className="w-7 h-7 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">AO</div>
+              <div className="w-7 h-7 flex-shrink-0 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">AO</div>
               Admin OSI · admin@osilogistics.com
             </button>
             <div className="mt-3 flex flex-col gap-1 text-center">
