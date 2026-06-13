@@ -644,7 +644,7 @@ export default function DriverPortal() {
               <p className="text-[11px] mt-0.5 text-slate-500">Active Orders</p>
             </div>
             <div className="rounded-2xl px-2 py-3 text-center bg-white/6 border border-white/10">
-              <p className="text-xl font-bold text-green-400">${todayRevenue.toFixed(0)}</p>
+              <p className="text-xl font-bold text-green-400">${todayRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               <p className="text-[11px] mt-0.5 text-slate-500">Today's Revenue</p>
             </div>
             <div className="rounded-2xl px-2 py-3 text-center bg-white/6 border border-white/10">
