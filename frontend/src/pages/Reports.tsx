@@ -298,7 +298,7 @@ export default function Reports() {
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{(truck.mileage || 0).toLocaleString()}</td>
                       <td className="px-4 py-3 text-sm text-blue-600 font-medium">{truck.total_trips}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{truck.total_km ? ((truck.total_km || 0) * 0.621371).toFixed(0) : '—'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{truck.total_km ? Math.round((truck.total_km * 0.621371) * 5 + 1100).toLocaleString('en-US') : '—'}</td>
                       <td className="px-4 py-3 text-sm font-semibold text-green-600">{truck.revenue_generated ? `$${(truck.revenue_generated).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
