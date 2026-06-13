@@ -57,7 +57,7 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
         </div>
         <div className="text-right">
           <p className="text-lg font-bold text-green-600">${order.price.toFixed(2)}</p>
-          <p className="text-xs text-gray-400 dark:text-slate-500">{order.distance_km} km</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">{(order.distance_km * 0.621371).toFixed(1)} mi</p>
         </div>
       </div>
 
@@ -92,8 +92,8 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
 
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
-          <p className="text-xs text-gray-400 dark:text-slate-500">Weight</p>
-          <p className="text-sm font-semibold text-gray-900 dark:text-white">{order.weight_kg} kg</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">Peso</p>
+          <p className="text-sm font-semibold text-gray-900 dark:text-white">{(order.weight_kg * 2.20462).toFixed(0)} lbs</p>
         </div>
         <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
           <p className="text-xs text-gray-400 dark:text-slate-500">Created</p>
@@ -108,7 +108,10 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
       </div>
 
       {order.description && (
-        <p className="text-xs text-gray-500 dark:text-slate-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">{order.description}</p>
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">
+          <p className="text-[10px] font-semibold text-blue-500 dark:text-blue-400 uppercase tracking-wide mb-0.5">Mercancía</p>
+          <p className="text-xs text-gray-600 dark:text-slate-400">{order.description}</p>
+        </div>
       )}
 
       {/* Dispatcher info */}
