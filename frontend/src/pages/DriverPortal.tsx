@@ -124,16 +124,18 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
 
       {/* Dispatcher info */}
       {(order.dispatcher_name || order.dispatcher_user_id) && (
-        <div className="flex items-center gap-3 bg-orange-50 dark:bg-orange-900/15 border border-orange-100 dark:border-orange-800/30 rounded-xl px-3 py-2.5">
-          <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-            {order.dispatcher_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || 'DS'}
-          </div>
-          <div className="min-w-0">
-            <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wide font-medium">Asignado por</p>
-            <p className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">{order.dispatcher_name || 'Dispatcher'}</p>
-            <p className="text-[10px] text-orange-500 font-medium">
-              #{(order.dispatcher_id || order.dispatcher_user_id || '').slice(0, 8).toUpperCase()}
-            </p>
+        <div className="bg-orange-50 dark:bg-orange-900/15 border border-orange-100 dark:border-orange-800/30 rounded-xl px-4 py-3">
+          <p className="text-[9px] font-bold text-orange-400 dark:text-orange-500 uppercase tracking-widest mb-2">Asignado por</p>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm">
+              {order.dispatcher_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || 'DS'}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-gray-900 dark:text-white leading-tight">{order.dispatcher_name || 'Dispatcher'}</p>
+              {order.dispatcher_code && (
+                <p className="text-[11px] font-bold text-orange-500 tracking-widest mt-0.5">ID #{order.dispatcher_code}</p>
+              )}
+            </div>
           </div>
         </div>
       )}

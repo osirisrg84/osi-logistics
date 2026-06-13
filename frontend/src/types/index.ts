@@ -104,6 +104,7 @@ export interface Order {
   dispatcher_user_id?: string | null;
   dispatcher_name?: string | null;
   dispatcher_id?: string | null;
+  dispatcher_code?: string | null;
 }
 
 export interface OrderHistory {

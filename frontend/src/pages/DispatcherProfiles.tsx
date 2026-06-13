@@ -143,149 +143,150 @@ interface DetailModalProps {
   onEdit: () => void;
 }
 
+const EQ_COLORS: Record<string, string> = {
+  'Dry Van':    'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
+  'Reefer':     'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  'Flatbed':    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
+  'Box Truck':  'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+  'Power Only': 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+  'Hotshot':    'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300',
+  'Tanker':     'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
+};
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[9px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-2.5">{children}</p>
+  );
+}
+
 function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
   const [showSSN, setShowSSN] = useState(false);
   const initials = dispatcher.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
   const pct = dispatcher.total_earned > 0 ? Math.round((dispatcher.settled / dispatcher.total_earned) * 100) : 0;
+  const eqList = dispatcher.equipment_experience?.split(',').map(e => e.trim()).filter(Boolean) ?? [];
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm max-h-[92vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
 
-        {/* Title bar */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-slate-700">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">Perfil del Dispatcher</h2>
-          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
-            <X className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+        {/* ── Hero header ── */}
+        <div className="relative bg-gradient-to-br from-orange-500 to-orange-600 rounded-t-2xl px-5 pt-5 pb-6">
+          <button onClick={onClose} className="absolute top-4 right-4 p-1.5 bg-white/20 hover:bg-white/30 rounded-lg transition-colors">
+            <X className="w-4 h-4 text-white" />
           </button>
-        </div>
-
-        <div className="p-5 space-y-4">
-          {/* Identity */}
-          <div className="flex items-center gap-3">
-            <div className="w-14 h-14 bg-orange-500 rounded-2xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0 shadow-lg">
               {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-base font-bold text-gray-900 dark:text-white">{dispatcher.name}</p>
-              <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full mt-0.5 ${
-                dispatcher.active
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                  : 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400'
-              }`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${dispatcher.active ? 'bg-green-500' : 'bg-gray-400'}`} />
-                {dispatcher.active ? 'Activo' : 'Inactivo'}
-              </span>
-              {dispatcher.dispatcher_code && (
-                <div className="flex items-center gap-1 mt-1">
-                  <Hash className="w-3 h-3 text-orange-400" />
-                  <span className="text-xs font-bold text-orange-500 tracking-widest">{dispatcher.dispatcher_code}</span>
-                </div>
-              )}
+              <p className="text-white text-lg font-bold leading-tight">{dispatcher.name}</p>
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                  dispatcher.active ? 'bg-green-400/30 text-green-100' : 'bg-white/20 text-white/70'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${dispatcher.active ? 'bg-green-300' : 'bg-white/50'}`} />
+                  {dispatcher.active ? 'Activo' : 'Inactivo'}
+                </span>
+                {dispatcher.dispatcher_code && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-white/20 text-white px-2 py-0.5 rounded-full tracking-widest">
+                    <Hash className="w-2.5 h-2.5" /> ID {dispatcher.dispatcher_code}
+                  </span>
+                )}
+              </div>
+              <p className="text-white/60 text-[10px] mt-1">Miembro desde {format(new Date(dispatcher.created_at), 'MMM d, yyyy')}</p>
             </div>
           </div>
 
-          {/* Inline contact info — driver card style */}
-          <div className="space-y-1.5 text-xs">
-            {dispatcher.phone && (
-              <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
-                <Phone className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500 flex-shrink-0" />
-                <span>{dispatcher.phone}</span>
-              </div>
-            )}
-            <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
-              <Mail className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500 flex-shrink-0" />
-              <a href={`mailto:${dispatcher.email}`} className="text-blue-500 hover:text-blue-600 truncate">{dispatcher.email}</a>
-            </div>
-            <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
-              <Shield className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500 flex-shrink-0" />
-              {dispatcher.ssn ? (
-                <div className="flex items-center gap-1.5">
-                  <span className="font-mono">{showSSN ? dispatcher.ssn : maskSSN(dispatcher.ssn)}</span>
-                  <button onClick={() => setShowSSN(!showSSN)} className="hover:text-gray-700 dark:hover:text-slate-200">
-                    {showSSN ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                  </button>
-                </div>
-              ) : (
-                <button onClick={onEdit} className="text-orange-500 hover:text-orange-600 font-medium">+ Agregar SSN</button>
-              )}
-            </div>
-            {!dispatcher.phone && (
-              <div className="flex items-center gap-2 text-gray-400 dark:text-slate-500">
-                <Phone className="w-3.5 h-3.5 flex-shrink-0" />
-                <button onClick={onEdit} className="text-orange-500 hover:text-orange-600 font-medium">+ Agregar teléfono</button>
-              </div>
-            )}
-            <div className="flex items-center gap-2 text-gray-400 dark:text-slate-500">
-              <ClipboardList className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>Desde {format(new Date(dispatcher.created_at), 'MMM d, yyyy')}</span>
-            </div>
-          </div>
-
-          {/* Stats row */}
-          <div className="grid grid-cols-3 gap-2">
+          {/* Stats inside hero */}
+          <div className="grid grid-cols-3 gap-2 mt-4">
             {[
-              { label: 'Órdenes',  value: dispatcher.total_orders,              color: 'text-gray-900 dark:text-white' },
-              { label: 'Activas',  value: dispatcher.active_orders,             color: 'text-blue-600' },
-              { label: 'Ganado',   value: `$${dispatcher.total_earned.toFixed(0)}`, color: 'text-green-600' },
+              { label: 'Órdenes',  value: dispatcher.total_orders,                  color: 'text-white' },
+              { label: 'Activas',  value: dispatcher.active_orders,                 color: 'text-blue-200' },
+              { label: 'Ganado',   value: `$${dispatcher.total_earned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, color: 'text-green-200' },
             ].map(s => (
-              <div key={s.label} className="bg-gray-50 dark:bg-slate-700/60 rounded-xl py-2.5 text-center">
+              <div key={s.label} className="bg-white/15 backdrop-blur rounded-xl py-2.5 text-center">
                 <p className={`text-base font-bold ${s.color}`}>{s.value}</p>
-                <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">{s.label}</p>
+                <p className="text-[10px] text-white/60 mt-0.5">{s.label}</p>
               </div>
             ))}
           </div>
+        </div>
+
+        {/* ── Body ── */}
+        <div className="p-5 space-y-5">
+
+          {/* Contact */}
+          <div>
+            <SectionLabel>Contacto</SectionLabel>
+            <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl divide-y divide-gray-100 dark:divide-slate-600/50">
+              {dispatcher.phone ? (
+                <a href={`tel:${dispatcher.phone}`} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors rounded-t-xl">
+                  <Phone className="w-4 h-4 text-orange-400 flex-shrink-0" />
+                  <span className="text-sm text-gray-700 dark:text-slate-300">{dispatcher.phone}</span>
+                </a>
+              ) : (
+                <div className="flex items-center gap-3 px-4 py-3">
+                  <Phone className="w-4 h-4 text-gray-300 dark:text-slate-600 flex-shrink-0" />
+                  <button onClick={onEdit} className="text-sm text-orange-500 hover:text-orange-600 font-medium">+ Agregar teléfono</button>
+                </div>
+              )}
+              <a href={`mailto:${dispatcher.email}`} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                <Mail className="w-4 h-4 text-orange-400 flex-shrink-0" />
+                <span className="text-sm text-blue-500 hover:text-blue-600 truncate">{dispatcher.email}</span>
+              </a>
+              <div className="flex items-center gap-3 px-4 py-3 rounded-b-xl">
+                <Shield className="w-4 h-4 text-orange-400 flex-shrink-0" />
+                {dispatcher.ssn ? (
+                  <div className="flex items-center gap-2 flex-1">
+                    <span className="text-sm font-mono text-gray-700 dark:text-slate-300">{showSSN ? dispatcher.ssn : maskSSN(dispatcher.ssn)}</span>
+                    <button onClick={() => setShowSSN(!showSSN)} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 ml-auto">
+                      {showSSN ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={onEdit} className="text-sm text-orange-500 hover:text-orange-600 font-medium">+ Agregar SSN</button>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Commissions */}
-          <div className="bg-gray-50 dark:bg-slate-700/40 rounded-xl p-4 space-y-2">
-            <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Comisiones · 5% por orden</p>
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-500 dark:text-slate-400">Total generado</span>
-              <span className="font-bold text-gray-900 dark:text-white">${dispatcher.total_earned.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-500 dark:text-slate-400">Liquidado</span>
-              <span className="font-semibold text-green-600">${dispatcher.settled.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-500 dark:text-slate-400">Pendiente</span>
-              <span className="font-semibold text-yellow-600">${dispatcher.pending.toFixed(2)}</span>
-            </div>
-            {dispatcher.total_earned > 0 && (
-              <div className="pt-1">
-                <div className="flex justify-between text-[10px] text-gray-400 dark:text-slate-500 mb-1">
-                  <span>Progreso liquidación</span><span>{pct}%</span>
+          <div>
+            <SectionLabel>Comisiones · 5% por orden</SectionLabel>
+            <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 space-y-3">
+              {[
+                { label: 'Total generado', value: `$${dispatcher.total_earned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, color: 'text-gray-900 dark:text-white font-bold' },
+                { label: 'Liquidado',      value: `$${dispatcher.settled.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,      color: 'text-green-600 dark:text-green-400 font-semibold' },
+                { label: 'Pendiente',      value: `$${dispatcher.pending.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,      color: 'text-yellow-600 dark:text-yellow-400 font-semibold' },
+              ].map(r => (
+                <div key={r.label} className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500 dark:text-slate-400">{r.label}</span>
+                  <span className={r.color}>{r.value}</span>
                 </div>
-                <div className="h-1.5 bg-gray-200 dark:bg-slate-600 rounded-full overflow-hidden">
-                  <div className="h-full bg-green-500 rounded-full" style={{ width: `${pct}%` }} />
+              ))}
+              {dispatcher.total_earned > 0 && (
+                <div className="pt-1">
+                  <div className="flex justify-between text-[10px] text-gray-400 dark:text-slate-500 mb-1.5">
+                    <span>Progreso de liquidación</span><span className="font-semibold">{pct}%</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Equipment experience */}
-          {dispatcher.equipment_experience && (
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
-              <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest flex items-center gap-1.5 mb-3">
-                <Truck className="w-3 h-3" /> Experiencia en loads
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {dispatcher.equipment_experience.split(',').map(eq => eq.trim()).filter(Boolean).map(eq => {
-                  const colors: Record<string, string> = {
-                    'Dry Van':    'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
-                    'Reefer':     'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
-                    'Flatbed':    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
-                    'Box Truck':  'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
-                    'Power Only': 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
-                    'Hotshot':    'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300',
-                    'Tanker':     'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
-                  };
-                  return (
-                    <span key={eq} className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold ${colors[eq] || 'bg-gray-100 text-gray-700'}`}>
-                      {eq}
-                    </span>
-                  );
-                })}
+          {eqList.length > 0 && (
+            <div>
+              <SectionLabel>Experiencia en loads</SectionLabel>
+              <div className="flex flex-wrap gap-2">
+                {eqList.map(eq => (
+                  <span key={eq} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold ${EQ_COLORS[eq] || 'bg-gray-100 text-gray-700'}`}>
+                    <Truck className="w-3 h-3" />{eq}
+                  </span>
+                ))}
               </div>
             </div>
           )}

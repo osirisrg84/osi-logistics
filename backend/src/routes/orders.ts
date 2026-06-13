@@ -16,7 +16,7 @@ router.get('/', (req: Request, res: Response) => {
            d.name as driver_name, d.phone as driver_phone,
            t.plate_number, t.make, t.model, t.type as truck_type,
            od.name as offered_driver_name,
-           u.name as dispatcher_name, u.id as dispatcher_id
+           u.name as dispatcher_name, u.id as dispatcher_id, u.dispatcher_code
     FROM orders o
     LEFT JOIN drivers d ON o.driver_id = d.id
     LEFT JOIN trucks t ON o.truck_id = t.id
@@ -69,7 +69,7 @@ router.get('/:id', (req: Request, res: Response) => {
            d.name as driver_name, d.phone as driver_phone, d.email as driver_email,
            t.plate_number, t.make, t.model, t.type as truck_type,
            od.name as offered_driver_name,
-           u.name as dispatcher_name, u.id as dispatcher_id
+           u.name as dispatcher_name, u.id as dispatcher_id, u.dispatcher_code
     FROM orders o
     LEFT JOIN drivers d ON o.driver_id = d.id
     LEFT JOIN trucks t ON o.truck_id = t.id

@@ -95,7 +95,7 @@ router.post('/register', (req: Request, res: Response) => {
   const id = uuidv4();
 
   const genDispatcherCode = (): string => {
-    const code = 'DSP-' + String(Math.floor(1000 + Math.random() * 9000));
+    const code = String(Math.floor(10000000 + Math.random() * 90000000));
     const exists = db.prepare("SELECT id FROM users WHERE dispatcher_code = ?").get(code);
     return exists ? genDispatcherCode() : code;
   };
