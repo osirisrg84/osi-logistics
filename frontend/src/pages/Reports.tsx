@@ -236,7 +236,7 @@ export default function Reports() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
-                    {['Driver', 'Status', 'Total Trips', 'This Month', 'On-Time %', 'Rating', 'Revenue (Month)', 'Avg Time (min)'].map(h => (
+                    {['Driver', 'Status', 'Total Trips', 'This Month', 'On Time %', 'Rating', 'Revenue (Month)', 'Avg Time (min)'].map(h => (
                       <th key={h} className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{h}</th>
                     ))}
                   </tr>
@@ -246,15 +246,15 @@ export default function Reports() {
                     <tr key={i} className="table-row">
                       <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-slate-100">{driver.name}</td>
                       <td className="px-4 py-3">
-                        <span className={`badge text-xs ${driver.status === 'available' ? 'bg-green-100 text-green-700' : driver.status === 'busy' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'}`}>
-                          {driver.status}
+                        <span className={`badge text-xs ${driver.status === 'available' ? 'bg-green-100 text-green-700' : driver.status === 'busy' ? 'bg-orange-100 text-orange-700' : driver.status === 'on_break' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>
+                          {driver.status.replace(/_/g, ' ')}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{driver.total_deliveries}</td>
                       <td className="px-4 py-3 text-sm text-blue-600 font-medium">{driver.orders_this_month}</td>
                       <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{(driver.on_time_rate || 0).toFixed(1)}%</td>
                       <td className="px-4 py-3 text-sm text-yellow-500">★ {(driver.rating || 0).toFixed(1)}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-green-600">${(driver.revenue_this_month || 0).toFixed(2)}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-green-600">${(driver.revenue_this_month || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                       <td className="px-4 py-3 text-sm text-gray-600 dark:text-slate-400">{(driver.avg_delivery_minutes || 0).toFixed(0)}</td>
                     </tr>
                   ))}
