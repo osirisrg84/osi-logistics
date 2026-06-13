@@ -92,11 +92,11 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
 
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
-          <p className="text-xs text-gray-400 dark:text-slate-500">Peso</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">Weight</p>
           <p className="text-sm font-semibold text-gray-900 dark:text-white">{(order.weight_kg * 2.20462).toFixed(0)} lbs</p>
         </div>
         <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
-          <p className="text-xs text-gray-400 dark:text-slate-500">Creado</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">Created</p>
           <p className="text-xs font-medium text-gray-900 dark:text-slate-100">{formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}</p>
         </div>
         <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
