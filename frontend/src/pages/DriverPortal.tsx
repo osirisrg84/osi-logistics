@@ -279,6 +279,40 @@ export default function DriverPortal() {
     } catch {}
   };
 
+  const playAcceptSound = () => {
+    try {
+      const ctx = new AudioContext();
+      [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine'; osc.frequency.value = freq;
+        const start = ctx.currentTime + i * 0.1;
+        gain.gain.setValueAtTime(0, start);
+        gain.gain.linearRampToValueAtTime(0.35, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.3);
+        osc.start(start); osc.stop(start + 0.3);
+      });
+    } catch {}
+  };
+
+  const playDeliveredSound = () => {
+    try {
+      const ctx = new AudioContext();
+      [523.25, 659.25, 783.99, 1046.50, 1318.51, 1046.50, 1318.51].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine'; osc.frequency.value = freq;
+        const start = ctx.currentTime + i * 0.12;
+        gain.gain.setValueAtTime(0, start);
+        gain.gain.linearRampToValueAtTime(0.4, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.4);
+        osc.start(start); osc.stop(start + 0.4);
+      });
+    } catch {}
+  };
+
   useEffect(() => {
     fetchOrders();
     if (driverId) {
@@ -389,6 +423,7 @@ export default function DriverPortal() {
 
   const handleStatusUpdate = async (orderId: string, status: string) => {
     await ordersApi.updateStatus(orderId, { status });
+    if (status === 'delivered') playDeliveredSound();
     await fetchOrders();
   };
 
@@ -1428,6 +1463,7 @@ export default function DriverPortal() {
                 </button>
                 <button
                   onClick={async () => {
+                    playAcceptSound();
                     await ordersApi.accept(pendingOffer.id).catch(() => {});
                     setPendingOffer(null);
                     fetchOrders();
