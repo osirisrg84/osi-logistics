@@ -96,7 +96,10 @@ router.delete('/users/:id', (req: Request, res: Response) => {
 router.get('/dispatchers', (_req: Request, res: Response) => {
   const db = getDb();
   const dispatchers = db.prepare(`
-    SELECT u.id, u.name, u.email, u.phone, u.ssn, u.active, u.created_at, u.equipment_experience, u.dispatcher_code,
+    SELECT u.id, u.name, u.email, u.phone, u.ssn, u.active, u.created_at,
+           u.equipment_experience, u.dispatcher_code,
+           u.date_of_birth, u.city, u.years_experience, u.availability,
+           u.previous_companies, u.languages,
            COUNT(DISTINCT c.order_id)                                                        AS total_orders,
            COALESCE(SUM(c.dispatcher_pay), 0)                                                AS total_earned,
            COALESCE(SUM(CASE WHEN c.status = 'pending' THEN c.dispatcher_pay ELSE 0 END), 0) AS pending,

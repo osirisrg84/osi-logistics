@@ -19,6 +19,12 @@ interface DispatcherProfile {
   active_orders: number;
   equipment_experience: string;
   dispatcher_code: string;
+  date_of_birth: string;
+  city: string;
+  years_experience: number;
+  availability: string;
+  previous_companies: string;
+  languages: string;
 }
 
 function maskSSN(ssn: string): string {
@@ -237,6 +243,49 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
               <span className="text-sm text-blue-500 truncate">{dispatcher.email}</span>
             </a>
           </div>
+
+          {/* ── Personal / Professional info ── */}
+          {(dispatcher.date_of_birth || dispatcher.city || dispatcher.years_experience > 0 || dispatcher.availability || dispatcher.languages || dispatcher.previous_companies) && (
+            <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4 space-y-2.5">
+              <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1">Información Profesional</p>
+              {dispatcher.date_of_birth && (
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-400 dark:text-slate-500">Fecha de nacimiento</span>
+                  <span className="font-medium text-gray-800 dark:text-slate-200">{format(new Date(dispatcher.date_of_birth), 'MMM d, yyyy')}</span>
+                </div>
+              )}
+              {dispatcher.city && (
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-400 dark:text-slate-500">Ciudad</span>
+                  <span className="font-medium text-gray-800 dark:text-slate-200">{dispatcher.city}</span>
+                </div>
+              )}
+              {dispatcher.years_experience > 0 && (
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-400 dark:text-slate-500">Años de experiencia</span>
+                  <span className="font-bold text-orange-500">{dispatcher.years_experience} {dispatcher.years_experience === 1 ? 'año' : 'años'}</span>
+                </div>
+              )}
+              {dispatcher.availability && (
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-400 dark:text-slate-500">Disponibilidad</span>
+                  <span className="font-medium text-gray-800 dark:text-slate-200 capitalize">{dispatcher.availability.replace('-', ' ')}</span>
+                </div>
+              )}
+              {dispatcher.languages && (
+                <div className="flex justify-between items-start text-sm gap-4">
+                  <span className="text-gray-400 dark:text-slate-500 flex-shrink-0">Idiomas</span>
+                  <span className="font-medium text-gray-800 dark:text-slate-200 text-right">{dispatcher.languages}</span>
+                </div>
+              )}
+              {dispatcher.previous_companies && (
+                <div className="flex justify-between items-start text-sm gap-4">
+                  <span className="text-gray-400 dark:text-slate-500 flex-shrink-0">Empresas anteriores</span>
+                  <span className="font-medium text-gray-800 dark:text-slate-200 text-right">{dispatcher.previous_companies}</span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ── Commissions ── */}
           <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4 space-y-3">
