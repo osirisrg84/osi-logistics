@@ -894,7 +894,7 @@ export default function DriverPortal() {
                     <div className="text-right">
                       <p className="text-sm font-bold text-green-600">${(Math.round(order.price / 100) * 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                       {order.delivered_at && (
-                        <p className="text-xs text-gray-400 dark:text-slate-500">{format(new Date(order.delivered_at), 'HH:mm')}</p>
+                        <p className="text-xs text-gray-400 dark:text-slate-500">{format(new Date(order.delivered_at), 'MM/dd · HH:mm')}</p>
                       )}
                       <div className="flex items-center justify-end gap-1 mt-1">
                         <CheckCircle className="w-3 h-3 text-green-500" />
