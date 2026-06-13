@@ -3,7 +3,7 @@ import {
   Package, MapPin, CheckCircle, Truck, Phone,
   Clock, Star, Navigation, LogOut, User, Activity,
   Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet, Building2, CreditCard,
-  Lock, ShieldCheck, Send, Bell, BellOff, CheckCheck
+  Lock, ShieldCheck, Send, Bell, BellOff, CheckCheck, Award, Edit3, Zap
 } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
 import { useAuth } from '../context/AuthContext';
@@ -159,6 +159,8 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
   );
 }
 
+const EQUIP_TYPES = ['Dry Van', 'Reefer', 'Flatbed', 'Box Truck', 'Power Only', 'Hotshot', 'Tanker'];
+
 const STATUS_CONFIG: Record<DriverStatus, { label: string; dot: string; bg: string; text: string }> = {
   available: { label: 'Online',      dot: 'bg-green-400',  bg: 'bg-green-50 dark:bg-green-900/30',   text: 'text-green-700 dark:text-green-400' },
   busy:      { label: 'On Delivery', dot: 'bg-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/30', text: 'text-orange-700 dark:text-orange-400' },
@@ -220,6 +222,30 @@ export default function DriverPortal() {
   const [payoutDetails, setPayoutDetails] = useState<PayoutDetails>({});
   const [editingPayout, setEditingPayout] = useState(false);
   const [savingPayout,  setSavingPayout]  = useState(false);
+
+  // ── Equipment profile ─────────────────────────────────────
+  const [truckNum, setTruckNum] = useState('');
+  const [trailerNum, setTrailerNum] = useState('');
+  const [localEquipType, setLocalEquipType] = useState('');
+  const [editingEquip, setEditingEquip] = useState(false);
+  const [savingEquip, setSavingEquip] = useState(false);
+
+  useEffect(() => {
+    if (driver) {
+      setTruckNum(driver.truck_number || '');
+      setTrailerNum(driver.trailer_number || '');
+      setLocalEquipType(driver.equipment_type || '');
+    }
+  }, [driver?.id]);
+
+  const saveEquipment = async () => {
+    if (!driverId) return;
+    setSavingEquip(true);
+    try {
+      await driversApi.update(driverId, { truck_number: truckNum, trailer_number: trailerNum, equipment_type: localEquipType });
+      setEditingEquip(false);
+    } catch {} finally { setSavingEquip(false); }
+  };
 
   useEffect(() => {
     userApi.getProfile().then(({ data }) => {
@@ -508,6 +534,32 @@ export default function DriverPortal() {
   const isBusy = activeOrders.some(o => ['picked_up', 'in_transit'].includes(o.status));
   const todayRevenue = deliveredToday.reduce((sum, o) => sum + o.price, 0);
   const cfg = STATUS_CONFIG[driverStatus];
+
+  // ── Profile completion ─────────────────────────────────────
+  const profileItems = [
+    { label: 'Equipment Type', done: !!localEquipType },
+    { label: 'Truck #',        done: !!truckNum },
+    { label: 'Trailer #',      done: !!trailerNum },
+    { label: 'Payment Method', done: !!payoutMethod },
+    { label: 'Company / MC#',  done: !!(driver?.company_name && driver?.mc_number) },
+  ];
+  const profileScore = profileItems.filter(i => i.done).length;
+
+  // ── Achievements ───────────────────────────────────────────
+  const totalDel  = driver?.total_deliveries || 0;
+  const onTimeRt  = driver?.on_time_rate || 0;
+  const drvRating = driver?.rating || 0;
+  const ACHIEVEMENTS = [
+    { icon: '🚀', label: 'First Mile',       desc: 'Complete your first delivery',   unlocked: totalDel  >= 1,   current: Math.min(totalDel, 1),    target: 1,    showProgress: false },
+    { icon: '📦', label: 'Getting Moving',   desc: '10 deliveries completed',         unlocked: totalDel  >= 10,  current: Math.min(totalDel, 10),   target: 10,   showProgress: true  },
+    { icon: '⭐', label: 'Rising Star',      desc: '25 deliveries completed',         unlocked: totalDel  >= 25,  current: Math.min(totalDel, 25),   target: 25,   showProgress: true  },
+    { icon: '💪', label: 'Road Warrior',     desc: '50 deliveries completed',         unlocked: totalDel  >= 50,  current: Math.min(totalDel, 50),   target: 50,   showProgress: true  },
+    { icon: '🏆', label: 'Elite Driver',     desc: '100 deliveries completed',        unlocked: totalDel  >= 100, current: Math.min(totalDel, 100),  target: 100,  showProgress: true  },
+    { icon: '⏰', label: 'On-Time Pro',      desc: '95%+ on-time delivery rate',      unlocked: onTimeRt  >= 95,  current: Math.min(onTimeRt, 95),   target: 95,   showProgress: false },
+    { icon: '🌟', label: '5-Star Driver',    desc: 'Driver rating 4.8 or above',      unlocked: drvRating >= 4.8, current: drvRating,                 target: 4.8,  showProgress: false },
+    { icon: '✅', label: 'Profile Complete', desc: 'All profile sections filled in',  unlocked: profileScore >= 5, current: profileScore,             target: 5,    showProgress: true  },
+  ];
+  const unlockedCount = ACHIEVEMENTS.filter(a => a.unlocked).length;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-16">
@@ -876,6 +928,120 @@ export default function DriverPortal() {
             </div>
           </div>
 
+          {/* ── Profile Completion Banner ─────────────────────── */}
+          {profileScore < profileItems.length && (
+            <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-200 dark:border-orange-700/40 rounded-2xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-orange-500" />
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">Complete Your Profile</p>
+                </div>
+                <span className="text-xs font-bold text-orange-600 dark:text-orange-400">{profileScore}/{profileItems.length}</span>
+              </div>
+              <div className="h-2 bg-orange-100 dark:bg-orange-900/30 rounded-full overflow-hidden mb-3">
+                <div className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all"
+                     style={{ width: `${(profileScore / profileItems.length) * 100}%` }} />
+              </div>
+              <div className="space-y-1.5">
+                {profileItems.map(item => (
+                  <div key={item.label} className="flex items-center gap-2">
+                    {item.done
+                      ? <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                      : <div className="w-3.5 h-3.5 rounded-full border-2 border-orange-300 dark:border-orange-700 flex-shrink-0" />}
+                    <span className={`text-xs ${item.done ? 'text-gray-400 dark:text-slate-500 line-through' : 'text-gray-700 dark:text-slate-300 font-medium'}`}>
+                      {item.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── My Equipment (editable) ───────────────────────── */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Truck className="w-4 h-4 text-blue-500" />
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">My Equipment</h3>
+              </div>
+              {!editingEquip ? (
+                <button onClick={() => setEditingEquip(true)}
+                  className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                  <Edit3 className="w-3.5 h-3.5" /> Edit
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setEditingEquip(false)}
+                    className="text-xs text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition-colors">
+                    Cancel
+                  </button>
+                  <button onClick={saveEquipment} disabled={savingEquip}
+                    className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50">
+                    {savingEquip && <div className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" />}
+                    Save
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {!editingEquip ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500 dark:text-slate-400">Equipment Type</span>
+                  <span className={`text-sm font-semibold ${localEquipType ? 'text-gray-800 dark:text-slate-200' : 'text-gray-300 dark:text-slate-600 italic'}`}>
+                    {localEquipType || 'Not set'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500 dark:text-slate-400">Truck #</span>
+                  <span className={`text-sm font-mono font-semibold ${truckNum ? 'text-gray-800 dark:text-slate-200' : 'text-gray-300 dark:text-slate-600 italic'}`}>
+                    {truckNum || 'Not set'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500 dark:text-slate-400">Trailer #</span>
+                  <span className={`text-sm font-mono font-semibold ${trailerNum ? 'text-gray-800 dark:text-slate-200' : 'text-gray-300 dark:text-slate-600 italic'}`}>
+                    {trailerNum || 'Not set'}
+                  </span>
+                </div>
+                {!truckNum && !trailerNum && (
+                  <button onClick={() => setEditingEquip(true)}
+                    className="w-full mt-1 py-2.5 rounded-xl text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
+                    + Add equipment info
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-2 block">Equipment Type</label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {EQUIP_TYPES.map(t => (
+                      <button key={t} onClick={() => setLocalEquipType(t)}
+                        className={`py-2 px-3 rounded-xl text-xs font-semibold transition-colors text-left ${
+                          localEquipType === t
+                            ? 'bg-blue-500 text-white shadow-sm'
+                            : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+                        }`}>
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">Truck #</label>
+                  <input type="text" placeholder="e.g. 9809" value={truckNum} onChange={e => setTruckNum(e.target.value)}
+                    className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">Trailer #</label>
+                  <input type="text" placeholder="e.g. T4126" value={trailerNum} onChange={e => setTrailerNum(e.target.value)}
+                    className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Truck info */}
           {driver.plate_number && (
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
@@ -1045,6 +1211,72 @@ export default function DriverPortal() {
             </div>
             <span className="text-gray-300 dark:text-slate-600 text-lg">›</span>
           </button>
+
+          {/* ── Achievements / Logros ─────────────────────────── */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden">
+            {/* Header */}
+            <div className="px-5 pt-5 pb-4 border-b border-gray-50 dark:border-slate-700/50">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <Award className="w-4 h-4 text-amber-500" />
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Achievements</h3>
+                </div>
+                <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full">
+                  {unlockedCount} / {ACHIEVEMENTS.length}
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 dark:text-slate-500">Keep delivering to unlock more milestones</p>
+              {/* Overall progress */}
+              <div className="mt-3 h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-amber-400 to-yellow-300 rounded-full transition-all"
+                     style={{ width: `${(unlockedCount / ACHIEVEMENTS.length) * 100}%` }} />
+              </div>
+            </div>
+
+            {/* Achievement list */}
+            <div className="divide-y divide-gray-50 dark:divide-slate-700/50">
+              {ACHIEVEMENTS.map(a => (
+                <div key={a.label} className={`flex items-center gap-3 px-5 py-3.5 transition-colors ${
+                  a.unlocked ? '' : 'opacity-50'
+                }`}>
+                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl shadow-sm ${
+                    a.unlocked
+                      ? 'bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-900/20'
+                      : 'bg-gray-100 dark:bg-slate-700 grayscale'
+                  }`}>
+                    {a.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-0.5">
+                      <p className={`text-sm font-semibold ${a.unlocked ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-slate-500'}`}>
+                        {a.label}
+                      </p>
+                      {a.unlocked ? (
+                        <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded-full flex-shrink-0 uppercase tracking-wide">
+                          Unlocked
+                        </span>
+                      ) : (
+                        <Lock className="w-3.5 h-3.5 text-gray-300 dark:text-slate-600 flex-shrink-0" />
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400 dark:text-slate-500">{a.desc}</p>
+                    {a.showProgress && !a.unlocked && a.current !== undefined && a.target !== undefined && (
+                      <div className="mt-1.5">
+                        <div className="flex justify-between text-[10px] text-gray-400 dark:text-slate-600 mb-1">
+                          <span>{a.current} / {a.target}</span>
+                          <span className="text-orange-500 font-semibold">{Math.round((a.current / a.target) * 100)}%</span>
+                        </div>
+                        <div className="h-1 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-orange-400 to-amber-300 rounded-full transition-all"
+                               style={{ width: `${Math.min((a.current / a.target) * 100, 100)}%` }} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 

@@ -261,6 +261,12 @@ export function initDatabase(): void {
   if (!driverCols.some(c => c.name === 'payment_details')) {
     db.exec("ALTER TABLE drivers ADD COLUMN payment_details TEXT NOT NULL DEFAULT ''");
   }
+  if (!driverCols.some(c => c.name === 'truck_number')) {
+    db.exec("ALTER TABLE drivers ADD COLUMN truck_number TEXT NOT NULL DEFAULT ''");
+  }
+  if (!driverCols.some(c => c.name === 'trailer_number')) {
+    db.exec("ALTER TABLE drivers ADD COLUMN trailer_number TEXT NOT NULL DEFAULT ''");
+  }
 
   // Patch demo drivers with varied company/MC/authority data (runs every startup — idempotent)
   const demoPatches = [
