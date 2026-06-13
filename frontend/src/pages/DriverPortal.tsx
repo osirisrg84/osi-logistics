@@ -726,7 +726,8 @@ export default function DriverPortal() {
               <p className="text-[11px] mt-0.5 text-emerald-400/70">Today's Revenue</p>
             </div>
             <div className="rounded-2xl px-2 py-3 text-center bg-white/6 border border-white/10">
-              <p className="text-xl font-bold text-orange-400">{unlockedCount}<span className="text-sm text-orange-500/60 font-normal">/8</span></p>
+              <Award className="w-4 h-4 text-orange-400 mx-auto" />
+              <p className="text-xl font-bold text-orange-400 mt-0.5">{unlockedCount}<span className="text-sm text-orange-500/60 font-normal">/8</span></p>
               <p className="text-[11px] mt-0.5 text-slate-500">Logros</p>
             </div>
           </div>
