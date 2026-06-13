@@ -247,7 +247,7 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
           {/* ── Personal / Professional info ── */}
           {(dispatcher.date_of_birth || dispatcher.city || dispatcher.years_experience > 0 || dispatcher.availability || dispatcher.languages || dispatcher.previous_companies) && (
             <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4 space-y-2.5">
-              <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1">Información Profesional</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1">Professional Info</p>
               {dispatcher.date_of_birth && (
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-400 dark:text-slate-500">Fecha de nacimiento</span>
@@ -289,7 +289,7 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
 
           {/* ── Commissions ── */}
           <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4 space-y-3">
-            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Comisiones · 5% por orden</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Comisiones · 5% por carga</p>
             {[
               { label: 'Total generado', value: `$${dispatcher.total_earned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, cls: 'font-bold text-gray-900 dark:text-white' },
               { label: 'Liquidado',      value: `$${dispatcher.settled.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,      cls: 'font-semibold text-green-600 dark:text-green-400' },
