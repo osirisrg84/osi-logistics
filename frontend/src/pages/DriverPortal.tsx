@@ -1434,8 +1434,8 @@ export default function DriverPortal() {
                         { id: 'card',   label: '💳 Tarjeta' },
                         { id: 'zelle',  label: '📱 Zelle' },
                         { id: 'ach',    label: '🏦 ACH' },
-                        { id: 'paypal', label: 'P PayPal' },
-                      ] as { id: PayTab; label: string }[]).map(m => (
+                        { id: 'paypal', label: null },
+                      ] as { id: PayTab; label: string | null }[]).map(m => (
                         <button
                           key={m.id}
                           onClick={() => setPayTab(m.id)}
@@ -1445,7 +1445,12 @@ export default function DriverPortal() {
                               : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700'
                           }`}
                         >
-                          {m.label}
+                          {m.id === 'paypal' ? (
+                            <span className="flex items-center justify-center gap-0.5 leading-none">
+                              <span style={{ color: payTab === 'paypal' ? '#7EC8E3' : '#003087', fontWeight: 900, fontSize: 11 }}>Pay</span>
+                              <span style={{ color: payTab === 'paypal' ? '#b3d9f0' : '#009CDE', fontWeight: 900, fontSize: 11 }}>Pal</span>
+                            </span>
+                          ) : m.label}
                         </button>
                       ))}
                     </div>
