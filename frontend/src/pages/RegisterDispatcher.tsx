@@ -20,6 +20,7 @@ function Field({ label, required, children }: { label: string; required?: boolea
 }
 
 const LANGUAGES = ['English', 'Spanish'];
+const EQUIPMENT_TYPES = ['Dry Van', 'Reefer', 'Flatbed', 'Box Truck', 'Power Only', 'Hotshot', 'Tanker'];
 const AVAILABILITY_OPTIONS = [
   { value: 'full-time',  label: 'Full-time' },
   { value: 'part-time',  label: 'Part-time' },
@@ -38,6 +39,7 @@ export default function RegisterDispatcher() {
   });
   const [companies, setCompanies] = useState<string[]>(['']);
   const [languages, setLanguages] = useState<string[]>(['English']);
+  const [equipmentExp, setEquipmentExp] = useState<string[]>([]);
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -65,6 +67,11 @@ export default function RegisterDispatcher() {
   const toggleLanguage = (lang: string) =>
     setLanguages(prev =>
       prev.includes(lang) ? prev.filter(l => l !== lang) : [...prev, lang]
+    );
+
+  const toggleEquipment = (eq: string) =>
+    setEquipmentExp(prev =>
+      prev.includes(eq) ? prev.filter(e => e !== eq) : [...prev, eq]
     );
 
   const handleSubmit = async (e: FormEvent) => {
@@ -235,6 +242,29 @@ export default function RegisterDispatcher() {
                 ))}
               </div>
             </Field>
+
+            {/* Equipment Experience */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-2">
+                ¿Con qué tipo de equipo tienes experiencia? <span className="text-gray-400 font-normal">(selecciona todos los que apliquen)</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {EQUIPMENT_TYPES.map(eq => (
+                  <button
+                    key={eq}
+                    type="button"
+                    onClick={() => toggleEquipment(eq)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors ${
+                      equipmentExp.includes(eq)
+                        ? 'bg-orange-500 border-orange-500 text-white'
+                        : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-orange-300'
+                    }`}
+                  >
+                    {eq}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Account Security */}
