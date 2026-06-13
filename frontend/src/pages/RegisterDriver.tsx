@@ -83,7 +83,7 @@ export default function RegisterDriver() {
       <div className="w-full max-w-lg">
 
         <Link to="/driver/login" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm mb-6 transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to Driver Login
+          <ArrowLeft className="w-3.5 h-3.5" /> Volver al inicio de sesión
         </Link>
 
         {/* Header */}
@@ -92,7 +92,7 @@ export default function RegisterDriver() {
             <Truck className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white">Driver Registration</h1>
-          <p className="text-slate-400 text-sm mt-1">OSI Logistics · Create your driver account</p>
+          <p className="text-slate-400 text-sm mt-1">OSI Logistics · Crea tu cuenta de conductor</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -110,7 +110,7 @@ export default function RegisterDriver() {
               <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Personal Info</h2>
             </div>
 
-            <Field label="Full Name" required>
+            <Field label="Nombre Completo" required>
               <input className="input" type="text" placeholder="John Smith"
                 value={form.name} onChange={set('name')} required autoFocus />
             </Field>
@@ -252,8 +252,8 @@ export default function RegisterDriver() {
           </button>
 
           <p className="text-xs text-center text-slate-500 pb-4">
-            Already have an account?{' '}
-            <Link to="/driver/login" className="text-blue-400 hover:text-blue-300 font-medium">Sign in here</Link>
+            ¿Ya tienes una cuenta?{' '}
+            <Link to="/driver/login" className="text-blue-400 hover:text-blue-300 font-medium">Inicia sesión aquí</Link>
           </p>
         </form>
       </div>

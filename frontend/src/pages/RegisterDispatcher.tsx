@@ -102,7 +102,7 @@ export default function RegisterDispatcher() {
       <div className="w-full max-w-lg">
 
         <Link to="/dispatcher" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm mb-6 transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to Dispatcher Login
+          <ArrowLeft className="w-3.5 h-3.5" /> Volver al inicio de sesión
         </Link>
 
         {/* Header */}
@@ -111,7 +111,7 @@ export default function RegisterDispatcher() {
             <ClipboardList className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white">Dispatcher Registration</h1>
-          <p className="text-slate-400 text-sm mt-1">OSI Logistics · Create your operations account</p>
+          <p className="text-slate-400 text-sm mt-1">OSI Logistics · Crea tu cuenta de operaciones</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -129,17 +129,17 @@ export default function RegisterDispatcher() {
               <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Personal Info</h2>
             </div>
 
-            <Field label="Full Name" required>
+            <Field label="Nombre Completo" required>
               <input className="input" type="text" placeholder="Jane Smith"
                 value={form.name} onChange={set('name')} required autoFocus />
             </Field>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Date of Birth" required>
+              <Field label="Fecha de Nacimiento" required>
                 <input className="input" type="date"
                   value={form.date_of_birth} onChange={set('date_of_birth')} required />
               </Field>
-              <Field label="City / Location">
+              <Field label="Ciudad / Ubicación">
                 <div className="relative">
                   <MapPin className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input className="input pl-8" type="text" placeholder="Miami, FL"
@@ -174,11 +174,11 @@ export default function RegisterDispatcher() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Years of Experience" required>
+              <Field label="Años de Experiencia" required>
                 <input className="input" type="number" min="0" max="50" placeholder="e.g. 5"
                   value={form.years_experience} onChange={set('years_experience')} required />
               </Field>
-              <Field label="Availability">
+              <Field label="Disponibilidad">
                 <select className="input" value={form.availability} onChange={set('availability')}>
                   {AVAILABILITY_OPTIONS.map(o => (
                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -188,7 +188,7 @@ export default function RegisterDispatcher() {
             </div>
 
             {/* Previous Companies */}
-            <Field label="Previous Companies">
+            <Field label="Empresas Anteriores">
               <div className="space-y-2">
                 {companies.map((c, i) => (
                   <div key={i} className="flex gap-2">
@@ -286,7 +286,7 @@ export default function RegisterDispatcher() {
             {/* Access preview */}
             <div className="bg-orange-50 rounded-xl p-3.5 border border-orange-100">
               <p className="text-xs font-semibold text-orange-700 mb-2 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" /> You will have access to:
+                <Clock className="w-3.5 h-3.5" /> Tendrás acceso a:
               </p>
               <div className="grid grid-cols-2 gap-1">
                 {['Dashboard & KPIs', 'Order Management', 'Live Fleet Tracking', 'Driver Assignments', 'Fleet Management', 'Analytics & Reports'].map(f => (
@@ -330,8 +330,8 @@ export default function RegisterDispatcher() {
           </button>
 
           <p className="text-xs text-center text-slate-500 pb-4">
-            Already have an account?{' '}
-            <Link to="/dispatcher" className="text-orange-400 hover:text-orange-300 font-medium">Sign in here</Link>
+            ¿Ya tienes una cuenta?{' '}
+            <Link to="/dispatcher" className="text-orange-400 hover:text-orange-300 font-medium">Inicia sesión aquí</Link>
           </p>
         </form>
       </div>
