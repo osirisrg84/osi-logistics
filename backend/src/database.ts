@@ -424,14 +424,14 @@ function seedDatabase(db: DatabaseSync): void {
   if (driverCount > 0) return;
 
   const trucks = [
-    { id: uuidv4(), plate: 'OSI-001', make: 'Peterbilt', model: '579', year: 2022, type: 'Dry Van', cap_kg: 7000, cap_m3: 28, status: 'active', mileage: 45230, fuel: 85, last_maint: '2026-04-15', next_maint: '2026-07-15', vin: '1FDWF36P02EA12345', color: 'White' },
-    { id: uuidv4(), plate: 'OSI-002', make: 'Freightliner', model: 'Cascadia', year: 2021, type: 'Reefer', cap_kg: 9000, cap_m3: 35, status: 'active', mileage: 78400, fuel: 60, last_maint: '2026-03-20', next_maint: '2026-06-20', vin: '1FUBBCYB62LJ12346', color: 'White' },
-    { id: uuidv4(), plate: 'OSI-003', make: 'Volvo', model: '860', year: 2023, type: 'Reefer', cap_kg: 4500, cap_m3: 18, status: 'active', mileage: 12100, fuel: 95, last_maint: '2026-05-01', next_maint: '2026-08-01', vin: '54DC4W1B63JS12347', color: 'White' },
-    { id: uuidv4(), plate: 'OSI-004', make: 'Kenworth', model: 'W900', year: 2022, type: 'Flatbed', cap_kg: 1500, cap_m3: 11, status: 'active', mileage: 33800, fuel: 70, last_maint: '2026-04-01', next_maint: '2026-07-01', vin: 'WD3PE8CC6GP12348', color: 'Silver' },
-    { id: uuidv4(), plate: 'OSI-005', make: 'Kenworth', model: 'T270', year: 2020, type: 'Flatbed', cap_kg: 12000, cap_m3: 45, status: 'active', mileage: 112000, fuel: 40, last_maint: '2026-02-10', next_maint: '2026-05-10', vin: '2NKHHM6X2KM12349', color: 'Blue' },
-    { id: uuidv4(), plate: 'OSI-006', make: 'Ford', model: 'Transit 250', year: 2023, type: 'Box Truck', cap_kg: 1200, cap_m3: 9, status: 'active', mileage: 8900, fuel: 90, last_maint: '2026-05-15', next_maint: '2026-08-15', vin: '1FTBW2CM8KKA12350', color: 'White' },
-    { id: uuidv4(), plate: 'OSI-007', make: 'Peterbilt', model: '337', year: 2021, type: 'Box Truck', cap_kg: 8500, cap_m3: 32, status: 'maintenance', mileage: 67400, fuel: 55, last_maint: '2026-05-28', next_maint: '2026-08-28', vin: '2NP2HM6X2LM12351', color: 'Black' },
-    { id: uuidv4(), plate: 'OSI-008', make: 'Isuzu', model: 'FTR', year: 2022, type: 'Refrigerated', cap_kg: 6000, cap_m3: 24, status: 'active', mileage: 29300, fuel: 75, last_maint: '2026-03-05', next_maint: '2026-06-05', vin: '54DB4W1B63JS12352', color: 'White' },
+    { id: uuidv4(), plate: 'OSI-001', make: 'Peterbilt', model: '579', year: 2022, type: 'Dry Van', cap_kg: 7000, cap_m3: 28, status: 'active', mileage: 245230, fuel: 85, last_maint: '2026-04-15', next_maint: '2026-07-15', vin: '1FDWF36P02EA12345', color: 'White' },
+    { id: uuidv4(), plate: 'OSI-002', make: 'Freightliner', model: 'Cascadia', year: 2021, type: 'Reefer', cap_kg: 9000, cap_m3: 35, status: 'active', mileage: 378400, fuel: 60, last_maint: '2026-03-20', next_maint: '2026-06-20', vin: '1FUBBCYB62LJ12346', color: 'White' },
+    { id: uuidv4(), plate: 'OSI-003', make: 'Volvo', model: '860', year: 2023, type: 'Reefer', cap_kg: 4500, cap_m3: 18, status: 'active', mileage: 112100, fuel: 95, last_maint: '2026-05-01', next_maint: '2026-08-01', vin: '54DC4W1B63JS12347', color: 'White' },
+    { id: uuidv4(), plate: 'OSI-004', make: 'Kenworth', model: 'W900', year: 2022, type: 'Flatbed', cap_kg: 1500, cap_m3: 11, status: 'active', mileage: 183800, fuel: 70, last_maint: '2026-04-01', next_maint: '2026-07-01', vin: 'WD3PE8CC6GP12348', color: 'Silver' },
+    { id: uuidv4(), plate: 'OSI-005', make: 'Kenworth', model: 'T270', year: 2020, type: 'Flatbed', cap_kg: 12000, cap_m3: 45, status: 'active', mileage: 412000, fuel: 40, last_maint: '2026-02-10', next_maint: '2026-05-10', vin: '2NKHHM6X2KM12349', color: 'Blue' },
+    { id: uuidv4(), plate: 'OSI-006', make: 'Ford', model: 'Transit 250', year: 2023, type: 'Box Truck', cap_kg: 1200, cap_m3: 9, status: 'active', mileage: 108900, fuel: 90, last_maint: '2026-05-15', next_maint: '2026-08-15', vin: '1FTBW2CM8KKA12350', color: 'White' },
+    { id: uuidv4(), plate: 'OSI-007', make: 'Peterbilt', model: '337', year: 2021, type: 'Box Truck', cap_kg: 8500, cap_m3: 32, status: 'maintenance', mileage: 267400, fuel: 55, last_maint: '2026-05-28', next_maint: '2026-08-28', vin: '2NP2HM6X2LM12351', color: 'Black' },
+    { id: uuidv4(), plate: 'OSI-008', make: 'Isuzu', model: 'FTR', year: 2022, type: 'Reefer', cap_kg: 6000, cap_m3: 24, status: 'active', mileage: 189300, fuel: 75, last_maint: '2026-03-05', next_maint: '2026-06-05', vin: '54DB4W1B63JS12352', color: 'White' },
   ];
 
   const insertTruck = db.prepare(`

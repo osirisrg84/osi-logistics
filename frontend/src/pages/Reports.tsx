@@ -278,7 +278,7 @@ export default function Reports() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
-                    {['Truck', 'Type', 'Status', 'Mileage', 'Total Trips', 'Total km', 'Revenue', 'Fuel %', 'Driver'].map(h => (
+                    {['Truck', 'Type', 'Status', 'Mileage', 'Total Trips', 'Total mi', 'Revenue', 'Fuel %', 'Driver'].map(h => (
                       <th key={h} className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{h}</th>
                     ))}
                   </tr>
@@ -298,8 +298,8 @@ export default function Reports() {
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{(truck.mileage || 0).toLocaleString()}</td>
                       <td className="px-4 py-3 text-sm text-blue-600 font-medium">{truck.total_trips}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{(truck.total_km || 0).toFixed(0)}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-green-600">${(truck.revenue_generated || 0).toFixed(0)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{truck.total_km ? ((truck.total_km || 0) * 0.621371).toFixed(0) : '—'}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-green-600">{truck.revenue_generated ? `$${(truck.revenue_generated).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <div className="flex-1 h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full">
