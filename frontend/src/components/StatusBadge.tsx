@@ -2,6 +2,7 @@ import { OrderStatus, DriverStatus, TruckStatus, OrderPriority } from '../types'
 
 const ORDER_STATUS_STYLES: Record<OrderStatus, string> = {
   pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  offered: 'bg-orange-100 text-orange-700 border-orange-200',
   assigned: 'bg-blue-100 text-blue-700 border-blue-200',
   picked_up: 'bg-indigo-100 text-indigo-700 border-indigo-200',
   in_transit: 'bg-purple-100 text-purple-700 border-purple-200',
@@ -12,6 +13,7 @@ const ORDER_STATUS_STYLES: Record<OrderStatus, string> = {
 
 const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   pending: 'Pending',
+  offered: 'Oferta Enviada',
   assigned: 'Assigned',
   picked_up: 'Picked Up',
   in_transit: 'In Transit',

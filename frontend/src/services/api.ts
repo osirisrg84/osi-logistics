@@ -46,6 +46,9 @@ export const ordersApi = {
   create: (data: unknown) => api.post('/orders', data),
   update: (id: string, data: unknown) => api.put(`/orders/${id}`, data),
   assign: (id: string, data: { driver_id: string; truck_id: string }) => api.post(`/orders/${id}/assign`, data),
+  offer:  (id: string, data: { driver_id: string; truck_id: string }) => api.post(`/orders/${id}/offer`, data),
+  accept: (id: string) => api.post(`/orders/${id}/accept`),
+  ignore: (id: string) => api.post(`/orders/${id}/ignore`),
   updateStatus: (id: string, data: { status: string; notes?: string; lat?: number; lng?: number }) =>
     api.post(`/orders/${id}/status`, data),
   delete: (id: string) => api.delete(`/orders/${id}`),

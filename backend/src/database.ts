@@ -216,6 +216,15 @@ export function initDatabase(): void {
   if (!orderCols.some(c => c.name === 'dispatcher_user_id')) {
     db.exec('ALTER TABLE orders ADD COLUMN dispatcher_user_id TEXT');
   }
+  if (!orderCols.some(c => c.name === 'offered_to_driver_id')) {
+    db.exec('ALTER TABLE orders ADD COLUMN offered_to_driver_id TEXT');
+  }
+  if (!orderCols.some(c => c.name === 'offered_to_truck_id')) {
+    db.exec('ALTER TABLE orders ADD COLUMN offered_to_truck_id TEXT');
+  }
+  if (!orderCols.some(c => c.name === 'offered_at')) {
+    db.exec('ALTER TABLE orders ADD COLUMN offered_at TEXT');
+  }
 
   // Migrate: add equipment fields to drivers if not present
   const driverCols = db.prepare('PRAGMA table_info(drivers)').all() as Array<{ name: string }>;

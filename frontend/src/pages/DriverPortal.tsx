@@ -160,6 +160,10 @@ export default function DriverPortal() {
   const [showNotifs, setShowNotifs] = useState(false);
   const unreadCount = driverNotifs.filter(n => n.read === 0).length;
 
+  // ── Offer overlay ─────────────────────────────────────────
+  const [pendingOffer, setPendingOffer] = useState<Order | null>(null);
+  const [offerCountdown, setOfferCountdown] = useState(60);
+
   // ── Favorites ────────────────────────────────────────────
   interface Favorite { id: string; name: string; address: string; type: 'home' | 'work' | 'frequent' | 'other'; }
   const FAV_PRESETS = [
@@ -231,6 +235,23 @@ export default function DriverPortal() {
     if (driver?.status) setDriverStatus(driver.status as DriverStatus);
   }, [driver?.status]);
 
+  const playOfferSound = () => {
+    try {
+      const ctx = new AudioContext();
+      [659.25, 783.99, 1046.50, 783.99, 1046.50].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine'; osc.frequency.value = freq;
+        const start = ctx.currentTime + i * 0.15;
+        gain.gain.setValueAtTime(0, start);
+        gain.gain.linearRampToValueAtTime(0.3, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
+        osc.start(start); osc.stop(start + 0.35);
+      });
+    } catch {}
+  };
+
   useEffect(() => {
     fetchOrders();
     if (driverId) {
@@ -260,12 +281,28 @@ export default function DriverPortal() {
     socket.on('driver:notification', (notif: DriverNotif) => {
       setDriverNotifs(prev => [notif, ...prev]);
     });
+    socket.on('driver:offer', (offer: Order) => {
+      setPendingOffer(offer);
+      setOfferCountdown(60);
+      playOfferSound();
+    });
     return () => {
       socket.off('order_updated');
       socket.off('driver:notification');
+      socket.off('driver:offer');
     };
   }, [fetchOrders, user?.driver_id, driverId]);
 
+  useEffect(() => {
+    if (!pendingOffer) return;
+    if (offerCountdown <= 0) {
+      ordersApi.ignore(pendingOffer.id).catch(() => {});
+      setPendingOffer(null);
+      return;
+    }
+    const t = setTimeout(() => setOfferCountdown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [pendingOffer, offerCountdown]);
 
   const playOnlineSound = () => {
     try {
@@ -1278,6 +1315,105 @@ export default function DriverPortal() {
           );
         })}
       </nav>
+
+      {/* ── Offer overlay ──────────────────────────────────── */}
+      {pendingOffer && (
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-4 pb-8">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-5 py-4 flex items-center justify-between">
+              <div>
+                <p className="text-orange-100 text-xs font-bold uppercase tracking-widest">¡Nueva Oferta!</p>
+                <p className="text-white font-bold text-xl">{pendingOffer.order_number}</p>
+              </div>
+              <div className={`w-14 h-14 rounded-full flex items-center justify-center border-4 transition-colors ${
+                offerCountdown <= 10 ? 'border-red-300 bg-red-500/40' : 'border-white/40 bg-white/20'
+              }`}>
+                <span className={`font-bold text-2xl ${offerCountdown <= 10 ? 'text-red-100' : 'text-white'}`}>
+                  {offerCountdown}
+                </span>
+              </div>
+            </div>
+            {/* Timer bar */}
+            <div className="h-1.5 bg-gray-100 dark:bg-slate-700">
+              <div
+                className={`h-full transition-all duration-1000 ${offerCountdown <= 10 ? 'bg-red-500' : 'bg-orange-400'}`}
+                style={{ width: `${(offerCountdown / 60) * 100}%` }}
+              />
+            </div>
+
+            <div className="p-5 space-y-3">
+              {/* Price + Distance */}
+              <div className="flex items-center justify-between">
+                <span className="text-3xl font-bold text-green-600 dark:text-green-400">${pendingOffer.price.toFixed(2)}</span>
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-gray-700 dark:text-slate-300">{pendingOffer.distance_km} km</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500">{pendingOffer.weight_kg} kg</p>
+                </div>
+              </div>
+
+              {/* Pickup */}
+              <div className="flex items-start gap-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3">
+                <div className="w-6 h-6 bg-orange-100 dark:bg-orange-800/50 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <MapPin className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">Recogida</p>
+                  <p className="text-sm text-gray-800 dark:text-slate-200 leading-snug">{pendingOffer.pickup_address}</p>
+                </div>
+              </div>
+
+              {/* Delivery */}
+              <div className="flex items-start gap-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3">
+                <div className="w-6 h-6 bg-blue-100 dark:bg-blue-800/50 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Navigation className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wide">Destino</p>
+                  <p className="text-sm text-gray-800 dark:text-slate-200 leading-snug">{pendingOffer.delivery_address}</p>
+                </div>
+              </div>
+
+              {/* Customer + description */}
+              <div className="flex items-center gap-2 px-1 text-xs text-gray-500 dark:text-slate-400">
+                <User className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>{pendingOffer.customer_name}</span>
+                {pendingOffer.description && (
+                  <>
+                    <span className="text-gray-300 dark:text-slate-600">·</span>
+                    <Package className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span className="truncate">{pendingOffer.description}</span>
+                  </>
+                )}
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex gap-3 pt-1">
+                <button
+                  onClick={async () => {
+                    await ordersApi.ignore(pendingOffer.id).catch(() => {});
+                    setPendingOffer(null);
+                    fetchOrders();
+                  }}
+                  className="flex-1 py-3.5 rounded-xl bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold text-sm hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors flex items-center justify-center gap-2"
+                >
+                  <X className="w-4 h-4" /> Ignorar
+                </button>
+                <button
+                  onClick={async () => {
+                    await ordersApi.accept(pendingOffer.id).catch(() => {});
+                    setPendingOffer(null);
+                    fetchOrders();
+                  }}
+                  className="flex-1 py-3.5 rounded-xl bg-green-500 text-white font-bold text-sm hover:bg-green-600 active:bg-green-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-green-500/30"
+                >
+                  <CheckCircle className="w-4 h-4" /> Aceptar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

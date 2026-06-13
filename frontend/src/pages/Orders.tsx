@@ -9,7 +9,7 @@ import { OrderStatusBadge, PriorityBadge, DriverStatusBadge } from '../component
 import { format, formatDistanceToNow } from 'date-fns';
 import { getSocket } from '../services/socket';
 
-const STATUS_OPTIONS: OrderStatus[] = ['pending', 'assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled'];
+const STATUS_OPTIONS: OrderStatus[] = ['pending', 'offered', 'assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled'];
 const PRIORITY_OPTIONS: OrderPriority[] = ['low', 'normal', 'high', 'urgent'];
 
 interface OrderModalProps {
@@ -198,7 +198,7 @@ function CreateOrderModal({ onClose, onSave }: OrderModalProps) {
                 <input className="input" type="number" value={form.weight_kg} onChange={e => setForm({...form, weight_kg: e.target.value})} placeholder="0" min="0" />
               </div>
               <div>
-                <label className="label">Price ($)</label>
+                <label className="label">Rate ($)</label>
                 <input className="input" type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} placeholder="0.00" min="0" step="0.01" />
               </div>
               <div>
@@ -250,11 +250,11 @@ function AssignModal({ order, drivers, trucks, onClose, onSave }: AssignModalPro
   const availableDrivers = drivers.filter(d => d.status === 'available');
   const availableTrucks = trucks.filter(t => t.status === 'active');
 
-  const handleAssign = async () => {
+  const handleOffer = async () => {
     if (!driverId || !truckId) return;
     setSaving(true);
     try {
-      await ordersApi.assign(order.id, { driver_id: driverId, truck_id: truckId });
+      await ordersApi.offer(order.id, { driver_id: driverId, truck_id: truckId });
       onSave();
       onClose();
     } catch {
@@ -267,31 +267,34 @@ function AssignModal({ order, drivers, trucks, onClose, onSave }: AssignModalPro
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">Assign Order</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Enviar Oferta al Conductor</h2>
           <button onClick={onClose}><X className="w-5 h-5 text-gray-500 dark:text-slate-400" /></button>
         </div>
         <div className="p-6 space-y-4">
-          <div className="bg-orange-50 rounded-xl p-3">
+          <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3">
             <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{order.order_number}</p>
             <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name} · {order.delivery_address}</p>
           </div>
+          <p className="text-xs text-gray-500 dark:text-slate-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">
+            El conductor recibirá la oferta en tiempo real y tendrá 60 segundos para aceptarla o ignorarla.
+          </p>
 
           <div>
-            <label className="label">Select Driver ({availableDrivers.length} available)</label>
+            <label className="label">Seleccionar Conductor ({availableDrivers.length} disponibles)</label>
             <select className="input" value={driverId} onChange={e => setDriverId(e.target.value)}>
-              <option value="">Choose a driver...</option>
+              <option value="">Elige un conductor...</option>
               {availableDrivers.map(d => (
                 <option key={d.id} value={d.id}>
-                  {d.name} · ★{d.rating.toFixed(1)} · {d.total_deliveries} trips
+                  {d.name} · ★{d.rating.toFixed(1)} · {d.total_deliveries} viajes
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="label">Select Truck ({availableTrucks.length} active)</label>
+            <label className="label">Seleccionar Camión ({availableTrucks.length} activos)</label>
             <select className="input" value={truckId} onChange={e => setTruckId(e.target.value)}>
-              <option value="">Choose a truck...</option>
+              <option value="">Elige un camión...</option>
               {availableTrucks.map(t => (
                 <option key={t.id} value={t.id}>
                   {t.plate_number} · {t.make} {t.model} · {t.capacity_kg}kg
@@ -301,10 +304,10 @@ function AssignModal({ order, drivers, trucks, onClose, onSave }: AssignModalPro
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button onClick={onClose} className="btn-secondary flex-1 justify-center">Cancel</button>
-            <button onClick={handleAssign} disabled={!driverId || !truckId || saving} className="btn-primary flex-1 justify-center">
+            <button onClick={onClose} className="btn-secondary flex-1 justify-center">Cancelar</button>
+            <button onClick={handleOffer} disabled={!driverId || !truckId || saving} className="btn-primary flex-1 justify-center">
               <UserCheck className="w-4 h-4" />
-              {saving ? 'Assigning...' : 'Assign'}
+              {saving ? 'Enviando...' : 'Enviar Oferta'}
             </button>
           </div>
         </div>
@@ -623,7 +626,12 @@ export default function Orders() {
                       <td className="px-4 py-3"><OrderStatusBadge status={order.status} /></td>
                       <td className="px-4 py-3"><PriorityBadge priority={order.priority} /></td>
                       <td className="px-4 py-3 hidden lg:table-cell">
-                        <p className="text-xs text-gray-700 dark:text-slate-300">{order.driver_name || <span className="text-gray-400 dark:text-slate-500">Unassigned</span>}</p>
+                        {order.driver_name
+                          ? <p className="text-xs text-gray-700 dark:text-slate-300">{order.driver_name}</p>
+                          : order.status === 'offered' && order.offered_driver_name
+                            ? <p className="text-xs text-orange-600 dark:text-orange-400">⏳ {order.offered_driver_name}</p>
+                            : <span className="text-xs text-gray-400 dark:text-slate-500">Sin asignar</span>
+                        }
                       </td>
                       <td className="px-4 py-3 text-right">
                         <span className="text-sm font-semibold text-green-600">${order.price.toFixed(2)}</span>
@@ -633,8 +641,8 @@ export default function Orders() {
                           <button onClick={() => setDetailOrder(order)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
                             <Eye className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
                           </button>
-                          {order.status === 'pending' && (
-                            <button onClick={() => setAssignOrder(order)} className="p-1.5 hover:bg-blue-50 rounded-lg">
+                          {['pending', 'offered'].includes(order.status) && (
+                            <button onClick={() => setAssignOrder(order)} className="p-1.5 hover:bg-blue-50 rounded-lg" title="Enviar oferta">
                               <UserCheck className="w-3.5 h-3.5 text-blue-500" />
                             </button>
                           )}

@@ -14,10 +14,12 @@ router.get('/', (req: Request, res: Response) => {
   let query = `
     SELECT o.*,
            d.name as driver_name, d.phone as driver_phone,
-           t.plate_number, t.make, t.model
+           t.plate_number, t.make, t.model,
+           od.name as offered_driver_name
     FROM orders o
     LEFT JOIN drivers d ON o.driver_id = d.id
     LEFT JOIN trucks t ON o.truck_id = t.id
+    LEFT JOIN drivers od ON o.offered_to_driver_id = od.id
     WHERE 1=1
   `;
   const params: unknown[] = [];
@@ -63,10 +65,12 @@ router.get('/:id', (req: Request, res: Response) => {
   const order = db.prepare(`
     SELECT o.*,
            d.name as driver_name, d.phone as driver_phone, d.email as driver_email,
-           t.plate_number, t.make, t.model, t.type as truck_type
+           t.plate_number, t.make, t.model, t.type as truck_type,
+           od.name as offered_driver_name
     FROM orders o
     LEFT JOIN drivers d ON o.driver_id = d.id
     LEFT JOIN trucks t ON o.truck_id = t.id
+    LEFT JOIN drivers od ON o.offered_to_driver_id = od.id
     WHERE o.id = ?
   `).get(req.params.id);
 
@@ -251,6 +255,123 @@ router.post('/:id/status', (req: Request, res: Response) => {
     VALUES (?, 'order', ?, ?, 0, ?)
   `).run(uuidv4(), `Order ${status.replace('_', ' ').toUpperCase()}`,
     `Order ${order.order_number} status updated to ${status}`, req.params.id);
+
+  const updated = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
+  res.json(updated);
+});
+
+router.post('/:id/offer', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const { driver_id, truck_id } = req.body;
+  const now = new Date().toISOString();
+
+  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id) as Record<string, unknown> | undefined;
+  if (!order) return res.status(404).json({ error: 'Order not found' });
+  if (!['pending', 'offered'].includes(order.status as string)) return res.status(400).json({ error: 'Order is not available to offer' });
+
+  const driver = db.prepare('SELECT * FROM drivers WHERE id = ?').get(driver_id) as Record<string, unknown> | undefined;
+  if (!driver) return res.status(404).json({ error: 'Driver not found' });
+
+  db.prepare(`
+    UPDATE orders SET status = 'offered', offered_to_driver_id = ?, offered_to_truck_id = ?, offered_at = ?
+    WHERE id = ?
+  `).run(driver_id, truck_id, now, req.params.id);
+
+  db.prepare(`
+    INSERT INTO order_history (id, order_id, status, notes, created_by)
+    VALUES (?, ?, 'offered', ?, 'dispatcher')
+  `).run(uuidv4(), req.params.id, `Oferta enviada al conductor ${driver.name}`);
+
+  const driverNotifId = uuidv4();
+  const driverNotifMsg = `Tienes una nueva oferta: ${order.order_number}. Tienes 60 segundos para aceptar o ignorar.`;
+  db.prepare(`
+    INSERT INTO notifications (id, type, title, message, read, related_id, target_driver_id)
+    VALUES (?, 'order', 'Nueva oferta de carga', ?, 0, ?, ?)
+  `).run(driverNotifId, driverNotifMsg, req.params.id, driver_id);
+
+  const updated = db.prepare(`
+    SELECT o.*, od.name as offered_driver_name
+    FROM orders o
+    LEFT JOIN drivers od ON o.offered_to_driver_id = od.id
+    WHERE o.id = ?
+  `).get(req.params.id);
+
+  appEvents.emit('driver:offer', { driverId: driver_id, offer: updated });
+  appEvents.emit('order:status_changed', { id: req.params.id, order_number: order.order_number, status: 'offered' });
+
+  res.json(updated);
+});
+
+router.post('/:id/accept', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const now = new Date().toISOString();
+
+  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id) as Record<string, unknown> | undefined;
+  if (!order) return res.status(404).json({ error: 'Order not found' });
+  if (order.status !== 'offered') return res.status(400).json({ error: 'Order is not in offered state' });
+
+  const driverId = order.offered_to_driver_id as string;
+  const truckId = order.offered_to_truck_id as string;
+
+  // Only the driver the offer was sent to can accept
+  if (req.user?.driver_id && req.user.driver_id !== driverId) {
+    return res.status(403).json({ error: 'This offer was not sent to you' });
+  }
+
+  db.prepare(`
+    UPDATE orders SET status = 'assigned', driver_id = ?, truck_id = ?, assigned_at = ?,
+      offered_to_driver_id = NULL, offered_to_truck_id = NULL, offered_at = NULL
+    WHERE id = ?
+  `).run(driverId, truckId, now, req.params.id);
+
+  db.prepare(`UPDATE drivers SET status = 'busy', truck_id = ? WHERE id = ?`).run(truckId, driverId);
+
+  db.prepare(`
+    INSERT INTO order_history (id, order_id, status, notes, created_by)
+    VALUES (?, ?, 'assigned', 'Conductor aceptó la oferta', 'driver')
+  `).run(uuidv4(), req.params.id);
+
+  db.prepare(`
+    INSERT INTO notifications (id, type, title, message, read, related_id)
+    VALUES (?, 'order', '✅ Oferta Aceptada', ?, 0, ?)
+  `).run(uuidv4(), `El conductor aceptó la orden ${order.order_number}`, req.params.id);
+
+  appEvents.emit('order:status_changed', { id: req.params.id, order_number: order.order_number, status: 'assigned' });
+
+  const updated = db.prepare(`
+    SELECT o.*, d.name as driver_name, t.plate_number
+    FROM orders o
+    LEFT JOIN drivers d ON o.driver_id = d.id
+    LEFT JOIN trucks t ON o.truck_id = t.id
+    WHERE o.id = ?
+  `).get(req.params.id);
+
+  res.json(updated);
+});
+
+router.post('/:id/ignore', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+
+  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id) as Record<string, unknown> | undefined;
+  if (!order) return res.status(404).json({ error: 'Order not found' });
+  if (order.status !== 'offered') return res.status(400).json({ error: 'Order is not in offered state' });
+
+  db.prepare(`
+    UPDATE orders SET status = 'pending', offered_to_driver_id = NULL, offered_to_truck_id = NULL, offered_at = NULL
+    WHERE id = ?
+  `).run(req.params.id);
+
+  db.prepare(`
+    INSERT INTO order_history (id, order_id, status, notes, created_by)
+    VALUES (?, ?, 'pending', 'Conductor ignoró la oferta', 'driver')
+  `).run(uuidv4(), req.params.id);
+
+  db.prepare(`
+    INSERT INTO notifications (id, type, title, message, read, related_id)
+    VALUES (?, 'order', '❌ Oferta Ignorada', ?, 0, ?)
+  `).run(uuidv4(), `El conductor ignoró la orden ${order.order_number}. Disponible para reasignar.`, req.params.id);
+
+  appEvents.emit('order:status_changed', { id: req.params.id, order_number: order.order_number, status: 'pending' });
 
   const updated = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
   res.json(updated);

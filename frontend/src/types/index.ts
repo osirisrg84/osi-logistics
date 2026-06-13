@@ -1,6 +1,6 @@
 export type DriverStatus = 'available' | 'busy' | 'offline' | 'on_break';
 export type TruckStatus = 'active' | 'maintenance' | 'inactive';
-export type OrderStatus = 'pending' | 'assigned' | 'picked_up' | 'in_transit' | 'delivered' | 'cancelled' | 'failed';
+export type OrderStatus = 'pending' | 'offered' | 'assigned' | 'picked_up' | 'in_transit' | 'delivered' | 'cancelled' | 'failed';
 export type OrderPriority = 'low' | 'normal' | 'high' | 'urgent';
 export type NotificationType = 'order' | 'driver' | 'truck' | 'system' | 'alert';
 
@@ -84,6 +84,10 @@ export interface Order {
   notes: string;
   driver_id: string | null;
   truck_id: string | null;
+  offered_to_driver_id?: string | null;
+  offered_to_truck_id?: string | null;
+  offered_at?: string | null;
+  offered_driver_name?: string | null;
   created_at: string;
   assigned_at: string | null;
   picked_up_at: string | null;

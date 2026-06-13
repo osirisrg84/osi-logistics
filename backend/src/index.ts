@@ -221,6 +221,16 @@ function startSimulation(): void {
     io.to(`driver:${driverId}`).emit('driver:notification', notification);
   });
 
+  // Send offer to specific driver
+  appEvents.on('driver:offer', ({ driverId, offer }: { driverId: string; offer: unknown }) => {
+    io.to(`driver:${driverId}`).emit('driver:offer', offer);
+  });
+
+  // Broadcast order status change to dispatchers
+  appEvents.on('order:status_changed', (data: unknown) => {
+    io.to('orders').emit('order_updated', data);
+  });
+
   // React to driver status changes
   appEvents.on('driver:status_changed', (event: DriverStatusEvent) => {
     // Broadcast to all dispatcher clients subscribed to tracking
