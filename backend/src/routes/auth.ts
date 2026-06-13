@@ -192,16 +192,23 @@ router.post('/register-driver', (req: Request, res: Response) => {
   const driverId = uuidv4();
   const initials = name.split(' ').map((n: string) => n[0]).join('').slice(0, 2);
 
+  const genDriverCode = (): string => {
+    const code = String(Math.floor(10000000 + Math.random() * 90000000));
+    const exists = db.prepare("SELECT id FROM drivers WHERE driver_code = ?").get(code);
+    return exists ? genDriverCode() : code;
+  };
+  const driver_code = genDriverCode();
+
   db.prepare(`
     INSERT INTO drivers
       (id, name, phone, email, license_number, license_expiry, status,
        current_lat, current_lng, current_address,
        rating, total_deliveries, on_time_rate, avatar, hire_date,
-       equipment_type, company_name, mc_number, authority_since)
+       equipment_type, company_name, mc_number, authority_since, driver_code)
     VALUES (?, ?, ?, ?, ?, ?, 'offline', 25.7617, -80.1918, 'Miami, FL',
-            5.0, 0, 100.0, ?, ?, ?, ?, ?, ?)
+            5.0, 0, 100.0, ?, ?, ?, ?, ?, ?, ?)
   `).run(driverId, name, phone, email.toLowerCase(), license_number, license_expiry,
-    initials, hire_date, equipment_type, company_name, mc_number, authority_since);
+    initials, hire_date, equipment_type, company_name, mc_number, authority_since, driver_code);
 
   const salt = randomBytes(16).toString('hex');
   const passwordHash = hashPassword(password, salt);

@@ -167,7 +167,14 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
               {driver.avatar}
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-slate-100">{driver.name}</h3>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-slate-100">{driver.name}</h3>
+                {(driver as Driver & { driver_code?: string }).driver_code && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 tracking-widest border border-orange-200 dark:border-orange-700/40">
+                    ID #{(driver as Driver & { driver_code?: string }).driver_code}
+                  </span>
+                )}
+              </div>
               <DriverStatusBadge status={driver.status} className="mt-1" />
               <p className="text-xs text-gray-400 mt-1">Hired {format(new Date(driver.hire_date), 'MMM d, yyyy')}</p>
             </div>

@@ -926,7 +926,14 @@ export default function DriverPortal() {
                 {driver.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
               </div>
               <div>
-                <p className="font-bold text-gray-900 dark:text-white text-base">{driver.name}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-bold text-gray-900 dark:text-white text-base">{driver.name}</p>
+                  {driver.driver_code && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 tracking-widest border border-orange-200 dark:border-orange-700/40">
+                      ID #{driver.driver_code}
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-blue-500 dark:text-blue-400">{driver.email}</p>
                 <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{driver.phone}</p>
               </div>

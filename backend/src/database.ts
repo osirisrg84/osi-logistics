@@ -267,6 +267,20 @@ export function initDatabase(): void {
   if (!driverCols.some(c => c.name === 'trailer_number')) {
     db.exec("ALTER TABLE drivers ADD COLUMN trailer_number TEXT NOT NULL DEFAULT ''");
   }
+  if (!driverCols.some(c => c.name === 'driver_code')) {
+    db.exec("ALTER TABLE drivers ADD COLUMN driver_code TEXT NOT NULL DEFAULT ''");
+  }
+
+  // Assign driver_code to existing drivers that don't have one
+  const genDriverCode = (): string => {
+    const code = String(Math.floor(10000000 + Math.random() * 90000000));
+    const exists = db.prepare("SELECT id FROM drivers WHERE driver_code = ?").get(code);
+    return exists ? genDriverCode() : code;
+  };
+  const driversWithoutCode = db.prepare("SELECT id FROM drivers WHERE driver_code = ''").all() as Array<{ id: string }>;
+  for (const d of driversWithoutCode) {
+    db.prepare("UPDATE drivers SET driver_code = ? WHERE id = ?").run(genDriverCode(), d.id);
+  }
 
   // Patch demo drivers with varied company/MC/authority data (runs every startup — idempotent)
   const demoPatches = [

@@ -86,12 +86,19 @@ router.post('/', (req: Request, res: Response) => {
 
   const initials = name.split(' ').map((n: string) => n[0]).join('');
 
+  const genDriverCode = (): string => {
+    const code = String(Math.floor(10000000 + Math.random() * 90000000));
+    const exists = db.prepare("SELECT id FROM drivers WHERE driver_code = ?").get(code);
+    return exists ? genDriverCode() : code;
+  };
+  const driver_code = genDriverCode();
+
   db.prepare(`
     INSERT INTO drivers (id, name, phone, email, license_number, license_expiry,
       status, current_lat, current_lng, current_address, avatar, hire_date,
-      equipment_type, company_name, mc_number, authority_since)
-    VALUES (?, ?, ?, ?, ?, ?, 'available', ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(id, name, phone, email, license_number, license_expiry, current_lat, current_lng, current_address, initials, hire_date, equipment_type, company_name, mc_number, authority_since);
+      equipment_type, company_name, mc_number, authority_since, driver_code)
+    VALUES (?, ?, ?, ?, ?, ?, 'available', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, name, phone, email, license_number, license_expiry, current_lat, current_lng, current_address, initials, hire_date, equipment_type, company_name, mc_number, authority_since, driver_code);
 
   db.prepare(`
     INSERT INTO notifications (id, type, title, message, read, related_id)
