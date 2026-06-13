@@ -93,7 +93,7 @@ function TruckForm({ truck, onClose, onSave }: TruckFormProps) {
               <input className="input" value={form.color} onChange={e => setForm({...form, color: e.target.value})} placeholder="White" />
             </div>
             <div>
-              <label className="label">Capacity (kg)</label>
+              <label className="label">Capacity (lbs)</label>
               <input className="input" type="number" value={form.capacity_kg} onChange={e => setForm({...form, capacity_kg: e.target.value})} placeholder="5000" />
             </div>
             <div>
