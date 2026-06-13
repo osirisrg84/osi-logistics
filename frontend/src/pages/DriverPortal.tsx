@@ -817,10 +817,7 @@ export default function DriverPortal() {
 
       {/* Offline: 3D map fullscreen — solo cuando tab es 'active' */}
       {driverStatus === 'offline' && tab === 'active' && (
-        <div className="relative" style={{
-          height: 'calc(100vh - 380px)', minHeight: 320,
-          boxShadow: '0 0 0 1px rgba(56,189,248,0.35), 0 0 30px rgba(56,189,248,0.12), 0 0 60px rgba(56,189,248,0.06)'
-        }}>
+        <div className="relative" style={{ height: 'calc(100vh - 380px)', minHeight: 320 }}>
           <Map3D driver={driver} activeOrders={activeOrders} pitch={52} />
 
           {/* Tech grid overlay */}
