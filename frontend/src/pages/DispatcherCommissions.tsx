@@ -81,7 +81,7 @@ const PAYOUT_METHODS = [
   },
 ];
 
-function fmt(n: number) { return `$${n.toFixed(2)}`; }
+function fmt(n: number) { return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; }
 function maskAccount(s: string) { return s.length > 4 ? `****${s.slice(-4)}` : s; }
 
 function payoutSummary(method: string, details: PayoutDetails): string {
@@ -472,7 +472,7 @@ export default function DispatcherCommissions() {
               <tr className="border-b border-gray-100 dark:border-slate-700 text-xs text-gray-500 dark:text-slate-400 uppercase">
                 <th className="text-left px-4 py-3 font-semibold">Orden</th>
                 <th className="text-left px-4 py-3 font-semibold">Driver</th>
-                <th className="text-right px-4 py-3 font-semibold">Precio carga</th>
+                <th className="text-right px-4 py-3 font-semibold">Rate</th>
                 <th className="text-right px-4 py-3 font-semibold text-blue-600">Mi comisión (5%)</th>
                 <th className="text-left px-4 py-3 font-semibold">Fecha</th>
                 <th className="text-center px-4 py-3 font-semibold">Estado</th>
