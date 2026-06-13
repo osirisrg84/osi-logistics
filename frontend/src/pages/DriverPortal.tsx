@@ -817,6 +817,7 @@ export default function DriverPortal() {
 
       {/* Offline: 3D map fullscreen — solo cuando tab es 'active' */}
       {driverStatus === 'offline' && tab === 'active' && (
+        <div style={{ background: '#0a1628' }}>
         <div className="relative" style={{ height: 'calc(100vh - 380px)', minHeight: 320 }}>
           <Map3D driver={driver} activeOrders={activeOrders} pitch={52} />
 
@@ -907,6 +908,7 @@ export default function DriverPortal() {
           </div>
           <div className="absolute inset-x-0 bottom-0 h-20 pointer-events-none"
             style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.3), transparent)' }} />
+        </div>
         </div>
       )}
 
