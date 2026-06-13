@@ -628,7 +628,7 @@ export default function Orders() {
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">STATUS</th>
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">PRIORITY</th>
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3 hidden lg:table-cell">DRIVER</th>
-                    <th className="text-right text-xs font-semibold text-gray-500 px-4 py-3">PRICE</th>
+                    <th className="text-right text-xs font-semibold text-gray-500 px-4 py-3">RATE</th>
                     <th className="text-center text-xs font-semibold text-gray-500 px-4 py-3">ACTIONS</th>
                   </tr>
                 </thead>

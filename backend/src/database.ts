@@ -574,7 +574,7 @@ function seedDatabase(db: DatabaseSync): void {
     const weight = Math.round((Math.random() * 4000 + 200) * 10) / 10;
     const volume = Math.round((Math.random() * 25 + 2) * 10) / 10;
     const distance = Math.round((Math.random() * 50 + 5) * 10) / 10;
-    const price = Math.round((distance * 2.5 + weight * 0.1) * 100) / 100;
+    const price = Math.round((800 + distance * 20 + weight * 0.5) * 100) / 100;
 
     const createdDate = new Date();
     createdDate.setDate(createdDate.getDate() + days);
