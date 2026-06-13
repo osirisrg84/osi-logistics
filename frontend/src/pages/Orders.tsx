@@ -624,6 +624,7 @@ export default function Orders() {
                   <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">ORDER</th>
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">CUSTOMER</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">PICKUP</th>
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">DELIVERY</th>
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">STATUS</th>
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">PRIORITY</th>
@@ -644,7 +645,10 @@ export default function Orders() {
                         <p className="text-xs text-gray-400 dark:text-slate-500">{order.customer_phone}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-xs text-gray-600 max-w-[160px] truncate">{order.delivery_address}</p>
+                        <p className="text-xs text-gray-600 dark:text-slate-400 max-w-[160px] truncate">{order.pickup_address}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="text-xs text-gray-600 dark:text-slate-400 max-w-[160px] truncate">{order.delivery_address}</p>
                       </td>
                       <td className="px-4 py-3"><OrderStatusBadge status={order.status} /></td>
                       <td className="px-4 py-3"><PriorityBadge priority={order.priority} /></td>
