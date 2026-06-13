@@ -862,7 +862,7 @@ export default function DriverPortal() {
               <div className="space-y-2.5">
                 {driver.company_name && (
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-slate-400">Nombre de compañía</span>
+                    <span className="text-xs text-gray-500 dark:text-slate-400">Company Name</span>
                     <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{driver.company_name}</span>
                   </div>
                 )}

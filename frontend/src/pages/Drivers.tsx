@@ -240,12 +240,12 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
           {(driver.company_name || driver.mc_number) && (
             <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
               <p className="text-xs font-semibold text-green-700 dark:text-green-400 flex items-center gap-2 mb-3">
-                <Building2 className="w-3 h-3" /> EMPRESA / AUTORIDAD
+                <Building2 className="w-3 h-3" /> COMPANY / AUTHORITY
               </p>
               <div className="space-y-2">
                 {driver.company_name && (
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-slate-400">Nombre de compañía</span>
+                    <span className="text-xs text-gray-500 dark:text-slate-400">Company Name</span>
                     <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{driver.company_name}</span>
                   </div>
                 )}
