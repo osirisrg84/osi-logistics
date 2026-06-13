@@ -401,15 +401,38 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
 
           {/* Driver */}
           {order.driver_name && (
-            <div className="bg-blue-50 rounded-xl p-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-blue-700 mb-2">
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3">
+              <div className="flex items-center gap-2 text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">
                 <User className="w-3 h-3" /> ASSIGNED DRIVER
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-900 dark:text-slate-100">{order.driver_name}</span>
                 {order.plate_number && (
-                  <span className="text-xs bg-white text-gray-600 px-2 py-0.5 rounded-lg border border-blue-200">{order.plate_number}</span>
+                  <span className="text-xs bg-white dark:bg-slate-700 text-gray-600 dark:text-slate-300 px-2 py-0.5 rounded-lg border border-blue-200 dark:border-blue-700">{order.plate_number}</span>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Dispatcher */}
+          {(order.dispatcher_name || order.dispatcher_user_id) && (
+            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3">
+              <div className="flex items-center gap-2 text-xs font-semibold text-orange-700 dark:text-orange-400 mb-2">
+                <User className="w-3 h-3" /> DISPATCHER
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    {(order.dispatcher_name || 'DS').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-slate-100 leading-tight">{order.dispatcher_name || 'Dispatcher'}</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400">Assigned this order</p>
+                  </div>
+                </div>
+                <span className="text-xs bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 px-2.5 py-1 rounded-lg border border-orange-200 dark:border-orange-700 font-semibold">
+                  #{(order.dispatcher_id || order.dispatcher_user_id || '').slice(0, 8).toUpperCase()}
+                </span>
               </div>
             </div>
           )}
