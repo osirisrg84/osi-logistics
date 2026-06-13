@@ -812,10 +812,59 @@ export default function DriverPortal() {
 
       {/* Offline: 3D map fullscreen — solo cuando tab es 'active' */}
       {driverStatus === 'offline' && tab === 'active' && (
-        <div className="relative" style={{ height: 'calc(100vh - 380px)', minHeight: 320 }}>
+        <div className="relative" style={{
+          height: 'calc(100vh - 380px)', minHeight: 320,
+          boxShadow: '0 0 0 1px rgba(56,189,248,0.35), 0 0 30px rgba(56,189,248,0.12), 0 0 60px rgba(56,189,248,0.06)'
+        }}>
           <Map3D driver={driver} activeOrders={activeOrders} pitch={52} />
-          <div className="absolute inset-x-0 top-0 h-16 pointer-events-none"
-            style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.25), transparent)' }} />
+
+          {/* Tech grid overlay */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: 'linear-gradient(rgba(56,189,248,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.025) 1px, transparent 1px)',
+            backgroundSize: '44px 44px'
+          }} />
+
+          {/* Top HUD */}
+          <div className="absolute top-0 inset-x-0 px-4 py-3 pointer-events-none" style={{
+            background: 'linear-gradient(to bottom, rgba(2,6,23,0.82), transparent)'
+          }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" style={{ boxShadow: '0 0 6px rgba(34,211,238,0.8)' }} />
+                <span className="text-[10px] font-bold text-cyan-400 tracking-[0.15em] uppercase">Live Tracking</span>
+              </div>
+              <span className="text-[10px] font-mono text-cyan-300/60">
+                {driver?.current_lat?.toFixed(4)}°N · {Math.abs(driver?.current_lng ?? 0).toFixed(4)}°W
+              </span>
+            </div>
+          </div>
+
+          {/* Bottom HUD */}
+          <div className="absolute bottom-0 inset-x-0 px-4 py-3 pointer-events-none" style={{
+            background: 'linear-gradient(to top, rgba(2,6,23,0.82), transparent)'
+          }}>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono text-white/40 truncate max-w-[55%]">{driver?.current_address}</span>
+              <div className="flex items-center gap-1.5">
+                <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                <span className="text-[10px] font-mono text-white/50 tracking-widest">OFFLINE</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Corner tech brackets */}
+          {(['top-2.5 left-2.5 border-t-2 border-l-2','top-2.5 right-2.5 border-t-2 border-r-2',
+             'bottom-2.5 left-2.5 border-b-2 border-l-2','bottom-2.5 right-2.5 border-b-2 border-r-2'] as string[]).map((cls, i) => (
+            <div key={i} className={`absolute w-5 h-5 ${cls} border-cyan-400/60 pointer-events-none rounded-sm`} />
+          ))}
+
+          {/* Center scan line */}
+          <div className="absolute inset-x-0 pointer-events-none" style={{
+            top: '50%', height: 1,
+            background: 'linear-gradient(90deg, transparent 0%, rgba(56,189,248,0.4) 30%, rgba(56,189,248,0.8) 50%, rgba(56,189,248,0.4) 70%, transparent 100%)',
+            opacity: 0.5
+          }} />
+
           <div className="absolute inset-0 flex flex-col items-center justify-start pt-5 px-5 pointer-events-none">
             <div className={`backdrop-blur-xl rounded-3xl px-6 py-6 text-center shadow-2xl w-full max-w-sm pointer-events-auto ${
               dark
