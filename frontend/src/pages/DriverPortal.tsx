@@ -927,7 +927,7 @@ export default function DriverPortal() {
               </div>
               <div>
                 <p className="font-bold text-gray-900 dark:text-white text-base">{driver.name}</p>
-                <p className="text-xs text-gray-500 dark:text-slate-400">{driver.email}</p>
+                <p className="text-xs text-blue-500 dark:text-blue-400">{driver.email}</p>
                 <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{driver.phone}</p>
               </div>
             </div>
