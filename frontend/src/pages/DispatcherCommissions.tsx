@@ -227,7 +227,7 @@ export default function DispatcherCommissions() {
         <div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">Mis Comisiones</h1>
           <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-            OSI Logistics te paga <span className="font-semibold text-blue-600">5%</span> por cada carga gestionada
+            En OSI valoramos tu esfuerzo. Por eso te pagamos el <span className="font-semibold text-blue-600">5%</span> por cada carga gestionada.
           </p>
         </div>
         <button onClick={load} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
