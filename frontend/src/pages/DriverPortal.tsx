@@ -858,13 +858,6 @@ export default function DriverPortal() {
             <div key={i} className={`absolute w-5 h-5 ${cls} border-cyan-400/60 pointer-events-none rounded-sm`} />
           ))}
 
-          {/* Center scan line */}
-          <div className="absolute inset-x-0 pointer-events-none" style={{
-            top: '50%', height: 1,
-            background: 'linear-gradient(90deg, transparent 0%, rgba(56,189,248,0.4) 30%, rgba(56,189,248,0.8) 50%, rgba(56,189,248,0.4) 70%, transparent 100%)',
-            opacity: 0.5
-          }} />
-
           <div className="absolute inset-0 flex flex-col items-center justify-start pt-5 px-5 pointer-events-none">
             <div className={`backdrop-blur-xl rounded-3xl px-6 py-6 text-center shadow-2xl w-full max-w-sm pointer-events-auto ${
               dark
@@ -1018,12 +1011,6 @@ export default function DriverPortal() {
                   <div key={i} className={`absolute w-5 h-5 ${cls} border-cyan-400/60 pointer-events-none rounded-sm`} />
                 ))}
 
-                {/* Center scan line */}
-                <div className="absolute inset-x-0 pointer-events-none" style={{
-                  top: '50%', height: 1,
-                  background: 'linear-gradient(90deg, transparent 0%, rgba(56,189,248,0.4) 30%, rgba(56,189,248,0.8) 50%, rgba(56,189,248,0.4) 70%, transparent 100%)',
-                  animation: 'none', opacity: 0.5
-                }} />
               </div>
 
               {/* ── Navigation Buttons ───────────────────────── */}
