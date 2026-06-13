@@ -1636,7 +1636,7 @@ export default function DriverPortal() {
 
           {/* Records */}
           <div>
-            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide px-1 mb-2">Historial de cobros</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide px-1 mb-2">Historial de pagos</p>
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden">
               {billingRows.length === 0 ? (
                 <div className="py-10 text-center">
