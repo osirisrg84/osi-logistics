@@ -56,7 +56,7 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
           <OrderStatusBadge status={order.status} />
         </div>
         <div className="text-right">
-          <p className="text-lg font-bold text-green-600">${order.price.toFixed(2)}</p>
+          <p className="text-lg font-bold text-green-600">${(Math.round(order.price / 100) * 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           <p className="text-xs text-gray-400 dark:text-slate-500">{(order.distance_km * 0.621371).toFixed(1)} mi</p>
         </div>
       </div>
@@ -776,7 +776,7 @@ export default function DriverPortal() {
                       <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{order.delivery_address}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-green-600">${order.price.toFixed(2)}</p>
+                      <p className="text-sm font-bold text-green-600">${(Math.round(order.price / 100) * 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                       {order.delivered_at && (
                         <p className="text-xs text-gray-400 dark:text-slate-500">{format(new Date(order.delivered_at), 'HH:mm')}</p>
                       )}
@@ -1407,7 +1407,7 @@ export default function DriverPortal() {
             <div className="p-5 space-y-3">
               {/* Price + Distance */}
               <div className="flex items-center justify-between">
-                <span className="text-3xl font-bold text-green-600 dark:text-green-400">${pendingOffer.price.toFixed(2)}</span>
+                <span className="text-3xl font-bold text-green-600 dark:text-green-400">${(Math.round(pendingOffer.price / 100) * 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 <div className="text-right">
                   <p className="text-sm font-semibold text-gray-700 dark:text-slate-300">{(pendingOffer.distance_km * 0.621371).toFixed(1)} mi</p>
                   <p className="text-xs text-gray-400 dark:text-slate-500">{(pendingOffer.weight_kg * 2.20462).toFixed(0)} lbs</p>
