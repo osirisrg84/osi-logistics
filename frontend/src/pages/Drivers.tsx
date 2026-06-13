@@ -89,17 +89,13 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
               <label className="label">License Expiry *</label>
               <input className="input" type="date" value={form.license_expiry} onChange={e => setForm({...form, license_expiry: e.target.value})} required />
             </div>
-            <div>
-              <label className="label">Hire Date *</label>
-              <input className="input" type="date" value={form.hire_date} onChange={e => setForm({...form, hire_date: e.target.value})} required />
-            </div>
             <div className="col-span-2 border-t border-gray-100 dark:border-slate-700 pt-3">
               <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-2">
-                <Building2 className="w-3.5 h-3.5" /> Empresa / Equipo
+                <Building2 className="w-3.5 h-3.5" /> Company / Equipment
               </p>
             </div>
             <div>
-              <label className="label">Tipo de Equipo</label>
+              <label className="label">Equipment Type</label>
               <select className="input" value={form.equipment_type} onChange={e => setForm({...form, equipment_type: e.target.value})}>
                 {['Dry Van', 'Reefer', 'Flatbed', 'Box Truck'].map(t => <option key={t} value={t}>{t}</option>)}
               </select>
@@ -109,7 +105,7 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
               <input className="input" value={form.mc_number} onChange={e => setForm({...form, mc_number: e.target.value})} placeholder="MC-000000" />
             </div>
             <div className="col-span-2">
-              <label className="label">Nombre de Compañía</label>
+              <label className="label">Company Name</label>
               <input className="input" value={form.company_name} onChange={e => setForm({...form, company_name: e.target.value})} placeholder="OSI Logistics LLC" />
             </div>
             <div className="col-span-2">
