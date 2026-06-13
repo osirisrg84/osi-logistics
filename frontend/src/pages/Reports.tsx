@@ -200,7 +200,7 @@ export default function Reports() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
-                    {['Period', 'Total Orders', 'Delivered', 'Cancelled', 'Revenue', 'Avg Distance (km)'].map(h => (
+                    {['Period', 'Total Orders', 'Delivered', 'Cancelled', 'Revenue', 'Avg Distance (mi)'].map(h => (
                       <th key={h} className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{h}</th>
                     ))}
                   </tr>
@@ -212,8 +212,8 @@ export default function Reports() {
                       <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{row.total_orders}</td>
                       <td className="px-4 py-3 text-sm text-green-600 font-medium">{row.delivered}</td>
                       <td className="px-4 py-3 text-sm text-red-500">{row.cancelled}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-slate-100">${(row.revenue || 0).toFixed(2)}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-slate-400">{(row.avg_distance || 0).toFixed(1)}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-slate-100">${(row.revenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-slate-400">{((row.avg_distance || 0) * 0.621371).toFixed(1)}</td>
                     </tr>
                   ))}
                 </tbody>
