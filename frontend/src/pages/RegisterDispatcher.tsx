@@ -246,7 +246,7 @@ export default function RegisterDispatcher() {
             {/* Equipment Experience */}
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-2">
-                ¿Con qué tipo de equipo tienes experiencia? <span className="text-gray-400 font-normal">(selecciona todos los que apliquen)</span>
+                ¿Con qué tipo de loads tienes experiencia? <span className="text-gray-400 font-normal">(selecciona todos los que apliquen)</span>
               </label>
               <div className="flex flex-wrap gap-2">
                 {EQUIPMENT_TYPES.map(eq => (
