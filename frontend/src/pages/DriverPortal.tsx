@@ -1091,6 +1091,29 @@ export default function DriverPortal() {
             </div>
           )}
 
+          {/* Pagos shortcut */}
+          <button
+            onClick={() => setTab('payments')}
+            className="w-full bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 flex items-center justify-between hover:border-orange-300 dark:hover:border-orange-600 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
+                <Wallet className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">Mis Pagos a OSI</p>
+                {billingSummary && billingSummary.pending > 0 ? (
+                  <p className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">
+                    ${billingSummary.pending.toFixed(2)} pendiente
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-400 dark:text-slate-500">Ver historial de pagos</p>
+                )}
+              </div>
+            </div>
+            <span className="text-gray-300 dark:text-slate-600 text-lg">›</span>
+          </button>
+
           {/* Lugares favoritos */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
             <div className="flex items-center justify-between mb-3">
@@ -1189,28 +1212,6 @@ export default function DriverPortal() {
               </div>
             )}
           </div>
-          {/* Pagos shortcut */}
-          <button
-            onClick={() => setTab('payments')}
-            className="w-full bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 flex items-center justify-between hover:border-orange-300 dark:hover:border-orange-600 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-                <Wallet className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">Mis Pagos a OSI</p>
-                {billingSummary && billingSummary.pending > 0 ? (
-                  <p className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">
-                    ${billingSummary.pending.toFixed(2)} pendiente
-                  </p>
-                ) : (
-                  <p className="text-xs text-gray-400 dark:text-slate-500">Ver historial de pagos</p>
-                )}
-              </div>
-            </div>
-            <span className="text-gray-300 dark:text-slate-600 text-lg">›</span>
-          </button>
 
           {/* ── Achievements / Logros ─────────────────────────── */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden">
