@@ -537,11 +537,11 @@ export default function DriverPortal() {
 
   // ── Profile completion ─────────────────────────────────────
   const profileItems = [
-    { label: 'Equipment Type', done: !!localEquipType },
-    { label: 'Truck #',        done: !!truckNum },
-    { label: 'Trailer #',      done: !!trailerNum },
-    { label: 'Payment Method', done: !!payoutMethod },
-    { label: 'Company / MC#',  done: !!(driver?.company_name && driver?.mc_number) },
+    { label: 'Tipo de Equipo',   done: !!localEquipType },
+    { label: 'Truck #',          done: !!truckNum },
+    { label: 'Trailer #',        done: !!trailerNum },
+    { label: 'Método de Pago',   done: !!payoutMethod },
+    { label: 'Empresa / MC#',    done: !!(driver?.company_name && driver?.mc_number) },
   ];
   const profileScore = profileItems.filter(i => i.done).length;
 
@@ -934,7 +934,7 @@ export default function DriverPortal() {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Zap className="w-4 h-4 text-orange-500" />
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">Complete Your Profile</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">Completa tu Perfil</p>
                 </div>
                 <span className="text-xs font-bold text-orange-600 dark:text-orange-400">{profileScore}/{profileItems.length}</span>
               </div>
