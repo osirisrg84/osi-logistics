@@ -94,13 +94,20 @@ router.post('/register', (req: Request, res: Response) => {
   const passwordHash = hashPassword(password, salt);
   const id = uuidv4();
 
+  const genDispatcherCode = (): string => {
+    const code = 'DSP-' + String(Math.floor(1000 + Math.random() * 9000));
+    const exists = db.prepare("SELECT id FROM users WHERE dispatcher_code = ?").get(code);
+    return exists ? genDispatcherCode() : code;
+  };
+  const dispatcher_code = role === 'dispatcher' ? genDispatcherCode() : '';
+
   db.prepare(`
     INSERT INTO users
       (id, name, email, password_hash, salt, role, driver_id,
-       phone, date_of_birth, city, years_experience, previous_companies, languages, availability, equipment_experience)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       phone, date_of_birth, city, years_experience, previous_companies, languages, availability, equipment_experience, dispatcher_code)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(id, name, email.toLowerCase(), passwordHash, salt, role, driver_id,
-    phone, date_of_birth, city, years_experience, previous_companies, languages, availability, equipment_experience);
+    phone, date_of_birth, city, years_experience, previous_companies, languages, availability, equipment_experience, dispatcher_code);
 
   const token = createSession(id);
 

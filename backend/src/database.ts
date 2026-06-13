@@ -205,6 +205,20 @@ export function initDatabase(): void {
   addUserCol('payout_method',        "TEXT NOT NULL DEFAULT ''");
   addUserCol('payout_details',       "TEXT NOT NULL DEFAULT ''");
   addUserCol('equipment_experience', "TEXT NOT NULL DEFAULT ''");
+  addUserCol('dispatcher_code',      "TEXT NOT NULL DEFAULT ''");
+
+  // Assign dispatcher_code to existing dispatchers that don't have one
+  const dispatchersWithoutCode = db.prepare(
+    "SELECT id FROM users WHERE role = 'dispatcher' AND dispatcher_code = ''"
+  ).all() as Array<{ id: string }>;
+  const genCode = (): string => {
+    const code = 'DSP-' + String(Math.floor(1000 + Math.random() * 9000));
+    const exists = db.prepare("SELECT id FROM users WHERE dispatcher_code = ?").get(code);
+    return exists ? genCode() : code;
+  };
+  for (const u of dispatchersWithoutCode) {
+    db.prepare("UPDATE users SET dispatcher_code = ? WHERE id = ?").run(genCode(), u.id);
+  }
 
   // Migrate: add target_driver_id to notifications if not present
   const notifCols = db.prepare('PRAGMA table_info(notifications)').all() as Array<{ name: string }>;

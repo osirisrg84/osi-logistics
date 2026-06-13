@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, ClipboardList, Package, DollarSign, TrendingUp, Clock, X, Mail, CheckCircle, AlertCircle, Phone, Shield, Eye, EyeOff, Edit2, Trash2, Truck } from 'lucide-react';
+import { Search, ClipboardList, Package, DollarSign, TrendingUp, Clock, X, Mail, CheckCircle, AlertCircle, Phone, Shield, Eye, EyeOff, Edit2, Trash2, Truck, Hash } from 'lucide-react';
 import api from '../services/api';
 import { format } from 'date-fns';
 
@@ -17,6 +17,7 @@ interface DispatcherProfile {
   settled: number;
   active_orders: number;
   equipment_experience: string;
+  dispatcher_code: string;
 }
 
 function maskSSN(ssn: string): string {
@@ -175,6 +176,12 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
                 <span className={`w-1.5 h-1.5 rounded-full ${dispatcher.active ? 'bg-green-500' : 'bg-gray-400'}`} />
                 {dispatcher.active ? 'Activo' : 'Inactivo'}
               </span>
+              {dispatcher.dispatcher_code && (
+                <div className="flex items-center gap-1 mt-1">
+                  <Hash className="w-3 h-3 text-orange-400" />
+                  <span className="text-xs font-bold text-orange-500 tracking-widest">{dispatcher.dispatcher_code}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -368,12 +375,17 @@ export default function DispatcherProfiles() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{d.name}</p>
-                    <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full mt-0.5 ${
-                      d.active ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400'
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${d.active ? 'bg-green-500' : 'bg-gray-400'}`} />
-                      {d.active ? 'Activo' : 'Inactivo'}
-                    </span>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
+                        d.active ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${d.active ? 'bg-green-500' : 'bg-gray-400'}`} />
+                        {d.active ? 'Activo' : 'Inactivo'}
+                      </span>
+                      {d.dispatcher_code && (
+                        <span className="text-[10px] font-bold text-orange-500 tracking-widest">{d.dispatcher_code}</span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-0.5 flex-shrink-0">
                     <button onClick={() => setSelected(d)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
