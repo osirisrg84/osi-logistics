@@ -206,7 +206,7 @@ function CreateOrderModal({ onClose, onSave }: OrderModalProps) {
                 <input className="input" type="number" value={form.distance_mi} onChange={e => setForm({...form, distance_mi: e.target.value})} placeholder="0" min="0" />
               </div>
               <div className="col-span-2">
-                <label className="label">End. Delivery</label>
+                <label className="label">End Delivery</label>
                 <input className="input" type="datetime-local" value={form.estimated_delivery} onChange={e => setForm({...form, estimated_delivery: e.target.value})} />
               </div>
               <div className="col-span-3">
