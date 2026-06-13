@@ -937,7 +937,79 @@ export default function DriverPortal() {
           )}
 
           {tab === 'delivered' && (
-            <div className="space-y-3">
+            <div className="space-y-4">
+
+              {deliveredToday.length > 0 && (() => {
+                const grossRevenue  = todayRevenue;
+                const driverNet     = grossRevenue * 0.92;
+                const osiFee        = grossRevenue * 0.08;
+                const avgPerLoad    = grossRevenue / deliveredToday.length;
+                const bestLoad      = Math.max(...deliveredToday.map(o => o.price));
+                const totalMiles    = deliveredToday.reduce((s, o) => s + (o.distance_km || 0), 0) * 0.621371;
+                const ratePerMile   = totalMiles > 0 ? grossRevenue / totalMiles : 0;
+                const fmt = (n: number, dec = 2) => n.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+
+                return (
+                  <>
+                    {/* ── Revenue Hero ───────────────────────── */}
+                    <div className="rounded-2xl overflow-hidden" style={{
+                      background: 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)',
+                      boxShadow: '0 8px 32px rgba(5,150,105,0.35), inset 0 1px 0 rgba(167,243,208,0.15)'
+                    }}>
+                      <div className="px-5 pt-5 pb-4">
+                        <p className="text-[10px] font-bold text-emerald-300/60 uppercase tracking-widest mb-1">Today's Revenue</p>
+                        <p className="text-4xl font-black text-white tracking-tight">${fmt(grossRevenue)}</p>
+                        <p className="text-xs text-emerald-200/50 mt-1">{deliveredToday.length} entrega{deliveredToday.length !== 1 ? 's' : ''} completada{deliveredToday.length !== 1 ? 's' : ''} hoy</p>
+                      </div>
+                      <div className="grid grid-cols-2 border-t border-white/10">
+                        <div className="px-5 py-3 border-r border-white/10">
+                          <p className="text-[9px] text-emerald-300/50 uppercase tracking-widest mb-0.5">Tu ganancia (92%)</p>
+                          <p className="text-xl font-black text-emerald-300">${fmt(driverNet)}</p>
+                        </div>
+                        <div className="px-5 py-3">
+                          <p className="text-[9px] text-white/30 uppercase tracking-widest mb-0.5">OSI fee (8%)</p>
+                          <p className="text-xl font-bold text-white/50">${fmt(osiFee)}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ── Quick Stats ─────────────────────────── */}
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-3 text-center border border-gray-100 dark:border-slate-700">
+                        <p className="text-2xl font-black text-gray-900 dark:text-white">{deliveredToday.length}</p>
+                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Cargas</p>
+                      </div>
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-3 text-center border border-gray-100 dark:border-slate-700">
+                        <p className="text-base font-black text-gray-900 dark:text-white">${fmt(avgPerLoad, 0)}</p>
+                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Promedio</p>
+                      </div>
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-3 text-center border border-gray-100 dark:border-slate-700">
+                        <p className="text-base font-black text-green-600">${fmt(bestLoad, 0)}</p>
+                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Mejor</p>
+                      </div>
+                    </div>
+
+                    {/* ── Miles & Rate ────────────────────────── */}
+                    {totalMiles > 0 && (
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl px-5 py-4 border border-gray-100 dark:border-slate-700 flex items-center justify-between">
+                        <div>
+                          <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Millas hoy</p>
+                          <p className="text-xl font-black text-gray-900 dark:text-white">{totalMiles.toFixed(1)} <span className="text-sm font-normal text-gray-400">mi</span></p>
+                        </div>
+                        <div className="w-px h-10 bg-gray-100 dark:bg-slate-700" />
+                        <div className="text-right">
+                          <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Rate / milla</p>
+                          <p className="text-xl font-black text-blue-600">${ratePerMile.toFixed(2)}<span className="text-sm font-normal text-gray-400">/mi</span></p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ── Section label ───────────────────────── */}
+                    <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest px-1">Detalle de cargas</p>
+                  </>
+                );
+              })()}
+
               {deliveredToday.length === 0 ? (
                 <div className="text-center py-16">
                   <CheckCircle className="w-12 h-12 text-gray-200 dark:text-slate-600 mx-auto mb-3" />
