@@ -8,7 +8,7 @@ import {
 import osiLogo from '../assets/osi-logo.jpeg';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { ordersApi, driversApi, billingApi, notificationsApi } from '../services/api';
+import { ordersApi, driversApi, billingApi, notificationsApi, userApi } from '../services/api';
 import { Order, Driver, DriverStatus } from '../types';
 import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -205,6 +205,47 @@ export default function DriverPortal() {
   const [savingFav, setSavingFav] = useState(false);
   const [favError, setFavError] = useState('');
 
+  // ── Payout method ─────────────────────────────────────────
+  interface PayoutDetails { contact?: string; email?: string; username?: string; bank?: string; account?: string; routing?: string; type?: string; swift?: string; payable_to?: string; }
+  const PAYOUT_OPTS = [
+    { id: 'zelle',  label: 'Zelle',         icon: '📱' },
+    { id: 'paypal', label: 'PayPal',         icon: '🅿️' },
+    { id: 'venmo',  label: 'Venmo',          icon: '💸' },
+    { id: 'ach',    label: 'Direct Deposit', icon: '🏦' },
+    { id: 'check',  label: 'Check',          icon: '📝' },
+  ];
+  const [payoutMethod,  setPayoutMethod]  = useState('');
+  const [payoutDetails, setPayoutDetails] = useState<PayoutDetails>({});
+  const [editingPayout, setEditingPayout] = useState(false);
+  const [savingPayout,  setSavingPayout]  = useState(false);
+
+  useEffect(() => {
+    userApi.getProfile().then(({ data }) => {
+      setPayoutMethod(data.payout_method || '');
+      try { setPayoutDetails(data.payout_details ? JSON.parse(data.payout_details) : {}); } catch { setPayoutDetails({}); }
+    }).catch(() => {});
+  }, []);
+
+  const savePayout = async () => {
+    setSavingPayout(true);
+    try {
+      await userApi.updateProfile({ payout_method: payoutMethod, payout_details: JSON.stringify(payoutDetails) });
+      setEditingPayout(false);
+    } catch {} finally { setSavingPayout(false); }
+  };
+
+  const updatePayoutDetail = (k: string, v: string) => setPayoutDetails(d => ({ ...d, [k]: v }));
+
+  const payoutSummary = (method: string, details: PayoutDetails) => {
+    switch (method) {
+      case 'zelle':  return details.contact || '—';
+      case 'paypal': return details.email || '—';
+      case 'venmo':  return details.username || '—';
+      case 'ach':    return details.bank ? `${details.bank} · ****${(details.account || '').slice(-4)}` : '—';
+      case 'check':  return details.payable_to ? `A nombre de: ${details.payable_to}` : '—';
+      default:       return '—';
+    }
+  };
 
   // Use driver.id as the primary ID — it comes directly from the loaded driverProfile
   const driverId = driver?.id ?? user?.driver_id ?? '';
@@ -881,6 +922,91 @@ export default function DriverPortal() {
               </div>
             </div>
           )}
+
+          {/* Método de cobro */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Wallet className="w-4 h-4 text-orange-500" />
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Método de cobro</h3>
+              </div>
+              {!editingPayout && (
+                <button onClick={() => setEditingPayout(true)}
+                  className="text-xs text-orange-500 hover:text-orange-600 font-semibold transition-colors">
+                  {payoutMethod ? 'Editar' : '+ Configurar'}
+                </button>
+              )}
+            </div>
+
+            {!editingPayout && !payoutMethod && (
+              <div className="text-center py-4">
+                <Wallet className="w-8 h-8 text-gray-200 dark:text-slate-700 mx-auto mb-2" />
+                <p className="text-xs text-gray-400 dark:text-slate-500">Sin método configurado</p>
+                <button onClick={() => setEditingPayout(true)}
+                  className="mt-2 text-xs text-orange-500 hover:text-orange-600 font-medium">
+                  + Agregar método de cobro
+                </button>
+              </div>
+            )}
+
+            {!editingPayout && payoutMethod && (
+              <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/20 rounded-xl px-3 py-3">
+                <span className="text-xl">{PAYOUT_OPTS.find(o => o.id === payoutMethod)?.icon || '💳'}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">{PAYOUT_OPTS.find(o => o.id === payoutMethod)?.label}</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{payoutSummary(payoutMethod, payoutDetails)}</p>
+                </div>
+                <span className="text-[10px] font-semibold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/40 px-2 py-0.5 rounded-full">Activo</span>
+              </div>
+            )}
+
+            {editingPayout && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-3 gap-2">
+                  {PAYOUT_OPTS.map(opt => (
+                    <button key={opt.id} onClick={() => { setPayoutMethod(opt.id); setPayoutDetails({}); }}
+                      className={`flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl border-2 text-center transition-all ${
+                        payoutMethod === opt.id
+                          ? 'border-orange-400 bg-orange-50 dark:bg-orange-900/20'
+                          : 'border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700'
+                      }`}>
+                      <span className="text-lg">{opt.icon}</span>
+                      <span className="text-[10px] font-semibold text-gray-700 dark:text-slate-300">{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+                {payoutMethod === 'zelle' && (
+                  <input className="input text-sm" placeholder="Número o email Zelle"
+                    value={payoutDetails.contact || ''} onChange={e => updatePayoutDetail('contact', e.target.value)} />
+                )}
+                {payoutMethod === 'paypal' && (
+                  <input className="input text-sm" placeholder="Email PayPal"
+                    value={payoutDetails.email || ''} onChange={e => updatePayoutDetail('email', e.target.value)} />
+                )}
+                {payoutMethod === 'venmo' && (
+                  <input className="input text-sm" placeholder="@usuario Venmo"
+                    value={payoutDetails.username || ''} onChange={e => updatePayoutDetail('username', e.target.value)} />
+                )}
+                {payoutMethod === 'ach' && (
+                  <div className="space-y-2">
+                    <input className="input text-sm" placeholder="Nombre del banco" value={payoutDetails.bank || ''} onChange={e => updatePayoutDetail('bank', e.target.value)} />
+                    <input className="input text-sm" placeholder="Número de cuenta" value={payoutDetails.account || ''} onChange={e => updatePayoutDetail('account', e.target.value)} />
+                    <input className="input text-sm" placeholder="Routing number" value={payoutDetails.routing || ''} onChange={e => updatePayoutDetail('routing', e.target.value)} />
+                  </div>
+                )}
+                {payoutMethod === 'check' && (
+                  <input className="input text-sm" placeholder="A nombre de..." value={payoutDetails.payable_to || ''} onChange={e => updatePayoutDetail('payable_to', e.target.value)} />
+                )}
+                <div className="flex gap-2 pt-1">
+                  <button onClick={() => { setEditingPayout(false); }} className="flex-1 py-2 text-xs font-semibold text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 rounded-xl">Cancelar</button>
+                  <button onClick={savePayout} disabled={savingPayout || !payoutMethod}
+                    className="flex-1 py-2 text-xs font-semibold text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-50 rounded-xl transition-colors">
+                    {savingPayout ? 'Guardando...' : 'Guardar'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Lugares favoritos */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">

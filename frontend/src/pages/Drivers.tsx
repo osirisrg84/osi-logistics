@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
-import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin, Building2, Clock } from 'lucide-react';
+import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin, Building2, Clock, Wallet } from 'lucide-react';
 import { Driver, DriverStatus } from '../types';
 import { driversApi, trucksApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -260,6 +260,42 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
               </div>
             </div>
           )}
+
+          {/* Payment Method */}
+          {(() => {
+            const method = (driver as unknown as Record<string, string>).payout_method;
+            const rawDetails = (driver as unknown as Record<string, string>).payout_details;
+            if (!method) return null;
+            let details: Record<string, string> = {};
+            try { details = rawDetails ? JSON.parse(rawDetails) : {}; } catch {}
+            const ICONS: Record<string, string> = { zelle: '📱', paypal: '🅿️', venmo: '💸', ach: '🏦', check: '📝' };
+            const LABELS: Record<string, string> = { zelle: 'Zelle', paypal: 'PayPal', venmo: 'Venmo', ach: 'Direct Deposit', check: 'Check' };
+            const summary = () => {
+              switch (method) {
+                case 'zelle':  return details.contact || '—';
+                case 'paypal': return details.email || '—';
+                case 'venmo':  return details.username || '—';
+                case 'ach':    return details.bank ? `${details.bank} · ****${(details.account || '').slice(-4)}` : '—';
+                case 'check':  return details.payable_to ? `A nombre de: ${details.payable_to}` : '—';
+                default:       return '—';
+              }
+            };
+            return (
+              <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4">
+                <p className="text-xs font-semibold text-orange-700 dark:text-orange-400 flex items-center gap-2 mb-3">
+                  <Wallet className="w-3 h-3" /> PAYMENT METHOD
+                </p>
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{ICONS[method] || '💳'}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{LABELS[method] || method}</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{summary()}</p>
+                  </div>
+                  <span className="text-[10px] font-semibold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/40 px-2 py-0.5 rounded-full">Configurado</span>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Lugares favoritos */}
           <div>

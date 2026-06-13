@@ -49,9 +49,11 @@ router.get('/stats', (_req: Request, res: Response) => {
 router.get('/:id', (req: Request, res: Response) => {
   const db = getDb();
   const driver = db.prepare(`
-    SELECT d.*, t.plate_number, t.make, t.model, t.type as truck_type, t.fuel_level
+    SELECT d.*, t.plate_number, t.make, t.model, t.type as truck_type, t.fuel_level,
+           u.payout_method, u.payout_details
     FROM drivers d
     LEFT JOIN trucks t ON d.truck_id = t.id
+    LEFT JOIN users u ON u.driver_id = d.id
     WHERE d.id = ?
   `).get(req.params.id);
 
