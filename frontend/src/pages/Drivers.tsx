@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
-import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin, Building2, Clock, Wallet } from 'lucide-react';
+import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin, Building2, Clock, Wallet, ShieldCheck, FileText, Calendar, AlertCircle } from 'lucide-react';
 import { Driver, DriverStatus } from '../types';
 import { driversApi, trucksApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -309,6 +309,60 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
                   </div>
                   <span className="text-[10px] font-semibold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/40 px-2 py-0.5 rounded-full">Configurado</span>
                 </div>
+              </div>
+            );
+          })()}
+
+          {/* COI — Certificate of Insurance */}
+          {(() => {
+            const coiFile   = (driver as unknown as Record<string, string>).coi_filename || '';
+            const coiExpiry = (driver as unknown as Record<string, string>).coi_expiry   || '';
+            const today     = new Date();
+            const expDate   = coiExpiry ? new Date(coiExpiry + 'T00:00:00') : null;
+            const daysLeft  = expDate ? Math.ceil((expDate.getTime() - today.getTime()) / 86400000) : null;
+            const isExpired      = daysLeft !== null && daysLeft < 0;
+            const isExpiringSoon = daysLeft !== null && daysLeft >= 0 && daysLeft <= 30;
+            const statusColor = isExpired ? '#ef4444' : isExpiringSoon ? '#f59e0b' : coiExpiry ? '#22c55e' : '#94a3b8';
+            const statusLabel = isExpired
+              ? `Vencido hace ${Math.abs(daysLeft!)} días`
+              : isExpiringSoon
+                ? `Vence en ${daysLeft} días`
+                : coiExpiry ? 'Vigente' : 'No cargado';
+            return (
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 flex items-center gap-2">
+                    <ShieldCheck className="w-3 h-3" /> COI — CERTIFICATE OF INSURANCE
+                  </p>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                    style={{ background: `${statusColor}18`, color: statusColor }}>
+                    {statusLabel}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileText className="w-4 h-4 flex-shrink-0" style={{ color: statusColor }} />
+                    <span className="text-sm text-gray-700 dark:text-slate-300 truncate max-w-[180px]">
+                      {coiFile || 'Sin archivo cargado'}
+                    </span>
+                  </div>
+                  {coiFile && (
+                    <a href={`#coi-${driver.id}`}
+                      className="flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 bg-blue-100 dark:bg-blue-900/40 px-2.5 py-1 rounded-lg transition-colors flex-shrink-0 ml-2">
+                      <FileText className="w-3 h-3" /> Ver COI
+                    </a>
+                  )}
+                </div>
+                {coiExpiry && (
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <Calendar className="w-3 h-3 text-gray-400" />
+                    <span className="text-xs text-gray-500 dark:text-slate-400">Vencimiento: </span>
+                    <span className="text-xs font-semibold" style={{ color: statusColor }}>
+                      {new Date(coiExpiry + 'T00:00:00').toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </span>
+                    {(isExpired || isExpiringSoon) && <AlertCircle className="w-3 h-3 ml-1" style={{ color: statusColor }} />}
+                  </div>
+                )}
               </div>
             );
           })()}

@@ -257,6 +257,8 @@ export default function DriverPortal() {
       setTrailerNum(driver.trailer_number || '');
       setLocalEquipType(driver.equipment_type || '');
       setLocalTruckMake(driver.truck_make || '');
+      setCoiFileName((driver as unknown as Record<string, string>).coi_filename || '');
+      setCoiExpiry((driver as unknown as Record<string, string>).coi_expiry || '');
     }
   }, [driver?.id]);
 
@@ -333,8 +335,8 @@ export default function DriverPortal() {
   const [billingSummary, setBillingSummary] = useState<DriverBillingSummary | null>(null);
 
   // COI — Certificate of Insurance
-  const [coiFileName, setCoiFileName] = useState(() => { try { return localStorage.getItem('osi_coi_filename') || ''; } catch { return ''; } });
-  const [coiExpiry, setCoiExpiry] = useState(() => { try { return localStorage.getItem('osi_coi_expiry') || ''; } catch { return ''; } });
+  const [coiFileName, setCoiFileName] = useState('');
+  const [coiExpiry, setCoiExpiry] = useState('');
   const [coiEditing, setCoiEditing] = useState(false);
 
   const fetchOrders = useCallback(async () => {
@@ -1546,9 +1548,12 @@ export default function DriverPortal() {
                           </span>
                         </div>
                         <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden"
-                          onChange={e => {
+                          onChange={async e => {
                             const f = e.target.files?.[0];
-                            if (f) { setCoiFileName(f.name); localStorage.setItem('osi_coi_filename', f.name); }
+                            if (f && driverId) {
+                              setCoiFileName(f.name);
+                              await driversApi.update(driverId, { coi_filename: f.name }).catch(() => {});
+                            }
                           }} />
                       </label>
                     </div>
@@ -1556,11 +1561,14 @@ export default function DriverPortal() {
                     <div>
                       <p className="text-xs text-gray-500 dark:text-slate-400 mb-1.5 flex items-center gap-1"><Calendar className="w-3 h-3" /> Fecha de vencimiento</p>
                       <input type="date" value={coiExpiry}
-                        onChange={e => { setCoiExpiry(e.target.value); localStorage.setItem('osi_coi_expiry', e.target.value); }}
+                        onChange={async e => {
+                          setCoiExpiry(e.target.value);
+                          if (driverId) await driversApi.update(driverId, { coi_expiry: e.target.value }).catch(() => {});
+                        }}
                         className="input text-sm w-full" />
                     </div>
                     {(coiFileName || coiExpiry) && (
-                      <button onClick={() => { setCoiFileName(''); setCoiExpiry(''); localStorage.removeItem('osi_coi_filename'); localStorage.removeItem('osi_coi_expiry'); setCoiEditing(false); }}
+                      <button onClick={async () => { setCoiFileName(''); setCoiExpiry(''); setCoiEditing(false); if (driverId) await driversApi.update(driverId, { coi_filename: '', coi_expiry: '' }).catch(() => {}); }}
                         className="text-xs text-red-400 hover:text-red-500 font-medium">
                         Eliminar COI
                       </button>

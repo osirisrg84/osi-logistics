@@ -273,6 +273,12 @@ export function initDatabase(): void {
   if (!driverCols.some(c => c.name === 'truck_make')) {
     db.exec("ALTER TABLE drivers ADD COLUMN truck_make TEXT NOT NULL DEFAULT ''");
   }
+  if (!driverCols.some(c => c.name === 'coi_filename')) {
+    db.exec("ALTER TABLE drivers ADD COLUMN coi_filename TEXT NOT NULL DEFAULT ''");
+  }
+  if (!driverCols.some(c => c.name === 'coi_expiry')) {
+    db.exec("ALTER TABLE drivers ADD COLUMN coi_expiry TEXT NOT NULL DEFAULT ''");
+  }
 
   // Assign driver_code to existing drivers that don't have one
   const genDriverCode = (): string => {
