@@ -2576,145 +2576,132 @@ export default function DriverPortal() {
                     </div>
                   )}
 
-                  {/* PTT — Walkie-Talkie Device */}
+                  {/* PTT — Walkie-Talkie Ultra Realistic */}
                   <div className="flex flex-col items-center pt-3 pb-4 px-4 gap-3">
 
                     {/* Total container including antenna space */}
-                    <div className="relative" style={{ width: 162, height: 308 }}>
+                    <div className="relative" style={{ width: 162, height: 316 }}>
 
-                      {/* Antenna */}
+                      {/* Chrome ferrule ring — antenna-body junction */}
                       <div className="absolute" style={{
-                        right: 22, top: 2,
-                        width: 7, height: 70,
-                        borderRadius: '4px 4px 2px 2px',
-                        background: 'linear-gradient(to right, #0d1520 0%, #1e293b 35%, #2d3f55 55%, #1e293b 75%, #0d1520 100%)',
-                        boxShadow: '1px 0 4px rgba(0,0,0,0.7)',
-                        transform: 'rotate(11deg)',
+                        right: 16, top: 58,
+                        width: 16, height: 12, borderRadius: '2px 2px 1px 1px',
+                        background: 'linear-gradient(180deg, #64748b 0%, #94a3b8 20%, #e2e8f0 45%, #cbd5e1 65%, #64748b 100%)',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.5)',
+                        zIndex: 3,
+                      }} />
+                      {/* Antenna body — ribbed rubber */}
+                      <div className="absolute" style={{
+                        right: 19, top: 2,
+                        width: 9, height: 62,
+                        borderRadius: '4px 4px 1px 1px',
+                        background: [
+                          'repeating-linear-gradient(180deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 2px, transparent 2px, transparent 5.5px)',
+                          'linear-gradient(to right, #080e18 0%, #1a2640 28%, #26384f 52%, #1a2640 74%, #080e18 100%)',
+                        ].join(', '),
+                        boxShadow: '2px 0 8px rgba(0,0,0,0.88)',
+                        transform: 'rotate(10deg)',
                         transformOrigin: 'bottom center',
                       }} />
+                      {/* Antenna metal tip ball */}
                       <div className="absolute rounded-full" style={{
-                        right: 24, top: 2,
-                        width: 5, height: 5,
-                        background: '#334155',
-                        boxShadow: '0 0 3px rgba(0,0,0,0.6)',
-                        transform: 'rotate(11deg) translateY(-1px)',
-                        transformOrigin: '50% 72px',
+                        right: 21, top: 0,
+                        width: 7, height: 7,
+                        background: 'radial-gradient(circle at 32% 28%, #e2e8f0 0%, #94a3b8 45%, #374151 100%)',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.8)',
+                        transform: 'rotate(10deg) translateY(-3px)',
+                        transformOrigin: '50% 65px',
                       }} />
 
-                      {/* Main device body */}
+                      {/* Main device body — ABS plastic, multi-layer material */}
                       <div className="absolute" style={{
-                        left: 0, top: 52, width: 155, bottom: 0,
-                        borderRadius: 14,
-                        background: 'linear-gradient(162deg, #1c2a3e 0%, #0e1826 50%, #080e1c 100%)',
-                        boxShadow: '4px 10px 28px rgba(0,0,0,0.9), 2px 4px 10px rgba(0,0,0,0.7), inset 1px 1px 2px rgba(255,255,255,0.07), inset -1px -1px 2px rgba(0,0,0,0.5)',
-                        border: '1px solid rgba(255,255,255,0.07)',
+                        left: 0, top: 58, width: 155, bottom: 0,
+                        borderRadius: '13px 16px 11px 11px',
+                        background: [
+                          'linear-gradient(to right, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.04) 5%, transparent 14%)',
+                          'linear-gradient(to bottom, rgba(255,255,255,0.055) 0%, transparent 12%)',
+                          'repeating-linear-gradient(0deg, rgba(255,255,255,0.009) 0px, rgba(255,255,255,0.009) 1px, transparent 1px, transparent 4px)',
+                          'linear-gradient(164deg, #1f2d42 0%, #162234 16%, #0f1a2c 48%, #0b1220 76%, #06090f 100%)',
+                        ].join(', '),
+                        boxShadow: [
+                          '5px 14px 40px rgba(0,0,0,0.93)',
+                          '2px 4px 14px rgba(0,0,0,0.8)',
+                          'inset 1px 1px 3px rgba(255,255,255,0.1)',
+                          'inset -2px -3px 6px rgba(0,0,0,0.58)',
+                          '0 0 0 1px rgba(255,255,255,0.055)',
+                        ].join(', '),
                       }}>
 
                         {/* Top status accent band */}
                         <div style={{
-                          height: 10, borderRadius: '13px 13px 0 0',
+                          height: 11, borderRadius: '12px 15px 0 0',
                           background: isRecording
-                            ? 'linear-gradient(90deg, #7f1d1d 0%, #dc2626 50%, #7f1d1d 100%)'
-                            : 'linear-gradient(90deg, #14532d 0%, #16a34a 50%, #14532d 100%)',
-                          boxShadow: isRecording ? '0 2px 12px rgba(239,68,68,0.6)' : '0 2px 12px rgba(22,163,74,0.6)',
-                          transition: 'background 0.3s, box-shadow 0.3s',
+                            ? 'linear-gradient(90deg, #5c1010 0%, #a81818 30%, #cc2020 50%, #a81818 70%, #5c1010 100%)'
+                            : 'linear-gradient(90deg, #0c3b1c 0%, #117a30 30%, #15a03c 50%, #117a30 70%, #0c3b1c 100%)',
+                          boxShadow: isRecording
+                            ? '0 3px 16px rgba(204,32,32,0.75), inset 0 1px 0 rgba(255,150,150,0.2)'
+                            : '0 3px 16px rgba(21,160,60,0.75), inset 0 1px 0 rgba(150,255,180,0.15)',
+                          transition: 'all 0.25s',
                         }} />
 
                         {/* Top controls row — vol knob / LED / ch knob */}
                         <div className="flex items-center justify-between px-3 pt-2 pb-1">
-                          <div style={{
-                            width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
-                            background: 'conic-gradient(from 220deg, #07101a 0%, #1e293b 28%, #334155 46%, #475569 50%, #334155 54%, #1e293b 72%, #07101a 100%)',
-                            boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.8), 0 2px 5px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)',
-                            display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 3,
-                          }}>
-                            <div style={{ width: 2, height: 7, background: '#f97316', borderRadius: 1 }} />
+                          {/* Volume knob */}
+                          <div style={{ position: 'relative', width: 28, height: 28, flexShrink: 0 }}>
+                            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'conic-gradient(from 0deg, #07101a 0deg, #1a2840 12deg, #253b58 17deg, #1a2840 22deg, #07101a 32deg, #1a2840 44deg, #253b58 49deg, #1a2840 54deg, #07101a 64deg, #1a2840 76deg, #253b58 81deg, #1a2840 86deg, #07101a 96deg, #1a2840 108deg, #253b58 113deg, #1a2840 118deg, #07101a 128deg, #1a2840 140deg, #253b58 145deg, #1a2840 150deg, #07101a 160deg, #1a2840 172deg, #253b58 177deg, #1a2840 182deg, #07101a 192deg, #1a2840 204deg, #253b58 209deg, #1a2840 214deg, #07101a 224deg, #1a2840 236deg, #253b58 241deg, #1a2840 246deg, #07101a 256deg, #1a2840 268deg, #253b58 273deg, #1a2840 278deg, #07101a 288deg, #1a2840 300deg, #253b58 305deg, #1a2840 310deg, #07101a 320deg, #1a2840 332deg, #253b58 337deg, #1a2840 342deg, #07101a 352deg, #1a2840 360deg)', boxShadow: '0 2px 7px rgba(0,0,0,0.85), inset 0 2px 4px rgba(0,0,0,0.6)' }} />
+                            <div style={{ position: 'absolute', inset: 5, borderRadius: '50%', background: 'radial-gradient(circle at 32% 28%, #2a3d56 0%, #1a2840 45%, #0a1020 100%)', boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 3 }}>
+                              <div style={{ width: 2, height: 6, background: '#f97316', borderRadius: 1 }} />
+                            </div>
                           </div>
-                          <div style={{
-                            width: 9, height: 9, borderRadius: '50%', flexShrink: 0,
-                            background: isRecording ? '#fca5a5' : '#86efac',
-                            boxShadow: isRecording
-                              ? '0 0 12px 4px rgba(239,68,68,0.9)'
-                              : '0 0 12px 4px rgba(74,222,128,0.82)',
-                            transition: 'all 0.2s',
-                          }} />
-                          <div style={{
-                            width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
-                            background: 'conic-gradient(from 220deg, #07101a 0%, #1e293b 28%, #334155 46%, #475569 50%, #334155 54%, #1e293b 72%, #07101a 100%)',
-                            boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.8), 0 2px 5px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)',
-                            display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 3,
-                          }}>
-                            <div style={{ width: 2, height: 7, background: '#64748b', borderRadius: 1 }} />
+                          {/* Status LED */}
+                          <div style={{ width: 9, height: 9, borderRadius: '50%', flexShrink: 0, background: isRecording ? '#fca5a5' : '#86efac', boxShadow: isRecording ? '0 0 14px 5px rgba(239,68,68,0.92)' : '0 0 14px 5px rgba(74,222,128,0.86)', transition: 'all 0.2s' }} />
+                          {/* Channel knob */}
+                          <div style={{ position: 'relative', width: 28, height: 28, flexShrink: 0 }}>
+                            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'conic-gradient(from 0deg, #07101a 0deg, #1a2840 12deg, #253b58 17deg, #1a2840 22deg, #07101a 32deg, #1a2840 44deg, #253b58 49deg, #1a2840 54deg, #07101a 64deg, #1a2840 76deg, #253b58 81deg, #1a2840 86deg, #07101a 96deg, #1a2840 108deg, #253b58 113deg, #1a2840 118deg, #07101a 128deg, #1a2840 140deg, #253b58 145deg, #1a2840 150deg, #07101a 160deg, #1a2840 172deg, #253b58 177deg, #1a2840 182deg, #07101a 192deg, #1a2840 204deg, #253b58 209deg, #1a2840 214deg, #07101a 224deg, #1a2840 236deg, #253b58 241deg, #1a2840 246deg, #07101a 256deg, #1a2840 268deg, #253b58 273deg, #1a2840 278deg, #07101a 288deg, #1a2840 300deg, #253b58 305deg, #1a2840 310deg, #07101a 320deg, #1a2840 332deg, #253b58 337deg, #1a2840 342deg, #07101a 352deg, #1a2840 360deg)', boxShadow: '0 2px 7px rgba(0,0,0,0.85), inset 0 2px 4px rgba(0,0,0,0.6)' }} />
+                            <div style={{ position: 'absolute', inset: 5, borderRadius: '50%', background: 'radial-gradient(circle at 32% 28%, #2a3d56 0%, #1a2840 45%, #0a1020 100%)', boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 3 }}>
+                              <div style={{ width: 2, height: 6, background: '#64748b', borderRadius: 1 }} />
+                            </div>
                           </div>
                         </div>
 
-                        {/* Speaker grille */}
-                        <div style={{ margin: '3px 14px 5px', padding: '5px 4px 3px', borderRadius: 4, background: 'rgba(0,0,0,0.22)' }}>
-                          {[0,1,2,3,4,5].map(i => (
-                            <div key={i} style={{
-                              height: 1.5, borderRadius: 1, marginBottom: 3.5,
-                              background: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.75) 12%, rgba(0,0,0,0.75) 88%, transparent 100%)',
-                              boxShadow: '0 1px 0 rgba(255,255,255,0.04)',
-                            }} />
-                          ))}
+                        {/* Speaker grille — dot-matrix perforations */}
+                        <div style={{ margin: '3px 12px 5px', borderRadius: 5, overflow: 'hidden', boxShadow: 'inset 0 3px 10px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(0,0,0,0.5)', background: '#030710' }}>
+                          <div style={{ height: 34, backgroundImage: 'radial-gradient(circle at 1.5px 1.5px, #000608 1.8px, transparent 1.8px)', backgroundSize: '5px 5px', backgroundRepeat: 'repeat', padding: '2px 3px' }} />
                         </div>
 
-                        {/* LED phosphor display screen */}
-                        <div style={{ margin: '2px 10px', borderRadius: 6, border: '2px solid #030904', overflow: 'hidden', boxShadow: 'inset 0 3px 10px rgba(0,0,0,0.95), 0 0 0 1px rgba(0,0,0,0.7)' }}>
-                          <div style={{
-                            height: 50,
-                            background: isRecording
-                              ? 'linear-gradient(180deg, #0e2c10 0%, #071508 100%)'
-                              : 'linear-gradient(180deg, #071408 0%, #040c05 100%)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px',
-                            transition: 'background 0.3s',
-                          }}>
-                            {/* Signal bars left */}
-                            <div className="flex items-end" style={{ gap: 3 }}>
+                        {/* LED phosphor screen with glass overlay */}
+                        <div style={{ margin: '2px 10px', borderRadius: 6, border: '2.5px solid #010503', overflow: 'hidden', boxShadow: 'inset 0 4px 12px rgba(0,0,0,0.98), 0 0 0 1px rgba(0,0,0,0.8)', position: 'relative' }}>
+                          <div style={{ height: 52, background: isRecording ? 'linear-gradient(180deg, #0a2a0c 0%, #051208 100%)' : 'linear-gradient(180deg, #061208 0%, #020804 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px', transition: 'background 0.3s' }}>
+                            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3 }}>
                               {[5,8,12,16].map((h,i) => (
-                                <div key={i} style={{
-                                  width: 4, height: h, borderRadius: 1,
-                                  background: isRecording ? '#4ade80' : '#1a4d1e',
-                                  animation: isRecording ? `waveBar ${0.28 + i * 0.09}s ease-in-out infinite alternate` : 'none',
-                                  animationDelay: `${i * 0.07}s`,
-                                  transition: 'background 0.2s',
-                                }} />
+                                <div key={i} style={{ width: 4.5, height: h, borderRadius: 1, background: isRecording ? '#22c55e' : '#0c3312', boxShadow: isRecording ? '0 0 5px rgba(34,197,94,0.7)' : 'none', animation: isRecording ? `waveBar ${0.28 + i * 0.09}s ease-in-out infinite alternate` : 'none', animationDelay: `${i * 0.07}s`, transition: 'background 0.2s' }} />
                               ))}
                             </div>
-                            {/* Center channel / TX */}
-                            <span style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 800, letterSpacing: '0.1em', color: isRecording ? '#4ade80' : '#1e5228', transition: 'color 0.2s' }}>
-                              {isRecording ? '▶ TX' : 'CH 01'}
+                            <span style={{ fontSize: 11, fontFamily: '"Courier New", monospace', fontWeight: 800, letterSpacing: '0.08em', color: isRecording ? '#22c55e' : '#0e3d17', textShadow: isRecording ? '0 0 10px rgba(34,197,94,0.85)' : 'none', transition: 'all 0.2s' }}>
+                              {isRecording ? 'TX' : 'CH01'}
                             </span>
-                            {/* Battery icon right */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <div style={{ display: 'flex', gap: 2, border: '1px solid rgba(74,222,128,0.3)', borderRadius: 2, padding: '1px 2px' }}>
-                                {[0,1,2].map(i => (
-                                  <div key={i} style={{ width: 4, height: 8, borderRadius: 1, background: isRecording ? '#14532d' : '#22c55e', transition: 'background 0.2s' }} />
-                                ))}
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                              <div style={{ display: 'flex', gap: 2, border: `1px solid ${isRecording ? 'rgba(34,197,94,0.5)' : 'rgba(34,197,94,0.22)'}`, borderRadius: 2, padding: '1.5px 2.5px', transition: 'border-color 0.2s' }}>
+                                {[0,1,2].map(i => <div key={i} style={{ width: 5, height: 9, borderRadius: 1, background: isRecording ? '#166534' : '#14532d', boxShadow: isRecording ? '0 0 4px rgba(34,197,94,0.5)' : 'none', transition: 'all 0.2s' }} />)}
                               </div>
-                              <div style={{ width: 2, height: 5, borderRadius: '0 1px 1px 0', background: '#22c55e', marginLeft: -1 }} />
+                              <div style={{ width: 2, height: 6, borderRadius: '0 1px 1px 0', background: '#22c55e', marginLeft: -0.5 }} />
                             </div>
                           </div>
+                          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 3px)' }} />
+                          <div style={{ position: 'absolute', top: 3, left: 5, width: 40, height: 16, borderRadius: '50%', background: 'radial-gradient(ellipse at 40% 40%, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.04) 60%, transparent 100%)', transform: 'rotate(-10deg)', pointerEvents: 'none' }} />
                         </div>
 
                         {/* Sub label */}
-                        <p style={{ textAlign: 'center', fontSize: 7.5, color: isRecording ? 'rgba(74,222,128,0.5)' : 'rgba(51,65,85,0.55)', letterSpacing: '0.2em', marginTop: 4, fontFamily: 'monospace', transition: 'color 0.3s' }}>
+                        <p style={{ textAlign: 'center', fontSize: 7.5, color: isRecording ? 'rgba(34,197,94,0.55)' : 'rgba(30,50,80,0.6)', letterSpacing: '0.22em', marginTop: 3, fontFamily: '"Courier New", monospace', transition: 'color 0.3s' }}>
                           OSI · FLEET RADIO
                         </p>
 
                         {/* Function buttons */}
-                        <div style={{ display: 'flex', gap: 6, padding: '6px 14px 4px' }}>
-                          {['▲','■','▼'].map((s,i) => (
-                            <div key={i} style={{
-                              flex: 1, height: 14, borderRadius: 3,
-                              background: 'linear-gradient(180deg, #1e293b, #0d1520)',
-                              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.04)',
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              fontSize: 6, color: 'rgba(51,65,85,0.7)',
-                            }}>{s}</div>
+                        <div style={{ display: 'flex', gap: 5, padding: '5px 12px 3px' }}>
+                          {(['▲','■','▼'] as const).map((s,i) => (
+                            <div key={i} style={{ flex: 1, height: 15, borderRadius: 3, background: 'linear-gradient(180deg, #1a2840, #0a1020)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.9), 0 1px 0 rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 6.5, color: 'rgba(51,65,85,0.6)' }}>{s}</div>
                           ))}
                         </div>
-
                         {/* PTT button — main interactive element */}
                         <button
                           onPointerDown={async () => {
