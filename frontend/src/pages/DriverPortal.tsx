@@ -2563,120 +2563,161 @@ export default function DriverPortal() {
                     </div>
                   )}
 
-                  {/* PTT Button */}
-                  <div className="flex flex-col items-center py-4 px-4 gap-3">
-                    <button
-                      onPointerDown={async () => {
-                        if (isRecording) return;
-                        try {
-                          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                          // Radio click sound (start)
-                          try {
-                            const ctx = new AudioContext();
-                            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate);
-                            const d = buf.getChannelData(0);
-                            for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
-                            const src = ctx.createBufferSource();
-                            const g = ctx.createGain(); g.gain.value = 0.3;
-                            src.buffer = buf; src.connect(g); g.connect(ctx.destination); src.start();
-                          } catch {}
+                  {/* PTT Button — Premium Design */}
+                  <div className="flex flex-col items-center pt-5 pb-4 px-4 gap-4">
 
-                          const chunks: BlobPart[] = [];
-                          const mr = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg' });
-                          mr.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-                          const startTime = Date.now();
-                          mr.onstop = () => {
-                            stream.getTracks().forEach(t => t.stop());
-                            const blob = new Blob(chunks, { type: mr.mimeType });
-                            const dur = Math.round((Date.now() - startTime) / 1000);
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              const audioData = reader.result as string;
-                              const sock = getSocket();
-                              const name = driver?.name || user?.name || 'Driver';
-                              sock.emit('radio:voice', { name, audioData, duration: dur });
-                              setRadioMsgs(prev => [...prev, { id: Date.now().toString(), name, msg: '', type: 'voice', audioData, duration: dur, ts: new Date().toISOString() }]);
-                            };
-                            reader.readAsDataURL(blob);
-                            // Radio click sound (end)
+                    {/* Outer glow rings */}
+                    <div className="relative flex items-center justify-center" style={{ width: 140, height: 140 }}>
+
+                      {/* Animated pulse rings when recording */}
+                      {isRecording && (<>
+                        <div className="absolute rounded-full" style={{ width: 140, height: 140, border: '1.5px solid rgba(239,68,68,0.5)', animation: 'pttRing 1.2s ease-out infinite' }} />
+                        <div className="absolute rounded-full" style={{ width: 140, height: 140, border: '1.5px solid rgba(239,68,68,0.3)', animation: 'pttRing 1.2s ease-out infinite', animationDelay: '0.4s' }} />
+                        <div className="absolute rounded-full" style={{ width: 140, height: 140, border: '1.5px solid rgba(239,68,68,0.15)', animation: 'pttRing 1.2s ease-out infinite', animationDelay: '0.8s' }} />
+                      </>)}
+
+                      {/* Metal outer ring */}
+                      <div className="absolute rounded-full" style={{
+                        width: 118, height: 118,
+                        background: isRecording
+                          ? 'conic-gradient(from 135deg, #7f1d1d, #450a0a, #7f1d1d, #991b1b, #7f1d1d)'
+                          : 'conic-gradient(from 135deg, #14532d, #052e16, #14532d, #166534, #14532d)',
+                        boxShadow: isRecording
+                          ? '0 0 0 1px rgba(239,68,68,0.2), 0 12px 40px rgba(239,68,68,0.4), 0 4px 16px rgba(0,0,0,0.7)'
+                          : '0 0 0 1px rgba(34,197,94,0.15), 0 12px 40px rgba(0,0,0,0.7), 0 4px 16px rgba(0,0,0,0.5)',
+                      }} />
+
+                      {/* Inner shadow ring */}
+                      <div className="absolute rounded-full" style={{
+                        width: 108, height: 108,
+                        background: 'rgba(0,0,0,0.5)',
+                        boxShadow: 'inset 0 4px 12px rgba(0,0,0,0.8)',
+                      }} />
+
+                      {/* Main button surface */}
+                      <button
+                        onPointerDown={async () => {
+                          if (isRecording) return;
+                          try {
+                            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                             try {
                               const ctx = new AudioContext();
-                              const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
+                              const buf = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate);
                               const d = buf.getChannelData(0);
-                              for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length) * 0.6;
+                              for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
                               const src = ctx.createBufferSource();
-                              const g = ctx.createGain(); g.gain.value = 0.25;
+                              const g = ctx.createGain(); g.gain.value = 0.3;
                               src.buffer = buf; src.connect(g); g.connect(ctx.destination); src.start();
                             } catch {}
-                          };
-                          mr.start();
-                          setMediaRecorder(mr);
-                          setIsRecording(true);
-                          setRecordingDuration(0);
-                        } catch {}
-                      }}
-                      onPointerUp={() => {
-                        if (mediaRecorder && mediaRecorder.state === 'recording') {
-                          mediaRecorder.stop();
-                          setIsRecording(false);
-                          setMediaRecorder(null);
-                        }
-                      }}
-                      onPointerLeave={() => {
-                        if (mediaRecorder && mediaRecorder.state === 'recording') {
-                          mediaRecorder.stop();
-                          setIsRecording(false);
-                          setMediaRecorder(null);
-                        }
-                      }}
-                      className="select-none touch-none relative flex flex-col items-center justify-center rounded-full transition-all active:scale-95"
-                      style={{
-                        width: 88, height: 88,
-                        background: isRecording
-                          ? 'radial-gradient(circle at 35% 35%, #ef4444, #991b1b)'
-                          : 'radial-gradient(circle at 35% 35%, #22c55e, #14532d)',
-                        boxShadow: isRecording
-                          ? '0 0 0 3px rgba(239,68,68,0.3), 0 0 24px rgba(239,68,68,0.5), inset 0 2px 4px rgba(255,255,255,0.15), inset 0 -3px 6px rgba(0,0,0,0.4)'
-                          : '0 0 0 3px rgba(34,197,94,0.25), 0 8px 24px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.15), inset 0 -3px 6px rgba(0,0,0,0.4)',
-                        border: isRecording ? '2px solid rgba(239,68,68,0.6)' : '2px solid rgba(34,197,94,0.4)',
-                      }}>
-                      {/* Button shine */}
-                      <div className="absolute top-2 left-3 w-8 h-5 rounded-full opacity-25" style={{ background: 'radial-gradient(ellipse, white, transparent)' }} />
-                      {/* Walkie-talkie SVG icon */}
-                      <svg viewBox="0 0 64 64" className="w-11 h-11 drop-shadow-lg" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))' }} fill="none">
-                        {/* Antenna */}
-                        <rect x="38" y="2" width="3" height="14" rx="1.5" fill="rgba(255,255,255,0.9)"/>
-                        {/* Radio waves */}
-                        <path d="M44 6 Q48 9 44 12" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" fill="none"/>
-                        <path d="M46 3 Q53 8 46 14" stroke="rgba(255,255,255,0.45)" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-                        {/* Body */}
-                        <rect x="14" y="10" width="28" height="46" rx="5" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.5)" strokeWidth="2"/>
-                        {/* Screen */}
-                        <rect x="18" y="14" width="20" height="12" rx="2" fill="rgba(0,0,0,0.45)" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
-                        {/* Screen bars (signal) */}
-                        <rect x="20" y="21" width="2" height="3" rx="0.5" fill="#4ade80"/>
-                        <rect x="24" y="19" width="2" height="5" rx="0.5" fill="#4ade80"/>
-                        <rect x="28" y="17" width="2" height="7" rx="0.5" fill="#4ade80"/>
-                        <rect x="32" y="19" width="2" height="5" rx="0.5" fill="rgba(74,222,128,0.4)"/>
-                        {/* PTT side button */}
-                        <rect x="10" y="28" width="4" height="10" rx="2" fill="rgba(255,255,255,0.6)"/>
-                        {/* Speaker grille dots */}
-                        <circle cx="21" cy="34" r="1.2" fill="rgba(255,255,255,0.5)"/>
-                        <circle cx="27" cy="34" r="1.2" fill="rgba(255,255,255,0.5)"/>
-                        <circle cx="33" cy="34" r="1.2" fill="rgba(255,255,255,0.5)"/>
-                        <circle cx="21" cy="39" r="1.2" fill="rgba(255,255,255,0.5)"/>
-                        <circle cx="27" cy="39" r="1.2" fill="rgba(255,255,255,0.5)"/>
-                        <circle cx="33" cy="39" r="1.2" fill="rgba(255,255,255,0.5)"/>
-                        <circle cx="21" cy="44" r="1.2" fill="rgba(255,255,255,0.5)"/>
-                        <circle cx="27" cy="44" r="1.2" fill="rgba(255,255,255,0.5)"/>
-                        <circle cx="33" cy="44" r="1.2" fill="rgba(255,255,255,0.5)"/>
-                        {/* Bottom knob */}
-                        <rect x="24" y="52" width="8" height="3" rx="1.5" fill="rgba(255,255,255,0.4)"/>
-                      </svg>
-                    </button>
-                    <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: isRecording ? '#f87171' : 'rgba(100,116,139,0.8)' }}>
-                      {isRecording ? '● Suelta para enviar' : 'Mantén para hablar'}
-                    </p>
+                            const chunks: BlobPart[] = [];
+                            const mr = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg' });
+                            mr.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+                            const startTime = Date.now();
+                            mr.onstop = () => {
+                              stream.getTracks().forEach(t => t.stop());
+                              const blob = new Blob(chunks, { type: mr.mimeType });
+                              const dur = Math.round((Date.now() - startTime) / 1000);
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                const audioData = reader.result as string;
+                                const sock = getSocket();
+                                const name = driver?.name || user?.name || 'Driver';
+                                sock.emit('radio:voice', { name, audioData, duration: dur });
+                                setRadioMsgs(prev => [...prev, { id: Date.now().toString(), name, msg: '', type: 'voice', audioData, duration: dur, ts: new Date().toISOString() }]);
+                              };
+                              reader.readAsDataURL(blob);
+                              try {
+                                const ctx = new AudioContext();
+                                const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
+                                const d = buf.getChannelData(0);
+                                for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length) * 0.6;
+                                const src = ctx.createBufferSource();
+                                const g = ctx.createGain(); g.gain.value = 0.25;
+                                src.buffer = buf; src.connect(g); g.connect(ctx.destination); src.start();
+                              } catch {}
+                            };
+                            mr.start();
+                            setMediaRecorder(mr);
+                            setIsRecording(true);
+                            setRecordingDuration(0);
+                          } catch {}
+                        }}
+                        onPointerUp={() => {
+                          if (mediaRecorder && mediaRecorder.state === 'recording') {
+                            mediaRecorder.stop();
+                            setIsRecording(false);
+                            setMediaRecorder(null);
+                          }
+                        }}
+                        onPointerLeave={() => {
+                          if (mediaRecorder && mediaRecorder.state === 'recording') {
+                            mediaRecorder.stop();
+                            setIsRecording(false);
+                            setMediaRecorder(null);
+                          }
+                        }}
+                        className="select-none touch-none relative flex flex-col items-center justify-center rounded-full transition-transform active:scale-[0.93]"
+                        style={{
+                          width: 96, height: 96,
+                          background: isRecording
+                            ? 'radial-gradient(circle at 38% 32%, #f87171 0%, #dc2626 45%, #7f1d1d 100%)'
+                            : 'radial-gradient(circle at 38% 32%, #4ade80 0%, #16a34a 45%, #14532d 100%)',
+                          boxShadow: isRecording
+                            ? 'inset 0 -4px 12px rgba(0,0,0,0.5), inset 0 3px 8px rgba(255,255,255,0.12), 0 0 30px rgba(220,38,38,0.5)'
+                            : 'inset 0 -4px 12px rgba(0,0,0,0.5), inset 0 3px 8px rgba(255,255,255,0.12), 0 0 20px rgba(22,163,74,0.3)',
+                        }}>
+                        {/* Top gloss */}
+                        <div className="absolute rounded-full pointer-events-none" style={{
+                          top: 10, left: 14, width: 50, height: 28,
+                          background: 'radial-gradient(ellipse, rgba(255,255,255,0.22) 0%, transparent 70%)',
+                          transform: 'rotate(-15deg)',
+                        }} />
+                        {/* Walkie-talkie icon — cleaner premium version */}
+                        <svg viewBox="0 0 48 56" width="38" height="44" fill="none" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.6))' }}>
+                          {/* Antenna */}
+                          <rect x="30" y="0" width="2.5" height="12" rx="1.25" fill="rgba(255,255,255,0.95)"/>
+                          {/* Signal arcs */}
+                          <path d="M35 3 Q39 6.5 35 10" stroke="rgba(255,255,255,0.8)" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+                          <path d="M38 1 Q44 6.5 38 12" stroke="rgba(255,255,255,0.45)" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+                          {/* Device body */}
+                          <rect x="8" y="9" width="26" height="42" rx="4" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"/>
+                          {/* Top section highlight */}
+                          <rect x="8" y="9" width="26" height="14" rx="4" fill="rgba(255,255,255,0.08)"/>
+                          {/* Screen */}
+                          <rect x="12" y="12" width="18" height="9" rx="1.5" fill="rgba(0,0,0,0.55)" stroke="rgba(255,255,255,0.25)" strokeWidth="0.8"/>
+                          {/* Signal bars on screen */}
+                          <rect x="14" y="18" width="2" height="2" rx="0.3" fill="#4ade80" opacity="0.9"/>
+                          <rect x="17.5" y="16.5" width="2" height="3.5" rx="0.3" fill="#4ade80" opacity="0.9"/>
+                          <rect x="21" y="15" width="2" height="5" rx="0.3" fill="#4ade80" opacity="0.9"/>
+                          <rect x="24.5" y="16.5" width="2" height="3.5" rx="0.3" fill="rgba(74,222,128,0.35)"/>
+                          {/* Side PTT button */}
+                          <rect x="4" y="23" width="4" height="9" rx="2" fill="rgba(255,255,255,0.65)" stroke="rgba(255,255,255,0.3)" strokeWidth="0.5"/>
+                          {/* Speaker grille — horizontal lines */}
+                          <rect x="12" y="26" width="18" height="1.2" rx="0.6" fill="rgba(255,255,255,0.35)"/>
+                          <rect x="12" y="29" width="18" height="1.2" rx="0.6" fill="rgba(255,255,255,0.35)"/>
+                          <rect x="12" y="32" width="18" height="1.2" rx="0.6" fill="rgba(255,255,255,0.35)"/>
+                          <rect x="12" y="35" width="18" height="1.2" rx="0.6" fill="rgba(255,255,255,0.35)"/>
+                          {/* Bottom controls */}
+                          <circle cx="17" cy="43" r="2.5" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" strokeWidth="0.8"/>
+                          <circle cx="24" cy="43" r="2.5" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" strokeWidth="0.8"/>
+                          <circle cx="31" cy="43" r="2.5" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" strokeWidth="0.8"/>
+                          {/* Bottom strap hole */}
+                          <rect x="17" y="48" width="8" height="2.5" rx="1.25" fill="rgba(255,255,255,0.3)"/>
+                        </svg>
+                        {/* Bottom shadow rim */}
+                        <div className="absolute bottom-0 left-0 right-0 h-8 rounded-b-full pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.25))' }} />
+                      </button>
+                    </div>
+
+                    {/* Label */}
+                    <div className="flex flex-col items-center gap-1">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: isRecording ? '#f87171' : 'rgba(100,116,139,0.7)' }}>
+                        {isRecording ? '● Suelta para enviar' : 'Mantén para hablar'}
+                      </p>
+                      {!isRecording && (
+                        <p className="text-[9px] text-slate-600 tracking-wider uppercase">OSI Fleet · Canal Seguro</p>
+                      )}
+                    </div>
                   </div>
 
                   {/* Text input row */}
