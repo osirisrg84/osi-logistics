@@ -83,7 +83,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
       <>
         {musicOn && (
           <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(168,85,247,0.22)' }}>
-            <iframe src="https://open.spotify.com/embed/playlist/37i9dQZF1DWY7IeIP1cdjF?utm_source=generator&theme=0"
+            <iframe src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M?utm_source=generator&theme=0"
               width="100%" height="80" style={{ border: 'none', display: 'block' }}
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" />
           </div>
@@ -202,7 +202,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           {/* Music */}
           <button onClick={() => setMusicOn(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(musicOn,'rgba(168,85,247,0.13)','rgba(168,85,247,0.35)')}>
             <Headphones className={`w-3 h-3 flex-shrink-0 ${musicOn ? 'text-purple-400' : 'text-slate-400'}`} />
-            <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Music</p><p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }}>{musicOn ? '▶ Play' : 'Reggae'}</p></div>
+            <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Music</p><p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }}>{musicOn ? '▶ Play' : 'Pop'}</p></div>
             <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(musicOn,'linear-gradient(90deg,#a855f7,#7c3aed)','rgba(168,85,247,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(musicOn)} /></div>
           </button>
         </div>
@@ -335,7 +335,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             </button>
             <button onClick={() => setMusicOn(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(musicOn,'rgba(168,85,247,0.13)','rgba(168,85,247,0.35)')}>
               <Headphones className={`w-3 h-3 flex-shrink-0 ${musicOn ? 'text-purple-400' : 'text-slate-400'}`} />
-              <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Music</p><p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }}>{musicOn ? '▶ Play' : 'Reggae'}</p></div>
+              <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Music</p><p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }}>{musicOn ? '▶ Play' : 'Pop'}</p></div>
               <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(musicOn,'linear-gradient(90deg,#a855f7,#7c3aed)','rgba(168,85,247,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(musicOn)} /></div>
             </button>
           </div>
