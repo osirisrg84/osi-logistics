@@ -188,10 +188,9 @@ export default function DispatcherHub() {
             </div>
             <div className="space-y-2.5">
               {([
-                { label: 'Operations Manager',     phone: '+1 (786) 333-1000', desc: 'Decisiones operacionales urgentes',   color: '#22c55e' },
-                { label: 'Driver Support Line',    phone: '+1 (786) 333-4444', desc: 'Issues con drivers · Status de ruta', color: '#3b82f6' },
-                { label: 'Fleet Maintenance',      phone: '+1 (786) 333-6600', desc: 'Averías y mantenimiento de unidades', color: '#f59e0b' },
-                { label: 'Emergencias 24/7',       phone: '+1 (786) 333-9911', desc: 'Accidentes · Incidentes críticos',     color: '#ef4444' },
+                { label: 'Operations Manager',     phone: '+1 (786) 380-6634', desc: 'Decisiones operacionales urgentes',   color: '#22c55e' },
+                { label: 'Driver Support Line',    phone: '+1 (904) 610-3125', desc: 'Issues con drivers · Status de ruta', color: '#3b82f6' },
+                { label: 'Fleet Maintenance',      phone: '+1 (305) 492-8401', desc: 'Averías y mantenimiento de unidades', color: '#f59e0b' },
               ]).map(c => (
                 <a
                   key={c.phone}
