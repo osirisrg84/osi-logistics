@@ -16,7 +16,13 @@ export default function DispatcherHub() {
   const accentBorder = isAdmin ? 'rgba(168,85,247,0.3)' : 'rgba(249,115,22,0.3)';
 
   // ── Music ──────────────────────────────────────────────
-  const [musicOn, setMusicOn] = useState(false);
+  const [musicOn, setMusicOn] = useState(() => {
+    try { return localStorage.getItem('osi_music_on') === '1'; } catch { return false; }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('osi_music_on', musicOn ? '1' : '0');
+  }, [musicOn]);
 
   // ── Notas ──────────────────────────────────────────────
   const [notes, setNotes] = useState<Array<{id: string; text: string; time: string}>>(() => {
