@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Package, MapPin, CheckCircle, Truck, Phone,
   Clock, Star, Navigation, LogOut, User, Activity,
@@ -247,6 +247,8 @@ export default function DriverPortal() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [playingMsgId, setPlayingMsgId] = useState<string | null>(null);
+  const radioAudioRef = useRef<HTMLAudioElement | null>(null);
   const radioScrollRef = { current: null as HTMLDivElement | null };
   const [communityPosts, setCommunityPosts] = useState([
     { id:'cp1', avatar:'CM', name:'Carlos Mendez', time:'2h', msg:'Acabo de completar mi entrega #100 con OSI! 🎉 Gracias a todo el equipo dispatch. #OSILogistics', likes:7, liked:false },
@@ -2490,24 +2492,50 @@ export default function DriverPortal() {
                             }`}>
                               {/* Voice message player */}
                               {(() => {
-                                const audioSrc = msg.audioData!;
+                                const isPlaying = playingMsgId === msg.id;
                                 return (
                                   <div className="flex items-center gap-2">
                                     <button
                                       onClick={() => {
-                                        const audio = new Audio(audioSrc);
-                                        audio.play().catch(() => {});
+                                        if (isPlaying) {
+                                          radioAudioRef.current?.pause();
+                                          radioAudioRef.current = null;
+                                          setPlayingMsgId(null);
+                                        } else {
+                                          if (radioAudioRef.current) {
+                                            radioAudioRef.current.pause();
+                                            radioAudioRef.current = null;
+                                          }
+                                          const audio = new Audio(msg.audioData!);
+                                          audio.onended = () => setPlayingMsgId(null);
+                                          audio.onpause = () => setPlayingMsgId(prev => prev === msg.id ? null : prev);
+                                          radioAudioRef.current = audio;
+                                          audio.play().catch(() => setPlayingMsgId(null));
+                                          setPlayingMsgId(msg.id);
+                                        }
                                       }}
                                       className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all active:scale-95 ${isMe ? 'bg-white/20 hover:bg-white/30' : 'bg-cyan-500/20 hover:bg-cyan-500/30'}`}>
-                                      <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current text-white" style={{ marginLeft: 2 }}>
-                                        <path d="M8 5v14l11-7z"/>
-                                      </svg>
+                                      {isPlaying ? (
+                                        <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current text-white">
+                                          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                                        </svg>
+                                      ) : (
+                                        <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current text-white" style={{ marginLeft: 2 }}>
+                                          <path d="M8 5v14l11-7z"/>
+                                        </svg>
+                                      )}
                                     </button>
-                                    {/* Static waveform bars */}
+                                    {/* Waveform bars — animate while playing */}
                                     <div className="flex items-center gap-[2px] flex-1">
                                       {[4,8,12,6,10,14,8,5,11,9,13,7,10,6,8,12,5,9].map((h, i) => (
-                                        <div key={i} className={`rounded-full flex-shrink-0 ${isMe ? 'bg-white/60' : 'bg-cyan-400/60'}`}
-                                          style={{ width: 2, height: h }} />
+                                        <div key={i} className={`rounded-full flex-shrink-0 ${isMe ? 'bg-white/75' : 'bg-cyan-400/70'}`}
+                                          style={{
+                                            width: 2,
+                                            height: h,
+                                            transformOrigin: 'center',
+                                            animation: isPlaying ? `waveBar ${0.32 + (i % 6) * 0.07}s ease-in-out infinite alternate` : 'none',
+                                            animationDelay: isPlaying ? `${i * 0.04}s` : '0s',
+                                          }} />
                                       ))}
                                     </div>
                                     <span className={`text-[10px] font-mono flex-shrink-0 ${isMe ? 'text-white/70' : 'text-slate-400'}`}>
