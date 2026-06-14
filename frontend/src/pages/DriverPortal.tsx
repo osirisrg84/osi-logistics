@@ -2642,8 +2642,36 @@ export default function DriverPortal() {
                       }}>
                       {/* Button shine */}
                       <div className="absolute top-2 left-3 w-8 h-5 rounded-full opacity-25" style={{ background: 'radial-gradient(ellipse, white, transparent)' }} />
-                      <svg viewBox="0 0 24 24" className="w-9 h-9 fill-current text-white drop-shadow-lg" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>
-                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                      {/* Walkie-talkie SVG icon */}
+                      <svg viewBox="0 0 64 64" className="w-11 h-11 drop-shadow-lg" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))' }} fill="none">
+                        {/* Antenna */}
+                        <rect x="38" y="2" width="3" height="14" rx="1.5" fill="rgba(255,255,255,0.9)"/>
+                        {/* Radio waves */}
+                        <path d="M44 6 Q48 9 44 12" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" fill="none"/>
+                        <path d="M46 3 Q53 8 46 14" stroke="rgba(255,255,255,0.45)" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+                        {/* Body */}
+                        <rect x="14" y="10" width="28" height="46" rx="5" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.5)" strokeWidth="2"/>
+                        {/* Screen */}
+                        <rect x="18" y="14" width="20" height="12" rx="2" fill="rgba(0,0,0,0.45)" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
+                        {/* Screen bars (signal) */}
+                        <rect x="20" y="21" width="2" height="3" rx="0.5" fill="#4ade80"/>
+                        <rect x="24" y="19" width="2" height="5" rx="0.5" fill="#4ade80"/>
+                        <rect x="28" y="17" width="2" height="7" rx="0.5" fill="#4ade80"/>
+                        <rect x="32" y="19" width="2" height="5" rx="0.5" fill="rgba(74,222,128,0.4)"/>
+                        {/* PTT side button */}
+                        <rect x="10" y="28" width="4" height="10" rx="2" fill="rgba(255,255,255,0.6)"/>
+                        {/* Speaker grille dots */}
+                        <circle cx="21" cy="34" r="1.2" fill="rgba(255,255,255,0.5)"/>
+                        <circle cx="27" cy="34" r="1.2" fill="rgba(255,255,255,0.5)"/>
+                        <circle cx="33" cy="34" r="1.2" fill="rgba(255,255,255,0.5)"/>
+                        <circle cx="21" cy="39" r="1.2" fill="rgba(255,255,255,0.5)"/>
+                        <circle cx="27" cy="39" r="1.2" fill="rgba(255,255,255,0.5)"/>
+                        <circle cx="33" cy="39" r="1.2" fill="rgba(255,255,255,0.5)"/>
+                        <circle cx="21" cy="44" r="1.2" fill="rgba(255,255,255,0.5)"/>
+                        <circle cx="27" cy="44" r="1.2" fill="rgba(255,255,255,0.5)"/>
+                        <circle cx="33" cy="44" r="1.2" fill="rgba(255,255,255,0.5)"/>
+                        {/* Bottom knob */}
+                        <rect x="24" y="52" width="8" height="3" rx="1.5" fill="rgba(255,255,255,0.4)"/>
                       </svg>
                     </button>
                     <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: isRecording ? '#f87171' : 'rgba(100,116,139,0.8)' }}>
