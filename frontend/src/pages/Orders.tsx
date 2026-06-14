@@ -78,7 +78,7 @@ function CreateOrderModal({ onClose, onSave }: OrderModalProps) {
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Nueva Orden</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">New Order</h2>
           <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
             <X className="w-5 h-5 text-gray-500 dark:text-slate-400" />
           </button>
