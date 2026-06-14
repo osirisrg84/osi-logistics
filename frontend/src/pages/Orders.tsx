@@ -89,20 +89,20 @@ function CreateOrderModal({ onClose, onSave }: OrderModalProps) {
           {/* Customer */}
           <div>
             <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-              <User className="w-4 h-4 text-orange-500" /> Customer Information
+              <User className="w-4 h-4 text-orange-500" /> Información del Cliente
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="label">Customer Name *</label>
-                <input className="input" value={form.customer_name} onChange={e => setForm({...form, customer_name: e.target.value})} placeholder="Company or contact name" required />
+                <label className="label">Nombre *</label>
+                <input className="input" value={form.customer_name} onChange={e => setForm({...form, customer_name: e.target.value})} placeholder="Empresa o contacto" required />
               </div>
               <div>
-                <label className="label">Phone *</label>
+                <label className="label">Teléfono *</label>
                 <input className="input" value={form.customer_phone} onChange={e => setForm({...form, customer_phone: e.target.value})} placeholder="(305) 555-0000" required />
               </div>
               <div className="col-span-2">
-                <label className="label">Email</label>
-                <input className="input" type="email" value={form.customer_email} onChange={e => setForm({...form, customer_email: e.target.value})} placeholder="orders@company.com" />
+                <label className="label">Correo</label>
+                <input className="input" type="email" value={form.customer_email} onChange={e => setForm({...form, customer_email: e.target.value})} placeholder="correo@empresa.com" />
               </div>
             </div>
           </div>
