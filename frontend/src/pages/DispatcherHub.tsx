@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
-  Headphones, Users, PhoneCall, MessageSquare, Heart,
-  Briefcase, Shield, BookOpen, AlertTriangle, ChevronRight,
-  StickyNote, Plus, X, Pin, Zap
+  Users, PhoneCall, MessageSquare, Heart,
+  Briefcase, Shield, BookOpen, AlertTriangle, ChevronRight, X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -14,45 +13,6 @@ export default function DispatcherHub() {
   const accent = isAdmin ? '#a855f7' : '#f97316';
   const accentSoft = isAdmin ? 'rgba(168,85,247,0.12)' : 'rgba(249,115,22,0.12)';
   const accentBorder = isAdmin ? 'rgba(168,85,247,0.3)' : 'rgba(249,115,22,0.3)';
-
-  // ── Music ──────────────────────────────────────────────
-  const [musicOn, setMusicOn] = useState(() => {
-    try { return localStorage.getItem('osi_music_on') === '1'; } catch { return false; }
-  });
-
-  useEffect(() => {
-    localStorage.setItem('osi_music_on', musicOn ? '1' : '0');
-  }, [musicOn]);
-
-  // ── Notas ──────────────────────────────────────────────
-  const [notes, setNotes] = useState<Array<{id: string; text: string; time: string}>>(() => {
-    try { return JSON.parse(localStorage.getItem('osi_dispatch_notes') || '[]'); } catch { return []; }
-  });
-  const [noteInput, setNoteInput] = useState('');
-
-  useEffect(() => {
-    localStorage.setItem('osi_dispatch_notes', JSON.stringify(notes));
-  }, [notes]);
-
-  function addNote() {
-    if (!noteInput.trim()) return;
-    setNotes(prev => [{
-      id: Date.now().toString(),
-      text: noteInput.trim(),
-      time: new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' }),
-    }, ...prev]);
-    setNoteInput('');
-  }
-
-  // ── Switch panel state ─────────────────────────────────
-  const [notesOpen, setNotesOpen] = useState(false);
-  const [dispActive, setDispActive] = useState(() => {
-    try { return localStorage.getItem('osi_disp_active') === '1'; } catch { return false; }
-  });
-
-  useEffect(() => {
-    localStorage.setItem('osi_disp_active', dispActive ? '1' : '0');
-  }, [dispActive]);
 
   // ── Hub sections ───────────────────────────────────────
   const [section, setSection] = useState<'community' | 'support'>('community');
@@ -86,139 +46,6 @@ export default function DispatcherHub() {
 
   return (
     <div className="max-w-lg mx-auto space-y-4 pb-4">
-
-      {/* ── 3-Switch Compact Row ─────────────────────────── */}
-      <div className="flex gap-1.5">
-
-        {/* Switch 1 — Activo */}
-        <button
-          onClick={() => setDispActive(v => !v)}
-          className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all"
-          style={{
-            background: dispActive ? 'rgba(34,197,94,0.13)' : dark ? 'rgba(15,23,42,0.9)' : 'rgba(241,245,249,0.9)',
-            border: `1px solid ${dispActive ? 'rgba(34,197,94,0.35)' : dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)'}`,
-            boxShadow: dispActive ? '0 0 8px rgba(34,197,94,0.2)' : 'none',
-          }}>
-          <Zap className={`w-3 h-3 flex-shrink-0 transition-colors ${dispActive ? 'text-green-400' : 'text-slate-400'}`} />
-          <div className="flex-1 text-left">
-            <p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Activo</p>
-            <p className="text-[8px] leading-none mt-0.5" style={{ color: dispActive ? '#4ade80' : '#94a3b8' }}>
-              {dispActive ? 'En turno' : 'Libre'}
-            </p>
-          </div>
-          <div className="relative flex-shrink-0 rounded-full" style={{ width: 24, height: 13, background: dispActive ? 'linear-gradient(90deg,#22c55e,#16a34a)' : dark ? 'rgba(51,65,85,0.9)' : '#e2e8f0', boxShadow: dispActive ? '0 0 6px rgba(34,197,94,0.45)' : 'none', transition: 'background 0.25s' }}>
-            <div className="absolute rounded-full bg-white" style={{ width: 9, height: 9, top: 2, left: dispActive ? 13 : 2, transition: 'left 0.22s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' }} />
-          </div>
-        </button>
-
-        {/* Switch 2 — Notas */}
-        <button
-          onClick={() => setNotesOpen(v => !v)}
-          className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all"
-          style={{
-            background: notesOpen ? 'rgba(251,191,36,0.13)' : dark ? 'rgba(15,23,42,0.9)' : 'rgba(241,245,249,0.9)',
-            border: `1px solid ${notesOpen ? 'rgba(251,191,36,0.35)' : dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)'}`,
-            boxShadow: notesOpen ? '0 0 8px rgba(251,191,36,0.2)' : 'none',
-          }}>
-          <StickyNote className={`w-3 h-3 flex-shrink-0 transition-colors ${notesOpen ? 'text-amber-400' : 'text-slate-400'}`} />
-          <div className="flex-1 text-left">
-            <p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Notas</p>
-            <p className="text-[8px] leading-none mt-0.5" style={{ color: notesOpen ? '#fbbf24' : '#94a3b8' }}>
-              {notes.length > 0 ? `${notes.length} nota${notes.length !== 1 ? 's' : ''}` : 'Vacío'}
-            </p>
-          </div>
-          <div className="relative flex-shrink-0 rounded-full" style={{ width: 24, height: 13, background: notesOpen ? 'linear-gradient(90deg,#f59e0b,#d97706)' : dark ? 'rgba(51,65,85,0.9)' : '#e2e8f0', boxShadow: notesOpen ? '0 0 6px rgba(251,191,36,0.45)' : 'none', transition: 'background 0.25s' }}>
-            <div className="absolute rounded-full bg-white" style={{ width: 9, height: 9, top: 2, left: notesOpen ? 13 : 2, transition: 'left 0.22s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' }} />
-          </div>
-        </button>
-
-        {/* Switch 3 — Music */}
-        <button
-          onClick={() => setMusicOn(v => !v)}
-          className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all"
-          style={{
-            background: musicOn ? 'rgba(168,85,247,0.13)' : dark ? 'rgba(15,23,42,0.9)' : 'rgba(241,245,249,0.9)',
-            border: `1px solid ${musicOn ? 'rgba(168,85,247,0.35)' : dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)'}`,
-            boxShadow: musicOn ? '0 0 8px rgba(168,85,247,0.2)' : 'none',
-          }}>
-          <Headphones className={`w-3 h-3 flex-shrink-0 transition-colors ${musicOn ? 'text-purple-400' : 'text-slate-400'}`} />
-          <div className="flex-1 text-left">
-            <p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Music</p>
-            <p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }}>
-              {musicOn ? '▶ Play' : 'Reggae'}
-            </p>
-          </div>
-          <div className="relative flex-shrink-0 rounded-full" style={{ width: 24, height: 13, background: musicOn ? 'linear-gradient(90deg,#a855f7,#7c3aed)' : dark ? 'rgba(51,65,85,0.9)' : '#e2e8f0', boxShadow: musicOn ? '0 0 6px rgba(168,85,247,0.45)' : 'none', transition: 'background 0.25s' }}>
-            <div className="absolute rounded-full bg-white" style={{ width: 9, height: 9, top: 2, left: musicOn ? 13 : 2, transition: 'left 0.22s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' }} />
-          </div>
-        </button>
-
-      </div>
-
-      {/* Spotify embed — when music ON */}
-      {musicOn && (
-        <div className={`rounded-2xl overflow-hidden`} style={{ border: '1px solid rgba(168,85,247,0.22)' }}>
-          <iframe
-            src="https://open.spotify.com/embed/playlist/37i9dQZF1DWY7IeIP1cdjF?utm_source=generator&theme=0"
-            width="100%" height="80"
-            style={{ border: 'none', display: 'block' }}
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-          />
-        </div>
-      )}
-
-      {/* Notas panel — when notas ON */}
-      {notesOpen && (
-        <div className={`rounded-2xl overflow-hidden shadow-sm ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-100'}`}>
-          {/* Input */}
-          <div className="flex gap-2 px-4 py-3" style={{ borderBottom: notes.length > 0 ? `1px solid ${dark ? 'rgba(255,255,255,0.04)' : '#f8fafc'}` : 'none' }}>
-            <input
-              value={noteInput}
-              onChange={e => setNoteInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') addNote(); }}
-              placeholder="Apuntar algo importante..."
-              maxLength={200}
-              className={`flex-1 text-sm px-3 py-2 rounded-xl outline-none border-0 ${dark ? 'bg-slate-700 text-slate-200 placeholder:text-slate-500' : 'bg-gray-50 text-gray-800 placeholder:text-gray-400'}`}
-            />
-            <button
-              onClick={addNote}
-              disabled={!noteInput.trim()}
-              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all active:scale-90 disabled:opacity-40"
-              style={{ background: `linear-gradient(135deg,#f59e0b,#d97706)` }}
-            >
-              <Plus className="w-4 h-4 text-white" />
-            </button>
-          </div>
-          {/* Notes list */}
-          {notes.length > 0 && (
-            <div className="p-3 space-y-2 max-h-52 overflow-y-auto">
-              {notes.map((note, i) => (
-                <div key={note.id}
-                  className="flex items-start gap-2.5 p-3 rounded-xl"
-                  style={{
-                    background: dark
-                      ? i % 2 === 0 ? 'rgba(251,191,36,0.07)' : 'rgba(249,115,22,0.06)'
-                      : i % 2 === 0 ? 'rgba(251,191,36,0.07)' : 'rgba(249,115,22,0.05)',
-                    border: `1px solid ${dark ? 'rgba(251,191,36,0.12)' : 'rgba(251,191,36,0.14)'}`,
-                  }}>
-                  <Pin className="w-3 h-3 mt-0.5 flex-shrink-0 text-amber-400" />
-                  <p className={`flex-1 text-sm leading-snug ${dark ? 'text-slate-200' : 'text-gray-800'}`}>{note.text}</p>
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <span className="text-[10px] text-slate-500">{note.time}</span>
-                    <button
-                      onClick={() => setNotes(prev => prev.filter(n => n.id !== note.id))}
-                      className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors ${dark ? 'hover:bg-white/10 text-slate-500 hover:text-red-400' : 'hover:bg-red-50 text-gray-400 hover:text-red-400'}`}
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ── Section Tabs ─────────────────────────────────── */}
       <div className="flex gap-2">
