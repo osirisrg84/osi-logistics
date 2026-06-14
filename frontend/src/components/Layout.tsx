@@ -88,7 +88,7 @@ function BottomNav({ onMoreClick }: { onMoreClick: () => void }) {
         { to: '/orders',    icon: Package,         label: 'Orders'  },
         { to: '/tracking',  icon: MapPin,          label: 'Tracking'},
         { to: '/drivers',   icon: Users,           label: 'Drivers' },
-        { to: '/hub',       icon: Layers,          label: 'Hub'     },
+        { to: '/reports',   icon: BarChart3,       label: 'Reports' },
       ];
 
   return (
