@@ -84,11 +84,11 @@ function BottomNav({ onMoreClick }: { onMoreClick: () => void }) {
   const navItems = isAdmin
     ? BOTTOM_NAV
     : [
-        { to: '/hub',       icon: Layers,          label: 'Hub'     },
+        { to: '/dashboard', icon: LayoutDashboard, label: 'Stats'   },
         { to: '/orders',    icon: Package,         label: 'Orders'  },
         { to: '/tracking',  icon: MapPin,          label: 'Tracking'},
         { to: '/drivers',   icon: Users,           label: 'Drivers' },
-        { to: '/dashboard', icon: LayoutDashboard, label: 'Stats'   },
+        { to: '/hub',       icon: Layers,          label: 'Hub'     },
       ];
 
   return (
