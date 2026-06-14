@@ -2563,36 +2563,61 @@ export default function DriverPortal() {
                     </div>
                   )}
 
-                  {/* PTT Button — Premium Design */}
-                  <div className="flex flex-col items-center pt-5 pb-4 px-4 gap-4">
+                  {/* PTT Button — Ultra Premium */}
+                  <div className="flex flex-col items-center pt-5 pb-4 px-4 gap-3">
 
-                    {/* Outer glow rings */}
-                    <div className="relative flex items-center justify-center" style={{ width: 140, height: 140 }}>
+                    {/* All layers inside a 190×190 relative container */}
+                    <div className="relative flex items-center justify-center" style={{ width: 190, height: 190 }}>
 
                       {/* Animated pulse rings when recording */}
                       {isRecording && (<>
-                        <div className="absolute rounded-full" style={{ width: 140, height: 140, border: '1.5px solid rgba(239,68,68,0.5)', animation: 'pttRing 1.2s ease-out infinite' }} />
-                        <div className="absolute rounded-full" style={{ width: 140, height: 140, border: '1.5px solid rgba(239,68,68,0.3)', animation: 'pttRing 1.2s ease-out infinite', animationDelay: '0.4s' }} />
-                        <div className="absolute rounded-full" style={{ width: 140, height: 140, border: '1.5px solid rgba(239,68,68,0.15)', animation: 'pttRing 1.2s ease-out infinite', animationDelay: '0.8s' }} />
+                        <div className="absolute rounded-full" style={{ width: 190, height: 190, border: '1.5px solid rgba(239,68,68,0.6)', animation: 'pttRing 1.4s ease-out infinite' }} />
+                        <div className="absolute rounded-full" style={{ width: 190, height: 190, border: '1.5px solid rgba(239,68,68,0.3)', animation: 'pttRing 1.4s ease-out infinite', animationDelay: '0.46s' }} />
+                        <div className="absolute rounded-full" style={{ width: 190, height: 190, border: '1.5px solid rgba(239,68,68,0.14)', animation: 'pttRing 1.4s ease-out infinite', animationDelay: '0.92s' }} />
                       </>)}
 
-                      {/* Outer chrome bezel */}
+                      {/* Outer mounting plate — dark knurled housing */}
                       <div className="absolute rounded-full" style={{
-                        width: 122, height: 122,
-                        background: 'conic-gradient(from 200deg, #1e293b 0%, #334155 18%, #64748b 30%, #94a3b8 38%, #64748b 46%, #334155 58%, #1e293b 72%, #334155 82%, #64748b 90%, #475569 100%)',
-                        boxShadow: isRecording
-                          ? '0 0 0 1.5px rgba(239,68,68,0.3), 0 16px 48px rgba(239,68,68,0.35), 0 6px 20px rgba(0,0,0,0.8)'
-                          : '0 0 0 1.5px rgba(148,163,184,0.2), 0 16px 48px rgba(0,0,0,0.8), 0 6px 20px rgba(0,0,0,0.6)',
+                        width: 178, height: 178,
+                        background: 'conic-gradient(from 0deg, #08111e 0deg, #0e1a2c 12deg, #08111e 24deg, #0e1a2c 36deg, #08111e 48deg, #0e1a2c 60deg, #08111e 72deg, #0e1a2c 84deg, #08111e 96deg, #0e1a2c 108deg, #08111e 120deg, #0e1a2c 132deg, #08111e 144deg, #0e1a2c 156deg, #08111e 168deg, #0e1a2c 180deg, #08111e 192deg, #0e1a2c 204deg, #08111e 216deg, #0e1a2c 228deg, #08111e 240deg, #0e1a2c 252deg, #08111e 264deg, #0e1a2c 276deg, #08111e 288deg, #0e1a2c 300deg, #08111e 312deg, #0e1a2c 324deg, #08111e 336deg, #0e1a2c 348deg, #08111e 360deg)',
+                        boxShadow: '0 26px 72px rgba(0,0,0,0.94), 0 8px 22px rgba(0,0,0,0.75), inset 0 1px 3px rgba(255,255,255,0.05)',
                       }} />
 
-                      {/* Inner recess ring */}
+                      {/* Machined chrome bezel — 26-stop brushed steel gradient */}
                       <div className="absolute rounded-full" style={{
-                        width: 110, height: 110,
-                        background: 'radial-gradient(circle at 35% 30%, #1e293b, #0f172a)',
-                        boxShadow: 'inset 0 3px 10px rgba(0,0,0,0.9), inset 0 -2px 6px rgba(255,255,255,0.04)',
+                        width: 162, height: 162,
+                        background: 'conic-gradient(from 192deg, #0f172a 0%, #1a2744 3%, #273756 6%, #334a68 10%, #475f7b 14%, #5d7490 17%, #7a91a8 20%, #94a9be 23%, #aebfd1 26%, #c6d4e3 28.5%, #d8e4ef 31%, #c6d4e3 33.5%, #a8bccc 36%, #8499ab 40%, #617082 45%, #3f5166 51%, #273756 57%, #1a2744 62%, #253650 67%, #334a68 72%, #4a6278 76%, #617789 80%, #7d94a6 84%, #94a9be 87%, #7a91a8 90%, #5d7490 93%, #3f5166 96%, #273756 98.5%, #1a2744 100%)',
+                        boxShadow: '0 0 0 1.5px rgba(148,163,184,0.22), 0 12px 36px rgba(0,0,0,0.78)',
                       }} />
 
-                      {/* Main button surface */}
+                      {/* Engraved circular label — SVG textPath around bezel */}
+                      <svg className="absolute pointer-events-none" style={{ width: 162, height: 162 }} viewBox="0 0 162 162">
+                        <defs>
+                          <path id="pttArcPath" d="M 81,81 m -60,0 a 60,60 0 1,1 120,0 a 60,60 0 1,1 -120,0" />
+                        </defs>
+                        <text fontSize="6.5" fontFamily="Arial, sans-serif" fontWeight="700" letterSpacing="3.2"
+                          fill={isRecording ? 'rgba(252,165,165,0.58)' : 'rgba(148,163,184,0.5)'}>
+                          <textPath href="#pttArcPath" startOffset="4%">PUSH · TO · TALK · OSI FLEET ·</textPath>
+                        </text>
+                      </svg>
+
+                      {/* Deep anodized recess cavity */}
+                      <div className="absolute rounded-full" style={{
+                        width: 142, height: 142,
+                        background: 'radial-gradient(circle at 40% 32%, #182236 0%, #0c1220 55%, #070b17 100%)',
+                        boxShadow: 'inset 0 6px 24px rgba(0,0,0,0.97), inset 0 -2px 6px rgba(255,255,255,0.028)',
+                      }} />
+
+                      {/* LED ring — glows and pulses when recording */}
+                      {isRecording && (
+                        <div className="absolute rounded-full" style={{
+                          width: 128, height: 128,
+                          border: '2px solid rgba(239,68,68,0.82)',
+                          animation: 'pttLedRing 0.85s ease-in-out infinite alternate',
+                        }} />
+                      )}
+
+                      {/* Dome button */}
                       <button
                         onPointerDown={async () => {
                           if (isRecording) return;
@@ -2654,50 +2679,74 @@ export default function DriverPortal() {
                             setMediaRecorder(null);
                           }
                         }}
-                        className="select-none touch-none relative flex flex-col items-center justify-center rounded-full transition-transform active:scale-[0.93]"
+                        className="select-none touch-none relative flex flex-col items-center justify-center rounded-full transition-transform active:scale-[0.94]"
                         style={{
-                          width: 96, height: 96,
+                          width: 118, height: 118,
                           background: isRecording
-                            ? 'radial-gradient(circle at 38% 28%, #fca5a5 0%, #ef4444 30%, #b91c1c 65%, #7f1d1d 100%)'
-                            : 'radial-gradient(circle at 38% 28%, #86efac 0%, #22c55e 30%, #15803d 65%, #14532d 100%)',
+                            ? 'radial-gradient(circle at 36% 26%, #fecaca 0%, #fca5a5 8%, #f87171 20%, #ef4444 38%, #dc2626 58%, #b91c1c 78%, #7f1d1d 100%)'
+                            : 'radial-gradient(circle at 36% 26%, #dcfce7 0%, #bbf7d0 8%, #4ade80 20%, #22c55e 38%, #16a34a 58%, #15803d 78%, #14532d 100%)',
                           boxShadow: isRecording
-                            ? 'inset 0 -6px 16px rgba(0,0,0,0.55), inset 0 4px 10px rgba(255,180,180,0.15), 0 0 0 1px rgba(239,68,68,0.4), 0 0 35px rgba(220,38,38,0.55)'
-                            : 'inset 0 -6px 16px rgba(0,0,0,0.55), inset 0 4px 10px rgba(180,255,200,0.12), 0 0 0 1px rgba(34,197,94,0.3), 0 0 25px rgba(22,163,74,0.35)',
+                            ? 'inset 0 -14px 38px rgba(0,0,0,0.66), inset 0 9px 22px rgba(255,210,210,0.18), 0 0 0 1.5px rgba(239,68,68,0.52), 0 0 58px rgba(220,38,38,0.72), 0 16px 44px rgba(0,0,0,0.68)'
+                            : 'inset 0 -14px 38px rgba(0,0,0,0.66), inset 0 9px 22px rgba(210,255,225,0.18), 0 0 0 1.5px rgba(34,197,94,0.42), 0 0 42px rgba(22,163,74,0.6), 0 16px 44px rgba(0,0,0,0.68)',
                         }}>
-                        {/* Rim light — top left */}
-                        <div className="absolute rounded-full pointer-events-none" style={{
+
+                        {/* Primary specular — main light source top-left */}
+                        <div className="absolute pointer-events-none" style={{
+                          top: 12, left: 18, width: 68, height: 40,
+                          borderRadius: '50%',
+                          background: 'radial-gradient(ellipse at 35% 35%, rgba(255,255,255,0.46) 0%, rgba(255,255,255,0.14) 45%, transparent 100%)',
+                          transform: 'rotate(-22deg)',
+                        }} />
+                        {/* Secondary pinpoint glint */}
+                        <div className="absolute pointer-events-none" style={{
+                          top: 14, left: 24, width: 22, height: 12,
+                          borderRadius: '50%',
+                          background: 'radial-gradient(ellipse, rgba(255,255,255,0.6) 0%, transparent 100%)',
+                        }} />
+                        {/* Fresnel edge vignette at top */}
+                        <div className="absolute pointer-events-none rounded-full" style={{
                           inset: 0,
                           background: isRecording
-                            ? 'linear-gradient(135deg, rgba(252,165,165,0.18) 0%, transparent 50%, rgba(0,0,0,0.25) 100%)'
-                            : 'linear-gradient(135deg, rgba(187,247,208,0.18) 0%, transparent 50%, rgba(0,0,0,0.25) 100%)',
+                            ? 'radial-gradient(ellipse at 30% 18%, rgba(255,220,220,0.2) 0%, transparent 40%)'
+                            : 'radial-gradient(ellipse at 30% 18%, rgba(220,255,235,0.2) 0%, transparent 40%)',
                         }} />
-                        {/* Glass gloss */}
+                        {/* Diagonal environment sheen */}
+                        <div className="absolute pointer-events-none rounded-full" style={{
+                          inset: 0,
+                          background: isRecording
+                            ? 'linear-gradient(148deg, rgba(255,200,200,0.1) 0%, transparent 38%, rgba(0,0,0,0.32) 100%)'
+                            : 'linear-gradient(148deg, rgba(200,255,215,0.1) 0%, transparent 38%, rgba(0,0,0,0.32) 100%)',
+                        }} />
+                        {/* Bottom bounce light */}
                         <div className="absolute pointer-events-none" style={{
-                          top: 8, left: 12, width: 52, height: 30,
+                          bottom: 14, right: 22, width: 30, height: 16,
                           borderRadius: '50%',
-                          background: 'radial-gradient(ellipse at 40% 40%, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.06) 55%, transparent 100%)',
-                          transform: 'rotate(-20deg)',
+                          background: 'radial-gradient(ellipse, rgba(255,255,255,0.09) 0%, transparent 100%)',
                         }} />
-                        {/* PTT label */}
-                        <div className="flex flex-col items-center gap-0.5 select-none">
-                          <span className="text-[11px] font-black tracking-[0.22em] uppercase" style={{
-                            color: isRecording ? 'rgba(254,202,202,0.9)' : 'rgba(187,247,208,0.9)',
-                            textShadow: isRecording ? '0 0 12px rgba(239,68,68,0.8)' : '0 0 12px rgba(34,197,94,0.8)',
+
+                        {/* Center label — PTT + LED */}
+                        <div className="relative flex flex-col items-center select-none" style={{ gap: 6 }}>
+                          <span style={{
+                            fontSize: 15, fontWeight: 900, letterSpacing: '0.28em', textTransform: 'uppercase',
+                            fontFamily: "'Arial Black', Arial, sans-serif",
+                            color: isRecording ? 'rgba(254,202,202,0.97)' : 'rgba(187,247,208,0.97)',
+                            textShadow: isRecording
+                              ? '0 1px 4px rgba(0,0,0,0.9), 0 0 24px rgba(239,68,68,0.95)'
+                              : '0 1px 4px rgba(0,0,0,0.9), 0 0 24px rgba(34,197,94,0.95)',
                           }}>PTT</span>
-                          {/* LED indicator dot */}
+                          {/* LED indicator */}
                           <div style={{
-                            width: 6, height: 6, borderRadius: '50%',
+                            width: 9, height: 9, borderRadius: '50%',
                             background: isRecording ? '#f87171' : '#4ade80',
-                            boxShadow: isRecording ? '0 0 8px 2px rgba(239,68,68,0.9)' : '0 0 8px 2px rgba(74,222,128,0.7)',
-                            animation: isRecording ? 'pulse 0.6s ease-in-out infinite alternate' : 'none',
+                            boxShadow: isRecording
+                              ? '0 0 14px 5px rgba(239,68,68,0.95), 0 0 4px rgba(239,68,68,1)'
+                              : '0 0 14px 5px rgba(74,222,128,0.88), 0 0 4px rgba(74,222,128,1)',
                           }} />
                         </div>
-                        {/* Bottom shadow */}
-                        <div className="absolute bottom-0 left-0 right-0 h-10 rounded-b-full pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.3))' }} />
                       </button>
                     </div>
 
-                    {/* Label */}
+                    {/* Status label */}
                     <div className="flex flex-col items-center gap-1">
                       <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: isRecording ? '#f87171' : 'rgba(100,116,139,0.7)' }}>
                         {isRecording ? '● Suelta para enviar' : 'Mantén para hablar'}
