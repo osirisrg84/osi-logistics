@@ -90,24 +90,24 @@ export default function DispatcherHub() {
       {/* ── 3-Switch Compact Row ─────────────────────────── */}
       <div className="flex gap-1.5">
 
-        {/* Switch 1 — Music */}
+        {/* Switch 1 — Activo */}
         <button
-          onClick={() => setMusicOn(v => !v)}
+          onClick={() => setDispActive(v => !v)}
           className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all"
           style={{
-            background: musicOn ? 'rgba(168,85,247,0.13)' : dark ? 'rgba(15,23,42,0.9)' : 'rgba(241,245,249,0.9)',
-            border: `1px solid ${musicOn ? 'rgba(168,85,247,0.35)' : dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)'}`,
-            boxShadow: musicOn ? '0 0 8px rgba(168,85,247,0.2)' : 'none',
+            background: dispActive ? 'rgba(34,197,94,0.13)' : dark ? 'rgba(15,23,42,0.9)' : 'rgba(241,245,249,0.9)',
+            border: `1px solid ${dispActive ? 'rgba(34,197,94,0.35)' : dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)'}`,
+            boxShadow: dispActive ? '0 0 8px rgba(34,197,94,0.2)' : 'none',
           }}>
-          <Headphones className={`w-3 h-3 flex-shrink-0 transition-colors ${musicOn ? 'text-purple-400' : 'text-slate-400'}`} />
+          <Zap className={`w-3 h-3 flex-shrink-0 transition-colors ${dispActive ? 'text-green-400' : 'text-slate-400'}`} />
           <div className="flex-1 text-left">
-            <p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Music</p>
-            <p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }}>
-              {musicOn ? '▶ Play' : 'Reggae'}
+            <p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Activo</p>
+            <p className="text-[8px] leading-none mt-0.5" style={{ color: dispActive ? '#4ade80' : '#94a3b8' }}>
+              {dispActive ? 'En turno' : 'Libre'}
             </p>
           </div>
-          <div className="relative flex-shrink-0 rounded-full" style={{ width: 24, height: 13, background: musicOn ? 'linear-gradient(90deg,#a855f7,#7c3aed)' : dark ? 'rgba(51,65,85,0.9)' : '#e2e8f0', boxShadow: musicOn ? '0 0 6px rgba(168,85,247,0.45)' : 'none', transition: 'background 0.25s' }}>
-            <div className="absolute rounded-full bg-white" style={{ width: 9, height: 9, top: 2, left: musicOn ? 13 : 2, transition: 'left 0.22s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' }} />
+          <div className="relative flex-shrink-0 rounded-full" style={{ width: 24, height: 13, background: dispActive ? 'linear-gradient(90deg,#22c55e,#16a34a)' : dark ? 'rgba(51,65,85,0.9)' : '#e2e8f0', boxShadow: dispActive ? '0 0 6px rgba(34,197,94,0.45)' : 'none', transition: 'background 0.25s' }}>
+            <div className="absolute rounded-full bg-white" style={{ width: 9, height: 9, top: 2, left: dispActive ? 13 : 2, transition: 'left 0.22s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' }} />
           </div>
         </button>
 
@@ -132,24 +132,24 @@ export default function DispatcherHub() {
           </div>
         </button>
 
-        {/* Switch 3 — Activo */}
+        {/* Switch 3 — Music */}
         <button
-          onClick={() => setDispActive(v => !v)}
+          onClick={() => setMusicOn(v => !v)}
           className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all"
           style={{
-            background: dispActive ? 'rgba(34,197,94,0.13)' : dark ? 'rgba(15,23,42,0.9)' : 'rgba(241,245,249,0.9)',
-            border: `1px solid ${dispActive ? 'rgba(34,197,94,0.35)' : dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)'}`,
-            boxShadow: dispActive ? '0 0 8px rgba(34,197,94,0.2)' : 'none',
+            background: musicOn ? 'rgba(168,85,247,0.13)' : dark ? 'rgba(15,23,42,0.9)' : 'rgba(241,245,249,0.9)',
+            border: `1px solid ${musicOn ? 'rgba(168,85,247,0.35)' : dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)'}`,
+            boxShadow: musicOn ? '0 0 8px rgba(168,85,247,0.2)' : 'none',
           }}>
-          <Zap className={`w-3 h-3 flex-shrink-0 transition-colors ${dispActive ? 'text-green-400' : 'text-slate-400'}`} />
+          <Headphones className={`w-3 h-3 flex-shrink-0 transition-colors ${musicOn ? 'text-purple-400' : 'text-slate-400'}`} />
           <div className="flex-1 text-left">
-            <p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Activo</p>
-            <p className="text-[8px] leading-none mt-0.5" style={{ color: dispActive ? '#4ade80' : '#94a3b8' }}>
-              {dispActive ? 'En turno' : 'Libre'}
+            <p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Music</p>
+            <p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }}>
+              {musicOn ? '▶ Play' : 'Reggae'}
             </p>
           </div>
-          <div className="relative flex-shrink-0 rounded-full" style={{ width: 24, height: 13, background: dispActive ? 'linear-gradient(90deg,#22c55e,#16a34a)' : dark ? 'rgba(51,65,85,0.9)' : '#e2e8f0', boxShadow: dispActive ? '0 0 6px rgba(34,197,94,0.45)' : 'none', transition: 'background 0.25s' }}>
-            <div className="absolute rounded-full bg-white" style={{ width: 9, height: 9, top: 2, left: dispActive ? 13 : 2, transition: 'left 0.22s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' }} />
+          <div className="relative flex-shrink-0 rounded-full" style={{ width: 24, height: 13, background: musicOn ? 'linear-gradient(90deg,#a855f7,#7c3aed)' : dark ? 'rgba(51,65,85,0.9)' : '#e2e8f0', boxShadow: musicOn ? '0 0 6px rgba(168,85,247,0.45)' : 'none', transition: 'background 0.25s' }}>
+            <div className="absolute rounded-full bg-white" style={{ width: 9, height: 9, top: 2, left: musicOn ? 13 : 2, transition: 'left 0.22s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' }} />
           </div>
         </button>
 
