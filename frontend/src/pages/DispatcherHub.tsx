@@ -199,11 +199,11 @@ export default function DispatcherHub() {
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: c.color }} />
                     <div className="min-w-0">
-                      <p className={`text-sm font-semibold group-hover:text-blue-500 transition-colors truncate ${dark ? 'text-slate-200' : 'text-gray-800'}`}>{c.label}</p>
+                      <p className={`text-sm font-semibold group-hover:text-blue-500 transition-colors ${dark ? 'text-slate-200' : 'text-gray-800'}`}>{c.label}</p>
                       <p className={`text-[11px] truncate ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{c.desc}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                  <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                     <span className="text-[11px] font-mono font-bold whitespace-nowrap" style={{ color: accent }}>{c.phone}</span>
                     <PhoneCall className="w-3 h-3 flex-shrink-0" style={{ color: accent }} />
                   </div>
