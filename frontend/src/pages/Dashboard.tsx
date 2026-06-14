@@ -2,7 +2,6 @@
 import {
   Package, Users, Truck, TrendingUp, DollarSign,
   Clock, CheckCircle, AlertTriangle, Activity,
-  Headphones, StickyNote, Plus, X, Pin
 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -12,142 +11,6 @@ import { analyticsApi, ordersApi, driversApi } from '../services/api';
 import { DashboardStats } from '../types';
 import { OrderStatusBadge } from '../components/StatusBadge';
 import { formatDistanceToNow, format } from 'date-fns';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
-
-function DispatcherHubStrip() {
-  const { user } = useAuth();
-  const { dark } = useTheme();
-  const isAdmin = user?.role === 'admin';
-  if (isAdmin) return null;
-
-  const accent = '#f97316';
-  const accentSoft = 'rgba(249,115,22,0.12)';
-
-  const [musicOn, setMusicOn] = useState(() => {
-    try { return localStorage.getItem('osi_music_on') === '1'; } catch { return false; }
-  });
-  const [noteInput, setNoteInput] = useState('');
-  const [notes, setNotes] = useState<Array<{id: string; text: string; time: string}>>(() => {
-    try { return JSON.parse(localStorage.getItem('osi_dispatch_notes') || '[]'); } catch { return []; }
-  });
-  const [showNotes, setShowNotes] = useState(false);
-
-  useEffect(() => {
-    localStorage.setItem('osi_music_on', musicOn ? '1' : '0');
-  }, [musicOn]);
-
-  useEffect(() => {
-    localStorage.setItem('osi_dispatch_notes', JSON.stringify(notes));
-  }, [notes]);
-
-  function addNote() {
-    if (!noteInput.trim()) return;
-    setNotes(prev => [{
-      id: Date.now().toString(),
-      text: noteInput.trim(),
-      time: new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' }),
-    }, ...prev]);
-    setNoteInput('');
-  }
-
-  return (
-    <div className="md:hidden space-y-2 mb-4">
-      {/* Music toggle */}
-      <div
-        className={`flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer select-none active:opacity-80 transition-opacity shadow-sm ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-100'}`}
-        onClick={() => setMusicOn(v => !v)}
-      >
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
-             style={{ background: musicOn ? 'rgba(168,85,247,0.15)' : dark ? 'rgba(51,65,85,0.6)' : '#f1f5f9' }}>
-          <Headphones className="w-4 h-4" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }} />
-        </div>
-        <div className="flex-1">
-          <p className={`text-sm font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>Trap & Reggae Romantico</p>
-          <p className="text-[11px]" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }}>
-            {musicOn ? '🎵 OSI Dispatch Music — activo' : 'Música para la jornada de trabajo'}
-          </p>
-        </div>
-        <div className="relative flex-shrink-0 rounded-full transition-all duration-300"
-             style={{ width: 44, height: 24, background: musicOn ? 'linear-gradient(90deg,#a855f7,#7c3aed)' : dark ? 'rgba(51,65,85,0.9)' : '#e2e8f0', boxShadow: musicOn ? '0 0 10px rgba(168,85,247,0.45)' : 'none' }}>
-          <div className="absolute rounded-full bg-white shadow-md"
-               style={{ width: 18, height: 18, top: 3, left: musicOn ? 23 : 3, transition: 'left 0.25s', boxShadow: '0 1px 4px rgba(0,0,0,0.25)' }} />
-        </div>
-      </div>
-
-      {/* Spotify embed */}
-      {musicOn && (
-        <div className={`rounded-2xl overflow-hidden ${dark ? 'border border-purple-500/20' : 'border border-purple-200'}`}>
-          <iframe
-            src="https://open.spotify.com/embed/playlist/37i9dQZF1DWY7IeIP1cdjF?utm_source=generator&theme=0"
-            width="100%" height="80"
-            style={{ border: 'none', display: 'block' }}
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-          />
-        </div>
-      )}
-
-      {/* Notas strip */}
-      <div className={`rounded-2xl overflow-hidden shadow-sm ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-100'}`}>
-        {/* Header row */}
-        <div className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'}` }}>
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: accentSoft }}>
-            <StickyNote className="w-4 h-4" style={{ color: accent }} />
-          </div>
-          <p className={`flex-1 text-sm font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>Notas Importantes</p>
-          {notes.length > 0 && (
-            <button
-              onClick={() => setShowNotes(v => !v)}
-              className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-              style={{ background: accentSoft, color: accent }}
-            >
-              {notes.length} {showNotes ? '▲' : '▼'}
-            </button>
-          )}
-        </div>
-        {/* Input */}
-        <div className="flex gap-2 px-3 py-2.5">
-          <input
-            value={noteInput}
-            onChange={e => setNoteInput(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') addNote(); }}
-            placeholder="Apuntar algo importante..."
-            maxLength={200}
-            className={`flex-1 text-sm px-3 py-2 rounded-xl outline-none border-0 ${dark ? 'bg-slate-700 text-slate-200 placeholder:text-slate-500' : 'bg-gray-50 text-gray-800 placeholder:text-gray-400'}`}
-          />
-          <button onClick={addNote} disabled={!noteInput.trim()}
-            className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 active:scale-90 disabled:opacity-40 transition-all"
-            style={{ background: `linear-gradient(135deg,${accent},#ea580c)` }}>
-            <Plus className="w-4 h-4 text-white" />
-          </button>
-        </div>
-        {/* Notes list (collapsible) */}
-        {showNotes && notes.length > 0 && (
-          <div className="px-3 pb-3 space-y-1.5 max-h-40 overflow-y-auto">
-            {notes.map((note, i) => (
-              <div key={note.id} className="flex items-start gap-2 p-2.5 rounded-xl"
-                style={{
-                  background: dark ? (i % 2 === 0 ? 'rgba(251,191,36,0.07)' : 'rgba(249,115,22,0.06)') : (i % 2 === 0 ? 'rgba(251,191,36,0.07)' : 'rgba(249,115,22,0.05)'),
-                  border: `1px solid ${dark ? 'rgba(251,191,36,0.12)' : 'rgba(251,191,36,0.14)'}`,
-                }}>
-                <Pin className="w-3 h-3 mt-0.5 flex-shrink-0 text-amber-400" />
-                <p className={`flex-1 text-xs leading-snug ${dark ? 'text-slate-200' : 'text-gray-800'}`}>{note.text}</p>
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  <span className="text-[9px] text-slate-500">{note.time}</span>
-                  <button onClick={() => setNotes(prev => prev.filter(n => n.id !== note.id))}
-                    className={`w-4 h-4 rounded-full flex items-center justify-center ${dark ? 'hover:bg-white/10 text-slate-500 hover:text-red-400' : 'hover:bg-red-50 text-gray-400 hover:text-red-400'}`}>
-                    <X className="w-2.5 h-2.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 const STATUS_COLORS: Record<string, string> = {
   pending: '#eab308',
@@ -234,9 +97,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 fade-in">
-      {/* Hub strip — dispatcher only, mobile only */}
-      <DispatcherHubStrip />
-
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
