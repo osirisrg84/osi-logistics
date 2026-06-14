@@ -138,6 +138,19 @@ io.on('connection', (socket) => {
     socket.join(`driver:${driverId}`);
   });
 
+  socket.on('radio:join', () => {
+    socket.join('osi_radio');
+  });
+
+  socket.on('radio:msg', (data: { name: string; msg: string }) => {
+    if (!data.msg?.trim() || !data.name?.trim()) return;
+    io.to('osi_radio').emit('radio:msg', {
+      name: data.name.slice(0, 50),
+      msg: data.msg.slice(0, 200),
+      ts: new Date().toISOString(),
+    });
+  });
+
   socket.on('disconnect', () => {
     console.log(`Client disconnected: ${socket.id}`);
   });

@@ -3,7 +3,8 @@ import {
   Package, MapPin, CheckCircle, Truck, Phone,
   Clock, Star, Navigation, LogOut, User, Activity,
   Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet, Building2, CreditCard,
-  Lock, ShieldCheck, Send, Bell, BellOff, CheckCheck, Award, Edit3, Zap
+  Lock, ShieldCheck, Send, Bell, BellOff, CheckCheck, Award, Edit3, Zap,
+  Headphones, Radio, Users, PhoneCall, MessageSquare, Heart
 } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
 import { useAuth } from '../context/AuthContext';
@@ -169,7 +170,7 @@ const STATUS_CONFIG: Record<DriverStatus, { label: string; dot: string; bg: stri
   offline:   { label: 'Offline',     dot: 'bg-gray-400',   bg: 'bg-gray-100 dark:bg-slate-700',      text: 'text-gray-500 dark:text-slate-400' },
 };
 
-type Tab = 'active' | 'delivered' | 'map' | 'profile' | 'payments';
+type Tab = 'active' | 'delivered' | 'map' | 'profile' | 'payments' | 'hub';
 
 export default function DriverPortal() {
   const { user, driverProfile, logout } = useAuth();
@@ -231,6 +232,23 @@ export default function DriverPortal() {
   const [localTruckMake, setLocalTruckMake] = useState('');
   const [editingEquip, setEditingEquip] = useState(false);
   const [savingEquip, setSavingEquip] = useState(false);
+
+  // ── Hub: switches / radio / community ────────────────────
+  const [trackingOn, setTrackingOn] = useState(true);
+  const [musicOn, setMusicOn] = useState(false);
+  const [radioMsgs, setRadioMsgs] = useState<Array<{id:string; name:string; msg:string; ts:string}>>([
+    { id:'r1', name:'Carlos M.', msg:'Buenos días familia OSI! Arrancando ruta norte 🛣️', ts: new Date(Date.now()-1800000).toISOString() },
+    { id:'r2', name:'James W.', msg:'Clear roads on I-95 heading north 👌 Good weather', ts: new Date(Date.now()-900000).toISOString() },
+    { id:'r3', name:'Ana R.', msg:'Entregando en Doral, todo perfecto 💪 #OSIFleet', ts: new Date(Date.now()-300000).toISOString() },
+  ]);
+  const [radioInput, setRadioInput] = useState('');
+  const [communityPosts, setCommunityPosts] = useState([
+    { id:'cp1', avatar:'CM', name:'Carlos Mendez', time:'2h', msg:'Acabo de completar mi entrega #100 con OSI! 🎉 Gracias a todo el equipo dispatch. #OSILogistics', likes:7, liked:false },
+    { id:'cp2', avatar:'JW', name:'James Wilson', time:'4h', msg:'Best dispatch team in South Florida! Running smooth today 🚛💨', likes:4, liked:false },
+    { id:'cp3', avatar:'AR', name:'Ana Rodriguez', time:'5h', msg:'Tip pro: chequea siempre el dock antes de llegar. Ahorras tiempo y mueves más cargas 💡', likes:12, liked:false },
+  ]);
+  const [postText, setPostText] = useState('');
+  const [hubSection, setHubSection] = useState<'community'|'support'|'radio'>('community');
 
   useEffect(() => {
     if (driver) {
@@ -419,10 +437,15 @@ export default function DriverPortal() {
       setOfferCountdown(60);
       playOfferSound();
     });
+    socket.emit('radio:join');
+    socket.on('radio:msg', (data: {name:string; msg:string; ts:string}) => {
+      setRadioMsgs(prev => [...prev.slice(-49), { id: Date.now().toString(), ...data }]);
+    });
     return () => {
       socket.off('order_updated');
       socket.off('driver:notification');
       socket.off('driver:offer');
+      socket.off('radio:msg');
     };
   }, [fetchOrders, user?.driver_id, driverId]);
 
@@ -646,50 +669,124 @@ export default function DriverPortal() {
               )}
             </div>
 
-            {/* Status controls */}
-            {driverStatus === 'offline' ? (
-              <button onClick={() => setStatus('available')} disabled={togglingStatus}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-400 hover:from-green-400 hover:to-emerald-300 active:scale-[0.98] disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3 shadow-2xl shadow-green-500/40">
-                {togglingStatus
-                  ? <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  : <Power className="w-5 h-5 drop-shadow" />}
-                <span className="text-base tracking-wide">Go Online</span>
-              </button>
-            ) : (
-              <div className="space-y-2">
-                <div className={`flex items-center justify-between rounded-xl px-4 py-2.5 ${cfg.bg} border border-white/5`}>
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${cfg.dot} ${driverStatus === 'available' ? 'pulse-dot' : ''}`} />
-                    <span className={`text-sm font-semibold ${cfg.text}`}>{cfg.label}</span>
-                    {isBusy && driverStatus !== 'busy' && (
-                      <span className="text-xs text-orange-400 flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" /> Active delivery
-                      </span>
-                    )}
-                  </div>
-                  <span className={`text-xs font-medium ${cfg.text} opacity-70`}>
-                    {activeOrders.length} order{activeOrders.length !== 1 ? 's' : ''} active
-                  </span>
+            {/* ── Premium 3-Switch Control Panel ───────────── */}
+            <div className="rounded-2xl overflow-hidden" style={{
+              background: 'linear-gradient(145deg, rgba(15,30,53,0.95) 0%, rgba(8,18,32,0.98) 100%)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              boxShadow: '0 4px 28px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)',
+            }}>
+
+              {/* Switch 1 — Go Online */}
+              <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06] cursor-pointer active:bg-white/[0.03] transition-colors select-none"
+                   onClick={() => { if (togglingStatus) return; setStatus(driverStatus === 'offline' ? 'available' : 'offline'); }}>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${driverStatus !== 'offline' ? 'bg-green-500/20' : 'bg-slate-700/50'}`}>
+                  <Power className={`w-4 h-4 transition-colors ${driverStatus !== 'offline' ? 'text-green-400' : 'text-slate-500'}`} />
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {driverStatus !== 'on_break' ? (
-                    <button onClick={() => setStatus('on_break')} disabled={togglingStatus || isBusy}
-                      className="flex items-center justify-center gap-2 font-semibold py-2.5 rounded-xl transition-colors disabled:opacity-40 text-sm border bg-yellow-500/10 hover:bg-yellow-500/20 border-yellow-500/30 text-yellow-400">
-                      <Coffee className="w-4 h-4" /> Take a Break
-                    </button>
-                  ) : (
-                    <button onClick={() => setStatus('available')} disabled={togglingStatus}
-                      className="flex items-center justify-center gap-2 font-semibold py-2.5 rounded-xl transition-colors text-sm border bg-green-500/10 hover:bg-green-500/20 border-green-500/30 text-green-400">
-                      <Power className="w-4 h-4" /> Resume
-                    </button>
-                  )}
-                  <button onClick={() => setStatus('offline')} disabled={togglingStatus || isBusy}
-                    className="flex items-center justify-center gap-2 font-semibold py-2.5 rounded-xl transition-colors disabled:opacity-40 text-sm border bg-red-500/10 hover:bg-red-500/20 border-red-500/30 text-red-400">
-                    <Power className="w-4 h-4" /> Go Offline
-                  </button>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-white">Go Online</p>
+                  <p className="text-[11px] leading-tight" style={{ color: driverStatus !== 'offline' ? '#4ade80' : '#64748b' }}>
+                    {driverStatus === 'offline' ? 'Offline — sin recibir ofertas' :
+                     driverStatus === 'on_break' ? 'En descanso' :
+                     `Online · ${activeOrders.length} ${activeOrders.length === 1 ? 'orden activa' : 'órdenes activas'}`}
+                  </p>
+                </div>
+                {togglingStatus ? (
+                  <div className="w-5 h-5 border-2 border-white/20 border-t-green-400 rounded-full animate-spin flex-shrink-0" />
+                ) : (
+                  <div className="relative flex-shrink-0 rounded-full transition-all duration-300"
+                       style={{
+                         width: 48, height: 26,
+                         background: driverStatus !== 'offline' ? 'linear-gradient(90deg,#22c55e,#16a34a)' : 'rgba(51,65,85,0.8)',
+                         boxShadow: driverStatus !== 'offline' ? '0 0 12px rgba(34,197,94,0.45)' : 'none',
+                       }}>
+                    <div className="absolute rounded-full bg-white shadow-lg transition-all duration-300"
+                         style={{ width: 20, height: 20, top: 3, left: driverStatus !== 'offline' ? 25 : 3 }} />
+                  </div>
+                )}
+              </div>
+
+              {/* Switch 2 — GPS Tracking */}
+              <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06] cursor-pointer active:bg-white/[0.03] transition-colors select-none"
+                   onClick={() => setTrackingOn(v => !v)}>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${trackingOn ? 'bg-cyan-500/20' : 'bg-slate-700/50'}`}>
+                  <Navigation className={`w-4 h-4 transition-colors ${trackingOn ? 'text-cyan-400' : 'text-slate-500'}`} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-white">GPS Tracking</p>
+                  <p className="text-[11px] leading-tight" style={{ color: trackingOn ? '#22d3ee' : '#64748b' }}>
+                    {trackingOn ? 'Transmitiendo tu ubicación en vivo' : 'Tracking pausado'}
+                  </p>
+                </div>
+                <div className="relative flex-shrink-0 rounded-full transition-all duration-300"
+                     style={{
+                       width: 48, height: 26,
+                       background: trackingOn ? 'linear-gradient(90deg,#06b6d4,#0891b2)' : 'rgba(51,65,85,0.8)',
+                       boxShadow: trackingOn ? '0 0 12px rgba(6,182,212,0.45)' : 'none',
+                     }}>
+                  <div className="absolute rounded-full bg-white shadow-lg transition-all duration-300"
+                       style={{ width: 20, height: 20, top: 3, left: trackingOn ? 25 : 3 }} />
                 </div>
               </div>
-            )}
+
+              {/* Switch 3 — Trap & Reggae */}
+              <div className="flex items-center gap-3 px-4 py-3.5 cursor-pointer active:bg-white/[0.03] transition-colors select-none"
+                   onClick={() => setMusicOn(v => !v)}>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${musicOn ? 'bg-purple-500/20' : 'bg-slate-700/50'}`}>
+                  <Headphones className={`w-4 h-4 transition-colors ${musicOn ? 'text-purple-400' : 'text-slate-500'}`} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-white">Trap & Reggae</p>
+                  <p className="text-[11px] leading-tight" style={{ color: musicOn ? '#c084fc' : '#64748b' }}>
+                    {musicOn ? '🎵 OSI Radio — Hyped Mix activo' : 'Música para la ruta'}
+                  </p>
+                </div>
+                <div className="relative flex-shrink-0 rounded-full transition-all duration-300"
+                     style={{
+                       width: 48, height: 26,
+                       background: musicOn ? 'linear-gradient(90deg,#a855f7,#7c3aed)' : 'rgba(51,65,85,0.8)',
+                       boxShadow: musicOn ? '0 0 12px rgba(168,85,247,0.45)' : 'none',
+                     }}>
+                  <div className="absolute rounded-full bg-white shadow-lg transition-all duration-300"
+                       style={{ width: 20, height: 20, top: 3, left: musicOn ? 25 : 3 }} />
+                </div>
+              </div>
+
+              {/* Spotify player — appears when music is ON */}
+              {musicOn && (
+                <div style={{ borderTop: '1px solid rgba(168,85,247,0.18)', padding: '10px 12px 12px' }}>
+                  <iframe
+                    src="https://open.spotify.com/embed/playlist/37i9dQZF1DX0XUsuxWHRQd?utm_source=generator&theme=0"
+                    width="100%" height="80"
+                    style={{ borderRadius: 10, border: 'none', display: 'block' }}
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+
+              {/* Secondary: Break / Resume when online */}
+              {driverStatus !== 'offline' && (
+                <div className="flex gap-2 px-4 pb-3 pt-0.5">
+                  {isBusy && (
+                    <div className="flex items-center gap-1 text-[11px] text-orange-400 bg-orange-500/10 rounded-lg px-2 py-1 flex-1">
+                      <AlertTriangle className="w-3 h-3 flex-shrink-0" /> Active delivery in progress
+                    </div>
+                  )}
+                  {!isBusy && driverStatus !== 'on_break' && (
+                    <button onClick={() => setStatus('on_break')} disabled={togglingStatus}
+                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-xl border border-yellow-500/30 text-yellow-400 bg-yellow-500/10 hover:bg-yellow-500/15 transition-colors">
+                      <Coffee className="w-3.5 h-3.5" /> Take a Break
+                    </button>
+                  )}
+                  {driverStatus === 'on_break' && (
+                    <button onClick={() => setStatus('available')} disabled={togglingStatus}
+                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-xl border border-green-500/30 text-green-400 bg-green-500/10 hover:bg-green-500/15 transition-colors">
+                      <Power className="w-3.5 h-3.5" /> Retomar
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -2030,12 +2127,288 @@ export default function DriverPortal() {
         </div>
       )}
 
+      {/* ── Hub tab ──────────────────────────────────────────── */}
+      {tab === 'hub' && (
+        <div className="max-w-lg mx-auto">
+
+          {/* Sub-section pill tabs */}
+          <div className="flex gap-1.5 px-4 pt-4 pb-3 sticky top-0 z-10 bg-gray-50 dark:bg-slate-900">
+            {([
+              { id: 'community' as const, icon: Users,     label: 'Comunidad' },
+              { id: 'support'   as const, icon: PhoneCall, label: 'Support' },
+              { id: 'radio'     as const, icon: Radio,     label: 'OSI Radio' },
+            ]).map(s => (
+              <button key={s.id} onClick={() => setHubSection(s.id)}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                  hubSection === s.id
+                    ? 'bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-lg shadow-orange-500/25'
+                    : 'text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700'
+                }`}>
+                <s.icon className="w-3.5 h-3.5" />
+                {s.label}
+              </button>
+            ))}
+          </div>
+
+          {/* ── COMUNIDAD ──────────────────────────────── */}
+          {hubSection === 'community' && (
+            <div className="px-4 pb-5 space-y-3">
+
+              {/* Post composer */}
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 shadow-sm">
+                <div className="flex gap-3">
+                  <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-sm bg-gradient-to-br from-orange-400 to-orange-600 text-white">
+                    {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'D'}
+                  </div>
+                  <div className="flex-1">
+                    <textarea
+                      value={postText}
+                      onChange={e => setPostText(e.target.value)}
+                      placeholder="Comparte algo con la comunidad OSI..."
+                      className="w-full text-sm bg-gray-50 dark:bg-slate-700 rounded-xl p-3 resize-none border-0 outline-none text-gray-800 dark:text-slate-200 placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                      rows={2}
+                      maxLength={280}
+                    />
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-[10px] text-gray-300 dark:text-slate-600">{postText.length}/280</span>
+                      <button
+                        onClick={() => {
+                          if (!postText.trim()) return;
+                          const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'D';
+                          setCommunityPosts(prev => [{
+                            id: Date.now().toString(),
+                            avatar: initials,
+                            name: driver?.name || user?.name || 'Driver',
+                            time: 'ahora',
+                            msg: postText.trim(),
+                            likes: 0,
+                            liked: false,
+                          }, ...prev]);
+                          setPostText('');
+                        }}
+                        disabled={!postText.trim()}
+                        className="px-4 py-1.5 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-400 active:scale-95 disabled:opacity-40 text-white transition-all">
+                        Publicar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Posts feed */}
+              {communityPosts.map(post => (
+                <div key={post.id} className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 shadow-sm">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-sm bg-gradient-to-br from-blue-500 to-blue-700 text-white">
+                      {post.avatar}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{post.name}</p>
+                      <p className="text-[11px] text-gray-400 dark:text-slate-500">{post.time} · OSI Fleet</p>
+                    </div>
+                    <span className="text-[10px] font-bold text-orange-400 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded-full flex-shrink-0">OSI</span>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-slate-300 leading-relaxed mb-3">{post.msg}</p>
+                  <div className="flex items-center gap-4 pt-2.5 border-t border-gray-50 dark:border-slate-700/60">
+                    <button
+                      onClick={() => setCommunityPosts(prev => prev.map(p =>
+                        p.id === post.id ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 } : p
+                      ))}
+                      className={`flex items-center gap-1.5 text-xs font-semibold transition-colors ${post.liked ? 'text-red-500' : 'text-gray-400 dark:text-slate-500 hover:text-red-400'}`}>
+                      <Heart className="w-3.5 h-3.5" style={{ fill: post.liked ? 'currentColor' : 'none' }} />
+                      {post.likes}
+                    </button>
+                    <button className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-slate-500 hover:text-blue-400 transition-colors">
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      Responder
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ── SUPPORT ────────────────────────────────── */}
+          {hubSection === 'support' && (
+            <div className="px-4 pb-5 space-y-3">
+
+              {/* Current dispatcher */}
+              {activeOrders[0]?.dispatcher_name ? (
+                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-blue-200 dark:border-blue-500/25 p-5 shadow-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                      <Briefcase className="w-5 h-5 text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-bold text-blue-500 uppercase tracking-wider">Dispatcher Actual</p>
+                      <p className="text-base font-bold text-gray-900 dark:text-white">{activeOrders[0].dispatcher_name}</p>
+                    </div>
+                  </div>
+                  {activeOrders[0].dispatcher_code && (
+                    <div className="flex items-center justify-between mb-4 bg-blue-50 dark:bg-blue-500/10 rounded-xl px-3 py-2.5">
+                      <span className="text-xs text-blue-400">Código dispatcher</span>
+                      <span className="text-sm font-mono font-bold text-blue-600 dark:text-blue-300">{activeOrders[0].dispatcher_code}</span>
+                    </div>
+                  )}
+                  <a href="tel:+17863334444"
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm text-white transition-colors"
+                    style={{ background: 'linear-gradient(90deg, #3b82f6, #2563eb)', boxShadow: '0 4px 12px rgba(59,130,246,0.3)' }}>
+                    <PhoneCall className="w-4 h-4" /> Llamar al Dispatcher
+                  </a>
+                </div>
+              ) : (
+                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-6 text-center shadow-sm">
+                  <Briefcase className="w-8 h-8 text-gray-200 dark:text-slate-700 mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-gray-400 dark:text-slate-500">Sin carga activa asignada</p>
+                  <p className="text-xs text-gray-300 dark:text-slate-600 mt-1">El dispatcher aparece aquí cuando aceptas una oferta</p>
+                </div>
+              )}
+
+              {/* OSI Contact Lines */}
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 rounded-xl bg-orange-100 dark:bg-orange-500/10 flex items-center justify-center">
+                    <PhoneCall className="w-4 h-4 text-orange-500" />
+                  </div>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">OSI Logistics — Contactos</p>
+                </div>
+                <div className="space-y-2.5">
+                  {([
+                    { label: 'Dispatch 24/7',          phone: '+1 (786) 333-4444', desc: 'Lunes a Domingo · 24 horas' },
+                    { label: 'Soporte al Driver',       phone: '+1 (786) 333-5555', desc: 'Pagos · Issues técnicos' },
+                    { label: 'Emergencias en ruta',     phone: '+1 (786) 333-9911', desc: 'Accidentes · Incidentes' },
+                  ]).map(c => (
+                    <a key={c.phone} href={`tel:+${c.phone.replace(/\D/g,'')}`}
+                      className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 hover:bg-orange-50 dark:hover:bg-orange-500/8 transition-colors group">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800 dark:text-slate-200 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">{c.label}</p>
+                        <p className="text-[11px] text-gray-400 dark:text-slate-500">{c.desc}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-mono font-bold text-orange-500">{c.phone}</span>
+                        <PhoneCall className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              {/* Resources */}
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5 shadow-sm">
+                <p className="text-[11px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-3">Recursos</p>
+                <div className="space-y-2">
+                  {([
+                    { label: 'Manual del Driver OSI',   icon: '📋', desc: 'Procedimientos y políticas' },
+                    { label: 'Reportar Incidente',       icon: '⚠️', desc: 'Accidentes · Robos · Daños a carga' },
+                    { label: 'Solicitar Ajuste de Rate', icon: '💰', desc: 'Negociar compensación de carga' },
+                  ]).map(r => (
+                    <button key={r.label}
+                      className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 hover:bg-orange-50 dark:hover:bg-orange-500/8 transition-colors text-left">
+                      <span className="text-lg flex-shrink-0">{r.icon}</span>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800 dark:text-slate-200">{r.label}</p>
+                        <p className="text-[11px] text-gray-400 dark:text-slate-500">{r.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── OSI RADIO ──────────────────────────────── */}
+          {hubSection === 'radio' && (
+            <div className="px-4 pb-5">
+
+              {/* Radio header */}
+              <div className="rounded-2xl overflow-hidden mb-3" style={{
+                background: 'linear-gradient(135deg, #0a1628 0%, #0f1e35 100%)',
+                border: '1px solid rgba(56,189,248,0.2)',
+              }}>
+                <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06]">
+                  <div className="w-9 h-9 rounded-xl bg-cyan-500/15 flex items-center justify-center flex-shrink-0">
+                    <Radio className="w-4 h-4 text-cyan-400" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-white">OSI Radio</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                      <p className="text-[11px] text-green-400">En línea · Canal OSI Fleet</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold text-cyan-400/70 bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 rounded-lg">LIVE</span>
+                </div>
+
+                {/* Messages */}
+                <div className="overflow-y-auto px-4 py-3 space-y-3" style={{ maxHeight: '42vh', background: 'rgba(5,12,24,0.6)' }}>
+                  {radioMsgs.map(msg => {
+                    const myName = driver?.name || user?.name;
+                    const isMe = !!myName && msg.name === myName;
+                    return (
+                      <div key={msg.id} className={`flex gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
+                        <div className={`w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-[10px] font-bold ${isMe ? 'bg-orange-500' : 'bg-slate-600/80'} text-white`}>
+                          {msg.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                        </div>
+                        <div className={`max-w-[76%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                          {!isMe && <p className="text-[10px] text-slate-500 mb-0.5 ml-1">{msg.name}</p>}
+                          <div className={`rounded-2xl px-3 py-2 ${isMe
+                            ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-tr-sm'
+                            : 'bg-slate-700/80 text-slate-200 border border-white/5 rounded-tl-sm'
+                          }`}>
+                            <p className="text-sm leading-snug">{msg.msg}</p>
+                          </div>
+                          <p className="text-[10px] text-slate-600 mt-0.5 mx-1">{format(new Date(msg.ts), 'HH:mm')}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Input */}
+                <div className="flex gap-2 px-4 py-3" style={{ borderTop: '1px solid rgba(56,189,248,0.12)' }}>
+                  <input
+                    value={radioInput}
+                    onChange={e => setRadioInput(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key !== 'Enter' || e.shiftKey || !radioInput.trim()) return;
+                      e.preventDefault();
+                      const sock = getSocket();
+                      const name = driver?.name || user?.name || 'Driver';
+                      sock.emit('radio:msg', { name, msg: radioInput.trim() });
+                      setRadioMsgs(prev => [...prev, { id: Date.now().toString(), name, msg: radioInput.trim(), ts: new Date().toISOString() }]);
+                      setRadioInput('');
+                    }}
+                    placeholder="Transmitir al canal OSI..."
+                    className="flex-1 text-sm text-white placeholder:text-slate-600 rounded-xl px-3 py-2.5 outline-none focus:ring-1 focus:ring-cyan-500/40"
+                    style={{ background: 'rgba(15,30,53,0.8)', border: '1px solid rgba(56,189,248,0.15)' }}
+                  />
+                  <button
+                    onClick={() => {
+                      if (!radioInput.trim()) return;
+                      const sock = getSocket();
+                      const name = driver?.name || user?.name || 'Driver';
+                      sock.emit('radio:msg', { name, msg: radioInput.trim() });
+                      setRadioMsgs(prev => [...prev, { id: Date.now().toString(), name, msg: radioInput.trim(), ts: new Date().toISOString() }]);
+                      setRadioInput('');
+                    }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all active:scale-95"
+                    style={{ background: radioInput.trim() ? 'linear-gradient(135deg,#f97316,#ea580c)' : 'rgba(51,65,85,0.5)', boxShadow: radioInput.trim() ? '0 4px 12px rgba(249,115,22,0.35)' : 'none' }}>
+                    <Send className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Fixed Bottom Navigation ─────────────────────────── */}
       <nav className="fixed bottom-0 inset-x-0 z-40 bg-slate-900 border-t border-slate-700 flex items-stretch">
         {([
           { id: 'active',    icon: Activity,    label: 'Active',  badge: activeOrders.length },
           { id: 'delivered', icon: CheckCircle, label: 'Done',    badge: deliveredToday.length },
           { id: 'map',       icon: Navigation,  label: 'Map',     badge: 0 },
+          { id: 'hub',       icon: Users,       label: 'Hub',     badge: 0 },
           { id: 'payments',  icon: Wallet,      label: 'Pagos',   badge: (billingSummary?.pending ?? 0) > 0 ? 1 : 0 },
           { id: 'profile',   icon: User,        label: 'Perfil',  badge: 0 },
         ] as const).map(({ id, icon: Icon, label, badge }) => {
