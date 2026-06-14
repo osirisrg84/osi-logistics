@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Bell, Search, RefreshCw, X, Check, LogOut, ChevronDown, Shield, Truck, ClipboardList, Sun, Moon } from 'lucide-react';
+import { Bell, Search, RefreshCw, X, Check, LogOut, ChevronDown, Shield, Truck, ClipboardList, Sun, Moon, Zap, StickyNote, Headphones, Plus, Pin } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
 import { notificationsApi } from '../services/api';
 import { Notification } from '../types';
@@ -44,6 +44,85 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const notifRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const title = PAGE_TITLES[location.pathname] || 'OSI Logistics';
+  const isDispatcher = user?.role === 'dispatcher';
+
+  // ── Dispatcher strip state (shared mobile + desktop) ──────
+  const [musicOn, setMusicOn] = useState(() => { try { return localStorage.getItem('osi_music_on') === '1'; } catch { return false; } });
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [dispActive, setDispActive] = useState(() => { try { return localStorage.getItem('osi_disp_active') === '1'; } catch { return false; } });
+  const [notes, setNotes] = useState<Array<{id: string; text: string; time: string}>>(() => { try { return JSON.parse(localStorage.getItem('osi_dispatch_notes') || '[]'); } catch { return []; } });
+  const [noteInput, setNoteInput] = useState('');
+
+  useEffect(() => { if (isDispatcher) localStorage.setItem('osi_music_on', musicOn ? '1' : '0'); }, [musicOn, isDispatcher]);
+  useEffect(() => { if (isDispatcher) localStorage.setItem('osi_disp_active', dispActive ? '1' : '0'); }, [dispActive, isDispatcher]);
+  useEffect(() => { if (isDispatcher) localStorage.setItem('osi_dispatch_notes', JSON.stringify(notes)); }, [notes, isDispatcher]);
+
+  function addNote() {
+    if (!noteInput.trim()) return;
+    setNotes(prev => [{ id: Date.now().toString(), text: noteInput.trim(), time: new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' }) }, ...prev]);
+    setNoteInput('');
+  }
+
+  const swStyle = (on: boolean, activeBg: string, activeBorder: string) => ({
+    background: on ? activeBg : dark ? 'rgba(15,23,42,0.9)' : 'rgba(241,245,249,0.9)',
+    border: `1px solid ${on ? activeBorder : dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)'}`,
+    boxShadow: on ? `0 0 8px ${activeBorder}` : 'none',
+  });
+
+  const toggleStyle = (on: boolean, grad: string, glow: string) => ({
+    width: 24, height: 13,
+    background: on ? grad : dark ? 'rgba(51,65,85,0.9)' : '#e2e8f0',
+    boxShadow: on ? `0 0 6px ${glow}` : 'none',
+    transition: 'background 0.25s',
+  });
+
+  const knobLeft = (on: boolean) => ({ width: 9, height: 9, top: 2, left: on ? 13 : 2, transition: 'left 0.22s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' });
+
+  function SwitchPanels() {
+    return (
+      <>
+        {musicOn && (
+          <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(168,85,247,0.22)' }}>
+            <iframe src="https://open.spotify.com/embed/playlist/37i9dQZF1DWY7IeIP1cdjF?utm_source=generator&theme=0"
+              width="100%" height="80" style={{ border: 'none', display: 'block' }}
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" />
+          </div>
+        )}
+        {notesOpen && (
+          <div className={`rounded-xl overflow-hidden ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-gray-50 border border-gray-200'}`}>
+            <div className="flex gap-2 px-3 py-2.5" style={{ borderBottom: notes.length > 0 ? `1px solid ${dark ? 'rgba(255,255,255,0.04)' : '#f1f5f9'}` : 'none' }}>
+              <input value={noteInput} onChange={e => setNoteInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addNote(); }}
+                placeholder="Apuntar algo importante..." maxLength={200}
+                className={`flex-1 text-sm px-3 py-2 rounded-lg outline-none border-0 ${dark ? 'bg-slate-700 text-slate-200 placeholder:text-slate-500' : 'bg-white text-gray-800 placeholder:text-gray-400'}`} />
+              <button onClick={addNote} disabled={!noteInput.trim()}
+                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 active:scale-90 disabled:opacity-40"
+                style={{ background: 'linear-gradient(135deg,#f59e0b,#d97706)' }}>
+                <Plus className="w-4 h-4 text-white" />
+              </button>
+            </div>
+            {notes.length > 0 && (
+              <div className="px-3 pb-3 pt-2 space-y-1.5 max-h-40 overflow-y-auto">
+                {notes.map((note, i) => (
+                  <div key={note.id} className="flex items-start gap-2 p-2.5 rounded-lg"
+                    style={{ background: dark ? (i % 2 === 0 ? 'rgba(251,191,36,0.07)' : 'rgba(249,115,22,0.06)') : (i % 2 === 0 ? 'rgba(251,191,36,0.07)' : 'rgba(249,115,22,0.05)'), border: `1px solid ${dark ? 'rgba(251,191,36,0.12)' : 'rgba(251,191,36,0.15)'}` }}>
+                    <Pin className="w-3 h-3 mt-0.5 flex-shrink-0 text-amber-400" />
+                    <p className={`flex-1 text-xs leading-snug ${dark ? 'text-slate-200' : 'text-gray-800'}`}>{note.text}</p>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <span className="text-[9px] text-slate-500">{note.time}</span>
+                      <button onClick={() => setNotes(prev => prev.filter(n => n.id !== note.id))}
+                        className={`w-4 h-4 rounded-full flex items-center justify-center ${dark ? 'text-slate-500 hover:text-red-400' : 'text-gray-400 hover:text-red-400'}`}>
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </>
+    );
+  }
 
   const fetchNotifications = async () => {
     try {
@@ -79,7 +158,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 px-4 md:px-6 py-3 flex items-center justify-between flex-shrink-0">
+    <header className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 flex-shrink-0">
+      <div className="px-4 md:px-6 py-3 flex items-center justify-between">
       <div className="flex items-center gap-3">
         {/* OSI Logo — mobile only, tapping opens sidebar */}
         <button
@@ -103,6 +183,30 @@ export default function Header({ onMenuClick }: HeaderProps) {
           </p>
         </div>
       </div>
+
+      {/* CENTER — dispatcher 3 switches, desktop only */}
+      {isDispatcher && (
+        <div className="hidden md:flex items-center gap-1.5 flex-1 mx-8 max-w-xs">
+          {/* Activo */}
+          <button onClick={() => setDispActive(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(dispActive,'rgba(34,197,94,0.13)','rgba(34,197,94,0.35)')}>
+            <Zap className={`w-3 h-3 flex-shrink-0 ${dispActive ? 'text-green-400' : 'text-slate-400'}`} />
+            <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Activo</p><p className="text-[8px] leading-none mt-0.5" style={{ color: dispActive ? '#4ade80' : '#94a3b8' }}>{dispActive ? 'En turno' : 'Libre'}</p></div>
+            <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(dispActive,'linear-gradient(90deg,#22c55e,#16a34a)','rgba(34,197,94,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(dispActive)} /></div>
+          </button>
+          {/* Notas */}
+          <button onClick={() => setNotesOpen(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(notesOpen,'rgba(251,191,36,0.13)','rgba(251,191,36,0.35)')}>
+            <StickyNote className={`w-3 h-3 flex-shrink-0 ${notesOpen ? 'text-amber-400' : 'text-slate-400'}`} />
+            <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Notas</p><p className="text-[8px] leading-none mt-0.5" style={{ color: notesOpen ? '#fbbf24' : '#94a3b8' }}>{notes.length > 0 ? `${notes.length} nota${notes.length !== 1 ? 's' : ''}` : 'Vacío'}</p></div>
+            <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(notesOpen,'linear-gradient(90deg,#f59e0b,#d97706)','rgba(251,191,36,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(notesOpen)} /></div>
+          </button>
+          {/* Music */}
+          <button onClick={() => setMusicOn(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(musicOn,'rgba(168,85,247,0.13)','rgba(168,85,247,0.35)')}>
+            <Headphones className={`w-3 h-3 flex-shrink-0 ${musicOn ? 'text-purple-400' : 'text-slate-400'}`} />
+            <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Music</p><p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }}>{musicOn ? '▶ Play' : 'Reggae'}</p></div>
+            <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(musicOn,'linear-gradient(90deg,#a855f7,#7c3aed)','rgba(168,85,247,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(musicOn)} /></div>
+          </button>
+        </div>
+      )}
 
       <div className="flex items-center gap-2">
         {/* Search — hidden on small screens */}
@@ -213,6 +317,38 @@ export default function Header({ onMenuClick }: HeaderProps) {
           )}
         </div>
       </div>
+      </div>
+
+      {/* MOBILE: switches + panels below header row */}
+      {isDispatcher && (
+        <div className="md:hidden border-t border-gray-100 dark:border-slate-800 px-3 py-2 space-y-2">
+          <div className="flex gap-1.5">
+            <button onClick={() => setDispActive(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(dispActive,'rgba(34,197,94,0.13)','rgba(34,197,94,0.35)')}>
+              <Zap className={`w-3 h-3 flex-shrink-0 ${dispActive ? 'text-green-400' : 'text-slate-400'}`} />
+              <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Activo</p><p className="text-[8px] leading-none mt-0.5" style={{ color: dispActive ? '#4ade80' : '#94a3b8' }}>{dispActive ? 'En turno' : 'Libre'}</p></div>
+              <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(dispActive,'linear-gradient(90deg,#22c55e,#16a34a)','rgba(34,197,94,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(dispActive)} /></div>
+            </button>
+            <button onClick={() => setNotesOpen(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(notesOpen,'rgba(251,191,36,0.13)','rgba(251,191,36,0.35)')}>
+              <StickyNote className={`w-3 h-3 flex-shrink-0 ${notesOpen ? 'text-amber-400' : 'text-slate-400'}`} />
+              <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Notas</p><p className="text-[8px] leading-none mt-0.5" style={{ color: notesOpen ? '#fbbf24' : '#94a3b8' }}>{notes.length > 0 ? `${notes.length} nota${notes.length !== 1 ? 's' : ''}` : 'Vacío'}</p></div>
+              <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(notesOpen,'linear-gradient(90deg,#f59e0b,#d97706)','rgba(251,191,36,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(notesOpen)} /></div>
+            </button>
+            <button onClick={() => setMusicOn(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(musicOn,'rgba(168,85,247,0.13)','rgba(168,85,247,0.35)')}>
+              <Headphones className={`w-3 h-3 flex-shrink-0 ${musicOn ? 'text-purple-400' : 'text-slate-400'}`} />
+              <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Music</p><p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }}>{musicOn ? '▶ Play' : 'Reggae'}</p></div>
+              <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(musicOn,'linear-gradient(90deg,#a855f7,#7c3aed)','rgba(168,85,247,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(musicOn)} /></div>
+            </button>
+          </div>
+          <SwitchPanels />
+        </div>
+      )}
+
+      {/* DESKTOP: panels (Spotify + Notes) below header when active */}
+      {isDispatcher && (musicOn || notesOpen) && (
+        <div className="hidden md:block border-t border-gray-100 dark:border-slate-800 px-6 py-2 space-y-2">
+          <SwitchPanels />
+        </div>
+      )}
     </header>
   );
 }
