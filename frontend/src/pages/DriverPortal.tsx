@@ -631,52 +631,8 @@ export default function DriverPortal() {
         <div className="px-4 pt-2 pb-4">
           <div className="max-w-lg mx-auto">
 
-            {/* Driver card */}
-            <div className="flex items-center gap-4 rounded-2xl px-4 py-3.5 mb-4 bg-white/6 border border-white/10">
-              {/* Avatar */}
-              <div className="relative flex-shrink-0">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl shadow-lg ${
-                  driverStatus === 'offline'   ? 'bg-slate-600/80' :
-                  driverStatus === 'available' ? 'bg-gradient-to-br from-orange-400 to-orange-600' :
-                  driverStatus === 'busy'      ? 'bg-gradient-to-br from-blue-400 to-blue-600' :
-                                                'bg-gradient-to-br from-yellow-400 to-yellow-500'
-                }`}>
-                  <span className="text-white drop-shadow-sm">{user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'D'}</span>
-                </div>
-                <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#0f1e35] ${cfg.dot} ${driverStatus === 'available' ? 'pulse-dot' : ''}`} />
-              </div>
-
-              {/* Name & info */}
-              <div className="flex-1 min-w-0">
-                <p className="text-base font-bold text-white leading-tight truncate">{driver?.name || user?.name}</p>
-                <p className="text-xs text-slate-400 mt-0.5 truncate">
-                  {localTruckMake
-                    ? <>{localTruckMake}<span className="text-slate-600"> · </span>{localEquipType || driver?.equipment_type || 'Driver'}</>
-                    : (localEquipType || driver?.equipment_type || 'Driver')
-                  }
-                </p>
-                <span className={`inline-flex items-center gap-1 text-xs font-semibold mt-1.5 px-2 py-0.5 rounded-full ${
-                  driverStatus === 'available' ? 'bg-green-500/20 text-green-400' :
-                  driverStatus === 'busy'      ? 'bg-blue-500/20 text-blue-400' :
-                  driverStatus === 'on_break'  ? 'bg-yellow-500/20 text-yellow-400' :
-                                                'bg-slate-700/80 text-slate-400'
-                }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} ${driverStatus === 'available' ? 'pulse-dot' : ''}`} />
-                  {cfg.label}
-                </span>
-              </div>
-
-              {/* Rating badge */}
-              {driver?.rating && (
-                <div className="flex flex-col items-center rounded-2xl px-3 py-2 flex-shrink-0 bg-amber-500/10 border border-amber-500/20">
-                  <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                  <span className="text-sm font-bold text-white mt-0.5">{driver.rating.toFixed(1)}</span>
-                </div>
-              )}
-            </div>
-
             {/* ── Compact 3-Switch Row ──────────────────────── */}
-            <div className="space-y-2">
+            <div className="space-y-2 mb-4">
               <div className="flex gap-1.5">
 
                 {/* Switch 1 — Go Online */}
@@ -780,6 +736,50 @@ export default function DriverPortal() {
                       <Power className="w-3 h-3" /> Retomar
                     </button>
                   )}
+                </div>
+              )}
+            </div>
+
+            {/* Driver card */}
+            <div className="flex items-center gap-4 rounded-2xl px-4 py-3.5 bg-white/6 border border-white/10">
+              {/* Avatar */}
+              <div className="relative flex-shrink-0">
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl shadow-lg ${
+                  driverStatus === 'offline'   ? 'bg-slate-600/80' :
+                  driverStatus === 'available' ? 'bg-gradient-to-br from-orange-400 to-orange-600' :
+                  driverStatus === 'busy'      ? 'bg-gradient-to-br from-blue-400 to-blue-600' :
+                                                'bg-gradient-to-br from-yellow-400 to-yellow-500'
+                }`}>
+                  <span className="text-white drop-shadow-sm">{user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'D'}</span>
+                </div>
+                <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#0f1e35] ${cfg.dot} ${driverStatus === 'available' ? 'pulse-dot' : ''}`} />
+              </div>
+
+              {/* Name & info */}
+              <div className="flex-1 min-w-0">
+                <p className="text-base font-bold text-white leading-tight truncate">{driver?.name || user?.name}</p>
+                <p className="text-xs text-slate-400 mt-0.5 truncate">
+                  {localTruckMake
+                    ? <>{localTruckMake}<span className="text-slate-600"> · </span>{localEquipType || driver?.equipment_type || 'Driver'}</>
+                    : (localEquipType || driver?.equipment_type || 'Driver')
+                  }
+                </p>
+                <span className={`inline-flex items-center gap-1 text-xs font-semibold mt-1.5 px-2 py-0.5 rounded-full ${
+                  driverStatus === 'available' ? 'bg-green-500/20 text-green-400' :
+                  driverStatus === 'busy'      ? 'bg-blue-500/20 text-blue-400' :
+                  driverStatus === 'on_break'  ? 'bg-yellow-500/20 text-yellow-400' :
+                                                'bg-slate-700/80 text-slate-400'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} ${driverStatus === 'available' ? 'pulse-dot' : ''}`} />
+                  {cfg.label}
+                </span>
+              </div>
+
+              {/* Rating badge */}
+              {driver?.rating && (
+                <div className="flex flex-col items-center rounded-2xl px-3 py-2 flex-shrink-0 bg-amber-500/10 border border-amber-500/20">
+                  <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                  <span className="text-sm font-bold text-white mt-0.5">{driver.rating.toFixed(1)}</span>
                 </div>
               )}
             </div>
@@ -960,35 +960,79 @@ export default function DriverPortal() {
             <div key={i} className={`absolute w-5 h-5 ${cls} border-cyan-400/60 pointer-events-none rounded-sm`} />
           ))}
 
-          <div className="absolute inset-0 flex flex-col items-center justify-start pt-14 px-5 pointer-events-none">
-            <div className={`backdrop-blur-xl rounded-2xl px-6 py-6 text-center shadow-2xl w-full max-w-sm pointer-events-auto ${
+          <div className="absolute inset-0 flex flex-col items-center justify-start pt-10 px-5 pointer-events-none">
+            <div className={`backdrop-blur-2xl rounded-3xl px-6 py-7 text-center w-full max-w-sm pointer-events-auto ${
               dark
-                ? 'bg-slate-950/88 border border-white/10'
+                ? 'border border-white/[0.07]'
                 : 'bg-white/95 border border-gray-200 shadow-xl'
-            }`}>
-              {/* Icon */}
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow border ${
-                dark ? 'bg-gradient-to-br from-slate-700 to-slate-800 border-white/5'
-                     : 'bg-gradient-to-br from-gray-100 to-gray-200 border-gray-300'
-              }`}>
-                <Power className={`w-7 h-7 ${dark ? 'text-slate-400' : 'text-gray-500'}`} />
+            }`}
+              style={dark ? {
+                background: 'linear-gradient(160deg, rgba(2,6,23,0.92) 0%, rgba(15,23,42,0.90) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 24px 60px rgba(0,0,0,0.7), 0 0 40px rgba(239,68,68,0.06)',
+              } : undefined}>
+
+              {/* Divider superior — línea de acento rojo/amber para indicar offline */}
+              {dark && (
+                <div className="absolute top-0 inset-x-8 h-px rounded-full"
+                  style={{ background: 'linear-gradient(90deg, transparent, rgba(239,68,68,0.5), transparent)' }} />
+              )}
+
+              {/* Icon con glow pulsante */}
+              <div className="relative w-16 h-16 mx-auto mb-4">
+                <div className={`absolute inset-0 rounded-2xl ${dark ? 'animate-pulse' : ''}`}
+                  style={dark ? { background: 'rgba(239,68,68,0.12)', filter: 'blur(8px)', borderRadius: 18 } : undefined} />
+                <div className={`relative w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg border ${
+                  dark
+                    ? 'border-white/[0.08]'
+                    : 'bg-gradient-to-br from-gray-100 to-gray-200 border-gray-300'
+                }`}
+                  style={dark ? {
+                    background: 'linear-gradient(145deg, rgba(30,41,59,1) 0%, rgba(15,23,42,1) 100%)',
+                    boxShadow: '0 0 0 1px rgba(239,68,68,0.2), 0 4px 20px rgba(0,0,0,0.5)',
+                  } : undefined}>
+                  <Power className={`w-7 h-7 ${dark ? 'text-red-400/80' : 'text-gray-500'}`} />
+                </div>
               </div>
+
+              {/* Badge offline */}
+              {dark && (
+                <div className="inline-flex items-center gap-1.5 mb-3 px-2.5 py-1 rounded-full"
+                  style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400" style={{ boxShadow: '0 0 4px rgba(239,68,68,0.8)' }} />
+                  <span className="text-[10px] font-bold text-red-400 tracking-[0.12em] uppercase">Offline</span>
+                </div>
+              )}
+
               {/* Text */}
-              <h3 className={`text-base font-bold mb-1.5 tracking-tight ${dark ? 'text-white' : 'text-gray-900'}`}>You're Offline</h3>
-              <p className={`text-sm mb-4 ${dark ? 'text-slate-500' : 'text-gray-500'}`}>Conéctate para recibir ofertas de OSI Logistics</p>
+              <h3 className={`text-lg font-bold mb-1.5 tracking-tight ${dark ? 'text-white' : 'text-gray-900'}`}
+                style={dark ? { textShadow: '0 1px 8px rgba(0,0,0,0.5)' } : undefined}>
+                You're Offline
+              </h3>
+              <p className={`text-sm mb-5 leading-relaxed ${dark ? 'text-slate-400' : 'text-gray-500'}`}>
+                Conéctate para recibir ofertas de OSI Logistics
+              </p>
+
+              {/* Divider sutil */}
+              {dark && (
+                <div className="h-px mb-5 mx-2"
+                  style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)' }} />
+              )}
+
               {/* CTA */}
               <button onClick={() => setStatus('available')} disabled={togglingStatus}
-                className="w-full relative overflow-hidden active:scale-[0.97] disabled:opacity-60 transition-all duration-200 flex items-center justify-center gap-2 text-sm font-bold tracking-wide"
+                className="w-full relative overflow-hidden active:scale-[0.97] disabled:opacity-60 transition-all duration-150 flex items-center justify-center gap-2 text-sm font-bold tracking-wide"
                 style={{
-                  borderRadius: 12,
+                  borderRadius: 14,
                   padding: '13px 20px',
                   color: '#fff',
-                  background: 'linear-gradient(160deg, #4ade80 0%, #22c55e 35%, #16a34a 70%, #15803d 100%)',
-                  boxShadow: '0 4px 16px rgba(34,197,94,0.4), 0 1px 0 rgba(255,255,255,0.15) inset',
-                  border: '1px solid rgba(255,255,255,0.18)',
-                  textShadow: '0 1px 2px rgba(0,0,0,0.25)',
+                  background: 'linear-gradient(160deg, #4ade80 0%, #22c55e 40%, #16a34a 100%)',
+                  boxShadow: dark
+                    ? '0 0 0 1px rgba(74,222,128,0.25), 0 6px 24px rgba(34,197,94,0.35), 0 1px 0 rgba(255,255,255,0.15) inset'
+                    : '0 4px 16px rgba(34,197,94,0.4)',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)',
                 }}>
-                <span className="absolute inset-0 pointer-events-none rounded-xl" style={{ background: 'linear-gradient(180deg,rgba(255,255,255,0.1) 0%,transparent 60%)' }} />
+                <span className="absolute inset-0 pointer-events-none rounded-xl"
+                  style={{ background: 'linear-gradient(180deg,rgba(255,255,255,0.12) 0%,transparent 55%)' }} />
                 {togglingStatus
                   ? <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                   : <Power className="w-3.5 h-3.5" />}
