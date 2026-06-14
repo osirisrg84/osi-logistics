@@ -2394,7 +2394,7 @@ export default function DriverPortal() {
                         <p className="text-[11px] text-gray-400 dark:text-slate-500">{c.desc}</p>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-mono font-bold text-orange-500">{c.phone}</span>
+                        <span className="text-xs font-mono font-bold text-orange-500 whitespace-nowrap">{c.phone}</span>
                         <PhoneCall className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
                       </div>
                     </a>
