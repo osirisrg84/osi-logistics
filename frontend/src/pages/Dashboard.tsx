@@ -264,8 +264,8 @@ export default function Dashboard() {
         />
         <StatCard
           title="Revenue (Total)"
-          value={`$${((stats?.kpis.total_revenue || 0)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
-          sub={`$${((stats?.kpis.monthly_revenue || 0)).toFixed(0)} this month`}
+          value={`$${((stats?.kpis.total_revenue || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          sub={`$${((stats?.kpis.monthly_revenue || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} this month`}
           icon={DollarSign}
           color="bg-orange-100 text-orange-600"
           trend={12.5}
