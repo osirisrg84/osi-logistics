@@ -436,7 +436,7 @@ export default function Dashboard() {
         <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Fleet Overview</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { label: 'Total Trucks', value: driverStats.total || 0, color: 'text-gray-900' },
+            { label: 'Total Trucks', value: driverStats.total || 0, color: 'text-gray-900 dark:text-white' },
             { label: 'Active', value: driverStats.available || 0, color: 'text-green-600' },
             { label: 'On Break', value: driverStats.on_break || 0, color: 'text-yellow-600' },
             { label: 'Offline', value: driverStats.offline || 0, color: 'text-gray-400' },

@@ -193,7 +193,7 @@ export default function Fleet() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total Trucks', value: stats.total || 0, color: 'text-gray-900', bg: 'bg-gray-50' },
+          { label: 'Total Trucks', value: stats.total || 0, color: 'text-gray-900 dark:text-white', bg: 'bg-gray-50 dark:bg-slate-800' },
           { label: 'Active', value: stats.active || 0, color: 'text-green-600', bg: 'bg-green-50' },
           { label: 'In Maintenance', value: stats.maintenance || 0, color: 'text-yellow-600', bg: 'bg-yellow-50' },
           { label: 'Maintenance Due', value: stats.maintenance_due || 0, color: 'text-red-500', bg: 'bg-red-50' },
