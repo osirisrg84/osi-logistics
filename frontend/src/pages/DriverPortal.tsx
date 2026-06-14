@@ -960,8 +960,8 @@ export default function DriverPortal() {
             <div key={i} className={`absolute w-5 h-5 ${cls} border-cyan-400/60 pointer-events-none rounded-sm`} />
           ))}
 
-          <div className="absolute inset-0 flex flex-col items-center justify-start pt-10 px-5 pointer-events-none">
-            <div className={`backdrop-blur-2xl rounded-3xl px-6 py-7 text-center w-full max-w-sm pointer-events-auto ${
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-5 pointer-events-none">
+            <div className={`backdrop-blur-2xl rounded-3xl px-6 py-5 text-center w-full max-w-sm pointer-events-auto ${
               dark
                 ? 'border border-white/[0.07]'
                 : 'bg-white/95 border border-gray-200 shadow-xl'
@@ -978,7 +978,7 @@ export default function DriverPortal() {
               )}
 
               {/* Icon con glow pulsante */}
-              <div className="relative w-16 h-16 mx-auto mb-4">
+              <div className="relative w-16 h-16 mx-auto mb-3">
                 <div className={`absolute inset-0 rounded-2xl ${dark ? 'animate-pulse' : ''}`}
                   style={dark ? { background: 'rgba(239,68,68,0.12)', filter: 'blur(8px)', borderRadius: 18 } : undefined} />
                 <div className={`relative w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg border ${
