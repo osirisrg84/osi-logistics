@@ -2711,25 +2711,19 @@ export default function DriverPortal() {
                         style={{
                           width: 118, height: 118,
                           background: isRecording
-                            ? 'radial-gradient(circle at 36% 26%, #fecaca 0%, #fca5a5 8%, #f87171 20%, #ef4444 38%, #dc2626 58%, #b91c1c 78%, #7f1d1d 100%)'
-                            : 'radial-gradient(circle at 36% 26%, #dcfce7 0%, #bbf7d0 8%, #4ade80 20%, #22c55e 38%, #16a34a 58%, #15803d 78%, #14532d 100%)',
+                            ? 'repeating-linear-gradient(45deg, rgba(0,0,0,0.065) 0px, rgba(0,0,0,0.065) 1.5px, transparent 1.5px, transparent 5px), repeating-linear-gradient(-45deg, rgba(0,0,0,0.065) 0px, rgba(0,0,0,0.065) 1.5px, transparent 1.5px, transparent 5px), radial-gradient(circle at 36% 26%, #fca5a5 0%, #f87171 14%, #ef4444 34%, #dc2626 56%, #b91c1c 76%, #7f1d1d 100%)'
+                            : 'repeating-linear-gradient(45deg, rgba(0,0,0,0.065) 0px, rgba(0,0,0,0.065) 1.5px, transparent 1.5px, transparent 5px), repeating-linear-gradient(-45deg, rgba(0,0,0,0.065) 0px, rgba(0,0,0,0.065) 1.5px, transparent 1.5px, transparent 5px), radial-gradient(circle at 36% 26%, #bbf7d0 0%, #4ade80 14%, #22c55e 34%, #16a34a 56%, #15803d 76%, #14532d 100%)',
                           boxShadow: isRecording
                             ? 'inset 0 -14px 38px rgba(0,0,0,0.66), inset 0 9px 22px rgba(255,210,210,0.18), 0 0 0 1.5px rgba(239,68,68,0.52), 0 0 58px rgba(220,38,38,0.72), 0 16px 44px rgba(0,0,0,0.68)'
                             : 'inset 0 -14px 38px rgba(0,0,0,0.66), inset 0 9px 22px rgba(210,255,225,0.18), 0 0 0 1.5px rgba(34,197,94,0.42), 0 0 42px rgba(22,163,74,0.6), 0 16px 44px rgba(0,0,0,0.68)',
                         }}>
 
-                        {/* Primary specular — main light source top-left */}
+                        {/* Primary specular — diffuse matte (rubber absorbs light) */}
                         <div className="absolute pointer-events-none" style={{
-                          top: 12, left: 18, width: 68, height: 40,
+                          top: 10, left: 14, width: 78, height: 48,
                           borderRadius: '50%',
-                          background: 'radial-gradient(ellipse at 35% 35%, rgba(255,255,255,0.46) 0%, rgba(255,255,255,0.14) 45%, transparent 100%)',
-                          transform: 'rotate(-22deg)',
-                        }} />
-                        {/* Secondary pinpoint glint */}
-                        <div className="absolute pointer-events-none" style={{
-                          top: 14, left: 24, width: 22, height: 12,
-                          borderRadius: '50%',
-                          background: 'radial-gradient(ellipse, rgba(255,255,255,0.6) 0%, transparent 100%)',
+                          background: 'radial-gradient(ellipse at 38% 38%, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.06) 55%, transparent 100%)',
+                          transform: 'rotate(-20deg)',
                         }} />
                         {/* Fresnel edge vignette at top */}
                         <div className="absolute pointer-events-none rounded-full" style={{
@@ -2752,25 +2746,14 @@ export default function DriverPortal() {
                           background: 'radial-gradient(ellipse, rgba(255,255,255,0.09) 0%, transparent 100%)',
                         }} />
 
-                        {/* Center label — PTT + LED */}
-                        <div className="relative flex flex-col items-center select-none" style={{ gap: 6 }}>
-                          <span style={{
-                            fontSize: 15, fontWeight: 900, letterSpacing: '0.28em', textTransform: 'uppercase',
-                            fontFamily: "'Arial Black', Arial, sans-serif",
-                            color: isRecording ? 'rgba(254,202,202,0.97)' : 'rgba(187,247,208,0.97)',
-                            textShadow: isRecording
-                              ? '0 1px 4px rgba(0,0,0,0.9), 0 0 24px rgba(239,68,68,0.95)'
-                              : '0 1px 4px rgba(0,0,0,0.9), 0 0 24px rgba(34,197,94,0.95)',
-                          }}>PTT</span>
-                          {/* LED indicator */}
-                          <div style={{
-                            width: 9, height: 9, borderRadius: '50%',
-                            background: isRecording ? '#f87171' : '#4ade80',
-                            boxShadow: isRecording
-                              ? '0 0 14px 5px rgba(239,68,68,0.95), 0 0 4px rgba(239,68,68,1)'
-                              : '0 0 14px 5px rgba(74,222,128,0.88), 0 0 4px rgba(74,222,128,1)',
-                          }} />
-                        </div>
+                        {/* Status LED — no text, embedded in surface */}
+                        <div style={{
+                          width: 10, height: 10, borderRadius: '50%',
+                          background: isRecording ? '#fca5a5' : '#86efac',
+                          boxShadow: isRecording
+                            ? '0 0 18px 7px rgba(239,68,68,0.85), 0 0 6px rgba(239,68,68,1)'
+                            : '0 0 18px 7px rgba(74,222,128,0.78), 0 0 6px rgba(74,222,128,1)',
+                        }} />
                       </button>
                     </div>
 
