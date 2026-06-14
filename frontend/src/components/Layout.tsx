@@ -81,9 +81,19 @@ function BottomNav({ onMoreClick }: { onMoreClick: () => void }) {
   const activeColor = isAdmin ? 'text-purple-500' : 'text-orange-500';
   const activeBg   = isAdmin ? 'bg-purple-50 dark:bg-purple-900/30' : 'bg-orange-50 dark:bg-orange-900/30';
 
+  const navItems = isAdmin
+    ? BOTTOM_NAV
+    : [
+        { to: '/hub',       icon: Layers,          label: 'Hub'     },
+        { to: '/orders',    icon: Package,         label: 'Orders'  },
+        { to: '/tracking',  icon: MapPin,          label: 'Tracking'},
+        { to: '/drivers',   icon: Users,           label: 'Drivers' },
+        { to: '/dashboard', icon: LayoutDashboard, label: 'Stats'   },
+      ];
+
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 flex items-stretch">
-      {BOTTOM_NAV.map(({ to, icon: Icon, label }) => (
+      {navItems.map(({ to, icon: Icon, label }) => (
         <NavLink
           key={to}
           to={to}

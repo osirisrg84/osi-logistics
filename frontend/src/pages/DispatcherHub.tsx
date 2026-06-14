@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Headphones, Users, PhoneCall, MessageSquare, Heart,
-  Briefcase, Shield, BookOpen, AlertTriangle, ChevronRight
+  Briefcase, Shield, BookOpen, AlertTriangle, ChevronRight,
+  StickyNote, Plus, X, Pin
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -16,6 +17,26 @@ export default function DispatcherHub() {
 
   // ── Music ──────────────────────────────────────────────
   const [musicOn, setMusicOn] = useState(false);
+
+  // ── Notas ──────────────────────────────────────────────
+  const [notes, setNotes] = useState<Array<{id: string; text: string; time: string}>>(() => {
+    try { return JSON.parse(localStorage.getItem('osi_dispatch_notes') || '[]'); } catch { return []; }
+  });
+  const [noteInput, setNoteInput] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('osi_dispatch_notes', JSON.stringify(notes));
+  }, [notes]);
+
+  function addNote() {
+    if (!noteInput.trim()) return;
+    setNotes(prev => [{
+      id: Date.now().toString(),
+      text: noteInput.trim(),
+      time: new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' }),
+    }, ...prev]);
+    setNoteInput('');
+  }
 
   // ── Hub sections ───────────────────────────────────────
   const [section, setSection] = useState<'community' | 'support'>('community');
@@ -93,6 +114,74 @@ export default function DispatcherHub() {
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
             />
+          </div>
+        )}
+      </div>
+
+      {/* ── Notas Importantes ─────────────────────────────── */}
+      <div className={`rounded-2xl overflow-hidden shadow-sm ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-100'}`}>
+
+        {/* Header */}
+        <div className="flex items-center gap-3 px-4 py-3.5" style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : '#f1f5f9'}` }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: accentSoft }}>
+            <StickyNote className="w-5 h-5" style={{ color: accent }} />
+          </div>
+          <div className="flex-1">
+            <p className={`text-sm font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>Notas Importantes</p>
+            <p className="text-[11px]" style={{ color: '#94a3b8' }}>Apuntes rápidos del turno</p>
+          </div>
+          {notes.length > 0 && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: accentSoft, color: accent }}>
+              {notes.length}
+            </span>
+          )}
+        </div>
+
+        {/* Input */}
+        <div className="flex gap-2 px-4 py-3" style={{ borderBottom: notes.length > 0 ? `1px solid ${dark ? 'rgba(255,255,255,0.04)' : '#f8fafc'}` : 'none' }}>
+          <input
+            value={noteInput}
+            onChange={e => setNoteInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') addNote(); }}
+            placeholder="Apuntar algo importante..."
+            maxLength={200}
+            className={`flex-1 text-sm px-3 py-2 rounded-xl outline-none border-0 ${dark ? 'bg-slate-700 text-slate-200 placeholder:text-slate-500' : 'bg-gray-50 text-gray-800 placeholder:text-gray-400'}`}
+          />
+          <button
+            onClick={addNote}
+            disabled={!noteInput.trim()}
+            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all active:scale-90 disabled:opacity-40"
+            style={{ background: `linear-gradient(135deg,${accent},${isAdmin ? '#7c3aed' : '#ea580c'})` }}
+          >
+            <Plus className="w-4 h-4 text-white" />
+          </button>
+        </div>
+
+        {/* Notes list */}
+        {notes.length > 0 && (
+          <div className="p-3 space-y-2 max-h-56 overflow-y-auto">
+            {notes.map((note, i) => (
+              <div key={note.id}
+                className="flex items-start gap-2.5 p-3 rounded-xl"
+                style={{
+                  background: dark
+                    ? i % 2 === 0 ? 'rgba(251,191,36,0.07)' : 'rgba(249,115,22,0.06)'
+                    : i % 2 === 0 ? 'rgba(251,191,36,0.07)' : 'rgba(249,115,22,0.05)',
+                  border: `1px solid ${dark ? 'rgba(251,191,36,0.12)' : 'rgba(251,191,36,0.14)'}`,
+                }}>
+                <Pin className="w-3 h-3 mt-0.5 flex-shrink-0 text-amber-400" />
+                <p className={`flex-1 text-sm leading-snug ${dark ? 'text-slate-200' : 'text-gray-800'}`}>{note.text}</p>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <span className="text-[10px] text-slate-500">{note.time}</span>
+                  <button
+                    onClick={() => setNotes(prev => prev.filter(n => n.id !== note.id))}
+                    className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors ${dark ? 'hover:bg-white/10 text-slate-500 hover:text-red-400' : 'hover:bg-red-50 text-gray-400 hover:text-red-400'}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

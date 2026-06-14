@@ -33,6 +33,7 @@ function Spinner() {
 
 function getHomeForRole(role: string) {
   if (role === 'driver') return '/driver';
+  if (role === 'dispatcher') return '/hub';
   return '/dashboard';
 }
 
