@@ -669,119 +669,109 @@ export default function DriverPortal() {
               )}
             </div>
 
-            {/* ── Premium 3-Switch Control Panel ───────────── */}
-            <div className="rounded-2xl overflow-hidden" style={{
-              background: 'linear-gradient(145deg, rgba(15,30,53,0.95) 0%, rgba(8,18,32,0.98) 100%)',
-              border: '1px solid rgba(255,255,255,0.07)',
-              boxShadow: '0 4px 28px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)',
-            }}>
+            {/* ── Compact 3-Switch Row ──────────────────────── */}
+            <div className="space-y-2">
+              <div className="flex gap-2">
 
-              {/* Switch 1 — Go Online */}
-              <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06] cursor-pointer active:bg-white/[0.03] transition-colors select-none"
-                   onClick={() => { if (togglingStatus) return; setStatus(driverStatus === 'offline' ? 'available' : 'offline'); }}>
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${driverStatus !== 'offline' ? 'bg-green-500/20' : 'bg-slate-700/50'}`}>
-                  <Power className={`w-4 h-4 transition-colors ${driverStatus !== 'offline' ? 'text-green-400' : 'text-slate-500'}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-white">Go Online</p>
-                  <p className="text-[11px] leading-tight" style={{ color: driverStatus !== 'offline' ? '#4ade80' : '#64748b' }}>
-                    {driverStatus === 'offline' ? 'Offline — sin recibir ofertas' :
-                     driverStatus === 'on_break' ? 'En descanso' :
-                     `Online · ${activeOrders.length} ${activeOrders.length === 1 ? 'orden activa' : 'órdenes activas'}`}
-                  </p>
-                </div>
-                {togglingStatus ? (
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-green-400 rounded-full animate-spin flex-shrink-0" />
-                ) : (
-                  <div className="relative flex-shrink-0 rounded-full transition-all duration-300"
-                       style={{
-                         width: 48, height: 26,
-                         background: driverStatus !== 'offline' ? 'linear-gradient(90deg,#22c55e,#16a34a)' : 'rgba(51,65,85,0.8)',
-                         boxShadow: driverStatus !== 'offline' ? '0 0 12px rgba(34,197,94,0.45)' : 'none',
-                       }}>
-                    <div className="absolute rounded-full bg-white shadow-lg transition-all duration-300"
-                         style={{ width: 20, height: 20, top: 3, left: driverStatus !== 'offline' ? 25 : 3 }} />
+                {/* Switch 1 — Go Online */}
+                <button
+                  onClick={() => { if (togglingStatus) return; setStatus(driverStatus === 'offline' ? 'available' : 'offline'); }}
+                  className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all"
+                  style={{
+                    background: driverStatus !== 'offline' ? 'rgba(34,197,94,0.13)' : 'rgba(15,30,53,0.9)',
+                    border: `1px solid ${driverStatus !== 'offline' ? 'rgba(34,197,94,0.35)' : 'rgba(255,255,255,0.06)'}`,
+                    boxShadow: driverStatus !== 'offline' ? '0 0 10px rgba(34,197,94,0.18)' : 'none',
+                  }}>
+                  <Power className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${driverStatus !== 'offline' ? 'text-green-400' : 'text-slate-600'}`} />
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-[11px] font-bold text-white leading-none">Go Online</p>
+                    <p className="text-[9px] leading-none mt-0.5 truncate" style={{ color: driverStatus !== 'offline' ? '#4ade80' : '#475569' }}>
+                      {driverStatus === 'offline' ? 'Offline' : driverStatus === 'on_break' ? 'Break' : `Online ·${activeOrders.length}`}
+                    </p>
                   </div>
-                )}
+                  {togglingStatus
+                    ? <div className="w-4 h-4 border-2 border-white/20 border-t-green-400 rounded-full animate-spin flex-shrink-0" />
+                    : <div className="relative flex-shrink-0 rounded-full" style={{ width: 34, height: 19, background: driverStatus !== 'offline' ? 'linear-gradient(90deg,#22c55e,#16a34a)' : 'rgba(51,65,85,0.9)', boxShadow: driverStatus !== 'offline' ? '0 0 8px rgba(34,197,94,0.45)' : 'none', transition: 'background 0.25s' }}>
+                        <div className="absolute rounded-full bg-white" style={{ width: 13, height: 13, top: 3, left: driverStatus !== 'offline' ? 18 : 3, transition: 'left 0.25s', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }} />
+                      </div>
+                  }
+                </button>
+
+                {/* Switch 2 — GPS */}
+                <button
+                  onClick={() => setTrackingOn(v => !v)}
+                  className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all"
+                  style={{
+                    background: trackingOn ? 'rgba(6,182,212,0.13)' : 'rgba(15,30,53,0.9)',
+                    border: `1px solid ${trackingOn ? 'rgba(6,182,212,0.35)' : 'rgba(255,255,255,0.06)'}`,
+                    boxShadow: trackingOn ? '0 0 10px rgba(6,182,212,0.18)' : 'none',
+                  }}>
+                  <Navigation className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${trackingOn ? 'text-cyan-400' : 'text-slate-600'}`} />
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-[11px] font-bold text-white leading-none">GPS</p>
+                    <p className="text-[9px] leading-none mt-0.5" style={{ color: trackingOn ? '#22d3ee' : '#475569' }}>
+                      {trackingOn ? 'Live' : 'Paused'}
+                    </p>
+                  </div>
+                  <div className="relative flex-shrink-0 rounded-full" style={{ width: 34, height: 19, background: trackingOn ? 'linear-gradient(90deg,#06b6d4,#0891b2)' : 'rgba(51,65,85,0.9)', boxShadow: trackingOn ? '0 0 8px rgba(6,182,212,0.45)' : 'none', transition: 'background 0.25s' }}>
+                    <div className="absolute rounded-full bg-white" style={{ width: 13, height: 13, top: 3, left: trackingOn ? 18 : 3, transition: 'left 0.25s', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }} />
+                  </div>
+                </button>
+
+                {/* Switch 3 — Music */}
+                <button
+                  onClick={() => setMusicOn(v => !v)}
+                  className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all"
+                  style={{
+                    background: musicOn ? 'rgba(168,85,247,0.13)' : 'rgba(15,30,53,0.9)',
+                    border: `1px solid ${musicOn ? 'rgba(168,85,247,0.35)' : 'rgba(255,255,255,0.06)'}`,
+                    boxShadow: musicOn ? '0 0 10px rgba(168,85,247,0.18)' : 'none',
+                  }}>
+                  <Headphones className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${musicOn ? 'text-purple-400' : 'text-slate-600'}`} />
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-[11px] font-bold text-white leading-none">Music</p>
+                    <p className="text-[9px] leading-none mt-0.5 truncate" style={{ color: musicOn ? '#c084fc' : '#475569' }}>
+                      {musicOn ? '▶ Playing' : 'Trap · Reggae'}
+                    </p>
+                  </div>
+                  <div className="relative flex-shrink-0 rounded-full" style={{ width: 34, height: 19, background: musicOn ? 'linear-gradient(90deg,#a855f7,#7c3aed)' : 'rgba(51,65,85,0.9)', boxShadow: musicOn ? '0 0 8px rgba(168,85,247,0.45)' : 'none', transition: 'background 0.25s' }}>
+                    <div className="absolute rounded-full bg-white" style={{ width: 13, height: 13, top: 3, left: musicOn ? 18 : 3, transition: 'left 0.25s', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }} />
+                  </div>
+                </button>
+
               </div>
 
-              {/* Switch 2 — GPS Tracking */}
-              <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06] cursor-pointer active:bg-white/[0.03] transition-colors select-none"
-                   onClick={() => setTrackingOn(v => !v)}>
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${trackingOn ? 'bg-cyan-500/20' : 'bg-slate-700/50'}`}>
-                  <Navigation className={`w-4 h-4 transition-colors ${trackingOn ? 'text-cyan-400' : 'text-slate-500'}`} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-white">GPS Tracking</p>
-                  <p className="text-[11px] leading-tight" style={{ color: trackingOn ? '#22d3ee' : '#64748b' }}>
-                    {trackingOn ? 'Transmitiendo tu ubicación en vivo' : 'Tracking pausado'}
-                  </p>
-                </div>
-                <div className="relative flex-shrink-0 rounded-full transition-all duration-300"
-                     style={{
-                       width: 48, height: 26,
-                       background: trackingOn ? 'linear-gradient(90deg,#06b6d4,#0891b2)' : 'rgba(51,65,85,0.8)',
-                       boxShadow: trackingOn ? '0 0 12px rgba(6,182,212,0.45)' : 'none',
-                     }}>
-                  <div className="absolute rounded-full bg-white shadow-lg transition-all duration-300"
-                       style={{ width: 20, height: 20, top: 3, left: trackingOn ? 25 : 3 }} />
-                </div>
-              </div>
-
-              {/* Switch 3 — Trap & Reggae */}
-              <div className="flex items-center gap-3 px-4 py-3.5 cursor-pointer active:bg-white/[0.03] transition-colors select-none"
-                   onClick={() => setMusicOn(v => !v)}>
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${musicOn ? 'bg-purple-500/20' : 'bg-slate-700/50'}`}>
-                  <Headphones className={`w-4 h-4 transition-colors ${musicOn ? 'text-purple-400' : 'text-slate-500'}`} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-white">Trap & Reggae</p>
-                  <p className="text-[11px] leading-tight" style={{ color: musicOn ? '#c084fc' : '#64748b' }}>
-                    {musicOn ? '🎵 OSI Radio — Hyped Mix activo' : 'Música para la ruta'}
-                  </p>
-                </div>
-                <div className="relative flex-shrink-0 rounded-full transition-all duration-300"
-                     style={{
-                       width: 48, height: 26,
-                       background: musicOn ? 'linear-gradient(90deg,#a855f7,#7c3aed)' : 'rgba(51,65,85,0.8)',
-                       boxShadow: musicOn ? '0 0 12px rgba(168,85,247,0.45)' : 'none',
-                     }}>
-                  <div className="absolute rounded-full bg-white shadow-lg transition-all duration-300"
-                       style={{ width: 20, height: 20, top: 3, left: musicOn ? 25 : 3 }} />
-                </div>
-              </div>
-
-              {/* Spotify player — appears when music is ON */}
+              {/* Spotify embed — when music is ON */}
               {musicOn && (
-                <div style={{ borderTop: '1px solid rgba(168,85,247,0.18)', padding: '10px 12px 12px' }}>
+                <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(168,85,247,0.22)' }}>
                   <iframe
                     src="https://open.spotify.com/embed/playlist/37i9dQZF1DX0XUsuxWHRQd?utm_source=generator&theme=0"
                     width="100%" height="80"
-                    style={{ borderRadius: 10, border: 'none', display: 'block' }}
+                    style={{ border: 'none', display: 'block' }}
                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                     loading="lazy"
                   />
                 </div>
               )}
 
-              {/* Secondary: Break / Resume when online */}
+              {/* Break / Resume — only when online */}
               {driverStatus !== 'offline' && (
-                <div className="flex gap-2 px-4 pb-3 pt-0.5">
+                <div className="flex gap-2">
                   {isBusy && (
-                    <div className="flex items-center gap-1 text-[11px] text-orange-400 bg-orange-500/10 rounded-lg px-2 py-1 flex-1">
+                    <div className="flex items-center gap-1 text-[10px] text-orange-400 bg-orange-500/10 rounded-lg px-2 py-1.5 flex-1 border border-orange-500/15">
                       <AlertTriangle className="w-3 h-3 flex-shrink-0" /> Active delivery in progress
                     </div>
                   )}
                   {!isBusy && driverStatus !== 'on_break' && (
                     <button onClick={() => setStatus('on_break')} disabled={togglingStatus}
-                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-xl border border-yellow-500/30 text-yellow-400 bg-yellow-500/10 hover:bg-yellow-500/15 transition-colors">
-                      <Coffee className="w-3.5 h-3.5" /> Take a Break
+                      className="flex-1 flex items-center justify-center gap-1 text-[11px] font-semibold py-1.5 rounded-xl border border-yellow-500/25 text-yellow-400 bg-yellow-500/8 hover:bg-yellow-500/15 transition-colors">
+                      <Coffee className="w-3 h-3" /> Take a Break
                     </button>
                   )}
                   {driverStatus === 'on_break' && (
                     <button onClick={() => setStatus('available')} disabled={togglingStatus}
-                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-xl border border-green-500/30 text-green-400 bg-green-500/10 hover:bg-green-500/15 transition-colors">
-                      <Power className="w-3.5 h-3.5" /> Retomar
+                      className="flex-1 flex items-center justify-center gap-1 text-[11px] font-semibold py-1.5 rounded-xl border border-green-500/25 text-green-400 bg-green-500/8 hover:bg-green-500/15 transition-colors">
+                      <Power className="w-3 h-3" /> Retomar
                     </button>
                   )}
                 </div>
