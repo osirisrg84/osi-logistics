@@ -1008,15 +1008,9 @@ export default function DriverPortal() {
                 style={dark ? { textShadow: '0 1px 8px rgba(0,0,0,0.5)' } : undefined}>
                 You're Offline
               </h3>
-              <p className={`text-sm mb-5 leading-relaxed ${dark ? 'text-slate-400' : 'text-gray-500'}`}>
+              <p className={`leading-relaxed ${dark ? 'text-slate-400 text-sm mb-4' : 'text-gray-500 text-sm mb-5'}`}>
                 Conéctate para recibir ofertas de OSI Logistics
               </p>
-
-              {/* Divider sutil */}
-              {dark && (
-                <div className="h-px mb-5 mx-2"
-                  style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)' }} />
-              )}
 
               {/* CTA */}
               <button onClick={() => setStatus('available')} disabled={togglingStatus}
