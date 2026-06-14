@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { LayoutDashboard, Package, MapPin, Users, BarChart3, MoreHorizontal, X, Truck } from 'lucide-react';
+import { LayoutDashboard, Package, MapPin, Users, BarChart3, MoreHorizontal, X, Truck, Layers } from 'lucide-react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { useAuth } from '../context/AuthContext';
@@ -16,6 +16,7 @@ const BOTTOM_NAV = [
   { to: '/orders',    icon: Package,         label: 'Orders'   },
   { to: '/tracking',  icon: MapPin,          label: 'Tracking' },
   { to: '/drivers',   icon: Users,           label: 'Drivers'  },
+  { to: '/hub',       icon: Layers,          label: 'Hub'      },
   { to: '/reports',   icon: BarChart3,       label: 'Reports'  },
 ];
 
@@ -99,6 +100,7 @@ function BottomNav({ onMoreClick }: { onMoreClick: () => void }) {
       <button
         onClick={onMoreClick}
         className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium text-gray-400 dark:text-slate-500"
+        title="Más opciones"
       >
         <MoreHorizontal className="w-5 h-5" />
         More

@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import osiLogo from '../assets/osi-logo.jpeg';
 import {
   LayoutDashboard, Package, MapPin, Users, Truck,
-  BarChart3, Settings, Zap, Shield, ClipboardList, UserCog, X, Receipt, TrendingUp, Headset
+  BarChart3, Settings, Zap, Shield, ClipboardList, UserCog, X, Receipt, TrendingUp, Headset, Layers
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -14,6 +14,7 @@ const SHARED_NAV = [
   { to: '/fleet',       icon: Truck,           label: 'Fleet',       adminOnly: false },
   { to: '/dispatchers', icon: Headset,         label: 'Dispatchers', adminOnly: true  },
   { to: '/reports',     icon: BarChart3,       label: 'Reports',     adminOnly: false },
+  { to: '/hub',         icon: Layers,          label: 'Hub',         adminOnly: false },
 ];
 
 const DISPATCHER_ONLY_NAV = [

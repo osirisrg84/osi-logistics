@@ -20,6 +20,7 @@ import DispatcherCommissions from './pages/DispatcherCommissions';
 import Settings from './pages/Settings';
 import UsersManagement from './pages/UsersManagement';
 import DispatcherProfiles from './pages/DispatcherProfiles';
+import DispatcherHub from './pages/DispatcherHub';
 import DriverPortal from './pages/DriverPortal';
 
 function Spinner() {
@@ -108,6 +109,7 @@ function AppRoutes() {
         <Route path="reports"   element={<Reports />} />
         <Route path="billing"        element={<Billing />} />
         <Route path="commissions"    element={<DispatcherCommissions />} />
+        <Route path="hub"            element={<DispatcherHub />} />
         <Route path="settings"  element={<Settings />} />
 
         {/* Admin-only routes */}
