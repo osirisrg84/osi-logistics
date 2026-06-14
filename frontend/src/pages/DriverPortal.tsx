@@ -2255,9 +2255,9 @@ export default function DriverPortal() {
                 </div>
                 <div className="space-y-2.5">
                   {([
-                    { label: 'Dispatch 24/7',          phone: '+1 (786) 333-4444', desc: 'Lunes a Domingo · 24 horas' },
-                    { label: 'Soporte al Driver',       phone: '+1 (786) 333-5555', desc: 'Pagos · Issues técnicos' },
-                    { label: 'Emergencias en ruta',     phone: '+1 (786) 333-9911', desc: 'Accidentes · Incidentes' },
+                    { label: 'Dispatch 24/7',          phone: '+1 (786) 380-6634', desc: 'Lunes a Domingo · 24 horas' },
+                    { label: 'Soporte al Driver',       phone: '+1 (904) 610-3125', desc: 'Pagos · Issues técnicos' },
+                    { label: 'Emergencias en ruta',     phone: '+1 (305) 492-8401', desc: 'Accidentes · Incidentes' },
                   ]).map(c => (
                     <a key={c.phone} href={`tel:+${c.phone.replace(/\D/g,'')}`}
                       className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 hover:bg-orange-50 dark:hover:bg-orange-500/8 transition-colors group">
