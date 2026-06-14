@@ -204,8 +204,8 @@ export default function DispatcherHub() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                    <span className="text-xs font-mono font-bold whitespace-nowrap" style={{ color: accent }}>{c.phone}</span>
-                    <PhoneCall className="w-3.5 h-3.5 flex-shrink-0" style={{ color: accent }} />
+                    <span className="text-[11px] font-mono font-bold whitespace-nowrap" style={{ color: accent }}>{c.phone}</span>
+                    <PhoneCall className="w-3 h-3 flex-shrink-0" style={{ color: accent }} />
                   </div>
                 </a>
               ))}
