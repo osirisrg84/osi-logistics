@@ -196,15 +196,15 @@ export default function DispatcherHub() {
                   href={`tel:+${c.phone.replace(/\D/g, '')}`}
                   className={`flex items-center justify-between p-3 rounded-xl group transition-colors ${dark ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}
                   style={{ border: `1px solid ${dark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'}` }}>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: c.color }} />
-                    <div>
-                      <p className={`text-sm font-semibold group-hover:text-blue-500 transition-colors ${dark ? 'text-slate-200' : 'text-gray-800'}`}>{c.label}</p>
-                      <p className={`text-[11px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{c.desc}</p>
+                    <div className="min-w-0">
+                      <p className={`text-sm font-semibold group-hover:text-blue-500 transition-colors truncate ${dark ? 'text-slate-200' : 'text-gray-800'}`}>{c.label}</p>
+                      <p className={`text-[11px] truncate ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{c.desc}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold" style={{ color: accent }}>{c.phone}</span>
+                  <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                    <span className="text-xs font-mono font-bold whitespace-nowrap" style={{ color: accent }}>{c.phone}</span>
                     <PhoneCall className="w-3.5 h-3.5 flex-shrink-0" style={{ color: accent }} />
                   </div>
                 </a>
@@ -260,7 +260,7 @@ export default function DispatcherHub() {
                   className={`flex items-center justify-between p-3 rounded-xl transition-colors ${dark ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}
                   style={{ border: `1px solid ${dark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'}` }}>
                   <p className={`text-sm font-semibold ${dark ? 'text-slate-300' : 'text-gray-700'}`}>{e.label}</p>
-                  <p className="text-xs font-mono" style={{ color: accent }}>{e.email}</p>
+                  <p className="text-xs font-mono whitespace-nowrap flex-shrink-0 ml-2" style={{ color: accent }}>{e.email}</p>
                 </a>
               ))}
             </div>
