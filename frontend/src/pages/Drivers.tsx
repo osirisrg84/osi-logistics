@@ -28,6 +28,8 @@ interface DriverFormProps {
 }
 
 function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
+  const TRUCK_MAKES = ['', 'Peterbilt 579', 'Kenworth W900', 'Freightliner Cascadia', 'Volvo 860', 'Ford Transit 250'];
+
   const [form, setForm] = useState({
     name: driver?.name || '',
     phone: driver?.phone || '',
@@ -36,6 +38,7 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
     license_expiry: driver?.license_expiry || '',
     hire_date: driver?.hire_date || '',
     status: driver?.status || 'available',
+    truck_make: driver?.truck_make || '',
     equipment_type: driver?.equipment_type || 'Dry Van',
     company_name: driver?.company_name || '',
     mc_number: driver?.mc_number || '',
@@ -93,6 +96,12 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
               <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-2">
                 <Building2 className="w-3.5 h-3.5" /> Company / Equipment
               </p>
+            </div>
+            <div>
+              <label className="label">Make *</label>
+              <select className="input" value={form.truck_make} onChange={e => setForm({...form, truck_make: e.target.value})}>
+                {TRUCK_MAKES.map(m => <option key={m} value={m}>{m || '— Select make —'}</option>)}
+              </select>
             </div>
             <div>
               <label className="label">Equipment Type</label>
@@ -453,6 +462,13 @@ export default function Drivers() {
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">{driver.name}</h3>
+                  {(driver.truck_make || driver.equipment_type) && (
+                    <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5 leading-none">
+                      {driver.truck_make
+                        ? <>{driver.truck_make}<span className="text-gray-300 dark:text-slate-600"> · </span>{driver.equipment_type}</>
+                        : driver.equipment_type}
+                    </p>
+                  )}
                   <DriverStatusBadge status={driver.status} className="mt-0.5" />
                 </div>
               </div>
