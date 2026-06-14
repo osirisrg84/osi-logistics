@@ -2576,188 +2576,249 @@ export default function DriverPortal() {
                     </div>
                   )}
 
-                  {/* Animated waveform while recording */}
-                  {isRecording && (
-                    <div className="flex items-center justify-center gap-[3px] py-2" style={{ height: 36 }}>
-                      {Array.from({length: 24}).map((_, i) => (
-                        <div key={i} className="rounded-full bg-red-400/70"
-                          style={{
-                            width: 2.5,
-                            height: `${8 + Math.random() * 20}px`,
-                            animation: `waveBar ${0.4 + Math.random() * 0.4}s ease-in-out infinite alternate`,
-                            animationDelay: `${i * 0.04}s`,
-                          }} />
-                      ))}
-                    </div>
-                  )}
+                  {/* PTT — Walkie-Talkie Device */}
+                  <div className="flex flex-col items-center pt-3 pb-4 px-4 gap-3">
 
-                  {/* PTT Button — Ultra Premium */}
-                  <div className="flex flex-col items-center pt-5 pb-4 px-4 gap-3">
+                    {/* Total container including antenna space */}
+                    <div className="relative" style={{ width: 162, height: 308 }}>
 
-                    {/* All layers inside a 190×190 relative container */}
-                    <div className="relative flex items-center justify-center" style={{ width: 190, height: 190 }}>
-
-                      {/* Animated pulse rings when recording */}
-                      {isRecording && (<>
-                        <div className="absolute rounded-full" style={{ width: 190, height: 190, border: '1.5px solid rgba(239,68,68,0.6)', animation: 'pttRing 1.4s ease-out infinite' }} />
-                        <div className="absolute rounded-full" style={{ width: 190, height: 190, border: '1.5px solid rgba(239,68,68,0.3)', animation: 'pttRing 1.4s ease-out infinite', animationDelay: '0.46s' }} />
-                        <div className="absolute rounded-full" style={{ width: 190, height: 190, border: '1.5px solid rgba(239,68,68,0.14)', animation: 'pttRing 1.4s ease-out infinite', animationDelay: '0.92s' }} />
-                      </>)}
-
-                      {/* Outer mounting plate — dark knurled housing */}
+                      {/* Antenna */}
+                      <div className="absolute" style={{
+                        right: 22, top: 2,
+                        width: 7, height: 70,
+                        borderRadius: '4px 4px 2px 2px',
+                        background: 'linear-gradient(to right, #0d1520 0%, #1e293b 35%, #2d3f55 55%, #1e293b 75%, #0d1520 100%)',
+                        boxShadow: '1px 0 4px rgba(0,0,0,0.7)',
+                        transform: 'rotate(11deg)',
+                        transformOrigin: 'bottom center',
+                      }} />
                       <div className="absolute rounded-full" style={{
-                        width: 178, height: 178,
-                        background: 'conic-gradient(from 0deg, #08111e 0deg, #0e1a2c 12deg, #08111e 24deg, #0e1a2c 36deg, #08111e 48deg, #0e1a2c 60deg, #08111e 72deg, #0e1a2c 84deg, #08111e 96deg, #0e1a2c 108deg, #08111e 120deg, #0e1a2c 132deg, #08111e 144deg, #0e1a2c 156deg, #08111e 168deg, #0e1a2c 180deg, #08111e 192deg, #0e1a2c 204deg, #08111e 216deg, #0e1a2c 228deg, #08111e 240deg, #0e1a2c 252deg, #08111e 264deg, #0e1a2c 276deg, #08111e 288deg, #0e1a2c 300deg, #08111e 312deg, #0e1a2c 324deg, #08111e 336deg, #0e1a2c 348deg, #08111e 360deg)',
-                        boxShadow: '0 26px 72px rgba(0,0,0,0.94), 0 8px 22px rgba(0,0,0,0.75), inset 0 1px 3px rgba(255,255,255,0.05)',
+                        right: 24, top: 2,
+                        width: 5, height: 5,
+                        background: '#334155',
+                        boxShadow: '0 0 3px rgba(0,0,0,0.6)',
+                        transform: 'rotate(11deg) translateY(-1px)',
+                        transformOrigin: '50% 72px',
                       }} />
 
-                      {/* Machined chrome bezel — 26-stop brushed steel gradient */}
-                      <div className="absolute rounded-full" style={{
-                        width: 162, height: 162,
-                        background: 'conic-gradient(from 192deg, #0f172a 0%, #1a2744 3%, #273756 6%, #334a68 10%, #475f7b 14%, #5d7490 17%, #7a91a8 20%, #94a9be 23%, #aebfd1 26%, #c6d4e3 28.5%, #d8e4ef 31%, #c6d4e3 33.5%, #a8bccc 36%, #8499ab 40%, #617082 45%, #3f5166 51%, #273756 57%, #1a2744 62%, #253650 67%, #334a68 72%, #4a6278 76%, #617789 80%, #7d94a6 84%, #94a9be 87%, #7a91a8 90%, #5d7490 93%, #3f5166 96%, #273756 98.5%, #1a2744 100%)',
-                        boxShadow: '0 0 0 1.5px rgba(148,163,184,0.22), 0 12px 36px rgba(0,0,0,0.78)',
-                      }} />
+                      {/* Main device body */}
+                      <div className="absolute" style={{
+                        left: 0, top: 52, width: 155, bottom: 0,
+                        borderRadius: 14,
+                        background: 'linear-gradient(162deg, #1c2a3e 0%, #0e1826 50%, #080e1c 100%)',
+                        boxShadow: '4px 10px 28px rgba(0,0,0,0.9), 2px 4px 10px rgba(0,0,0,0.7), inset 1px 1px 2px rgba(255,255,255,0.07), inset -1px -1px 2px rgba(0,0,0,0.5)',
+                        border: '1px solid rgba(255,255,255,0.07)',
+                      }}>
 
-                      {/* Engraved circular label — SVG textPath around bezel */}
-                      <svg className="absolute pointer-events-none" style={{ width: 162, height: 162 }} viewBox="0 0 162 162">
-                        <defs>
-                          <path id="pttArcPath" d="M 81,81 m -60,0 a 60,60 0 1,1 120,0 a 60,60 0 1,1 -120,0" />
-                        </defs>
-                        <text fontSize="6.5" fontFamily="Arial, sans-serif" fontWeight="700" letterSpacing="3.2"
-                          fill={isRecording ? 'rgba(252,165,165,0.58)' : 'rgba(148,163,184,0.5)'}>
-                          <textPath href="#pttArcPath" startOffset="4%">PUSH · TO · TALK · OSI FLEET ·</textPath>
-                        </text>
-                      </svg>
-
-                      {/* Deep anodized recess cavity */}
-                      <div className="absolute rounded-full" style={{
-                        width: 142, height: 142,
-                        background: 'radial-gradient(circle at 40% 32%, #182236 0%, #0c1220 55%, #070b17 100%)',
-                        boxShadow: 'inset 0 6px 24px rgba(0,0,0,0.97), inset 0 -2px 6px rgba(255,255,255,0.028)',
-                      }} />
-
-                      {/* LED ring — glows and pulses when recording */}
-                      {isRecording && (
-                        <div className="absolute rounded-full" style={{
-                          width: 128, height: 128,
-                          border: '2px solid rgba(239,68,68,0.82)',
-                          animation: 'pttLedRing 0.85s ease-in-out infinite alternate',
+                        {/* Top status accent band */}
+                        <div style={{
+                          height: 10, borderRadius: '13px 13px 0 0',
+                          background: isRecording
+                            ? 'linear-gradient(90deg, #7f1d1d 0%, #dc2626 50%, #7f1d1d 100%)'
+                            : 'linear-gradient(90deg, #14532d 0%, #16a34a 50%, #14532d 100%)',
+                          boxShadow: isRecording ? '0 2px 12px rgba(239,68,68,0.6)' : '0 2px 12px rgba(22,163,74,0.6)',
+                          transition: 'background 0.3s, box-shadow 0.3s',
                         }} />
-                      )}
 
-                      {/* Dome button */}
-                      <button
-                        onPointerDown={async () => {
-                          if (isRecording) return;
-                          try {
-                            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        {/* Top controls row — vol knob / LED / ch knob */}
+                        <div className="flex items-center justify-between px-3 pt-2 pb-1">
+                          <div style={{
+                            width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+                            background: 'conic-gradient(from 220deg, #07101a 0%, #1e293b 28%, #334155 46%, #475569 50%, #334155 54%, #1e293b 72%, #07101a 100%)',
+                            boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.8), 0 2px 5px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)',
+                            display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 3,
+                          }}>
+                            <div style={{ width: 2, height: 7, background: '#f97316', borderRadius: 1 }} />
+                          </div>
+                          <div style={{
+                            width: 9, height: 9, borderRadius: '50%', flexShrink: 0,
+                            background: isRecording ? '#fca5a5' : '#86efac',
+                            boxShadow: isRecording
+                              ? '0 0 12px 4px rgba(239,68,68,0.9)'
+                              : '0 0 12px 4px rgba(74,222,128,0.82)',
+                            transition: 'all 0.2s',
+                          }} />
+                          <div style={{
+                            width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+                            background: 'conic-gradient(from 220deg, #07101a 0%, #1e293b 28%, #334155 46%, #475569 50%, #334155 54%, #1e293b 72%, #07101a 100%)',
+                            boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.8), 0 2px 5px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)',
+                            display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 3,
+                          }}>
+                            <div style={{ width: 2, height: 7, background: '#64748b', borderRadius: 1 }} />
+                          </div>
+                        </div>
+
+                        {/* Speaker grille */}
+                        <div style={{ margin: '3px 14px 5px', padding: '5px 4px 3px', borderRadius: 4, background: 'rgba(0,0,0,0.22)' }}>
+                          {[0,1,2,3,4,5].map(i => (
+                            <div key={i} style={{
+                              height: 1.5, borderRadius: 1, marginBottom: 3.5,
+                              background: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.75) 12%, rgba(0,0,0,0.75) 88%, transparent 100%)',
+                              boxShadow: '0 1px 0 rgba(255,255,255,0.04)',
+                            }} />
+                          ))}
+                        </div>
+
+                        {/* LED phosphor display screen */}
+                        <div style={{ margin: '2px 10px', borderRadius: 6, border: '2px solid #030904', overflow: 'hidden', boxShadow: 'inset 0 3px 10px rgba(0,0,0,0.95), 0 0 0 1px rgba(0,0,0,0.7)' }}>
+                          <div style={{
+                            height: 50,
+                            background: isRecording
+                              ? 'linear-gradient(180deg, #0e2c10 0%, #071508 100%)'
+                              : 'linear-gradient(180deg, #071408 0%, #040c05 100%)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px',
+                            transition: 'background 0.3s',
+                          }}>
+                            {/* Signal bars left */}
+                            <div className="flex items-end" style={{ gap: 3 }}>
+                              {[5,8,12,16].map((h,i) => (
+                                <div key={i} style={{
+                                  width: 4, height: h, borderRadius: 1,
+                                  background: isRecording ? '#4ade80' : '#1a4d1e',
+                                  animation: isRecording ? `waveBar ${0.28 + i * 0.09}s ease-in-out infinite alternate` : 'none',
+                                  animationDelay: `${i * 0.07}s`,
+                                  transition: 'background 0.2s',
+                                }} />
+                              ))}
+                            </div>
+                            {/* Center channel / TX */}
+                            <span style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 800, letterSpacing: '0.1em', color: isRecording ? '#4ade80' : '#1e5228', transition: 'color 0.2s' }}>
+                              {isRecording ? '▶ TX' : 'CH 01'}
+                            </span>
+                            {/* Battery icon right */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <div style={{ display: 'flex', gap: 2, border: '1px solid rgba(74,222,128,0.3)', borderRadius: 2, padding: '1px 2px' }}>
+                                {[0,1,2].map(i => (
+                                  <div key={i} style={{ width: 4, height: 8, borderRadius: 1, background: isRecording ? '#14532d' : '#22c55e', transition: 'background 0.2s' }} />
+                                ))}
+                              </div>
+                              <div style={{ width: 2, height: 5, borderRadius: '0 1px 1px 0', background: '#22c55e', marginLeft: -1 }} />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Sub label */}
+                        <p style={{ textAlign: 'center', fontSize: 7.5, color: isRecording ? 'rgba(74,222,128,0.5)' : 'rgba(51,65,85,0.55)', letterSpacing: '0.2em', marginTop: 4, fontFamily: 'monospace', transition: 'color 0.3s' }}>
+                          OSI · FLEET RADIO
+                        </p>
+
+                        {/* Function buttons */}
+                        <div style={{ display: 'flex', gap: 6, padding: '6px 14px 4px' }}>
+                          {['▲','■','▼'].map((s,i) => (
+                            <div key={i} style={{
+                              flex: 1, height: 14, borderRadius: 3,
+                              background: 'linear-gradient(180deg, #1e293b, #0d1520)',
+                              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.04)',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: 6, color: 'rgba(51,65,85,0.7)',
+                            }}>{s}</div>
+                          ))}
+                        </div>
+
+                        {/* PTT button — main interactive element */}
+                        <button
+                          onPointerDown={async () => {
+                            if (isRecording) return;
                             try {
-                              const ctx = new AudioContext();
-                              const buf = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate);
-                              const d = buf.getChannelData(0);
-                              for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
-                              const src = ctx.createBufferSource();
-                              const g = ctx.createGain(); g.gain.value = 0.3;
-                              src.buffer = buf; src.connect(g); g.connect(ctx.destination); src.start();
-                            } catch {}
-                            const chunks: BlobPart[] = [];
-                            const mr = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg' });
-                            mr.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-                            const startTime = Date.now();
-                            mr.onstop = () => {
-                              stream.getTracks().forEach(t => t.stop());
-                              const blob = new Blob(chunks, { type: mr.mimeType });
-                              const dur = Math.round((Date.now() - startTime) / 1000);
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                const audioData = reader.result as string;
-                                const sock = getSocket();
-                                const name = driver?.name || user?.name || 'Driver';
-                                sock.emit('radio:voice', { name, audioData, duration: dur });
-                                setRadioMsgs(prev => [...prev, { id: Date.now().toString(), name, msg: '', type: 'voice', audioData, duration: dur, ts: new Date().toISOString() }]);
-                              };
-                              reader.readAsDataURL(blob);
+                              const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                               try {
                                 const ctx = new AudioContext();
-                                const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
+                                const buf = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate);
                                 const d = buf.getChannelData(0);
-                                for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length) * 0.6;
+                                for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
                                 const src = ctx.createBufferSource();
-                                const g = ctx.createGain(); g.gain.value = 0.25;
+                                const g = ctx.createGain(); g.gain.value = 0.3;
                                 src.buffer = buf; src.connect(g); g.connect(ctx.destination); src.start();
                               } catch {}
-                            };
-                            mr.start();
-                            setMediaRecorder(mr);
-                            setIsRecording(true);
-                            setRecordingDuration(0);
-                          } catch {}
-                        }}
-                        onPointerUp={() => {
-                          if (mediaRecorder && mediaRecorder.state === 'recording') {
-                            mediaRecorder.stop();
-                            setIsRecording(false);
-                            setMediaRecorder(null);
-                          }
-                        }}
-                        onPointerLeave={() => {
-                          if (mediaRecorder && mediaRecorder.state === 'recording') {
-                            mediaRecorder.stop();
-                            setIsRecording(false);
-                            setMediaRecorder(null);
-                          }
-                        }}
-                        className="select-none touch-none relative flex flex-col items-center justify-center rounded-full transition-transform active:scale-[0.94]"
-                        style={{
-                          width: 118, height: 118,
-                          background: isRecording
-                            ? 'repeating-linear-gradient(45deg, rgba(0,0,0,0.065) 0px, rgba(0,0,0,0.065) 1.5px, transparent 1.5px, transparent 5px), repeating-linear-gradient(-45deg, rgba(0,0,0,0.065) 0px, rgba(0,0,0,0.065) 1.5px, transparent 1.5px, transparent 5px), radial-gradient(circle at 36% 26%, #fca5a5 0%, #f87171 14%, #ef4444 34%, #dc2626 56%, #b91c1c 76%, #7f1d1d 100%)'
-                            : 'repeating-linear-gradient(45deg, rgba(0,0,0,0.065) 0px, rgba(0,0,0,0.065) 1.5px, transparent 1.5px, transparent 5px), repeating-linear-gradient(-45deg, rgba(0,0,0,0.065) 0px, rgba(0,0,0,0.065) 1.5px, transparent 1.5px, transparent 5px), radial-gradient(circle at 36% 26%, #bbf7d0 0%, #4ade80 14%, #22c55e 34%, #16a34a 56%, #15803d 76%, #14532d 100%)',
-                          boxShadow: isRecording
-                            ? 'inset 0 -14px 38px rgba(0,0,0,0.66), inset 0 9px 22px rgba(255,210,210,0.18), 0 0 0 1.5px rgba(239,68,68,0.52), 0 0 58px rgba(220,38,38,0.72), 0 16px 44px rgba(0,0,0,0.68)'
-                            : 'inset 0 -14px 38px rgba(0,0,0,0.66), inset 0 9px 22px rgba(210,255,225,0.18), 0 0 0 1.5px rgba(34,197,94,0.42), 0 0 42px rgba(22,163,74,0.6), 0 16px 44px rgba(0,0,0,0.68)',
-                        }}>
+                              const chunks: BlobPart[] = [];
+                              const mr = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg' });
+                              mr.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+                              const startTime = Date.now();
+                              mr.onstop = () => {
+                                stream.getTracks().forEach(t => t.stop());
+                                const blob = new Blob(chunks, { type: mr.mimeType });
+                                const dur = Math.round((Date.now() - startTime) / 1000);
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  const audioData = reader.result as string;
+                                  const sock = getSocket();
+                                  const name = driver?.name || user?.name || 'Driver';
+                                  sock.emit('radio:voice', { name, audioData, duration: dur });
+                                  setRadioMsgs(prev => [...prev, { id: Date.now().toString(), name, msg: '', type: 'voice', audioData, duration: dur, ts: new Date().toISOString() }]);
+                                };
+                                reader.readAsDataURL(blob);
+                                try {
+                                  const ctx = new AudioContext();
+                                  const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
+                                  const d = buf.getChannelData(0);
+                                  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length) * 0.6;
+                                  const src = ctx.createBufferSource();
+                                  const g = ctx.createGain(); g.gain.value = 0.25;
+                                  src.buffer = buf; src.connect(g); g.connect(ctx.destination); src.start();
+                                } catch {}
+                              };
+                              mr.start();
+                              setMediaRecorder(mr);
+                              setIsRecording(true);
+                              setRecordingDuration(0);
+                            } catch {}
+                          }}
+                          onPointerUp={() => {
+                            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                              mediaRecorder.stop(); setIsRecording(false); setMediaRecorder(null);
+                            }
+                          }}
+                          onPointerLeave={() => {
+                            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                              mediaRecorder.stop(); setIsRecording(false); setMediaRecorder(null);
+                            }
+                          }}
+                          className="select-none touch-none relative transition-transform active:scale-[0.97] block"
+                          style={{
+                            margin: '7px 10px 5px', width: 'calc(100% - 20px)', height: 50,
+                            borderRadius: 9, border: 'none', cursor: 'pointer',
+                            background: isRecording
+                              ? 'repeating-linear-gradient(45deg, rgba(0,0,0,0.07) 0px, rgba(0,0,0,0.07) 1.5px, transparent 1.5px, transparent 5px), linear-gradient(180deg, #fca5a5 0%, #ef4444 42%, #b91c1c 100%)'
+                              : 'repeating-linear-gradient(45deg, rgba(0,0,0,0.07) 0px, rgba(0,0,0,0.07) 1.5px, transparent 1.5px, transparent 5px), linear-gradient(180deg, #fdba74 0%, #f97316 42%, #ea580c 100%)',
+                            boxShadow: isRecording
+                              ? 'inset 0 -5px 12px rgba(0,0,0,0.6), inset 0 3px 6px rgba(255,185,185,0.2), 0 0 24px rgba(239,68,68,0.7), 0 3px 8px rgba(0,0,0,0.7)'
+                              : 'inset 0 -5px 12px rgba(0,0,0,0.5), inset 0 3px 6px rgba(255,200,140,0.2), 0 0 14px rgba(249,115,22,0.45), 0 3px 8px rgba(0,0,0,0.7)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                            transition: 'box-shadow 0.2s',
+                          }}
+                        >
+                          <div style={{ width: 3.5, height: 26, borderRadius: 2, background: 'rgba(255,255,255,0.28)', boxShadow: '0 0 4px rgba(255,255,255,0.25)' }} />
+                          <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.93)', textShadow: '0 1px 4px rgba(0,0,0,0.6)', fontFamily: 'Arial, sans-serif' }}>
+                            {isRecording ? '● TX' : 'PTT'}
+                          </span>
+                          <div style={{ width: 3.5, height: 26, borderRadius: 2, background: 'rgba(255,255,255,0.28)', boxShadow: '0 0 4px rgba(255,255,255,0.25)' }} />
+                        </button>
 
-                        {/* Primary specular — diffuse matte (rubber absorbs light) */}
-                        <div className="absolute pointer-events-none" style={{
-                          top: 10, left: 14, width: 78, height: 48,
-                          borderRadius: '50%',
-                          background: 'radial-gradient(ellipse at 38% 38%, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.06) 55%, transparent 100%)',
-                          transform: 'rotate(-20deg)',
-                        }} />
-                        {/* Fresnel edge vignette at top */}
-                        <div className="absolute pointer-events-none rounded-full" style={{
-                          inset: 0,
-                          background: isRecording
-                            ? 'radial-gradient(ellipse at 30% 18%, rgba(255,220,220,0.2) 0%, transparent 40%)'
-                            : 'radial-gradient(ellipse at 30% 18%, rgba(220,255,235,0.2) 0%, transparent 40%)',
-                        }} />
-                        {/* Diagonal environment sheen */}
-                        <div className="absolute pointer-events-none rounded-full" style={{
-                          inset: 0,
-                          background: isRecording
-                            ? 'linear-gradient(148deg, rgba(255,200,200,0.1) 0%, transparent 38%, rgba(0,0,0,0.32) 100%)'
-                            : 'linear-gradient(148deg, rgba(200,255,215,0.1) 0%, transparent 38%, rgba(0,0,0,0.32) 100%)',
-                        }} />
-                        {/* Bottom bounce light */}
-                        <div className="absolute pointer-events-none" style={{
-                          bottom: 14, right: 22, width: 30, height: 16,
-                          borderRadius: '50%',
-                          background: 'radial-gradient(ellipse, rgba(255,255,255,0.09) 0%, transparent 100%)',
-                        }} />
+                        {/* Keypad grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 5, margin: '4px 12px 12px' }}>
+                          {Array.from({length: 8}).map((_,i) => (
+                            <div key={i} style={{
+                              height: 11, borderRadius: 3,
+                              background: 'linear-gradient(180deg, #1a2436, #0d1520)',
+                              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.85), 0 1px 0 rgba(255,255,255,0.04)',
+                            }} />
+                          ))}
+                        </div>
 
-                        {/* Status LED — no text, embedded in surface */}
-                        <div style={{
-                          width: 10, height: 10, borderRadius: '50%',
-                          background: isRecording ? '#fca5a5' : '#86efac',
-                          boxShadow: isRecording
-                            ? '0 0 18px 7px rgba(239,68,68,0.85), 0 0 6px rgba(239,68,68,1)'
-                            : '0 0 18px 7px rgba(74,222,128,0.78), 0 0 6px rgba(74,222,128,1)',
-                        }} />
-                      </button>
+                      </div>
+
+                      {/* Belt clip tab at bottom */}
+                      <div className="absolute" style={{
+                        left: '50%', transform: 'translateX(-50%)',
+                        bottom: -8, width: 44, height: 14,
+                        borderRadius: '0 0 5px 5px',
+                        background: 'linear-gradient(180deg, #0d1520, #060e18)',
+                        boxShadow: '0 5px 10px rgba(0,0,0,0.65)',
+                      }} />
+
                     </div>
 
-                    {/* Status label */}
+                    {/* Status label below device */}
                     <div className="flex flex-col items-center gap-1">
                       <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: isRecording ? '#f87171' : 'rgba(100,116,139,0.7)' }}>
                         {isRecording ? '● Suelta para enviar' : 'Mantén para hablar'}
