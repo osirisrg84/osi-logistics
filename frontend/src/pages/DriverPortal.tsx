@@ -237,12 +237,17 @@ export default function DriverPortal() {
   // ── Hub: switches / radio / community ────────────────────
   const [trackingOn, setTrackingOn] = useState(true);
   const [musicOn, setMusicOn] = useState(false);
-  const [radioMsgs, setRadioMsgs] = useState<Array<{id:string; name:string; msg:string; ts:string}>>([
-    { id:'r1', name:'Carlos M.', msg:'Buenos días familia OSI! Arrancando ruta norte 🛣️', ts: new Date(Date.now()-1800000).toISOString() },
-    { id:'r2', name:'James W.', msg:'Clear roads on I-95 heading north 👌 Good weather', ts: new Date(Date.now()-900000).toISOString() },
-    { id:'r3', name:'Ana R.', msg:'Entregando en Doral, todo perfecto 💪 #OSIFleet', ts: new Date(Date.now()-300000).toISOString() },
+  interface RadioMsg { id:string; name:string; msg:string; ts:string; type?:'text'|'voice'; audioData?:string; duration?:number; }
+  const [radioMsgs, setRadioMsgs] = useState<RadioMsg[]>([
+    { id:'r1', name:'Carlos M.', msg:'Buenos días familia OSI! Arrancando ruta norte 🛣️', ts: new Date(Date.now()-1800000).toISOString(), type:'text' },
+    { id:'r2', name:'James W.', msg:'Clear roads on I-95 heading north 👌 Good weather', ts: new Date(Date.now()-900000).toISOString(), type:'text' },
+    { id:'r3', name:'Ana R.', msg:'Entregando en Doral, todo perfecto 💪 #OSIFleet', ts: new Date(Date.now()-300000).toISOString(), type:'text' },
   ]);
   const [radioInput, setRadioInput] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const radioScrollRef = { current: null as HTMLDivElement | null };
   const [communityPosts, setCommunityPosts] = useState([
     { id:'cp1', avatar:'CM', name:'Carlos Mendez', time:'2h', msg:'Acabo de completar mi entrega #100 con OSI! 🎉 Gracias a todo el equipo dispatch. #OSILogistics', likes:7, liked:false },
     { id:'cp2', avatar:'JW', name:'James Wilson', time:'4h', msg:'Best dispatch team in South Florida! Running smooth today 🚛💨', likes:4, liked:false },
@@ -447,13 +452,17 @@ export default function DriverPortal() {
     });
     socket.emit('radio:join');
     socket.on('radio:msg', (data: {name:string; msg:string; ts:string}) => {
-      setRadioMsgs(prev => [...prev.slice(-49), { id: Date.now().toString(), ...data }]);
+      setRadioMsgs(prev => [...prev.slice(-49), { id: Date.now().toString(), type: 'text' as const, ...data }]);
+    });
+    socket.on('radio:voice', (data: {name:string; audioData:string; duration:number; ts:string}) => {
+      setRadioMsgs(prev => [...prev.slice(-49), { id: Date.now().toString(), type: 'voice' as const, msg: '', ...data }]);
     });
     return () => {
       socket.off('order_updated');
       socket.off('driver:notification');
       socket.off('driver:offer');
       socket.off('radio:msg');
+      socket.off('radio:voice');
     };
   }, [fetchOrders, user?.driver_id, driverId]);
 
@@ -467,6 +476,12 @@ export default function DriverPortal() {
     const t = setTimeout(() => setOfferCountdown(c => c - 1), 1000);
     return () => clearTimeout(t);
   }, [pendingOffer, offerCountdown]);
+
+  useEffect(() => {
+    if (!isRecording) { setRecordingDuration(0); return; }
+    const t = setInterval(() => setRecordingDuration(s => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [isRecording]);
 
   const playOnlineSound = () => {
     try {
@@ -2457,7 +2472,7 @@ export default function DriverPortal() {
                 </div>
 
                 {/* Messages */}
-                <div className="overflow-y-auto px-4 py-3 space-y-3" style={{ maxHeight: '42vh', background: 'rgba(5,12,24,0.6)' }}>
+                <div ref={el => { radioScrollRef.current = el; }} className="overflow-y-auto px-4 py-3 space-y-3" style={{ maxHeight: '36vh', background: 'rgba(5,12,24,0.6)' }}>
                   {radioMsgs.map(msg => {
                     const myName = driver?.name || user?.name;
                     const isMe = !!myName && msg.name === myName;
@@ -2466,14 +2481,50 @@ export default function DriverPortal() {
                         <div className={`w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-[10px] font-bold ${isMe ? 'bg-orange-500' : 'bg-slate-600/80'} text-white`}>
                           {msg.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                         </div>
-                        <div className={`max-w-[76%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                        <div className={`max-w-[80%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                           {!isMe && <p className="text-[10px] text-slate-500 mb-0.5 ml-1">{msg.name}</p>}
-                          <div className={`rounded-2xl px-3 py-2 ${isMe
-                            ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-tr-sm'
-                            : 'bg-slate-700/80 text-slate-200 border border-white/5 rounded-tl-sm'
-                          }`}>
-                            <p className="text-sm leading-snug">{msg.msg}</p>
-                          </div>
+                          {msg.type === 'voice' && msg.audioData ? (
+                            <div className={`rounded-2xl px-3 py-2.5 min-w-[180px] ${isMe
+                              ? 'bg-gradient-to-br from-orange-500 to-orange-600 rounded-tr-sm'
+                              : 'bg-slate-700/80 border border-white/5 rounded-tl-sm'
+                            }`}>
+                              {/* Voice message player */}
+                              {(() => {
+                                const audioSrc = msg.audioData!;
+                                return (
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => {
+                                        const audio = new Audio(audioSrc);
+                                        audio.play().catch(() => {});
+                                      }}
+                                      className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all active:scale-95 ${isMe ? 'bg-white/20 hover:bg-white/30' : 'bg-cyan-500/20 hover:bg-cyan-500/30'}`}>
+                                      <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current text-white" style={{ marginLeft: 2 }}>
+                                        <path d="M8 5v14l11-7z"/>
+                                      </svg>
+                                    </button>
+                                    {/* Static waveform bars */}
+                                    <div className="flex items-center gap-[2px] flex-1">
+                                      {[4,8,12,6,10,14,8,5,11,9,13,7,10,6,8,12,5,9].map((h, i) => (
+                                        <div key={i} className={`rounded-full flex-shrink-0 ${isMe ? 'bg-white/60' : 'bg-cyan-400/60'}`}
+                                          style={{ width: 2, height: h }} />
+                                      ))}
+                                    </div>
+                                    <span className={`text-[10px] font-mono flex-shrink-0 ${isMe ? 'text-white/70' : 'text-slate-400'}`}>
+                                      {String(Math.floor((msg.duration||0)/60)).padStart(1,'0')}:{String(Math.round((msg.duration||0)%60)).padStart(2,'0')}
+                                    </span>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          ) : (
+                            <div className={`rounded-2xl px-3 py-2 ${isMe
+                              ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-tr-sm'
+                              : 'bg-slate-700/80 text-slate-200 border border-white/5 rounded-tl-sm'
+                            }`}>
+                              <p className="text-sm leading-snug">{msg.msg}</p>
+                            </div>
+                          )}
                           <p className="text-[10px] text-slate-600 mt-0.5 mx-1">{format(new Date(msg.ts), 'HH:mm')}</p>
                         </div>
                       </div>
@@ -2481,37 +2532,157 @@ export default function DriverPortal() {
                   })}
                 </div>
 
-                {/* Input */}
-                <div className="flex gap-2 px-4 py-3" style={{ borderTop: '1px solid rgba(56,189,248,0.12)' }}>
-                  <input
-                    value={radioInput}
-                    onChange={e => setRadioInput(e.target.value)}
-                    onKeyDown={e => {
-                      if (e.key !== 'Enter' || e.shiftKey || !radioInput.trim()) return;
-                      e.preventDefault();
-                      const sock = getSocket();
-                      const name = driver?.name || user?.name || 'Driver';
-                      sock.emit('radio:msg', { name, msg: radioInput.trim() });
-                      setRadioMsgs(prev => [...prev, { id: Date.now().toString(), name, msg: radioInput.trim(), ts: new Date().toISOString() }]);
-                      setRadioInput('');
-                    }}
-                    placeholder="Transmitir al canal OSI..."
-                    className="flex-1 text-sm text-white placeholder:text-slate-600 rounded-xl px-3 py-2.5 outline-none focus:ring-1 focus:ring-cyan-500/40"
-                    style={{ background: 'rgba(15,30,53,0.8)', border: '1px solid rgba(56,189,248,0.15)' }}
-                  />
-                  <button
-                    onClick={() => {
-                      if (!radioInput.trim()) return;
-                      const sock = getSocket();
-                      const name = driver?.name || user?.name || 'Driver';
-                      sock.emit('radio:msg', { name, msg: radioInput.trim() });
-                      setRadioMsgs(prev => [...prev, { id: Date.now().toString(), name, msg: radioInput.trim(), ts: new Date().toISOString() }]);
-                      setRadioInput('');
-                    }}
-                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all active:scale-95"
-                    style={{ background: radioInput.trim() ? 'linear-gradient(135deg,#f97316,#ea580c)' : 'rgba(51,65,85,0.5)', boxShadow: radioInput.trim() ? '0 4px 12px rgba(249,115,22,0.35)' : 'none' }}>
-                    <Send className="w-4 h-4 text-white" />
-                  </button>
+                {/* ── Walkie-Talkie PTT Zone ── */}
+                <div style={{ borderTop: '1px solid rgba(56,189,248,0.12)', background: 'rgba(4,8,18,0.95)' }}>
+
+                  {/* Recording status bar */}
+                  {isRecording && (
+                    <div className="flex items-center justify-between px-4 py-1.5" style={{ background: 'rgba(239,68,68,0.12)', borderBottom: '1px solid rgba(239,68,68,0.2)' }}>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" style={{ boxShadow: '0 0 6px rgba(239,68,68,0.8)' }} />
+                        <span className="text-[11px] font-bold text-red-400 tracking-widest uppercase">Transmitiendo</span>
+                      </div>
+                      <span className="text-[11px] font-mono text-red-400">
+                        {String(Math.floor(recordingDuration/60)).padStart(1,'0')}:{String(recordingDuration%60).padStart(2,'0')}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Animated waveform while recording */}
+                  {isRecording && (
+                    <div className="flex items-center justify-center gap-[3px] py-2" style={{ height: 36 }}>
+                      {Array.from({length: 24}).map((_, i) => (
+                        <div key={i} className="rounded-full bg-red-400/70"
+                          style={{
+                            width: 2.5,
+                            height: `${8 + Math.random() * 20}px`,
+                            animation: `waveBar ${0.4 + Math.random() * 0.4}s ease-in-out infinite alternate`,
+                            animationDelay: `${i * 0.04}s`,
+                          }} />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* PTT Button */}
+                  <div className="flex flex-col items-center py-4 px-4 gap-3">
+                    <button
+                      onPointerDown={async () => {
+                        if (isRecording) return;
+                        try {
+                          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                          // Radio click sound (start)
+                          try {
+                            const ctx = new AudioContext();
+                            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate);
+                            const d = buf.getChannelData(0);
+                            for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+                            const src = ctx.createBufferSource();
+                            const g = ctx.createGain(); g.gain.value = 0.3;
+                            src.buffer = buf; src.connect(g); g.connect(ctx.destination); src.start();
+                          } catch {}
+
+                          const chunks: BlobPart[] = [];
+                          const mr = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg' });
+                          mr.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+                          const startTime = Date.now();
+                          mr.onstop = () => {
+                            stream.getTracks().forEach(t => t.stop());
+                            const blob = new Blob(chunks, { type: mr.mimeType });
+                            const dur = Math.round((Date.now() - startTime) / 1000);
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              const audioData = reader.result as string;
+                              const sock = getSocket();
+                              const name = driver?.name || user?.name || 'Driver';
+                              sock.emit('radio:voice', { name, audioData, duration: dur });
+                              setRadioMsgs(prev => [...prev, { id: Date.now().toString(), name, msg: '', type: 'voice', audioData, duration: dur, ts: new Date().toISOString() }]);
+                            };
+                            reader.readAsDataURL(blob);
+                            // Radio click sound (end)
+                            try {
+                              const ctx = new AudioContext();
+                              const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
+                              const d = buf.getChannelData(0);
+                              for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length) * 0.6;
+                              const src = ctx.createBufferSource();
+                              const g = ctx.createGain(); g.gain.value = 0.25;
+                              src.buffer = buf; src.connect(g); g.connect(ctx.destination); src.start();
+                            } catch {}
+                          };
+                          mr.start();
+                          setMediaRecorder(mr);
+                          setIsRecording(true);
+                          setRecordingDuration(0);
+                        } catch {}
+                      }}
+                      onPointerUp={() => {
+                        if (mediaRecorder && mediaRecorder.state === 'recording') {
+                          mediaRecorder.stop();
+                          setIsRecording(false);
+                          setMediaRecorder(null);
+                        }
+                      }}
+                      onPointerLeave={() => {
+                        if (mediaRecorder && mediaRecorder.state === 'recording') {
+                          mediaRecorder.stop();
+                          setIsRecording(false);
+                          setMediaRecorder(null);
+                        }
+                      }}
+                      className="select-none touch-none relative flex flex-col items-center justify-center rounded-full transition-all active:scale-95"
+                      style={{
+                        width: 88, height: 88,
+                        background: isRecording
+                          ? 'radial-gradient(circle at 35% 35%, #ef4444, #991b1b)'
+                          : 'radial-gradient(circle at 35% 35%, #22c55e, #14532d)',
+                        boxShadow: isRecording
+                          ? '0 0 0 3px rgba(239,68,68,0.3), 0 0 24px rgba(239,68,68,0.5), inset 0 2px 4px rgba(255,255,255,0.15), inset 0 -3px 6px rgba(0,0,0,0.4)'
+                          : '0 0 0 3px rgba(34,197,94,0.25), 0 8px 24px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.15), inset 0 -3px 6px rgba(0,0,0,0.4)',
+                        border: isRecording ? '2px solid rgba(239,68,68,0.6)' : '2px solid rgba(34,197,94,0.4)',
+                      }}>
+                      {/* Button shine */}
+                      <div className="absolute top-2 left-3 w-8 h-5 rounded-full opacity-25" style={{ background: 'radial-gradient(ellipse, white, transparent)' }} />
+                      <svg viewBox="0 0 24 24" className="w-9 h-9 fill-current text-white drop-shadow-lg" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>
+                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                      </svg>
+                    </button>
+                    <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: isRecording ? '#f87171' : 'rgba(100,116,139,0.8)' }}>
+                      {isRecording ? '● Suelta para enviar' : 'Mantén para hablar'}
+                    </p>
+                  </div>
+
+                  {/* Text input row */}
+                  <div className="flex gap-2 px-4 pb-3">
+                    <input
+                      value={radioInput}
+                      onChange={e => setRadioInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key !== 'Enter' || e.shiftKey || !radioInput.trim()) return;
+                        e.preventDefault();
+                        const sock = getSocket();
+                        const name = driver?.name || user?.name || 'Driver';
+                        sock.emit('radio:msg', { name, msg: radioInput.trim() });
+                        setRadioMsgs(prev => [...prev, { id: Date.now().toString(), name, msg: radioInput.trim(), type: 'text', ts: new Date().toISOString() }]);
+                        setRadioInput('');
+                      }}
+                      placeholder="Mensaje de texto al canal..."
+                      className="flex-1 text-xs text-white placeholder:text-slate-600 rounded-xl px-3 py-2 outline-none focus:ring-1 focus:ring-cyan-500/30"
+                      style={{ background: 'rgba(15,30,53,0.7)', border: '1px solid rgba(56,189,248,0.1)' }}
+                    />
+                    <button
+                      onClick={() => {
+                        if (!radioInput.trim()) return;
+                        const sock = getSocket();
+                        const name = driver?.name || user?.name || 'Driver';
+                        sock.emit('radio:msg', { name, msg: radioInput.trim() });
+                        setRadioMsgs(prev => [...prev, { id: Date.now().toString(), name, msg: radioInput.trim(), type: 'text', ts: new Date().toISOString() }]);
+                        setRadioInput('');
+                      }}
+                      className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all active:scale-95"
+                      style={{ background: radioInput.trim() ? 'linear-gradient(135deg,#f97316,#ea580c)' : 'rgba(51,65,85,0.4)' }}>
+                      <Send className="w-3.5 h-3.5 text-white" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

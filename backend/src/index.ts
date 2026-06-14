@@ -151,6 +151,17 @@ io.on('connection', (socket) => {
     });
   });
 
+  socket.on('radio:voice', (data: { name: string; audioData: string; duration: number }) => {
+    if (!data.audioData || !data.name?.trim()) return;
+    if (data.audioData.length > 2_000_000) return; // max ~1.5MB base64
+    io.to('osi_radio').emit('radio:voice', {
+      name: data.name.slice(0, 50),
+      audioData: data.audioData,
+      duration: Math.min(data.duration || 0, 60),
+      ts: new Date().toISOString(),
+    });
+  });
+
   socket.on('disconnect', () => {
     console.log(`Client disconnected: ${socket.id}`);
   });
