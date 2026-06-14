@@ -190,7 +190,6 @@ export default function DispatcherHub() {
               {([
                 { label: 'Operations Manager',     phone: '+1 (786) 380-6634', desc: 'Decisiones operacionales urgentes',   color: '#22c55e' },
                 { label: 'Driver Support Line',    phone: '+1 (904) 610-3125', desc: 'Issues con drivers · Status de ruta', color: '#3b82f6' },
-                { label: 'Fleet Maintenance',      phone: '+1 (305) 492-8401', desc: 'Averías y mantenimiento de unidades', color: '#f59e0b' },
               ]).map(c => (
                 <a
                   key={c.phone}
@@ -254,7 +253,6 @@ export default function DispatcherHub() {
               {([
                 { label: 'Dispatch Operations', email: 'dispatch@osilogistics.com' },
                 { label: 'Billing / Payments',  email: 'billing@osilogistics.com'  },
-                { label: 'HR / Recursos',        email: 'hr@osilogistics.com'       },
               ]).map(e => (
                 <a
                   key={e.email}
