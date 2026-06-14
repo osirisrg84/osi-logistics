@@ -2389,11 +2389,11 @@ export default function DriverPortal() {
                   ]).map(c => (
                     <a key={c.phone} href={`tel:+${c.phone.replace(/\D/g,'')}`}
                       className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 hover:bg-orange-50 dark:hover:bg-orange-500/8 transition-colors group">
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold text-gray-800 dark:text-slate-200 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">{c.label}</p>
-                        <p className="text-[11px] text-gray-400 dark:text-slate-500">{c.desc}</p>
+                        <p className="text-[11px] text-gray-400 dark:text-slate-500 truncate">{c.desc}</p>
                       </div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
                         <span className="text-xs font-mono font-bold text-orange-500 whitespace-nowrap">{c.phone}</span>
                         <PhoneCall className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
                       </div>
