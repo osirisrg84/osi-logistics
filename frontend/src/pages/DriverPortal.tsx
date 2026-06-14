@@ -4,7 +4,8 @@ import {
   Clock, Star, Navigation, LogOut, User, Activity,
   Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet, Building2, CreditCard,
   Lock, ShieldCheck, Send, Bell, BellOff, CheckCheck, Award, Edit3, Zap,
-  Headphones, Radio, Users, PhoneCall, MessageSquare, Heart
+  Headphones, Radio, Users, PhoneCall, MessageSquare, Heart,
+  FileText, Upload, Calendar, AlertCircle
 } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
 import { useAuth } from '../context/AuthContext';
@@ -331,6 +332,11 @@ export default function DriverPortal() {
   const [billingRows, setBillingRows] = useState<DriverBillingRow[]>([]);
   const [billingSummary, setBillingSummary] = useState<DriverBillingSummary | null>(null);
 
+  // COI — Certificate of Insurance
+  const [coiFileName, setCoiFileName] = useState(() => { try { return localStorage.getItem('osi_coi_filename') || ''; } catch { return ''; } });
+  const [coiExpiry, setCoiExpiry] = useState(() => { try { return localStorage.getItem('osi_coi_expiry') || ''; } catch { return ''; } });
+  const [coiEditing, setCoiEditing] = useState(false);
+
   const fetchOrders = useCallback(async () => {
     if (!user?.driver_id) return;
     try {
@@ -567,7 +573,7 @@ export default function DriverPortal() {
     { label: 'Truck #',          done: !!truckNum },
     { label: 'Trailer #',        done: !!trailerNum },
     { label: 'Método de Pago',   done: !!payoutMethod },
-    { label: 'Empresa / MC#',    done: !!(driver?.company_name && driver?.mc_number) },
+    { label: 'Company / MC#',    done: !!(driver?.company_name && driver?.mc_number) },
   ];
   const profileScore = profileItems.filter(i => i.done).length;
 
@@ -1472,6 +1478,90 @@ export default function DriverPortal() {
               </div>
             </div>
           )}
+
+          {/* COI — Certificate of Insurance */}
+          {(() => {
+            const today = new Date();
+            const expDate = coiExpiry ? new Date(coiExpiry + 'T00:00:00') : null;
+            const daysLeft = expDate ? Math.ceil((expDate.getTime() - today.getTime()) / 86400000) : null;
+            const isExpired = daysLeft !== null && daysLeft < 0;
+            const isExpiringSoon = daysLeft !== null && daysLeft >= 0 && daysLeft <= 30;
+            const statusColor = isExpired ? '#ef4444' : isExpiringSoon ? '#f59e0b' : coiExpiry ? '#22c55e' : '#94a3b8';
+            const statusLabel = isExpired ? `Vencido hace ${Math.abs(daysLeft!)} días` : isExpiringSoon ? `Vence en ${daysLeft} días` : coiExpiry ? 'Vigente' : 'No cargado';
+            return (
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-blue-500" />
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">COI — Certificate of Insurance</h3>
+                  </div>
+                  <button onClick={() => setCoiEditing(v => !v)}
+                    className="text-xs text-blue-500 hover:text-blue-600 font-semibold flex items-center gap-1">
+                    <Edit3 className="w-3 h-3" /> {coiEditing ? 'Cerrar' : 'Editar'}
+                  </button>
+                </div>
+
+                {/* Status row */}
+                <div className="flex items-center justify-between py-2 border-b border-gray-50 dark:border-slate-700">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4" style={{ color: statusColor }} />
+                    <span className="text-sm text-gray-700 dark:text-slate-300 truncate max-w-[160px]">
+                      {coiFileName || 'Sin archivo'}
+                    </span>
+                  </div>
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${statusColor}18`, color: statusColor }}>
+                    {statusLabel}
+                  </span>
+                </div>
+
+                {coiExpiry && !coiEditing && (
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <Calendar className="w-3 h-3 text-gray-400" />
+                    <span className="text-xs text-gray-500 dark:text-slate-400">Vencimiento: </span>
+                    <span className="text-xs font-semibold" style={{ color: statusColor }}>
+                      {new Date(coiExpiry + 'T00:00:00').toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </span>
+                    {(isExpired || isExpiringSoon) && <AlertCircle className="w-3 h-3 ml-1" style={{ color: statusColor }} />}
+                  </div>
+                )}
+
+                {coiEditing && (
+                  <div className="mt-3 space-y-2.5">
+                    {/* File upload */}
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-slate-400 mb-1.5">Archivo (PDF, JPG, PNG)</p>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-dashed border-blue-300 dark:border-blue-700 hover:border-blue-400 transition-colors flex-1">
+                          <Upload className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                          <span className="text-xs text-gray-500 dark:text-slate-400 truncate">
+                            {coiFileName || 'Seleccionar archivo...'}
+                          </span>
+                        </div>
+                        <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden"
+                          onChange={e => {
+                            const f = e.target.files?.[0];
+                            if (f) { setCoiFileName(f.name); localStorage.setItem('osi_coi_filename', f.name); }
+                          }} />
+                      </label>
+                    </div>
+                    {/* Expiry date */}
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-slate-400 mb-1.5 flex items-center gap-1"><Calendar className="w-3 h-3" /> Fecha de vencimiento</p>
+                      <input type="date" value={coiExpiry}
+                        onChange={e => { setCoiExpiry(e.target.value); localStorage.setItem('osi_coi_expiry', e.target.value); }}
+                        className="input text-sm w-full" />
+                    </div>
+                    {(coiFileName || coiExpiry) && (
+                      <button onClick={() => { setCoiFileName(''); setCoiExpiry(''); localStorage.removeItem('osi_coi_filename'); localStorage.removeItem('osi_coi_expiry'); setCoiEditing(false); }}
+                        className="text-xs text-red-400 hover:text-red-500 font-medium">
+                        Eliminar COI
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Pagos shortcut */}
           <button
