@@ -536,9 +536,9 @@ export default function Drivers() {
             </div>
 
             {driver.active_orders !== undefined && driver.active_orders > 0 && (
-              <div className="mt-3 bg-orange-50 rounded-lg p-2 flex items-center gap-2">
-                <Package className="w-3.5 h-3.5 text-orange-500" />
-                <span className="text-xs text-orange-700 font-medium">{driver.active_orders} active order(s)</span>
+              <div className="mt-3 bg-orange-500/15 dark:bg-orange-500/20 border border-orange-500/30 dark:border-orange-500/40 rounded-lg p-2 flex items-center gap-2">
+                <Package className="w-3.5 h-3.5 text-orange-400" />
+                <span className="text-xs text-orange-600 dark:text-orange-300 font-semibold">{driver.active_orders} active order(s)</span>
               </div>
             )}
           </div>
