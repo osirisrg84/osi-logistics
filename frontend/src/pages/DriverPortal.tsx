@@ -2420,7 +2420,6 @@ export default function DriverPortal() {
                   {([
                     { label: 'Dispatch 24/7',          phone: '+1 (786) 380-6634', desc: 'Lunes a Domingo · 24 horas' },
                     { label: 'Soporte al Driver',       phone: '+1 (904) 610-3125', desc: 'Pagos · Issues técnicos' },
-                    { label: 'Emergencias en ruta',     phone: '+1 (305) 492-8401', desc: 'Accidentes · Incidentes' },
                   ]).map(c => (
                     <a key={c.phone} href={`tel:+${c.phone.replace(/\D/g,'')}`}
                       className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 hover:bg-orange-50 dark:hover:bg-orange-500/8 transition-colors group">
@@ -2617,7 +2616,7 @@ export default function DriverPortal() {
                       }}>
 
                         {/* CHROME RAIL */}
-                        <div style={{ height: 16, borderRadius: '12px 17px 0 0',
+                        <div style={{ height: 16, borderRadius: '13px 18px 0 0',
                           background: 'linear-gradient(180deg,#b0bac8 0%,#d8dfe8 8%,#edf1f6 18%,#f8fafc 32%,#ffffff 46%,#f4f7fa 58%,#dde3ec 72%,#bdc6d2 84%,#8d9aaa 94%,#6b7888 100%)',
                           boxShadow: '0 4px 12px rgba(0,0,0,0.88), inset 0 1px 0 rgba(255,255,255,1), inset 0 -1px 0 rgba(0,0,0,0.28)',
                           display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px',
@@ -2876,15 +2875,6 @@ export default function DriverPortal() {
                       </div>
 
                     </div>{/* end drop-shadow wrapper */}
-                    {/* Status label below device */}
-                    <div className="flex flex-col items-center gap-1">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: isRecording ? '#f87171' : 'rgba(100,116,139,0.7)' }}>
-                        {isRecording ? '● Suelta para enviar' : 'Mantén para hablar'}
-                      </p>
-                      {!isRecording && (
-                        <p className="text-[9px] text-slate-600 tracking-wider uppercase">OSI Fleet · Canal Seguro</p>
-                      )}
-                    </div>
                   </div>
 
                   {/* Text input row */}
