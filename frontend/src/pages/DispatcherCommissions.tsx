@@ -308,7 +308,7 @@ export default function DispatcherCommissions() {
         <div className="flex items-center gap-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/40 rounded-2xl px-4 py-3">
           <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
           <p className="text-xs text-yellow-700 dark:text-yellow-300 flex-1">
-            Tienes <strong>{fmt(pending)}</strong> pendientes. Configura tu método de cobro para que OSI pueda enviarte el pago.
+            Tienes <strong>{fmt(pending)}</strong> pendientes. Configura tu método de pago para que OSI pueda enviarte el pago.
           </p>
           <button onClick={startEdit} className="text-xs font-bold text-yellow-700 dark:text-yellow-300 hover:underline flex-shrink-0">
             Configurar
@@ -324,7 +324,7 @@ export default function DispatcherCommissions() {
               <Wallet className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-gray-900 dark:text-white">Método de cobro</h2>
+              <h2 className="text-sm font-bold text-gray-900 dark:text-white">Método de pago</h2>
               <p className="text-xs text-gray-400 dark:text-slate-500">Cómo OSI Logistics te envía tus pagos</p>
             </div>
           </div>
@@ -458,13 +458,13 @@ export default function DispatcherCommissions() {
             <div className="w-12 h-12 bg-gray-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-3">
               <Wallet className="w-6 h-6 text-gray-400 dark:text-slate-500" />
             </div>
-            <p className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1">Sin método de cobro configurado</p>
+            <p className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1">Sin método de pago configurado</p>
             <p className="text-xs text-gray-400 dark:text-slate-500 mb-4">
               Agrega tu método preferido para que OSI pueda enviarte tus comisiones
             </p>
             <button onClick={startEdit}
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold rounded-xl transition-colors shadow-sm shadow-blue-500/20">
-              <PlusCircle className="w-3.5 h-3.5" /> Configurar método de cobro
+              <PlusCircle className="w-3.5 h-3.5" /> Configurar método de pago
             </button>
           </div>
         )}
