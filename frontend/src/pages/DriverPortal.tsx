@@ -1326,35 +1326,74 @@ export default function DriverPortal() {
       {tab === 'profile' && driver && (
         <div className="max-w-lg mx-auto px-4 py-5 space-y-4">
           {/* Driver card */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
-            <div className="flex items-center gap-4 mb-5">
-              <div className="w-14 h-14 bg-orange-500 rounded-2xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
-                {driver.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-              </div>
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-bold text-gray-900 dark:text-white text-base">{driver.name}</p>
-                  {driver.driver_code && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 tracking-widest border border-orange-200 dark:border-orange-700/40">
-                      ID #{driver.driver_code}
-                    </span>
-                  )}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden shadow-sm">
+
+            {/* ── Banner header ── */}
+            <div className="relative h-20 overflow-hidden" style={{
+              background: 'linear-gradient(135deg, #0a1628 0%, #0f2035 35%, #0c2a45 65%, #152a40 100%)',
+            }}>
+              <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 70% 100% at 90% 50%, rgba(249,115,22,0.22) 0%, transparent 70%)' }} />
+              <div className="absolute right-5 top-3 w-10 h-10 rounded-full border border-orange-400/20" />
+              <div className="absolute right-12 top-5 w-5 h-5 rounded-full border border-orange-400/15" />
+              <div className="absolute right-20 top-2 w-3 h-3 rounded-full bg-orange-500/10" />
+              <div className="absolute left-4 bottom-2 text-[9px] font-bold tracking-[0.3em] text-white/15 uppercase select-none">OSI Logistics · Driver</div>
+            </div>
+
+            {/* ── Avatar + info ── */}
+            <div className="px-5 pb-5">
+              <div className="flex items-end justify-between -mt-9 mb-3">
+                <div className="relative">
+                  <div className="w-[68px] h-[68px] rounded-[18px] flex items-center justify-center text-white font-extrabold flex-shrink-0 select-none"
+                    style={{
+                      fontSize: 22, letterSpacing: '-0.5px',
+                      background: 'linear-gradient(135deg, #fb923c 0%, #f97316 55%, #ea580c 100%)',
+                      boxShadow: '0 8px 24px rgba(249,115,22,0.45), 0 2px 6px rgba(0,0,0,0.18)',
+                      border: '3px solid white',
+                    }}>
+                    {driver.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-400 border-2 border-white dark:border-slate-800 shadow-sm" />
                 </div>
-                <p className="text-xs text-blue-500 dark:text-blue-400">{driver.email}</p>
-                <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{driver.phone}</p>
+                {driver.driver_code && (
+                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full mb-1 tracking-widest border bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-700/40">
+                    ID #{driver.driver_code}
+                  </span>
+                )}
+              </div>
+
+              <p className="font-extrabold text-gray-900 dark:text-white text-lg leading-tight mb-2">{driver.name}</p>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-500/15 flex items-center justify-center flex-shrink-0">
+                    <Send className="w-2.5 h-2.5 text-blue-500" />
+                  </div>
+                  <p className="text-xs text-blue-500 dark:text-blue-400 font-medium">{driver.email}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-md bg-gray-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-2.5 h-2.5 text-gray-500 dark:text-slate-400" />
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-slate-400">{driver.phone}</p>
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+
+            {/* ── Stats grid ── */}
+            <div className="border-t border-gray-100 dark:border-slate-700 mx-4 mb-1" />
+            <div className="grid grid-cols-2 gap-3 p-4">
               {[
-                { label: 'Total Deliveries', value: driver.total_deliveries, icon: Package,  color: 'text-blue-500' },
-                { label: 'On-Time Rate',     value: `${driver.on_time_rate.toFixed(0)}%`,   icon: Clock,     color: 'text-green-500' },
-                { label: 'License',          value: driver.license_number,                  icon: FileText,  color: 'text-indigo-500' },
-                { label: 'Rating',           value: `★ ${driver.rating.toFixed(1)}`,        icon: Star,      color: 'text-amber-500' },
-              ].map(({ label, value, icon: Icon, color }) => (
-                <div key={label} className="bg-gray-50 dark:bg-slate-700 rounded-xl p-3">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Icon className={`w-3 h-3 ${color}`} />
-                    <p className="text-xs text-gray-500 dark:text-slate-400">{label}</p>
+                { label: 'Total Deliveries', value: driver.total_deliveries, icon: Package,  color: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-500/10' },
+                { label: 'On-Time Rate',     value: `${driver.on_time_rate.toFixed(0)}%`,   icon: Clock,     color: 'text-green-500',  bg: 'bg-green-50 dark:bg-green-500/10' },
+                { label: 'License',          value: driver.license_number,                  icon: FileText,  color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-500/10' },
+                { label: 'Rating',           value: `★ ${driver.rating.toFixed(1)}`,        icon: Star,      color: 'text-amber-500',  bg: 'bg-amber-50 dark:bg-amber-500/10' },
+              ].map(({ label, value, icon: Icon, color, bg }) => (
+                <div key={label} className="bg-gray-50 dark:bg-slate-700/60 rounded-xl p-3">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <div className={`w-5 h-5 rounded-md ${bg} flex items-center justify-center flex-shrink-0`}>
+                      <Icon className={`w-3 h-3 ${color}`} />
+                    </div>
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400 font-medium">{label}</p>
                   </div>
                   <p className="text-sm font-bold text-gray-900 dark:text-white">{value}</p>
                 </div>
