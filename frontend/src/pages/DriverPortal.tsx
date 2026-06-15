@@ -617,7 +617,7 @@ export default function DriverPortal() {
     <div className={`min-h-screen pb-16 ${driverStatus === 'offline' && tab === 'active' ? 'bg-[#0a1628]' : 'bg-gray-50 dark:bg-slate-900'}`}>
 
       {/* ── Header + Driver Hero — always dark/premium ──────── */}
-      <div className="bg-gradient-to-b from-[#0a1628] via-[#0f1e35] to-[#132640]">
+      <div className="bg-gradient-to-b from-[#0a1628] via-[#0f1e35] to-[#132640] sticky top-0 z-40" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
 
         {/* Top bar */}
         <div className="px-4 pt-4 pb-2">
@@ -2569,7 +2569,7 @@ export default function DriverPortal() {
                     <div className="flex items-center justify-between px-4 py-1.5" style={{ background: 'rgba(239,68,68,0.12)', borderBottom: '1px solid rgba(239,68,68,0.2)' }}>
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" style={{ boxShadow: '0 0 6px rgba(239,68,68,0.8)' }} />
-                        <span className="text-[11px] font-bold text-red-400 tracking-widest uppercase">Transmitiendo</span>
+                        <span className="text-[11px] font-bold text-red-400 tracking-widest uppercase">Transmitting</span>
                       </div>
                       <span className="text-[11px] font-mono text-red-400">
                         {String(Math.floor(recordingDuration/60)).padStart(1,'0')}:{String(recordingDuration%60).padStart(2,'0')}
@@ -2828,7 +2828,7 @@ export default function DriverPortal() {
                             }}>PTT</span>
                             {/* Sub label */}
                             <span style={{ fontSize: 5.5, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.55)', fontFamily: 'Arial', fontWeight: 700 }}>
-                              {isRecording ? 'TRANSMITIENDO' : 'PUSH  TO  TALK'}
+                              {isRecording ? 'TRANSMITTING' : 'PUSH  TO  TALK'}
                             </span>
                           </div>
                           {/* Right ridge */}
