@@ -2592,13 +2592,6 @@ export default function DriverPortal() {
                       filter: 'drop-shadow(0 18px 40px rgba(0,0,0,0.98)) drop-shadow(0 5px 12px rgba(0,0,0,0.85))' }}>
 
                       {/* ANTENNA */}
-                      <div style={{ position: 'absolute', right: 14, top: 48, width: 18, height: 14, zIndex: 5, borderRadius: '3px 3px 1px 1px',
-                        background: 'linear-gradient(180deg,#1f2937 0%,#6b7280 8%,#c4cdd9 22%,#f8fafc 38%,#ffffff 50%,#e8edf4 62%,#b0bac8 76%,#6b7280 90%,#374151 100%)',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -1px 0 rgba(0,0,0,0.5)',
-                      }}>
-                        <div style={{ position: 'absolute', top: '44%', left: 2, right: 2, height: 1, background: 'rgba(0,0,0,0.35)', borderRadius: 1 }} />
-                        <div style={{ position: 'absolute', top: '56%', left: 2, right: 2, height: 0.5, background: 'rgba(255,255,255,0.5)', borderRadius: 1 }} />
-                      </div>
                       <div style={{ position: 'absolute', right: 17, top: 0, width: 11, height: 56, borderRadius: '5px 5px 2px 2px',
                         background: ['repeating-linear-gradient(180deg,rgba(255,255,255,0.08) 0px,rgba(255,255,255,0.08) 2px,rgba(0,0,0,0.1) 2px,rgba(0,0,0,0.1) 3.5px,transparent 3.5px,transparent 7px)','linear-gradient(to right,#020810 0%,#0a1824 18%,#152334 50%,#0a1824 82%,#020810 100%)'].join(','),
                         boxShadow: '3px 0 10px rgba(0,0,0,0.95)', transform: 'rotate(7deg)', transformOrigin: 'bottom center',
@@ -2860,9 +2853,6 @@ export default function DriverPortal() {
                         </div>
 
                       </div>{/* end body */}
-
-                      {/* Belt clip */}
-                      <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', bottom: -8, width: 44, height: 14, borderRadius: '0 0 6px 6px', background: 'linear-gradient(180deg,#0b1622,#040c14)', boxShadow: '0 6px 14px rgba(0,0,0,0.82)' }} />
 
                       {/* Side PTT bar */}
                       <div style={{ position: 'absolute', left: -6, top: 98, width: 8, height: 58, borderRadius: '4px 0 0 4px',
