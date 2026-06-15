@@ -2418,7 +2418,7 @@ export default function DriverPortal() {
                 </div>
                 <div className="space-y-2.5">
                   {([
-                    { label: 'Dispatch 24/7',          phone: '+1 (786) 380-6634', desc: 'Lunes a Domingo · 24 horas' },
+                    { label: 'Dispatch 24/7',          phone: '+1 (904) 945-1816', desc: 'Lunes a Domingo · 24 horas' },
                     { label: 'Soporte al Driver',       phone: '+1 (904) 610-3125', desc: 'Pagos · Issues técnicos' },
                   ]).map(c => (
                     <a key={c.phone} href={`tel:+${c.phone.replace(/\D/g,'')}`}
