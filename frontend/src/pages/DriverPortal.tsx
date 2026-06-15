@@ -2875,6 +2875,7 @@ export default function DriverPortal() {
                       </div>
 
                     </div>{/* end drop-shadow wrapper */}
+                    <p className="text-[9px] text-slate-500 tracking-wider uppercase">OSI Fleet · Canal Seguro</p>
                   </div>
 
                   {/* Text input row */}
