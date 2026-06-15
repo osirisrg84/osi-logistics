@@ -3,6 +3,70 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ClipboardList, Eye, EyeOff, AlertCircle, ArrowLeft, Truck, BarChart2, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
+function playLoginSound() {
+  try {
+    const ctx = new AudioContext();
+    const t = ctx.currentTime;
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0, t);
+    master.gain.linearRampToValueAtTime(0.18, t + 0.6);
+    master.gain.setValueAtTime(0.18, t + 1.6);
+    master.gain.linearRampToValueAtTime(0, t + 3.2);
+    master.connect(ctx.destination);
+
+    // Warm reverb via delay feedback
+    const delay = ctx.createDelay(0.5);
+    delay.delayTime.value = 0.38;
+    const delayGain = ctx.createGain();
+    delayGain.gain.value = 0.28;
+    delay.connect(delayGain);
+    delayGain.connect(delay);
+    delayGain.connect(master);
+
+    const notes = [110, 138.6, 165, 220, 277.2];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, t + i * 0.08);
+      g.gain.linearRampToValueAtTime(0.55 - i * 0.06, t + i * 0.08 + 0.4);
+      g.gain.linearRampToValueAtTime(0, t + 3.2);
+      osc.connect(g);
+      g.connect(master);
+      g.connect(delay);
+      osc.start(t + i * 0.08);
+      osc.stop(t + 3.4);
+
+      // Soft harmonic layer
+      const h = ctx.createOscillator();
+      h.type = 'sine';
+      h.frequency.value = freq * 2;
+      const hg = ctx.createGain();
+      hg.gain.setValueAtTime(0, t + i * 0.08);
+      hg.gain.linearRampToValueAtTime(0.06, t + i * 0.08 + 0.5);
+      hg.gain.linearRampToValueAtTime(0, t + 3.0);
+      h.connect(hg);
+      hg.connect(master);
+      h.start(t + i * 0.08);
+      h.stop(t + 3.4);
+    });
+
+    // Subtle high shimmer
+    const shimmer = ctx.createOscillator();
+    shimmer.type = 'sine';
+    shimmer.frequency.value = 880;
+    const sg = ctx.createGain();
+    sg.gain.setValueAtTime(0, t + 0.5);
+    sg.gain.linearRampToValueAtTime(0.04, t + 1.0);
+    sg.gain.linearRampToValueAtTime(0, t + 2.8);
+    shimmer.connect(sg);
+    sg.connect(master);
+    shimmer.start(t + 0.5);
+    shimmer.stop(t + 3.4);
+  } catch {}
+}
+
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -36,6 +100,7 @@ export default function Login() {
           return;
         }
       }
+      playLoginSound();
       navigate('/dashboard');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
