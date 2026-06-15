@@ -2805,10 +2805,19 @@ export default function DriverPortal() {
                           boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.85)', border: '1px solid rgba(0,0,0,0.6)',
                         }} />
 
-                        {/* PTT BUTTON — MIC ICON */}
+                        {/* PTT BUTTON — tap to start / tap to stop */}
                         <button
-                          onPointerDown={async () => {
-                            if (isRecording) return;
+                          onClick={async () => {
+                            if (isRecording) {
+                              // STOP recording
+                              if (mediaRecorder && mediaRecorder.state === 'recording') {
+                                mediaRecorder.stop();
+                              }
+                              setIsRecording(false);
+                              setMediaRecorder(null);
+                              return;
+                            }
+                            // START recording
                             try {
                               const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                               try {
@@ -2853,11 +2862,9 @@ export default function DriverPortal() {
                               setRecordingDuration(0);
                             } catch {}
                           }}
-                          onPointerUp={() => { if (mediaRecorder && mediaRecorder.state === 'recording') { mediaRecorder.stop(); setIsRecording(false); setMediaRecorder(null); } }}
-                          onPointerLeave={() => { if (mediaRecorder && mediaRecorder.state === 'recording') { mediaRecorder.stop(); setIsRecording(false); setMediaRecorder(null); } }}
                           className="select-none touch-none transition-transform active:scale-[0.955] block"
                           style={{
-                            margin: '0 9px 5px', width: 'calc(100% - 18px)', height: 52,
+                            margin: '0 9px 3px', width: 'calc(100% - 18px)', height: 52,
                             borderRadius: 10, border: 'none', cursor: 'pointer',
                             background: isRecording
                               ? ['repeating-linear-gradient(135deg,rgba(0,0,0,0.1) 0px,rgba(0,0,0,0.1) 2px,transparent 2px,transparent 6px)','linear-gradient(180deg,#f87171 0%,#ef4444 36%,#991b1b 100%)'].join(',')
@@ -2865,19 +2872,40 @@ export default function DriverPortal() {
                             boxShadow: isRecording
                               ? 'inset 0 -7px 18px rgba(0,0,0,0.65), inset 0 3px 8px rgba(255,100,100,0.18), 0 0 34px rgba(239,68,68,0.82), 0 5px 14px rgba(0,0,0,0.9)'
                               : 'inset 0 -7px 18px rgba(0,0,0,0.55), inset 0 3px 8px rgba(255,185,100,0.14), 0 0 20px rgba(249,115,22,0.48), 0 5px 14px rgba(0,0,0,0.9)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                             transition: 'all 0.15s',
                           }}
                         >
                           <div style={{ width: 4, height: 30, borderRadius: 2, background: 'rgba(255,255,255,0.24)', boxShadow: '0 0 5px rgba(255,255,255,0.14)' }} />
-                          <svg width="22" height="26" viewBox="0 0 22 26" fill="none" style={{ opacity: isRecording ? 1 : 0.9, flexShrink: 0, filter: isRecording ? 'drop-shadow(0 0 7px rgba(255,255,255,0.75))' : 'none', transition: 'all 0.18s' }}>
-                            <rect x="6.5" y="1" width="9" height="13" rx="4.5" fill="rgba(255,255,255,0.93)" />
-                            <path d="M2.5 11 C2.5 18 19.5 18 19.5 11" stroke="rgba(255,255,255,0.92)" strokeWidth="2.2" fill="none" strokeLinecap="round" />
-                            <line x1="11" y1="18" x2="11" y2="22" stroke="rgba(255,255,255,0.92)" strokeWidth="2.2" strokeLinecap="round" />
-                            <line x1="7" y1="22" x2="15" y2="22" stroke="rgba(255,255,255,0.92)" strokeWidth="2.2" strokeLinecap="round" />
-                          </svg>
+                          {isRecording ? (
+                            /* Stop icon */
+                            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" style={{ flexShrink: 0, filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.8))', transition: 'all 0.18s' }}>
+                              <rect x="4" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.95)" />
+                            </svg>
+                          ) : (
+                            /* Mic icon */
+                            <svg width="22" height="26" viewBox="0 0 22 26" fill="none" style={{ opacity: 0.92, flexShrink: 0, transition: 'all 0.18s' }}>
+                              <rect x="6.5" y="1" width="9" height="13" rx="4.5" fill="rgba(255,255,255,0.93)" />
+                              <path d="M2.5 11 C2.5 18 19.5 18 19.5 11" stroke="rgba(255,255,255,0.92)" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+                              <line x1="11" y1="18" x2="11" y2="22" stroke="rgba(255,255,255,0.92)" strokeWidth="2.2" strokeLinecap="round" />
+                              <line x1="7" y1="22" x2="15" y2="22" stroke="rgba(255,255,255,0.92)" strokeWidth="2.2" strokeLinecap="round" />
+                            </svg>
+                          )}
                           <div style={{ width: 4, height: 30, borderRadius: 2, background: 'rgba(255,255,255,0.24)', boxShadow: '0 0 5px rgba(255,255,255,0.14)' }} />
                         </button>
+                        {/* State label under button */}
+                        <div style={{ textAlign: 'center', marginBottom: 4 }}>
+                          {isRecording ? (
+                            <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.18em', color: '#f87171', textTransform: 'uppercase', fontFamily: 'Arial',
+                              textShadow: '0 0 10px rgba(239,68,68,0.7)', animation: 'pulse-dot 1s ease-in-out infinite' }}>
+                              ● Toca para detener
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', color: 'rgba(251,146,60,0.7)', textTransform: 'uppercase', fontFamily: 'Arial' }}>
+                              Toca para grabar
+                            </span>
+                          )}
+                        </div>
 
                         {/* KEYPAD 3×4 */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4, margin: '0 10px 12px' }}>
