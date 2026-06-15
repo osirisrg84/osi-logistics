@@ -1336,7 +1336,7 @@ export default function DriverPortal() {
               <div className="absolute right-5 top-3 w-10 h-10 rounded-full border border-orange-400/20" />
               <div className="absolute right-12 top-5 w-5 h-5 rounded-full border border-orange-400/15" />
               <div className="absolute right-20 top-2 w-3 h-3 rounded-full bg-orange-500/10" />
-              <div className="absolute right-4 bottom-2.5 text-[9px] font-bold tracking-[0.3em] text-white/30 uppercase select-none">OSI LOGISTICS * PARTNER</div>
+              <div className="absolute right-4 bottom-2.5 text-[9px] font-bold tracking-[0.3em] text-white/30 uppercase select-none">OSI LOGISTICS · PARTNER</div>
             </div>
 
             {/* ── Avatar + info ── */}
