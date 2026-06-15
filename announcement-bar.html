@@ -18,6 +18,7 @@
     height: 46px;
     max-width: 1200px;
     margin: 0 auto;
+    position: relative;
   }
 
   /* Pulsing fire dot */
@@ -33,20 +34,43 @@
     50% { opacity: 0.8; transform: scale(1.15); box-shadow: 0 0 0 5px rgba(151,240,72,0); }
   }
 
-  #osi-bar .txt {
+  /* Text group */
+  .osi-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .osi-text-block {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  #osi-bar .accent {
+    color: #97f048;
+    font-weight: 700;
+    font-size: 12.5px;
+  }
+  #osi-bar .hide-sm {
     color: #a1a1aa;
     font-size: 12.5px;
     font-weight: 400;
-    letter-spacing: 0.1px;
   }
-  #osi-bar .txt b {
-    color: #ffffff;
-    font-weight: 700;
-    font-size: 13px;
+  /* Sub-text shown only on mobile */
+  #osi-bar .sub-text {
+    display: none;
+    color: #a1a1aa;
+    font-size: 10.5px;
+    font-weight: 400;
+    margin-top: 1px;
   }
-  #osi-bar .txt .accent {
-    color: #97f048;
-    font-weight: 700;
+
+  /* Right group: countdown + button stacked on mobile */
+  .osi-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
   }
 
   /* Countdown */
@@ -120,39 +144,73 @@
   @media (max-width: 600px) {
     #osi-bar-inner {
       height: auto;
-      padding: 8px 14px;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
+      padding: 10px 36px 10px 14px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    /* Left: stacked text */
+    .osi-left {
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .osi-text-block {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+    }
+    #osi-bar .hide-sm { display: none; }
+    #osi-bar .sub-text { display: block; }
+
+    /* Right: countdown on top, button below */
+    .osi-right {
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
     }
     .osi-divider { display: none; }
-    #osi-bar .txt .hide-sm { display: none; }
-    #osi-bar .cd { order: 3; }
-    #osi-bar .apply { order: 4; font-size: 12px; padding: 7px 16px; }
-    #osi-bar .xbtn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); }
-    #osi-bar { position: fixed; }
+
+    #osi-bar .apply { font-size: 11px; padding: 6px 13px; }
+
+    /* X button — top right corner */
+    #osi-bar .xbtn {
+      position: absolute;
+      right: 8px; top: 8px;
+    }
   }
 </style>
 
 <div id="osi-bar">
   <div id="osi-bar-inner">
-    <div class="osi-pulse"></div>
-    <span class="txt">
-      <span class="accent">Solo 8% por carga</span>
-      <span class="hide-sm"> — Disponible todo 2026</span>
-    </span>
-    <div class="osi-divider"></div>
-    <div class="cd">
-      <div class="osi-cu"><span class="n" id="osi-d">---</span><span class="l">días</span></div>
-      <span class="osi-dot">:</span>
-      <div class="osi-cu"><span class="n" id="osi-h">--</span><span class="l">hrs</span></div>
-      <span class="osi-dot">:</span>
-      <div class="osi-cu"><span class="n" id="osi-m">--</span><span class="l">min</span></div>
-      <span class="osi-dot">:</span>
-      <div class="osi-cu"><span class="n" id="osi-s">--</span><span class="l">seg</span></div>
+
+    <!-- Left: dot + text -->
+    <div class="osi-left">
+      <div class="osi-pulse"></div>
+      <div class="osi-text-block">
+        <span class="accent">Solo 8% por carga</span>
+        <span class="hide-sm"> — Disponible todo 2026</span>
+        <span class="sub-text">Disponible todo 2026</span>
+      </div>
     </div>
+
     <div class="osi-divider"></div>
-    <a href="tel:+13053358114" class="apply">Aplicar ahora</a>
+
+    <!-- Right: countdown + button -->
+    <div class="osi-right">
+      <div class="cd">
+        <div class="osi-cu"><span class="n" id="osi-d">---</span><span class="l">días</span></div>
+        <span class="osi-dot">:</span>
+        <div class="osi-cu"><span class="n" id="osi-h">--</span><span class="l">hrs</span></div>
+        <span class="osi-dot">:</span>
+        <div class="osi-cu"><span class="n" id="osi-m">--</span><span class="l">min</span></div>
+        <span class="osi-dot">:</span>
+        <div class="osi-cu"><span class="n" id="osi-s">--</span><span class="l">seg</span></div>
+      </div>
+      <a href="tel:+13053358114" class="apply">Aplicar ahora</a>
+    </div>
+
     <button class="xbtn" id="osi-xbtn" aria-label="Cerrar">✕</button>
   </div>
 </div>
