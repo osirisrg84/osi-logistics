@@ -339,14 +339,14 @@ export default function Header({ onMenuClick }: HeaderProps) {
               <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(musicOn,'linear-gradient(90deg,#a855f7,#7c3aed)','rgba(168,85,247,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(musicOn)} /></div>
             </button>
           </div>
-          <SwitchPanels />
+          {SwitchPanels()}
         </div>
       )}
 
       {/* DESKTOP: panels (Spotify + Notes) below header when active */}
       {isDispatcher && (musicOn || notesOpen) && (
         <div className="hidden md:block border-t border-gray-100 dark:border-slate-800 px-6 py-2 space-y-2">
-          <SwitchPanels />
+          {SwitchPanels()}
         </div>
       )}
     </header>
