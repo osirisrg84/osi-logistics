@@ -616,6 +616,7 @@ export default function DriverPortal() {
   // ── Profile completion ─────────────────────────────────────
   const profileItems = [
     { label: 'Tipo de Equipo',   done: !!localEquipType },
+    { label: 'Truck Make',       done: !!localTruckMake },
     { label: 'Truck #',          done: !!truckNum },
     { label: 'Trailer #',        done: !!trailerNum },
     { label: 'Método de Pago',   done: !!payoutMethod },
@@ -636,7 +637,7 @@ export default function DriverPortal() {
     { icon: '🏆', label: 'Driver Élite',           desc: '100 entregas completadas',            unlocked: totalDel  >= 100, current: Math.min(totalDel, 100),  target: 100,  showProgress: true  },
     { icon: '⏰', label: 'Pro Puntualidad',         desc: '95%+ de entregas a tiempo',           unlocked: onTimeRt  >= 95,  current: Math.min(onTimeRt, 95),   target: 95,   showProgress: false },
     { icon: '🌟', label: 'Driver 5 Estrellas',     desc: 'Calificación de 4.8 o superior',      unlocked: drvRating >= 4.8, current: drvRating,                 target: 4.8,  showProgress: false },
-    { icon: '✅', label: 'Perfil Completo',         desc: 'Todas las secciones del perfil llenas', unlocked: profileScore >= 6, current: profileScore,           target: 6,    showProgress: true  },
+    { icon: '✅', label: 'Perfil Completo',         desc: 'Todas las secciones del perfil llenas', unlocked: profileScore >= 7, current: profileScore,           target: 7,    showProgress: true  },
   ];
   const unlockedCount = ACHIEVEMENTS.filter(a => a.unlocked).length;
 
