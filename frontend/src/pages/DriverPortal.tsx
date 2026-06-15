@@ -760,6 +760,15 @@ export default function DriverPortal() {
               )}
             </div>
 
+          </div>
+        </div>
+      </div>
+
+      {/* Driver card + stats — scrollable */}
+      <div className="bg-gradient-to-b from-[#132640] to-[#0a1628]">
+        <div className="px-4 pb-4">
+          <div className="max-w-lg mx-auto">
+
             {/* Driver card */}
             <div className="flex items-center gap-4 rounded-2xl px-4 py-3.5 bg-white/6 border border-white/10">
               {/* Avatar */}
