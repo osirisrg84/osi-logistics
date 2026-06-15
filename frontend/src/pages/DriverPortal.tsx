@@ -2802,20 +2802,39 @@ export default function DriverPortal() {
                             transition: 'all 0.15s',
                           }}
                         >
-                          <div style={{ width: 3.5, height: 28, borderRadius: 2, background: 'rgba(255,255,255,0.22)' }} />
-                          {isRecording ? (
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0, filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.8))' }}>
-                              <rect x="3" y="3" width="14" height="14" rx="3" fill="rgba(255,255,255,0.95)" />
-                            </svg>
-                          ) : (
-                            <svg width="20" height="24" viewBox="0 0 20 24" fill="none" style={{ flexShrink: 0, opacity: 0.93 }}>
-                              <rect x="6" y="1" width="8" height="12" rx="4" fill="rgba(255,255,255,0.93)" />
-                              <path d="M2 10 C2 16.5 18 16.5 18 10" stroke="rgba(255,255,255,0.92)" strokeWidth="2" fill="none" strokeLinecap="round" />
-                              <line x1="10" y1="16.5" x2="10" y2="20.5" stroke="rgba(255,255,255,0.92)" strokeWidth="2" strokeLinecap="round" />
-                              <line x1="6.5" y1="20.5" x2="13.5" y2="20.5" stroke="rgba(255,255,255,0.92)" strokeWidth="2" strokeLinecap="round" />
-                            </svg>
-                          )}
-                          <div style={{ width: 3.5, height: 28, borderRadius: 2, background: 'rgba(255,255,255,0.22)' }} />
+                          {/* Left ridge */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            {[0,1,2,3].map(i => <div key={i} style={{ width: 3, height: 5, borderRadius: 1.5, background: 'rgba(255,255,255,0.28)' }} />)}
+                          </div>
+                          {/* Center content */}
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                            {/* Signal dot */}
+                            <div style={{ width: 7, height: 7, borderRadius: '50%',
+                              background: isRecording ? '#fff' : 'rgba(255,255,255,0.7)',
+                              boxShadow: isRecording ? '0 0 10px rgba(255,255,255,0.9), 0 0 20px rgba(255,255,255,0.5)' : 'none',
+                              animation: isRecording ? 'pulse-dot 0.8s ease-in-out infinite' : 'none',
+                              transition: 'all 0.2s',
+                            }} />
+                            {/* PTT text */}
+                            <span style={{
+                              fontSize: 15, fontWeight: 900, letterSpacing: '0.3em',
+                              fontFamily: 'Arial Black, Arial, sans-serif',
+                              color: 'rgba(255,255,255,0.95)',
+                              textShadow: isRecording
+                                ? '0 0 12px rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.6)'
+                                : '0 2px 6px rgba(0,0,0,0.6)',
+                              lineHeight: 1,
+                              transition: 'text-shadow 0.2s',
+                            }}>PTT</span>
+                            {/* Sub label */}
+                            <span style={{ fontSize: 5.5, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.55)', fontFamily: 'Arial', fontWeight: 700 }}>
+                              {isRecording ? 'TRANSMITIENDO' : 'PUSH  TO  TALK'}
+                            </span>
+                          </div>
+                          {/* Right ridge */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            {[0,1,2,3].map(i => <div key={i} style={{ width: 3, height: 5, borderRadius: 1.5, background: 'rgba(255,255,255,0.28)' }} />)}
+                          </div>
                         </button>
 
                         {/* State label + brand */}
