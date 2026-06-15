@@ -2577,296 +2577,235 @@ export default function DriverPortal() {
                     </div>
                   )}
 
-                  {/* PTT — OSI Fleet Radio PRO X7 — New Model */}
-                  <div className="flex flex-col items-center pt-1 pb-4 px-4 gap-2">
+                  {/* PTT — OSI Fleet Radio PRO X7 v4 */}
+                  <div className="flex flex-col items-center pt-1 pb-3 px-4 gap-2">
 
-                    <div style={{ position: 'relative', width: 190, height: 448,
-                      filter: 'drop-shadow(0 28px 60px rgba(0,0,0,0.98)) drop-shadow(0 8px 20px rgba(0,0,0,0.82)) drop-shadow(-2px 0 8px rgba(0,0,0,0.5))' }}>
+                    <div style={{ position: 'relative', width: 168, height: 342,
+                      filter: 'drop-shadow(0 22px 48px rgba(0,0,0,0.98)) drop-shadow(0 6px 14px rgba(0,0,0,0.85)) drop-shadow(-3px 2px 8px rgba(0,0,0,0.6))' }}>
 
-                      {/* ═══ ANTENNA ═══ */}
-                      {/* Ferrule – chrome junction */}
-                      <div style={{ position: 'absolute', right: 16, top: 70, width: 20, height: 16, zIndex: 5,
-                        borderRadius: '3px 3px 1px 1px',
-                        background: 'linear-gradient(180deg,#374151 0%,#9ca3af 16%,#f9fafb 40%,#e5e7eb 58%,#9ca3af 80%,#374151 100%)',
-                        boxShadow: '0 2px 10px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(0,0,0,0.5)',
-                      }} />
-                      {/* Shaft – ribbed rubber */}
-                      <div style={{ position: 'absolute', right: 19, top: 0, width: 12, height: 78,
-                        borderRadius: '6px 6px 2px 2px',
+                      {/* ══════════ ANTENNA — PREMIUM ══════════ */}
+
+                      {/* Multi-layer chrome ferrule */}
+                      <div style={{ position: 'absolute', right: 14, top: 55, width: 19, height: 16, zIndex: 5, borderRadius: '3px 3px 1px 1px',
+                        background: 'linear-gradient(180deg,#1f2937 0%,#6b7280 8%,#c4cdd9 22%,#f8fafc 38%,#ffffff 50%,#e8edf4 62%,#b0bac8 76%,#6b7280 90%,#374151 100%)',
+                        boxShadow: '0 3px 12px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -1px 0 rgba(0,0,0,0.55), inset 2px 0 4px rgba(255,255,255,0.2), inset -2px 0 4px rgba(0,0,0,0.3)',
+                      }}>
+                        {/* Ferrule center groove */}
+                        <div style={{ position: 'absolute', top: '45%', left: 2, right: 2, height: 1, background: 'rgba(0,0,0,0.35)', borderRadius: 1 }} />
+                        <div style={{ position: 'absolute', top: '55%', left: 2, right: 2, height: 0.5, background: 'rgba(255,255,255,0.55)', borderRadius: 1 }} />
+                      </div>
+
+                      {/* Antenna shaft — thick ribbed rubber */}
+                      <div style={{ position: 'absolute', right: 17, top: 0, width: 13, height: 62, borderRadius: '6px 6px 2px 2px',
                         background: [
-                          'repeating-linear-gradient(180deg,rgba(255,255,255,0.07) 0px,rgba(255,255,255,0.07) 2.5px,transparent 2.5px,transparent 6.5px)',
-                          'linear-gradient(to right,#030810 0%,#0c1a28 18%,#152438 50%,#0c1a28 82%,#030810 100%)',
+                          'repeating-linear-gradient(180deg,rgba(255,255,255,0.09) 0px,rgba(255,255,255,0.09) 2px,rgba(0,0,0,0.12) 2px,rgba(0,0,0,0.12) 3.5px,transparent 3.5px,transparent 7px)',
+                          'linear-gradient(to right,#020810 0%,#0a1824 15%,#162334 35%,#1c2c40 50%,#162334 65%,#0a1824 85%,#020810 100%)',
                         ].join(','),
-                        boxShadow: '4px 0 14px rgba(0,0,0,0.92), -1px 0 5px rgba(0,0,0,0.6)',
+                        boxShadow: '4px 0 16px rgba(0,0,0,0.95), -1px 0 6px rgba(0,0,0,0.7), inset -2px 0 4px rgba(0,0,0,0.5)',
                         transform: 'rotate(7deg)', transformOrigin: 'bottom center',
                       }} />
-                      {/* Tip sphere */}
-                      <div style={{ position: 'absolute', right: 20, top: -3, width: 10, height: 10, borderRadius: '50%',
-                        background: 'radial-gradient(circle at 32% 26%,#e5e7eb 0%,#9ca3af 38%,#1f2937 100%)',
-                        boxShadow: '0 2px 7px rgba(0,0,0,0.98)',
-                        transform: 'rotate(7deg) translateY(-4px)', transformOrigin: '50% 80px',
+
+                      {/* Antenna tip — chrome sphere */}
+                      <div style={{ position: 'absolute', right: 18, top: -4, width: 12, height: 12, borderRadius: '50%',
+                        background: 'radial-gradient(circle at 30% 26%,#ffffff 0%,#e2e8f0 18%,#94a3b8 48%,#334155 78%,#0f172a 100%)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.98), inset 0 -1px 3px rgba(0,0,0,0.5)',
+                        transform: 'rotate(7deg) translateY(-5px)', transformOrigin: '50% 65px',
                       }} />
 
-                      {/* ═══ MAIN BODY ═══ */}
-                      <div style={{ position: 'absolute', left: 0, top: 70, width: 182, bottom: 0,
-                        borderRadius: '16px 22px 14px 14px', overflow: 'hidden',
+                      {/* ══════════ MAIN BODY ══════════ */}
+                      <div style={{ position: 'absolute', left: 0, top: 55, width: 161, bottom: 0, borderRadius: '14px 20px 12px 12px', overflow: 'hidden',
                         background: [
-                          'linear-gradient(to right,rgba(255,255,255,0.18) 0px,rgba(255,255,255,0.07) 4px,rgba(255,255,255,0.02) 12px,transparent 22px)',
-                          'radial-gradient(ellipse 90% 22% at 48% 0%,rgba(255,255,255,0.07) 0%,transparent 100%)',
-                          'repeating-linear-gradient(0deg,transparent 0px,transparent 2px,rgba(255,255,255,0.005) 2px,rgba(255,255,255,0.005) 3px)',
-                          'linear-gradient(160deg,#181e2c 0%,#0e1420 12%,#090d18 32%,#060910 58%,#030508 100%)',
+                          'linear-gradient(to right,rgba(255,255,255,0.2) 0px,rgba(255,255,255,0.08) 4px,rgba(255,255,255,0.02) 12px,transparent 22px)',
+                          'radial-gradient(ellipse 88% 20% at 46% 0%,rgba(255,255,255,0.075) 0%,transparent 100%)',
+                          'repeating-linear-gradient(0deg,transparent 0px,transparent 2px,rgba(255,255,255,0.004) 2px,rgba(255,255,255,0.004) 3px)',
+                          'linear-gradient(158deg,#171d2a 0%,#0e1320 12%,#090c18 32%,#050810 58%,#020408 100%)',
                         ].join(','),
                         boxShadow: [
-                          'inset -4px 0 12px rgba(0,0,0,0.72)',
-                          'inset 0 -6px 18px rgba(0,0,0,0.82)',
-                          'inset 1px 1px 0 rgba(255,255,255,0.15)',
+                          'inset -4px 0 12px rgba(0,0,0,0.75)',
+                          'inset 0 -5px 16px rgba(0,0,0,0.85)',
+                          'inset 1px 1px 0 rgba(255,255,255,0.16)',
                           '0 0 0 1px rgba(255,255,255,0.03)',
-                          isRecording ? '0 0 45px rgba(239,68,68,0.2)' : '0 0 0 transparent',
+                          isRecording ? '0 0 40px rgba(239,68,68,0.18)' : '0 0 0 transparent',
                         ].join(','),
                         transition: 'box-shadow 0.3s',
                       }}>
 
-                        {/* TOP CHROME RAIL */}
-                        <div style={{ height: 20, borderRadius: '15px 21px 0 0',
-                          background: 'linear-gradient(180deg,#d1d5db 0%,#f9fafb 20%,#ffffff 45%,#f3f4f6 65%,#d1d5db 85%,#9ca3af 100%)',
-                          boxShadow: '0 5px 14px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(0,0,0,0.28)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 12px',
+                        {/* ═══ TOP CHROME RAIL — PREMIUM ═══ */}
+                        <div style={{ height: 18, borderRadius: '13px 19px 0 0',
+                          background: 'linear-gradient(180deg,#b0bac8 0%,#d8dfe8 8%,#edf1f6 18%,#f8fafc 30%,#ffffff 44%,#f4f7fa 56%,#dde3ec 70%,#bdc6d2 82%,#8d9aaa 92%,#6b7888 100%)',
+                          boxShadow: '0 5px 16px rgba(0,0,0,0.88), inset 0 1px 0 rgba(255,255,255,1), inset 0 -1px 0 rgba(0,0,0,0.32)',
+                          position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px',
                         }}>
-                          <div style={{ display: 'flex', gap: 6 }}>
+                          {/* Left screws */}
+                          <div style={{ display: 'flex', gap: 5 }}>
                             {[0,1].map(i => (
-                              <div key={i} style={{ width: 6, height: 6, borderRadius: '50%',
-                                background: 'radial-gradient(circle at 35% 30%,#9ca3af,#374151 80%)',
-                                boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(0,0,0,0.4)',
-                              }} />
+                              <div key={i} style={{ position: 'relative', width: 6, height: 6, borderRadius: '50%',
+                                background: 'radial-gradient(circle at 32% 26%,#c4cdd8 0%,#8892a0 40%,#3d4856 80%,#1e2530 100%)',
+                                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.65), inset 0 -0.5px 1px rgba(255,255,255,0.25), 0 0 0 0.5px rgba(0,0,0,0.5)',
+                              }}>
+                                {/* Phillips cross */}
+                                <div style={{ position: 'absolute', top: '20%', left: '47%', width: 0.8, height: '60%', background: 'rgba(0,0,0,0.45)', transform: 'translateX(-50%)' }} />
+                                <div style={{ position: 'absolute', top: '47%', left: '20%', height: 0.8, width: '60%', background: 'rgba(0,0,0,0.45)', transform: 'translateY(-50%)' }} />
+                              </div>
                             ))}
                           </div>
-                          <span style={{ fontSize: 6, letterSpacing: '0.35em', fontFamily: 'Arial', fontWeight: 900,
-                            color: '#374151', textShadow: '0 1px 0 rgba(255,255,255,0.6)',
-                          }}>OSI · PRO X7</span>
-                          <div style={{ display: 'flex', gap: 6 }}>
+                          {/* Brushed metal center + model text */}
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <div style={{ width: 60, height: 1, background: 'linear-gradient(90deg,transparent,rgba(0,0,0,0.12),transparent)' }} />
+                            <span style={{ fontSize: 5.5, letterSpacing: '0.4em', fontFamily: 'Arial', fontWeight: 900, color: '#3d4856', textShadow: '0 1px 0 rgba(255,255,255,0.7)' }}>OSI · PRO X7</span>
+                            <div style={{ width: 60, height: 0.5, background: 'linear-gradient(90deg,transparent,rgba(0,0,0,0.1),transparent)' }} />
+                          </div>
+                          {/* Right screws */}
+                          <div style={{ display: 'flex', gap: 5 }}>
                             {[0,1].map(i => (
-                              <div key={i} style={{ width: 6, height: 6, borderRadius: '50%',
-                                background: 'radial-gradient(circle at 35% 30%,#9ca3af,#374151 80%)',
-                                boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(0,0,0,0.4)',
-                              }} />
+                              <div key={i} style={{ position: 'relative', width: 6, height: 6, borderRadius: '50%',
+                                background: 'radial-gradient(circle at 32% 26%,#c4cdd8 0%,#8892a0 40%,#3d4856 80%,#1e2530 100%)',
+                                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.65), inset 0 -0.5px 1px rgba(255,255,255,0.25), 0 0 0 0.5px rgba(0,0,0,0.5)',
+                              }}>
+                                <div style={{ position: 'absolute', top: '20%', left: '47%', width: 0.8, height: '60%', background: 'rgba(0,0,0,0.45)', transform: 'translateX(-50%)' }} />
+                                <div style={{ position: 'absolute', top: '47%', left: '20%', height: 0.8, width: '60%', background: 'rgba(0,0,0,0.45)', transform: 'translateY(-50%)' }} />
+                              </div>
                             ))}
                           </div>
                         </div>
 
                         {/* KNOB ROW */}
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px 0' }}>
-                          {/* VOL */}
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                            <div style={{ position: 'relative', width: 42, height: 42 }}>
-                              {/* Outer knurled ring */}
-                              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%',
-                                background: 'conic-gradient(from 0deg,#050c16 0deg,#0e1e30 9deg,#182c44 14deg,#0e1e30 19deg,#050c16 28deg,#0e1e30 38deg,#182c44 43deg,#0e1e30 48deg,#050c16 57deg,#0e1e30 67deg,#182c44 72deg,#0e1e30 77deg,#050c16 86deg,#0e1e30 96deg,#182c44 101deg,#0e1e30 106deg,#050c16 115deg,#0e1e30 125deg,#182c44 130deg,#0e1e30 135deg,#050c16 144deg,#0e1e30 154deg,#182c44 159deg,#0e1e30 164deg,#050c16 173deg,#0e1e30 183deg,#182c44 188deg,#0e1e30 193deg,#050c16 202deg,#0e1e30 212deg,#182c44 217deg,#0e1e30 222deg,#050c16 231deg,#0e1e30 241deg,#182c44 246deg,#0e1e30 251deg,#050c16 260deg,#0e1e30 270deg,#182c44 275deg,#0e1e30 280deg,#050c16 289deg,#0e1e30 299deg,#182c44 304deg,#0e1e30 309deg,#050c16 318deg,#0e1e30 328deg,#182c44 333deg,#0e1e30 338deg,#050c16 347deg,#0e1e30 357deg,#182c44 360deg)',
-                                boxShadow: '0 4px 14px rgba(0,0,0,0.96), inset 0 2px 5px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.05)',
-                              }} />
-                              {/* Chrome separator ring */}
-                              <div style={{ position: 'absolute', inset: 5, borderRadius: '50%',
-                                background: 'linear-gradient(135deg,#6b7280 0%,#d1d5db 22%,#f3f4f6 45%,#d1d5db 68%,#6b7280 100%)',
-                                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.55), inset 0 -1px 2px rgba(255,255,255,0.3)',
-                              }} />
-                              {/* Inner dark cap */}
-                              <div style={{ position: 'absolute', inset: 8, borderRadius: '50%',
-                                background: 'radial-gradient(circle at 33% 28%,#253648 0%,#131f30 40%,#070d18 100%)',
-                                boxShadow: 'inset 0 4px 10px rgba(0,0,0,0.95), inset 0 -1px 3px rgba(255,255,255,0.04)',
-                                display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 3,
-                              }}>
-                                <div style={{ width: 3, height: 5, borderRadius: '0 0 2px 2px', background: '#f97316', boxShadow: '0 0 9px #f97316' }} />
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 12px 0' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                            <div style={{ position: 'relative', width: 36, height: 36 }}>
+                              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'conic-gradient(from 0deg,#040a14 0deg,#0c1a28 9deg,#162638 14deg,#0c1a28 19deg,#040a14 28deg,#0c1a28 38deg,#162638 43deg,#0c1a28 48deg,#040a14 57deg,#0c1a28 67deg,#162638 72deg,#0c1a28 77deg,#040a14 86deg,#0c1a28 96deg,#162638 101deg,#0c1a28 106deg,#040a14 115deg,#0c1a28 125deg,#162638 130deg,#0c1a28 135deg,#040a14 144deg,#0c1a28 154deg,#162638 159deg,#0c1a28 164deg,#040a14 173deg,#0c1a28 183deg,#162638 188deg,#0c1a28 193deg,#040a14 202deg,#0c1a28 212deg,#162638 217deg,#0c1a28 222deg,#040a14 231deg,#0c1a28 241deg,#162638 246deg,#0c1a28 251deg,#040a14 260deg,#0c1a28 270deg,#162638 275deg,#0c1a28 280deg,#040a14 289deg,#0c1a28 299deg,#162638 304deg,#0c1a28 309deg,#040a14 318deg,#0c1a28 328deg,#162638 333deg,#0c1a28 338deg,#040a14 347deg,#0c1a28 357deg,#162638 360deg)', boxShadow: '0 3px 12px rgba(0,0,0,0.97), inset 0 2px 4px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.055)' }} />
+                              <div style={{ position: 'absolute', inset: 4, borderRadius: '50%', background: 'linear-gradient(135deg,#818c9e 0%,#d1d9e6 22%,#f4f6f9 46%,#d1d9e6 70%,#818c9e 100%)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.55), inset 0 -1px 2px rgba(255,255,255,0.35)' }} />
+                              <div style={{ position: 'absolute', inset: 8, borderRadius: '50%', background: 'radial-gradient(circle at 33% 28%,#223448 0%,#111f30 42%,#060c18 100%)', boxShadow: 'inset 0 3px 9px rgba(0,0,0,0.96), inset 0 -1px 3px rgba(255,255,255,0.04)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 2 }}>
+                                <div style={{ width: 2.5, height: 4.5, borderRadius: '0 0 2px 2px', background: '#f97316', boxShadow: '0 0 8px #f97316, 0 0 14px #f9731666' }} />
                               </div>
                             </div>
-                            <span style={{ fontSize: 6.5, letterSpacing: '0.2em', color: 'rgba(100,130,180,0.62)', fontFamily: 'Arial', fontWeight: 800 }}>VOL</span>
+                            <span style={{ fontSize: 6, letterSpacing: '0.2em', color: 'rgba(100,130,180,0.6)', fontFamily: 'Arial', fontWeight: 800 }}>VOL</span>
                           </div>
-
-                          {/* Center badge + LED */}
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-                            <span style={{ fontSize: 7, letterSpacing: '0.35em', color: 'rgba(148,163,184,0.42)', fontFamily: 'Arial', fontWeight: 900 }}>OSI</span>
-                            <div style={{ position: 'relative', width: 14, height: 14, borderRadius: '50%',
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                            <span style={{ fontSize: 6.5, letterSpacing: '0.35em', color: 'rgba(148,163,184,0.4)', fontFamily: 'Arial', fontWeight: 900 }}>OSI</span>
+                            <div style={{ width: 12, height: 12, borderRadius: '50%',
                               background: isRecording
                                 ? 'radial-gradient(circle at 34% 30%,#fecaca 0%,#ef4444 50%,#7f1d1d 100%)'
                                 : 'radial-gradient(circle at 34% 30%,#bbf7d0 0%,#22c55e 50%,#14532d 100%)',
                               boxShadow: isRecording
-                                ? '0 0 0 3px rgba(239,68,68,0.18), 0 0 22px 6px rgba(239,68,68,0.94)'
-                                : '0 0 0 3px rgba(34,197,94,0.16), 0 0 22px 6px rgba(34,197,94,0.88)',
+                                ? '0 0 0 2.5px rgba(239,68,68,0.18), 0 0 20px 5px rgba(239,68,68,0.94)'
+                                : '0 0 0 2.5px rgba(34,197,94,0.16), 0 0 20px 5px rgba(34,197,94,0.9)',
                               transition: 'all 0.2s',
                             }} />
-                            <span style={{ fontSize: 5.5, letterSpacing: '0.12em', color: 'rgba(100,130,180,0.35)', fontFamily: 'Arial' }}>PRO X</span>
+                            <span style={{ fontSize: 5, letterSpacing: '0.12em', color: 'rgba(100,130,180,0.32)', fontFamily: 'Arial' }}>PRO X</span>
                           </div>
-
-                          {/* CH */}
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                            <div style={{ position: 'relative', width: 42, height: 42 }}>
-                              {/* Outer knurled ring */}
-                              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%',
-                                background: 'conic-gradient(from 0deg,#050c16 0deg,#0e1e30 9deg,#182c44 14deg,#0e1e30 19deg,#050c16 28deg,#0e1e30 38deg,#182c44 43deg,#0e1e30 48deg,#050c16 57deg,#0e1e30 67deg,#182c44 72deg,#0e1e30 77deg,#050c16 86deg,#0e1e30 96deg,#182c44 101deg,#0e1e30 106deg,#050c16 115deg,#0e1e30 125deg,#182c44 130deg,#0e1e30 135deg,#050c16 144deg,#0e1e30 154deg,#182c44 159deg,#0e1e30 164deg,#050c16 173deg,#0e1e30 183deg,#182c44 188deg,#0e1e30 193deg,#050c16 202deg,#0e1e30 212deg,#182c44 217deg,#0e1e30 222deg,#050c16 231deg,#0e1e30 241deg,#182c44 246deg,#0e1e30 251deg,#050c16 260deg,#0e1e30 270deg,#182c44 275deg,#0e1e30 280deg,#050c16 289deg,#0e1e30 299deg,#182c44 304deg,#0e1e30 309deg,#050c16 318deg,#0e1e30 328deg,#182c44 333deg,#0e1e30 338deg,#050c16 347deg,#0e1e30 357deg,#182c44 360deg)',
-                                boxShadow: '0 4px 14px rgba(0,0,0,0.96), inset 0 2px 5px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.05)',
-                              }} />
-                              {/* Chrome separator ring */}
-                              <div style={{ position: 'absolute', inset: 5, borderRadius: '50%',
-                                background: 'linear-gradient(135deg,#6b7280 0%,#d1d5db 22%,#f3f4f6 45%,#d1d5db 68%,#6b7280 100%)',
-                                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.55), inset 0 -1px 2px rgba(255,255,255,0.3)',
-                              }} />
-                              {/* Inner dark cap */}
-                              <div style={{ position: 'absolute', inset: 8, borderRadius: '50%',
-                                background: 'radial-gradient(circle at 33% 28%,#253648 0%,#131f30 40%,#070d18 100%)',
-                                boxShadow: 'inset 0 4px 10px rgba(0,0,0,0.95), inset 0 -1px 3px rgba(255,255,255,0.04)',
-                                display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 3,
-                              }}>
-                                <div style={{ width: 3, height: 5, borderRadius: '0 0 2px 2px', background: '#64748b', boxShadow: '0 0 9px #64748b' }} />
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                            <div style={{ position: 'relative', width: 36, height: 36 }}>
+                              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'conic-gradient(from 0deg,#040a14 0deg,#0c1a28 9deg,#162638 14deg,#0c1a28 19deg,#040a14 28deg,#0c1a28 38deg,#162638 43deg,#0c1a28 48deg,#040a14 57deg,#0c1a28 67deg,#162638 72deg,#0c1a28 77deg,#040a14 86deg,#0c1a28 96deg,#162638 101deg,#0c1a28 106deg,#040a14 115deg,#0c1a28 125deg,#162638 130deg,#0c1a28 135deg,#040a14 144deg,#0c1a28 154deg,#162638 159deg,#0c1a28 164deg,#040a14 173deg,#0c1a28 183deg,#162638 188deg,#0c1a28 193deg,#040a14 202deg,#0c1a28 212deg,#162638 217deg,#0c1a28 222deg,#040a14 231deg,#0c1a28 241deg,#162638 246deg,#0c1a28 251deg,#040a14 260deg,#0c1a28 270deg,#162638 275deg,#0c1a28 280deg,#040a14 289deg,#0c1a28 299deg,#162638 304deg,#0c1a28 309deg,#040a14 318deg,#0c1a28 328deg,#162638 333deg,#0c1a28 338deg,#040a14 347deg,#0c1a28 357deg,#162638 360deg)', boxShadow: '0 3px 12px rgba(0,0,0,0.97), inset 0 2px 4px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.055)' }} />
+                              <div style={{ position: 'absolute', inset: 4, borderRadius: '50%', background: 'linear-gradient(135deg,#818c9e 0%,#d1d9e6 22%,#f4f6f9 46%,#d1d9e6 70%,#818c9e 100%)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.55), inset 0 -1px 2px rgba(255,255,255,0.35)' }} />
+                              <div style={{ position: 'absolute', inset: 8, borderRadius: '50%', background: 'radial-gradient(circle at 33% 28%,#223448 0%,#111f30 42%,#060c18 100%)', boxShadow: 'inset 0 3px 9px rgba(0,0,0,0.96), inset 0 -1px 3px rgba(255,255,255,0.04)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 2 }}>
+                                <div style={{ width: 2.5, height: 4.5, borderRadius: '0 0 2px 2px', background: '#64748b', boxShadow: '0 0 8px #64748b, 0 0 14px #64748b66' }} />
                               </div>
                             </div>
-                            <span style={{ fontSize: 6.5, letterSpacing: '0.2em', color: 'rgba(100,130,180,0.62)', fontFamily: 'Arial', fontWeight: 800 }}>CH</span>
+                            <span style={{ fontSize: 6, letterSpacing: '0.2em', color: 'rgba(100,130,180,0.6)', fontFamily: 'Arial', fontWeight: 800 }}>CH</span>
                           </div>
                         </div>
 
                         {/* CIRCULAR SPEAKER DISC */}
-                        <div style={{ display: 'flex', justifyContent: 'center', margin: '8px 0 6px' }}>
-                          <div style={{ position: 'relative', width: 138, height: 138, borderRadius: '50%',
-                            border: '3.5px solid #030508',
+                        <div style={{ display: 'flex', justifyContent: 'center', margin: '7px 0 5px' }}>
+                          <div style={{ position: 'relative', width: 114, height: 114, borderRadius: '50%',
+                            border: '3px solid #020406',
                             background: '#010205',
-                            boxShadow: [
-                              'inset 0 8px 28px rgba(0,0,0,1)',
-                              'inset 0 0 0 2px rgba(255,255,255,0.02)',
-                              '0 4px 16px rgba(0,0,0,0.8)',
-                              '0 0 0 1px rgba(255,255,255,0.04)',
-                            ].join(','),
+                            boxShadow: 'inset 0 7px 26px rgba(0,0,0,1), inset 0 0 0 2px rgba(255,255,255,0.018), 0 3px 12px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.04)',
                             overflow: 'hidden',
                           }}>
-                            {/* Dot perforation fill */}
-                            <div style={{ position: 'absolute', inset: 4, borderRadius: '50%', overflow: 'hidden',
-                              backgroundImage: 'radial-gradient(circle at 1.5px 1.5px, #04080e 1.75px, transparent 1.75px)',
-                              backgroundSize: '5px 5px',
-                              backgroundRepeat: 'repeat',
+                            <div style={{ position: 'absolute', inset: 3, borderRadius: '50%', overflow: 'hidden',
+                              backgroundImage: 'radial-gradient(circle at 1.5px 1.5px,#04080e 1.75px,transparent 1.75px)',
+                              backgroundSize: '4.8px 4.8px', backgroundRepeat: 'repeat',
                             }} />
-                            {/* Center cone depth shadow */}
                             <div style={{ position: 'absolute', inset: 0, borderRadius: '50%',
-                              background: 'radial-gradient(circle at 50% 52%,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.45) 45%,transparent 70%)',
+                              background: 'radial-gradient(circle at 50% 52%,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.4) 42%,transparent 68%)',
                             }} />
-                            {/* Voice wave arcs when recording */}
-                            {isRecording && [22,36,50].map((r,i) => (
-                              <div key={i} style={{ position: 'absolute',
-                                top: '50%', left: '50%',
-                                width: r*2, height: r*2,
-                                marginLeft: -r, marginTop: -r,
+                            {isRecording && [18,30,42].map((r,i) => (
+                              <div key={i} style={{ position: 'absolute', top: '50%', left: '50%',
+                                width: r*2, height: r*2, marginLeft: -r, marginTop: -r,
                                 borderRadius: '50%',
-                                border: `1.5px solid rgba(34,197,94,${0.55 - i*0.16})`,
-                                boxShadow: `0 0 ${4 + i*3}px rgba(34,197,94,${0.5 - i*0.15})`,
-                                animation: `pttRing ${0.9 + i*0.35}s ease-out infinite`,
-                                animationDelay: `${i*0.22}s`,
+                                border: `1.5px solid rgba(34,197,94,${0.58 - i*0.17})`,
+                                boxShadow: `0 0 ${4+i*3}px rgba(34,197,94,${0.52-i*0.15})`,
+                                animation: `pttRing ${0.88+i*0.33}s ease-out infinite`,
+                                animationDelay: `${i*0.2}s`,
                               }} />
                             ))}
-                            {/* Glass glare top-left */}
                             <div style={{ position: 'absolute', inset: 0, borderRadius: '50%',
-                              background: 'radial-gradient(ellipse 55% 40% at 32% 26%,rgba(255,255,255,0.06) 0%,transparent 100%)',
-                              pointerEvents: 'none',
-                            }} />
-                            {/* Outer rim specular */}
-                            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%',
-                              boxShadow: 'inset 2px 2px 6px rgba(255,255,255,0.055)',
+                              background: 'radial-gradient(ellipse 55% 38% at 30% 24%,rgba(255,255,255,0.065) 0%,transparent 100%)',
                               pointerEvents: 'none',
                             }} />
                           </div>
                         </div>
 
                         {/* LCD SCREEN */}
-                        <div style={{ margin: '0 10px 6px', borderRadius: 9,
-                          border: '3.5px solid #020305',
-                          boxShadow: 'inset 0 8px 24px rgba(0,0,0,1), 0 0 0 1px rgba(255,255,255,0.04), 0 2px 10px rgba(0,0,0,0.88)',
+                        <div style={{ margin: '0 9px 5px', borderRadius: 8, border: '3px solid #010203',
+                          boxShadow: 'inset 0 7px 22px rgba(0,0,0,1), 0 0 0 1px rgba(255,255,255,0.04)',
                           position: 'relative', overflow: 'hidden', background: '#000',
                         }}>
-                          <div style={{ height: 68,
-                            background: isRecording
-                              ? 'linear-gradient(180deg,#06180a 0%,#030c05 100%)'
-                              : 'linear-gradient(180deg,#030d07 0%,#010603 100%)',
-                            display: 'flex', alignItems: 'stretch', padding: '5px 8px 4px',
-                            transition: 'background 0.3s',
-                          }}>
-                            {/* Left col */}
+                          <div style={{ height: 56, background: isRecording ? 'linear-gradient(180deg,#050f08 0%,#020804 100%)' : 'linear-gradient(180deg,#030c06 0%,#010503 100%)',
+                            display: 'flex', alignItems: 'stretch', padding: '4px 7px', transition: 'background 0.3s' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
-                              {/* Signal bars */}
-                              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2.5 }}>
-                                {[4,6,9,12,15].map((h,i) => (
-                                  <div key={i} style={{ width: 4.5, height: h, borderRadius: '1px 1px 0 0',
+                              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2 }}>
+                                {[3,5,8,10,13].map((h,i) => (
+                                  <div key={i} style={{ width: 3.5, height: h, borderRadius: '1px 1px 0 0',
                                     background: isRecording ? (i < 4 ? '#22c55e' : '#0a2a12') : (i < 3 ? '#22c55e' : '#0a2a12'),
-                                    boxShadow: (isRecording ? i < 4 : i < 3) ? '0 0 5px rgba(34,197,94,0.65)' : 'none',
-                                    animation: isRecording && i < 4 ? `waveBar ${0.24 + i * 0.08}s ease-in-out infinite alternate` : 'none',
+                                    boxShadow: (isRecording ? i < 4 : i < 3) ? '0 0 4px rgba(34,197,94,0.6)' : 'none',
+                                    animation: isRecording && i < 4 ? `waveBar ${0.24+i*0.08}s ease-in-out infinite alternate` : 'none',
                                     transition: 'background 0.22s',
                                   }} />
                                 ))}
                               </div>
-                              {/* CANAL + big number */}
                               <div>
-                                <div style={{ fontSize: 6.5, color: isRecording ? 'rgba(34,197,94,0.48)' : 'rgba(34,197,94,0.26)', fontFamily: '"Courier New",monospace', letterSpacing: '0.1em' }}>CANAL</div>
-                                <div style={{ fontSize: 26, fontWeight: 900, fontFamily: '"Courier New",monospace', letterSpacing: '0.04em', lineHeight: 1,
-                                  color: isRecording ? '#22c55e' : '#14582a',
-                                  textShadow: isRecording ? '0 0 16px rgba(34,197,94,0.98), 0 0 32px rgba(34,197,94,0.4)' : 'none',
+                                <div style={{ fontSize: 6, color: isRecording ? 'rgba(34,197,94,0.48)' : 'rgba(34,197,94,0.26)', fontFamily: '"Courier New",monospace', letterSpacing: '0.1em' }}>CANAL</div>
+                                <div style={{ fontSize: 22, fontWeight: 900, fontFamily: '"Courier New",monospace', lineHeight: 1,
+                                  color: isRecording ? '#22c55e' : '#145a24',
+                                  textShadow: isRecording ? '0 0 14px rgba(34,197,94,1), 0 0 28px rgba(34,197,94,0.4)' : 'none',
                                   transition: 'all 0.22s',
                                 }}>{isRecording ? 'TX' : '01'}</div>
                               </div>
                             </div>
-                            {/* Right col */}
                             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                              {/* Battery */}
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <div style={{ display: 'flex', gap: 1.5, border: `1px solid ${isRecording ? 'rgba(34,197,94,0.48)' : 'rgba(34,197,94,0.24)'}`, borderRadius: 2, padding: '1px 2px', transition: 'border-color 0.2s' }}>
-                                  {[0,1,2,3].map(i => (
-                                    <div key={i} style={{ width: 4, height: 8, borderRadius: 1,
-                                      background: isRecording ? '#16a34a' : '#14532d',
-                                      boxShadow: isRecording ? '0 0 4px rgba(34,197,94,0.5)' : 'none',
-                                      transition: 'all 0.2s',
-                                    }} />
-                                  ))}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <div style={{ display: 'flex', gap: 1, border: `1px solid ${isRecording ? 'rgba(34,197,94,0.45)' : 'rgba(34,197,94,0.22)'}`, borderRadius: 2, padding: '1px 1.5px', transition: 'border-color 0.2s' }}>
+                                  {[0,1,2,3].map(i => <div key={i} style={{ width: 3.5, height: 7, borderRadius: 1, background: isRecording ? '#16a34a' : '#14532d', boxShadow: isRecording ? '0 0 4px rgba(34,197,94,0.5)' : 'none', transition: 'all 0.2s' }} />)}
                                 </div>
-                                <div style={{ width: 2, height: 5, borderRadius: '0 1px 1px 0', background: isRecording ? '#22c55e' : '#166534' }} />
+                                <div style={{ width: 2, height: 4.5, borderRadius: '0 1px 1px 0', background: isRecording ? '#22c55e' : '#166534' }} />
                               </div>
-                              {/* Frequency + zone */}
                               <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontSize: 6.5, color: isRecording ? 'rgba(34,197,94,0.44)' : 'rgba(34,197,94,0.22)', fontFamily: '"Courier New",monospace', letterSpacing: '0.06em' }}>ZONE A · MHz</div>
-                                <div style={{ fontSize: 11, fontWeight: 900, fontFamily: '"Courier New",monospace', letterSpacing: '0.02em',
+                                <div style={{ fontSize: 6, color: isRecording ? 'rgba(34,197,94,0.44)' : 'rgba(34,197,94,0.2)', fontFamily: '"Courier New",monospace', letterSpacing: '0.05em' }}>ZONE A · MHz</div>
+                                <div style={{ fontSize: 10, fontWeight: 900, fontFamily: '"Courier New",monospace',
                                   color: isRecording ? '#22c55e' : '#155724',
-                                  textShadow: isRecording ? '0 0 10px rgba(34,197,94,0.9)' : 'none',
+                                  textShadow: isRecording ? '0 0 9px rgba(34,197,94,0.88)' : 'none',
                                   transition: 'all 0.22s',
                                 }}>154.310</div>
                               </div>
                             </div>
                           </div>
-                          {/* CRT scanlines */}
-                          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
-                            backgroundImage: 'repeating-linear-gradient(0deg,rgba(0,0,0,0.22) 0px,rgba(0,0,0,0.22) 1px,transparent 1px,transparent 3px)',
-                          }} />
-                          {/* Glass glare */}
-                          <div style={{ position: 'absolute', top: 3, left: 6, width: 52, height: 18, borderRadius: '50%',
-                            background: 'radial-gradient(ellipse,rgba(255,255,255,0.19) 0%,rgba(255,255,255,0.05) 55%,transparent 100%)',
-                            transform: 'rotate(-14deg)', pointerEvents: 'none',
-                          }} />
+                          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'repeating-linear-gradient(0deg,rgba(0,0,0,0.2) 0px,rgba(0,0,0,0.2) 1px,transparent 1px,transparent 3px)' }} />
+                          <div style={{ position: 'absolute', top: 3, left: 5, width: 40, height: 14, borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(255,255,255,0.18) 0%,rgba(255,255,255,0.04) 55%,transparent 100%)', transform: 'rotate(-13deg)', pointerEvents: 'none' }} />
                         </div>
 
-                        {/* FUNCTION BUTTONS — 4 buttons */}
-                        <div style={{ display: 'flex', gap: 4, margin: '0 12px 6px' }}>
-                          {[{l:'▲',c:'#0d2a4a'},{l:'◀',c:'#1a0d3a'},{l:'▶',c:'#1a0d3a'},{l:'▼',c:'#0d2a4a'}].map((b,i) => (
-                            <div key={i} style={{ flex: 1, height: 18, borderRadius: 4,
+                        {/* FUNCTION BUTTONS */}
+                        <div style={{ display: 'flex', gap: 3, margin: '0 10px 5px' }}>
+                          {[{l:'▲',c:'#0d2848'},{l:'◀',c:'#1a0d38'},{l:'▶',c:'#1a0d38'},{l:'▼',c:'#0d2848'}].map((b,i) => (
+                            <div key={i} style={{ flex: 1, height: 16, borderRadius: 3,
                               background: `linear-gradient(180deg,${b.c}cc,${b.c}44)`,
-                              boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.9), inset 0 -1px 0 rgba(255,255,255,0.04), 0 1px 0 rgba(255,255,255,0.05)',
+                              boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.9), 0 1px 0 rgba(255,255,255,0.05)',
                               border: '1px solid rgba(0,0,0,0.75)',
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              fontSize: 7, color: 'rgba(148,163,184,0.42)',
+                              fontSize: 6.5, color: 'rgba(148,163,184,0.4)',
                             }}>{b.l}</div>
                           ))}
                         </div>
 
-                        {/* RUBBER GRIP BAND */}
-                        <div style={{ margin: '0 10px 6px', height: 10, borderRadius: 5,
-                          background: [
-                            'repeating-linear-gradient(90deg,rgba(255,255,255,0.022) 0px,rgba(255,255,255,0.022) 1px,transparent 1px,transparent 5px)',
-                            'linear-gradient(180deg,#0c1928 0%,#060e18 100%)',
-                          ].join(','),
-                          boxShadow: 'inset 0 2.5px 6px rgba(0,0,0,0.85), inset 0 -1px 0 rgba(255,255,255,0.025)',
-                          border: '1px solid rgba(0,0,0,0.6)',
+                        {/* GRIP BAND */}
+                        <div style={{ margin: '0 9px 5px', height: 8, borderRadius: 4,
+                          background: ['repeating-linear-gradient(90deg,rgba(255,255,255,0.022) 0px,rgba(255,255,255,0.022) 1px,transparent 1px,transparent 5px)','linear-gradient(180deg,#0b1826,#060e18)'].join(','),
+                          boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.85)', border: '1px solid rgba(0,0,0,0.6)',
                         }} />
 
-                        {/* ═══ PTT BUTTON — MIC ICON, NO TEXT ═══ */}
+                        {/* PTT BUTTON — MIC ICON */}
                         <button
                           onPointerDown={async () => {
                             if (isRecording) return;
@@ -2914,115 +2853,72 @@ export default function DriverPortal() {
                               setRecordingDuration(0);
                             } catch {}
                           }}
-                          onPointerUp={() => {
-                            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                              mediaRecorder.stop(); setIsRecording(false); setMediaRecorder(null);
-                            }
-                          }}
-                          onPointerLeave={() => {
-                            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                              mediaRecorder.stop(); setIsRecording(false); setMediaRecorder(null);
-                            }
-                          }}
+                          onPointerUp={() => { if (mediaRecorder && mediaRecorder.state === 'recording') { mediaRecorder.stop(); setIsRecording(false); setMediaRecorder(null); } }}
+                          onPointerLeave={() => { if (mediaRecorder && mediaRecorder.state === 'recording') { mediaRecorder.stop(); setIsRecording(false); setMediaRecorder(null); } }}
                           className="select-none touch-none transition-transform active:scale-[0.955] block"
                           style={{
-                            margin: '0 10px 7px', width: 'calc(100% - 20px)', height: 62,
-                            borderRadius: 11, border: 'none', cursor: 'pointer',
+                            margin: '0 9px 5px', width: 'calc(100% - 18px)', height: 52,
+                            borderRadius: 10, border: 'none', cursor: 'pointer',
                             background: isRecording
-                              ? [
-                                  'repeating-linear-gradient(135deg,rgba(0,0,0,0.1) 0px,rgba(0,0,0,0.1) 2px,transparent 2px,transparent 6px)',
-                                  'linear-gradient(180deg,#f87171 0%,#ef4444 36%,#991b1b 100%)',
-                                ].join(',')
-                              : [
-                                  'repeating-linear-gradient(135deg,rgba(0,0,0,0.09) 0px,rgba(0,0,0,0.09) 2px,transparent 2px,transparent 6px)',
-                                  'linear-gradient(180deg,#fb923c 0%,#f97316 36%,#b45309 100%)',
-                                ].join(','),
+                              ? ['repeating-linear-gradient(135deg,rgba(0,0,0,0.1) 0px,rgba(0,0,0,0.1) 2px,transparent 2px,transparent 6px)','linear-gradient(180deg,#f87171 0%,#ef4444 36%,#991b1b 100%)'].join(',')
+                              : ['repeating-linear-gradient(135deg,rgba(0,0,0,0.09) 0px,rgba(0,0,0,0.09) 2px,transparent 2px,transparent 6px)','linear-gradient(180deg,#fb923c 0%,#f97316 36%,#b45309 100%)'].join(','),
                             boxShadow: isRecording
-                              ? 'inset 0 -8px 20px rgba(0,0,0,0.68), inset 0 4px 10px rgba(255,100,100,0.18), 0 0 38px rgba(239,68,68,0.82), 0 6px 16px rgba(0,0,0,0.9)'
-                              : 'inset 0 -8px 20px rgba(0,0,0,0.58), inset 0 4px 10px rgba(255,185,100,0.14), 0 0 22px rgba(249,115,22,0.48), 0 6px 16px rgba(0,0,0,0.9)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14,
+                              ? 'inset 0 -7px 18px rgba(0,0,0,0.65), inset 0 3px 8px rgba(255,100,100,0.18), 0 0 34px rgba(239,68,68,0.82), 0 5px 14px rgba(0,0,0,0.9)'
+                              : 'inset 0 -7px 18px rgba(0,0,0,0.55), inset 0 3px 8px rgba(255,185,100,0.14), 0 0 20px rgba(249,115,22,0.48), 0 5px 14px rgba(0,0,0,0.9)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
                             transition: 'all 0.15s',
                           }}
                         >
-                          <div style={{ width: 4, height: 36, borderRadius: 2, background: 'rgba(255,255,255,0.22)', boxShadow: '0 0 6px rgba(255,255,255,0.14)' }} />
-                          <svg width="26" height="30" viewBox="0 0 26 30" fill="none"
-                            style={{ opacity: isRecording ? 1 : 0.9, flexShrink: 0,
-                              filter: isRecording ? 'drop-shadow(0 0 8px rgba(255,255,255,0.75))' : 'none',
-                              transition: 'all 0.18s' }}>
-                            <rect x="8" y="1" width="10" height="15" rx="5" fill="rgba(255,255,255,0.93)" />
-                            <path d="M3 13 C3 20.5 23 20.5 23 13" stroke="rgba(255,255,255,0.92)" strokeWidth="2.4" fill="none" strokeLinecap="round" />
-                            <line x1="13" y1="20.5" x2="13" y2="25.5" stroke="rgba(255,255,255,0.92)" strokeWidth="2.4" strokeLinecap="round" />
-                            <line x1="8" y1="25.5" x2="18" y2="25.5" stroke="rgba(255,255,255,0.92)" strokeWidth="2.4" strokeLinecap="round" />
+                          <div style={{ width: 4, height: 30, borderRadius: 2, background: 'rgba(255,255,255,0.24)', boxShadow: '0 0 5px rgba(255,255,255,0.14)' }} />
+                          <svg width="22" height="26" viewBox="0 0 22 26" fill="none" style={{ opacity: isRecording ? 1 : 0.9, flexShrink: 0, filter: isRecording ? 'drop-shadow(0 0 7px rgba(255,255,255,0.75))' : 'none', transition: 'all 0.18s' }}>
+                            <rect x="6.5" y="1" width="9" height="13" rx="4.5" fill="rgba(255,255,255,0.93)" />
+                            <path d="M2.5 11 C2.5 18 19.5 18 19.5 11" stroke="rgba(255,255,255,0.92)" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+                            <line x1="11" y1="18" x2="11" y2="22" stroke="rgba(255,255,255,0.92)" strokeWidth="2.2" strokeLinecap="round" />
+                            <line x1="7" y1="22" x2="15" y2="22" stroke="rgba(255,255,255,0.92)" strokeWidth="2.2" strokeLinecap="round" />
                           </svg>
-                          <div style={{ width: 4, height: 36, borderRadius: 2, background: 'rgba(255,255,255,0.22)', boxShadow: '0 0 6px rgba(255,255,255,0.14)' }} />
+                          <div style={{ width: 4, height: 30, borderRadius: 2, background: 'rgba(255,255,255,0.24)', boxShadow: '0 0 5px rgba(255,255,255,0.14)' }} />
                         </button>
 
-                        {/* KEYPAD — 3×4 numeric with letter sub-labels */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 5, margin: '0 12px 14px' }}>
-                          {[
-                            {n:'1',s:''},  {n:'2',s:'ABC'},{n:'3',s:'DEF'},
-                            {n:'4',s:'GHI'},{n:'5',s:'JKL'},{n:'6',s:'MNO'},
-                            {n:'7',s:'PQR'},{n:'8',s:'STU'},{n:'9',s:'VWX'},
-                            {n:'*',s:''},  {n:'0',s:'+'}, {n:'#',s:''},
-                          ].map((k,i) => (
-                            <div key={i} style={{ height: 20, borderRadius: 4,
-                              background: 'linear-gradient(180deg,#152030,#0a1422)',
-                              boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.92), inset 0 -0.5px 0 rgba(255,255,255,0.055), 0 1.5px 0 rgba(255,255,255,0.05)',
+                        {/* KEYPAD 3×4 */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4, margin: '0 10px 12px' }}>
+                          {[{n:'1',s:''},{n:'2',s:'ABC'},{n:'3',s:'DEF'},{n:'4',s:'GHI'},{n:'5',s:'JKL'},{n:'6',s:'MNO'},{n:'7',s:'PRS'},{n:'8',s:'TUV'},{n:'9',s:'WXY'},{n:'*',s:''},{n:'0',s:'+'},{n:'#',s:''}].map((k,i) => (
+                            <div key={i} style={{ height: 18, borderRadius: 4,
+                              background: 'linear-gradient(180deg,#12202e,#08101c)',
+                              boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.92), inset 0 -0.5px 0 rgba(255,255,255,0.05), 0 1.5px 0 rgba(255,255,255,0.05)',
                               border: '0.5px solid rgba(0,0,0,0.7)',
                               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 0.5,
                             }}>
-                              <span style={{ fontSize: 8, fontWeight: 800, color: 'rgba(203,213,225,0.62)', fontFamily: 'Arial', lineHeight: 1 }}>{k.n}</span>
-                              {k.s && <span style={{ fontSize: 4.5, color: 'rgba(100,116,139,0.48)', fontFamily: 'Arial', letterSpacing: '0.04em' }}>{k.s}</span>}
+                              <span style={{ fontSize: 8, fontWeight: 800, color: 'rgba(203,213,225,0.65)', fontFamily: 'Arial', lineHeight: 1 }}>{k.n}</span>
+                              {k.s && <span style={{ fontSize: 4, color: 'rgba(100,116,139,0.44)', fontFamily: 'Arial', letterSpacing: '0.04em' }}>{k.s}</span>}
                             </div>
                           ))}
                         </div>
 
-                        {/* BOTTOM CONNECTOR PORT */}
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, paddingBottom: 12 }}>
-                          <div style={{ fontSize: 6.5, letterSpacing: '0.35em', fontWeight: 900, fontFamily: 'Arial',
-                            color: isRecording ? 'rgba(34,197,94,0.4)' : 'rgba(71,85,105,0.45)',
-                            textTransform: 'uppercase', transition: 'color 0.3s',
-                          }}>OSI · FLEET RADIO</div>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: 12, marginTop: -10 }}>
-                          <div style={{ width: 56, height: 8, borderRadius: 3,
-                            background: 'linear-gradient(180deg,#0a1220,#050a14)',
-                            boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.9)',
-                            border: '1px solid rgba(0,0,0,0.7)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2.5,
-                          }}>
-                            {Array.from({length:9}).map((_,i) => (
-                              <div key={i} style={{ width: 2, height: 4, borderRadius: 0.5,
-                                background: 'rgba(71,85,105,0.45)',
-                              }} />
-                            ))}
+                        {/* BRAND + CONNECTOR */}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, paddingBottom: 10 }}>
+                          <span style={{ fontSize: 6.5, letterSpacing: '0.38em', fontWeight: 900, fontFamily: 'Arial', textTransform: 'uppercase', color: isRecording ? 'rgba(34,197,94,0.4)' : 'rgba(71,85,105,0.44)', transition: 'color 0.3s' }}>OSI · FLEET RADIO</span>
+                          <div style={{ width: 48, height: 7, borderRadius: 2.5, background: 'linear-gradient(180deg,#0a1220,#050a14)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.9)', border: '1px solid rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+                            {Array.from({length:9}).map((_,i) => <div key={i} style={{ width: 2, height: 3.5, borderRadius: 0.5, background: 'rgba(71,85,105,0.42)' }} />)}
                           </div>
                         </div>
 
-                      </div>{/* end main body */}
+                      </div>{/* end body */}
 
                       {/* BELT CLIP */}
-                      <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', bottom: -11, width: 54, height: 18,
-                        borderRadius: '0 0 8px 8px',
-                        background: 'linear-gradient(180deg,#0b1622,#040c14)',
-                        boxShadow: '0 8px 18px rgba(0,0,0,0.82), inset 0 1px 0 rgba(255,255,255,0.04)',
-                      }} />
+                      <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', bottom: -9, width: 46, height: 15, borderRadius: '0 0 7px 7px', background: 'linear-gradient(180deg,#0b1622,#040c14)', boxShadow: '0 7px 16px rgba(0,0,0,0.82)' }} />
 
-                      {/* SIDE PTT BAR — orange / red reactive */}
-                      <div style={{ position: 'absolute', left: -7, top: 128, width: 9, height: 76,
-                        borderRadius: '5px 0 0 5px',
+                      {/* SIDE PTT BAR */}
+                      <div style={{ position: 'absolute', left: -6, top: 104, width: 8, height: 64, borderRadius: '4px 0 0 4px',
                         background: isRecording
-                          ? 'linear-gradient(to right,#dc2626,#b91c1c 65%,#7f1d1d 100%)'
-                          : 'linear-gradient(to right,#f97316,#ea580c 65%,#c2410c 100%)',
+                          ? 'linear-gradient(to right,#ef4444,#dc2626 60%,#991b1b 100%)'
+                          : 'linear-gradient(to right,#f97316,#ea580c 60%,#c2410c 100%)',
                         boxShadow: isRecording
-                          ? '-5px 0 18px rgba(239,68,68,0.72), inset 0 2px 5px rgba(255,100,100,0.22), inset 0 -2px 4px rgba(0,0,0,0.4)'
-                          : '-5px 0 18px rgba(249,115,22,0.6), inset 0 2px 5px rgba(255,190,100,0.2), inset 0 -2px 4px rgba(0,0,0,0.4)',
+                          ? '-4px 0 16px rgba(239,68,68,0.75), inset 0 2px 4px rgba(255,100,100,0.22)'
+                          : '-4px 0 16px rgba(249,115,22,0.6), inset 0 2px 4px rgba(255,190,100,0.2)',
                         transition: 'all 0.3s',
                         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
                       }}>
-                        {[0,1,2].map(i => (
-                          <div key={i} style={{ width: 5, height: 1.5, borderRadius: 1, background: 'rgba(255,255,255,0.35)' }} />
-                        ))}
+                        {[0,1,2].map(i => <div key={i} style={{ width: 4, height: 1.5, borderRadius: 1, background: 'rgba(255,255,255,0.35)' }} />)}
                       </div>
 
                     </div>{/* end drop-shadow wrapper */}
