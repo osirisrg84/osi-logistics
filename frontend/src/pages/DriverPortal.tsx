@@ -487,81 +487,9 @@ export default function DriverPortal() {
 
   const playOnlineSound = () => {
     try {
-      const ctx = new AudioContext();
-      const t = ctx.currentTime;
-      const dur = 2.2;
-
-      // ── Low engine rumble (noise filtered low) ──
-      const bufLen = ctx.sampleRate * dur;
-      const noiseBuf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-      const nd = noiseBuf.getChannelData(0);
-      for (let i = 0; i < bufLen; i++) nd[i] = (Math.random() * 2 - 1);
-      const noise = ctx.createBufferSource();
-      noise.buffer = noiseBuf;
-      const lpf = ctx.createBiquadFilter();
-      lpf.type = 'lowpass';
-      lpf.frequency.setValueAtTime(80, t);
-      lpf.frequency.linearRampToValueAtTime(160, t + dur);
-      const noiseGain = ctx.createGain();
-      noiseGain.gain.setValueAtTime(0, t);
-      noiseGain.gain.linearRampToValueAtTime(0.55, t + 0.18);
-      noiseGain.gain.setValueAtTime(0.55, t + 0.5);
-      noiseGain.gain.linearRampToValueAtTime(0.38, t + dur);
-      noise.connect(lpf); lpf.connect(noiseGain); noiseGain.connect(ctx.destination);
-      noise.start(t); noise.stop(t + dur);
-
-      // ── Engine fundamental — low sawtooth rising ──
-      const eng = ctx.createOscillator();
-      eng.type = 'sawtooth';
-      eng.frequency.setValueAtTime(28, t);
-      eng.frequency.linearRampToValueAtTime(38, t + 0.3);
-      eng.frequency.linearRampToValueAtTime(52, t + 0.9);
-      eng.frequency.linearRampToValueAtTime(68, t + 1.6);
-      eng.frequency.linearRampToValueAtTime(80, t + dur);
-      const engGain = ctx.createGain();
-      engGain.gain.setValueAtTime(0, t);
-      engGain.gain.linearRampToValueAtTime(0.4, t + 0.15);
-      engGain.gain.setValueAtTime(0.4, t + 0.5);
-      engGain.gain.linearRampToValueAtTime(0.28, t + dur);
-      eng.connect(engGain); engGain.connect(ctx.destination);
-      eng.start(t); eng.stop(t + dur);
-
-      // ── Ignition click (short burst) ──
-      const clickBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.06), ctx.sampleRate);
-      const cd = clickBuf.getChannelData(0);
-      for (let i = 0; i < cd.length; i++) cd[i] = (Math.random() * 2 - 1) * (1 - i / cd.length);
-      const click = ctx.createBufferSource();
-      click.buffer = clickBuf;
-      const clickGain = ctx.createGain();
-      clickGain.gain.setValueAtTime(0.9, t);
-      click.connect(clickGain); clickGain.connect(ctx.destination);
-      click.start(t);
-
-      // ── Rev spike at ~0.4s ──
-      const rev = ctx.createOscillator();
-      rev.type = 'sawtooth';
-      rev.frequency.setValueAtTime(55, t + 0.38);
-      rev.frequency.linearRampToValueAtTime(110, t + 0.55);
-      rev.frequency.linearRampToValueAtTime(75, t + 0.85);
-      const revGain = ctx.createGain();
-      revGain.gain.setValueAtTime(0, t + 0.38);
-      revGain.gain.linearRampToValueAtTime(0.22, t + 0.45);
-      revGain.gain.linearRampToValueAtTime(0, t + 0.9);
-      rev.connect(revGain); revGain.connect(ctx.destination);
-      rev.start(t + 0.38); rev.stop(t + 0.9);
-
-      // ── Distortion-like harmonic ──
-      const harm = ctx.createOscillator();
-      harm.type = 'sawtooth';
-      harm.frequency.setValueAtTime(56, t);
-      harm.frequency.linearRampToValueAtTime(160, t + dur);
-      const harmGain = ctx.createGain();
-      harmGain.gain.setValueAtTime(0, t);
-      harmGain.gain.linearRampToValueAtTime(0.08, t + 0.3);
-      harmGain.gain.linearRampToValueAtTime(0.05, t + dur);
-      harm.connect(harmGain); harmGain.connect(ctx.destination);
-      harm.start(t); harm.stop(t + dur);
-
+      const audio = new Audio('/sounds/truck-start.mp3');
+      audio.volume = 1.0;
+      audio.play().catch(() => {});
     } catch {}
   };
 
