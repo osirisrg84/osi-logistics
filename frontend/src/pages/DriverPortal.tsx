@@ -615,8 +615,8 @@ export default function DriverPortal() {
 
   // ── Profile completion ─────────────────────────────────────
   const profileItems = [
-    { label: 'Tipo de Equipo',   done: !!localEquipType },
     { label: 'Truck Make',       done: !!localTruckMake },
+    { label: 'Tipo de Equipo',   done: !!localEquipType },
     { label: 'Truck #',          done: !!truckNum },
     { label: 'Trailer #',        done: !!trailerNum },
     { label: 'Método de Pago',   done: !!payoutMethod },
