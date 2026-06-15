@@ -1,0 +1,211 @@
+<!-- OSI Logistics — Announcement Bar v3 -->
+<style>
+  #osi-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 10001;
+    background: #09090b;
+    border-bottom: 2px solid #97f048;
+    font-family: 'Inter', Arial, sans-serif;
+  }
+
+  #osi-bar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 0 20px;
+    height: 46px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Pulsing fire dot */
+  .osi-pulse {
+    width: 8px; height: 8px;
+    background: #97f048;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: osi-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes osi-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(151,240,72,0.5); }
+    50% { opacity: 0.8; transform: scale(1.15); box-shadow: 0 0 0 5px rgba(151,240,72,0); }
+  }
+
+  #osi-bar .txt {
+    color: #a1a1aa;
+    font-size: 12.5px;
+    font-weight: 400;
+    letter-spacing: 0.1px;
+  }
+  #osi-bar .txt b {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  #osi-bar .txt .accent {
+    color: #97f048;
+    font-weight: 700;
+  }
+
+  /* Countdown */
+  #osi-bar .cd {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .osi-cu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 34px;
+  }
+  .osi-cu .n {
+    color: #97f048;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.5px;
+  }
+  .osi-cu .l {
+    color: #ffffff;
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 1px;
+  }
+  .osi-dot {
+    color: #3f3f46;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  /* Divider */
+  .osi-divider {
+    width: 1px;
+    height: 20px;
+    background: #27272a;
+    flex-shrink: 0;
+  }
+
+  #osi-bar .apply {
+    background: #97f048;
+    color: #000;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 5px;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: background 0.15s, transform 0.15s;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+  }
+  #osi-bar .apply:hover { background: #b3f572; transform: translateY(-1px); }
+
+  #osi-bar .xbtn {
+    background: none; border: none;
+    color: #3f3f46; font-size: 13px;
+    cursor: pointer; padding: 4px;
+    line-height: 1; flex-shrink: 0;
+    border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
+  }
+  #osi-bar .xbtn:hover { color: #a1a1aa; background: #18181b; }
+
+  @media (max-width: 600px) {
+    #osi-bar-inner {
+      height: auto;
+      padding: 8px 14px;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+    .osi-divider { display: none; }
+    #osi-bar .txt .hide-sm { display: none; }
+    #osi-bar .cd { order: 3; }
+    #osi-bar .apply { order: 4; font-size: 12px; padding: 7px 16px; }
+    #osi-bar .xbtn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); }
+    #osi-bar { position: fixed; }
+  }
+</style>
+
+<div id="osi-bar">
+  <div id="osi-bar-inner">
+    <div class="osi-pulse"></div>
+    <span class="txt">
+      <span class="accent">Solo 8% por carga</span>
+      <span class="hide-sm"> — Disponible todo 2026</span>
+    </span>
+    <div class="osi-divider"></div>
+    <div class="cd">
+      <div class="osi-cu"><span class="n" id="osi-d">---</span><span class="l">días</span></div>
+      <span class="osi-dot">:</span>
+      <div class="osi-cu"><span class="n" id="osi-h">--</span><span class="l">hrs</span></div>
+      <span class="osi-dot">:</span>
+      <div class="osi-cu"><span class="n" id="osi-m">--</span><span class="l">min</span></div>
+      <span class="osi-dot">:</span>
+      <div class="osi-cu"><span class="n" id="osi-s">--</span><span class="l">seg</span></div>
+    </div>
+    <div class="osi-divider"></div>
+    <a href="tel:+13053358114" class="apply">Aplicar ahora</a>
+    <button class="xbtn" id="osi-xbtn" aria-label="Cerrar">✕</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var deadline = new Date('2026-12-31T23:59:59');
+
+  function tick() {
+    var diff = deadline - new Date();
+    if (diff <= 0) { document.getElementById('osi-bar').style.display = 'none'; return; }
+    document.getElementById('osi-d').textContent = String(Math.floor(diff / 86400000)).padStart(3,'0');
+    document.getElementById('osi-h').textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0');
+    document.getElementById('osi-m').textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+    document.getElementById('osi-s').textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  document.getElementById('osi-xbtn').addEventListener('click', function () {
+    document.getElementById('osi-bar').style.display = 'none';
+    applyOffsets(0);
+  });
+
+  function applyOffsets(barH) {
+    var header = document.querySelector('header')
+      || document.querySelector('.o-header')
+      || document.querySelector('[data-page-element="HeaderContainer/V1"]')
+      || document.querySelector('[id*="header"]')
+      || document.querySelector('nav');
+    if (header) {
+      header.style.position = 'fixed';
+      header.style.top = barH + 'px';
+      header.style.left = '0';
+      header.style.right = '0';
+      header.style.width = '100%';
+      header.style.zIndex = '10000';
+      header.style.boxShadow = '0 1px 10px rgba(0,0,0,0.2)';
+      document.body.style.paddingTop = (barH + header.offsetHeight) + 'px';
+    } else {
+      document.body.style.paddingTop = barH + 'px';
+    }
+  }
+
+  function init() {
+    applyOffsets(document.getElementById('osi-bar').offsetHeight);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(init, 400); });
+  } else {
+    setTimeout(init, 400);
+  }
+  window.addEventListener('resize', init);
+})();
+</script>
