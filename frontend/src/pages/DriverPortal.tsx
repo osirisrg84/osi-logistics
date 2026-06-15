@@ -493,6 +493,46 @@ export default function DriverPortal() {
     } catch {}
   };
 
+  const playBreakSound = () => {
+    try {
+      const ctx = new AudioContext();
+      const t = ctx.currentTime;
+      // Tono suave descendente — C5 → A4 → F4 (relajante)
+      [523.25, 440, 349.23].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        osc.connect(gain); gain.connect(ctx.destination);
+        const s = t + i * 0.18;
+        gain.gain.setValueAtTime(0, s);
+        gain.gain.linearRampToValueAtTime(0.18, s + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, s + 0.45);
+        osc.start(s); osc.stop(s + 0.45);
+      });
+    } catch {}
+  };
+
+  const playRetakeSound = () => {
+    try {
+      const ctx = new AudioContext();
+      const t = ctx.currentTime;
+      // Tono ascendente energético — F4 → A4 → C5 → E5 (volviendo a la acción)
+      [349.23, 440, 523.25, 659.25].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        osc.connect(gain); gain.connect(ctx.destination);
+        const s = t + i * 0.11;
+        gain.gain.setValueAtTime(0, s);
+        gain.gain.linearRampToValueAtTime(0.22, s + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, s + 0.3);
+        osc.start(s); osc.stop(s + 0.3);
+      });
+    } catch {}
+  };
+
   const playOfflineSound = () => {
     try {
       const ctx = new AudioContext();
@@ -520,7 +560,7 @@ export default function DriverPortal() {
     try {
       await driversApi.update(user.driver_id, { status: newStatus });
       setDriverStatus(newStatus);
-      if (newStatus === 'available') playOnlineSound();
+      if (newStatus === 'available' && driverStatus === 'offline') playOnlineSound();
       if (newStatus === 'offline') playOfflineSound();
     } catch {
     } finally {
@@ -732,13 +772,13 @@ export default function DriverPortal() {
                     </div>
                   )}
                   {!isBusy && driverStatus !== 'on_break' && (
-                    <button onClick={() => setStatus('on_break')} disabled={togglingStatus}
+                    <button onClick={() => { playBreakSound(); setStatus('on_break'); }} disabled={togglingStatus}
                       className="flex-1 flex items-center justify-center gap-1 text-[11px] font-semibold py-1.5 rounded-xl border border-yellow-500/25 text-yellow-400 bg-yellow-500/8 hover:bg-yellow-500/15 transition-colors">
                       <Coffee className="w-3 h-3" /> Take a Break
                     </button>
                   )}
                   {driverStatus === 'on_break' && (
-                    <button onClick={() => setStatus('available')} disabled={togglingStatus}
+                    <button onClick={() => { playRetakeSound(); setStatus('available'); }} disabled={togglingStatus}
                       className="flex-1 flex items-center justify-center gap-1 text-[11px] font-semibold py-1.5 rounded-xl border border-green-500/25 text-green-400 bg-green-500/8 hover:bg-green-500/15 transition-colors">
                       <Power className="w-3 h-3" /> Retomar
                     </button>
