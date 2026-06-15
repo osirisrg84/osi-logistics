@@ -713,7 +713,7 @@ export default function DriverPortal() {
                   <div className="flex-1 min-w-0 text-left">
                     <p className="text-[9px] font-bold text-white leading-none">Music</p>
                     <p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#475569' }}>
-                      {musicOn ? '▶ Play' : 'Reggae'}
+                      {musicOn ? '▶ Play' : 'Trap'}
                     </p>
                   </div>
                   <div className="relative flex-shrink-0 rounded-full" style={{ width: 24, height: 13, background: musicOn ? 'linear-gradient(90deg,#a855f7,#7c3aed)' : 'rgba(51,65,85,0.9)', boxShadow: musicOn ? '0 0 6px rgba(168,85,247,0.4)' : 'none', transition: 'background 0.25s' }}>
