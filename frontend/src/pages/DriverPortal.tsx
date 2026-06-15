@@ -1346,14 +1346,14 @@ export default function DriverPortal() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Total Deliveries', value: driver.total_deliveries, icon: Package },
-                { label: 'On-Time Rate',     value: `${driver.on_time_rate.toFixed(0)}%`, icon: Clock },
-                { label: 'License',          value: driver.license_number, icon: Truck },
-                { label: 'Rating',           value: `★ ${driver.rating.toFixed(1)}`, icon: Star },
-              ].map(({ label, value, icon: Icon }) => (
+                { label: 'Total Deliveries', value: driver.total_deliveries, icon: Package,  color: 'text-blue-500' },
+                { label: 'On-Time Rate',     value: `${driver.on_time_rate.toFixed(0)}%`,   icon: Clock,     color: 'text-green-500' },
+                { label: 'License',          value: driver.license_number,                  icon: FileText,  color: 'text-indigo-500' },
+                { label: 'Rating',           value: `★ ${driver.rating.toFixed(1)}`,        icon: Star,      color: 'text-amber-500' },
+              ].map(({ label, value, icon: Icon, color }) => (
                 <div key={label} className="bg-gray-50 dark:bg-slate-700 rounded-xl p-3">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <Icon className="w-3 h-3 text-gray-400 dark:text-slate-500" />
+                    <Icon className={`w-3 h-3 ${color}`} />
                     <p className="text-xs text-gray-500 dark:text-slate-400">{label}</p>
                   </div>
                   <p className="text-sm font-bold text-gray-900 dark:text-white">{value}</p>
