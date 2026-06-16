@@ -411,7 +411,7 @@ export default function DriverPortal() {
         osc.type = 'sine'; osc.frequency.value = freq;
         const start = ctx.currentTime + i * 0.12;
         gain.gain.setValueAtTime(0, start);
-        gain.gain.linearRampToValueAtTime(0.4, start + 0.02);
+        gain.gain.linearRampToValueAtTime(0.22, start + 0.02);
         gain.gain.exponentialRampToValueAtTime(0.001, start + 0.4);
         osc.start(start); osc.stop(start + 0.4);
       });
@@ -488,7 +488,7 @@ export default function DriverPortal() {
   const playOnlineSound = () => {
     try {
       const audio = new Audio('/sounds/truck-engine-6s-fadeout.mp3');
-      audio.volume = 0.5;
+      audio.volume = 0.25;
       audio.play().catch(() => {});
     } catch {}
   };
@@ -506,7 +506,7 @@ export default function DriverPortal() {
         osc.connect(gain); gain.connect(ctx.destination);
         const s = t + i * 0.18;
         gain.gain.setValueAtTime(0, s);
-        gain.gain.linearRampToValueAtTime(0.18, s + 0.03);
+        gain.gain.linearRampToValueAtTime(0.15, s + 0.03);
         gain.gain.exponentialRampToValueAtTime(0.001, s + 0.45);
         osc.start(s); osc.stop(s + 0.45);
       });
@@ -526,7 +526,7 @@ export default function DriverPortal() {
         osc.connect(gain); gain.connect(ctx.destination);
         const s = t + i * 0.11;
         gain.gain.setValueAtTime(0, s);
-        gain.gain.linearRampToValueAtTime(0.22, s + 0.02);
+        gain.gain.linearRampToValueAtTime(0.16, s + 0.02);
         gain.gain.exponentialRampToValueAtTime(0.001, s + 0.3);
         osc.start(s); osc.stop(s + 0.3);
       });
@@ -546,7 +546,7 @@ export default function DriverPortal() {
         osc.frequency.value = freq;
         const start = ctx.currentTime + i * 0.14;
         gain.gain.setValueAtTime(0, start);
-        gain.gain.linearRampToValueAtTime(0.2, start + 0.02);
+        gain.gain.linearRampToValueAtTime(0.16, start + 0.02);
         gain.gain.exponentialRampToValueAtTime(0.001, start + 0.4);
         osc.start(start);
         osc.stop(start + 0.4);

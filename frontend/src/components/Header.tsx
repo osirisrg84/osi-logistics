@@ -34,14 +34,14 @@ function playShiftOnSound() {
     const t = ctx.currentTime;
     const master = ctx.createGain();
     master.gain.setValueAtTime(0, t);
-    master.gain.linearRampToValueAtTime(0.24, t + 0.05);
+    master.gain.linearRampToValueAtTime(0.2, t + 0.05);
     master.gain.linearRampToValueAtTime(0, t + 0.55);
     master.connect(ctx.destination);
 
     const delay = ctx.createDelay(0.25);
     delay.delayTime.value = 0.14;
     const delayGain = ctx.createGain();
-    delayGain.gain.value = 0.2;
+    delayGain.gain.value = 0.18;
     delay.connect(delayGain);
     delayGain.connect(delay);
     delayGain.connect(master);
@@ -55,7 +55,7 @@ function playShiftOnSound() {
       const g = ctx.createGain();
       const s = t + i * 0.04;
       g.gain.setValueAtTime(0, s);
-      g.gain.linearRampToValueAtTime(0.4, s + 0.07);
+      g.gain.linearRampToValueAtTime(0.34, s + 0.07);
       g.gain.exponentialRampToValueAtTime(0.001, s + 0.5);
       osc.connect(g);
       g.connect(master);
@@ -72,14 +72,14 @@ function playShiftOffSound() {
     const t = ctx.currentTime;
     const master = ctx.createGain();
     master.gain.setValueAtTime(0, t);
-    master.gain.linearRampToValueAtTime(0.18, t + 0.3);
+    master.gain.linearRampToValueAtTime(0.16, t + 0.3);
     master.gain.linearRampToValueAtTime(0, t + 1.6);
     master.connect(ctx.destination);
 
     const delay = ctx.createDelay(0.5);
     delay.delayTime.value = 0.36;
     const delayGain = ctx.createGain();
-    delayGain.gain.value = 0.3;
+    delayGain.gain.value = 0.25;
     delay.connect(delayGain);
     delayGain.connect(delay);
     delayGain.connect(master);
@@ -92,7 +92,7 @@ function playShiftOffSound() {
       const g = ctx.createGain();
       const s = t + i * 0.12;
       g.gain.setValueAtTime(0, s);
-      g.gain.linearRampToValueAtTime(0.4, s + 0.2);
+      g.gain.linearRampToValueAtTime(0.34, s + 0.2);
       g.gain.linearRampToValueAtTime(0, s + 1.2);
       osc.connect(g);
       g.connect(master);
