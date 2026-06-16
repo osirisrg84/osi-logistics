@@ -11,7 +11,7 @@ export function playSuccessChime(): void {
       const g = ctx.createGain();
       const s = t + i * 0.09;
       g.gain.setValueAtTime(0, s);
-      g.gain.linearRampToValueAtTime(0.22, s + 0.04);
+      g.gain.linearRampToValueAtTime(0.36, s + 0.04);
       g.gain.exponentialRampToValueAtTime(0.001, s + 0.4);
       osc.connect(g);
       g.connect(ctx.destination);
