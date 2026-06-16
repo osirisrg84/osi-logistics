@@ -28,6 +28,80 @@ const NOTIF_COLORS: Record<string, string> = {
   alert: 'bg-red-100 text-red-700',
 };
 
+function playShiftOnSound() {
+  try {
+    const ctx = new AudioContext();
+    const t = ctx.currentTime;
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0, t);
+    master.gain.linearRampToValueAtTime(0.2, t + 0.25);
+    master.gain.linearRampToValueAtTime(0, t + 1.4);
+    master.connect(ctx.destination);
+
+    const delay = ctx.createDelay(0.4);
+    delay.delayTime.value = 0.3;
+    const delayGain = ctx.createGain();
+    delayGain.gain.value = 0.25;
+    delay.connect(delayGain);
+    delayGain.connect(delay);
+    delayGain.connect(master);
+
+    const notes = [196, 246.94, 293.66, 392]; // G3, B3, D4, G4 — ascendente, cálido
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const g = ctx.createGain();
+      const s = t + i * 0.09;
+      g.gain.setValueAtTime(0, s);
+      g.gain.linearRampToValueAtTime(0.45, s + 0.15);
+      g.gain.linearRampToValueAtTime(0, s + 1.0);
+      osc.connect(g);
+      g.connect(master);
+      g.connect(delay);
+      osc.start(s);
+      osc.stop(s + 1.2);
+    });
+  } catch { /* AudioContext unavailable */ }
+}
+
+function playShiftOffSound() {
+  try {
+    const ctx = new AudioContext();
+    const t = ctx.currentTime;
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0, t);
+    master.gain.linearRampToValueAtTime(0.18, t + 0.3);
+    master.gain.linearRampToValueAtTime(0, t + 1.6);
+    master.connect(ctx.destination);
+
+    const delay = ctx.createDelay(0.5);
+    delay.delayTime.value = 0.36;
+    const delayGain = ctx.createGain();
+    delayGain.gain.value = 0.3;
+    delay.connect(delayGain);
+    delayGain.connect(delay);
+    delayGain.connect(master);
+
+    const notes = [392, 329.63, 261.63, 196]; // G4, E4, C4, G3 — descendente, relajado
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const g = ctx.createGain();
+      const s = t + i * 0.12;
+      g.gain.setValueAtTime(0, s);
+      g.gain.linearRampToValueAtTime(0.4, s + 0.2);
+      g.gain.linearRampToValueAtTime(0, s + 1.2);
+      osc.connect(g);
+      g.connect(master);
+      g.connect(delay);
+      osc.start(s);
+      osc.stop(s + 1.4);
+    });
+  } catch { /* AudioContext unavailable */ }
+}
+
 interface HeaderProps {
   onMenuClick: () => void;
 }
@@ -188,7 +262,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
       {isDispatcher && (
         <div className="hidden md:flex items-center gap-1.5 flex-1 mx-8 max-w-xs">
           {/* Activo */}
-          <button onClick={() => setDispActive(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(dispActive,'rgba(34,197,94,0.13)','rgba(34,197,94,0.35)')}>
+          <button onClick={() => setDispActive(v => { const nv = !v; nv ? playShiftOnSound() : playShiftOffSound(); return nv; })} className="flex-1 flex items-center gap-1 px-1.5 py-2 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(dispActive,'rgba(34,197,94,0.13)','rgba(34,197,94,0.35)')}>
             <Zap className={`w-3 h-3 flex-shrink-0 ${dispActive ? 'text-green-400' : 'text-slate-400'}`} />
             <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Activo</p><p className="text-[8px] leading-none mt-0.5" style={{ color: dispActive ? '#4ade80' : '#94a3b8' }}>{dispActive ? 'En turno' : 'Libre'}</p></div>
             <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(dispActive,'linear-gradient(90deg,#22c55e,#16a34a)','rgba(34,197,94,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(dispActive)} /></div>
@@ -323,7 +397,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
       {isDispatcher && (
         <div className="md:hidden border-t border-gray-100 dark:border-slate-800 px-3 py-2 space-y-2">
           <div className="flex gap-1.5">
-            <button onClick={() => setDispActive(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(dispActive,'rgba(34,197,94,0.13)','rgba(34,197,94,0.35)')}>
+            <button onClick={() => setDispActive(v => { const nv = !v; nv ? playShiftOnSound() : playShiftOffSound(); return nv; })} className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(dispActive,'rgba(34,197,94,0.13)','rgba(34,197,94,0.35)')}>
               <Zap className={`w-3 h-3 flex-shrink-0 ${dispActive ? 'text-green-400' : 'text-slate-400'}`} />
               <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Activo</p><p className="text-[8px] leading-none mt-0.5" style={{ color: dispActive ? '#4ade80' : '#94a3b8' }}>{dispActive ? 'En turno' : 'Libre'}</p></div>
               <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(dispActive,'linear-gradient(90deg,#22c55e,#16a34a)','rgba(34,197,94,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(dispActive)} /></div>
