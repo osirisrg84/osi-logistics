@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { scryptSync, randomBytes, timingSafeEqual } from 'node:crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne } from '../database';
+import { appEvents } from '../events';
 
 const router = Router();
 
@@ -233,6 +234,26 @@ router.put('/profile', async (req: Request, res: Response) => {
       vals.push(session.user_id);
       await exec(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, vals);
     }
+    res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.put('/shift', async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ error: 'No token' });
+    const session = await queryOne<{ user_id: string }>(
+      "SELECT user_id FROM sessions WHERE token = ? AND expires_at > datetime('now')", [token]
+    );
+    if (!session) return res.status(401).json({ error: 'Invalid session' });
+
+    const active = !!req.body.active;
+    await exec("UPDATE users SET shift_active = ?, shift_changed_at = datetime('now') WHERE id = ?",
+      [active ? 1 : 0, session.user_id]);
+
+    const user = await queryOne<{ id: string; name: string }>('SELECT id, name FROM users WHERE id = ?', [session.user_id]);
+    if (user) appEvents.emit('dispatcher:shift_changed', { id: user.id, name: user.name, active });
+
     res.json({ success: true });
   } catch { res.status(500).json({ error: 'Failed' }); }
 });

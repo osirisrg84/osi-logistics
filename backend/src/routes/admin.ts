@@ -89,6 +89,7 @@ router.get('/dispatchers', async (_req: Request, res: Response) => {
     res.json(await query(`
       SELECT u.id, u.name, u.email, u.phone, u.ssn, u.active, u.created_at,
              u.equipment_experience, u.dispatcher_code,
+             u.shift_active, u.shift_changed_at,
              u.date_of_birth, u.city, u.years_experience, u.availability,
              u.previous_companies, u.languages,
              COUNT(DISTINCT c.order_id)                                                        AS total_orders,

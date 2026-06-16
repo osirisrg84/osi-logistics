@@ -2,7 +2,7 @@
 import { useLocation } from 'react-router-dom';
 import { Bell, Search, RefreshCw, X, Check, LogOut, ChevronDown, Shield, Truck, ClipboardList, Sun, Moon, Zap, StickyNote, Headphones, Plus, Pin } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
-import { notificationsApi } from '../services/api';
+import api, { notificationsApi } from '../services/api';
 import { Notification } from '../types';
 import { getSocket } from '../services/socket';
 import { useAuth } from '../context/AuthContext';
@@ -262,7 +262,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
       {isDispatcher && (
         <div className="hidden md:flex items-center gap-1.5 flex-1 mx-8 max-w-xs">
           {/* Activo */}
-          <button onClick={() => setDispActive(v => { const nv = !v; nv ? playShiftOnSound() : playShiftOffSound(); return nv; })} className="flex-1 flex items-center gap-1 px-1.5 py-2 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(dispActive,'rgba(34,197,94,0.13)','rgba(34,197,94,0.35)')}>
+          <button onClick={() => setDispActive(v => { const nv = !v; nv ? playShiftOnSound() : playShiftOffSound(); api.put('/auth/shift', { active: nv }).catch(() => {}); return nv; })} className="flex-1 flex items-center gap-1 px-1.5 py-2 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(dispActive,'rgba(34,197,94,0.13)','rgba(34,197,94,0.35)')}>
             <Zap className={`w-3 h-3 flex-shrink-0 ${dispActive ? 'text-green-400' : 'text-slate-400'}`} />
             <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Activo</p><p className="text-[8px] leading-none mt-0.5" style={{ color: dispActive ? '#4ade80' : '#94a3b8' }}>{dispActive ? 'En turno' : 'Libre'}</p></div>
             <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(dispActive,'linear-gradient(90deg,#22c55e,#16a34a)','rgba(34,197,94,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(dispActive)} /></div>
@@ -397,7 +397,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
       {isDispatcher && (
         <div className="md:hidden border-t border-gray-100 dark:border-slate-800 px-3 py-2 space-y-2">
           <div className="flex gap-1.5">
-            <button onClick={() => setDispActive(v => { const nv = !v; nv ? playShiftOnSound() : playShiftOffSound(); return nv; })} className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(dispActive,'rgba(34,197,94,0.13)','rgba(34,197,94,0.35)')}>
+            <button onClick={() => setDispActive(v => { const nv = !v; nv ? playShiftOnSound() : playShiftOffSound(); api.put('/auth/shift', { active: nv }).catch(() => {}); return nv; })} className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(dispActive,'rgba(34,197,94,0.13)','rgba(34,197,94,0.35)')}>
               <Zap className={`w-3 h-3 flex-shrink-0 ${dispActive ? 'text-green-400' : 'text-slate-400'}`} />
               <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Activo</p><p className="text-[8px] leading-none mt-0.5" style={{ color: dispActive ? '#4ade80' : '#94a3b8' }}>{dispActive ? 'En turno' : 'Libre'}</p></div>
               <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(dispActive,'linear-gradient(90deg,#22c55e,#16a34a)','rgba(34,197,94,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(dispActive)} /></div>

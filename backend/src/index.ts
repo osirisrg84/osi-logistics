@@ -197,6 +197,10 @@ async function startSimulation(): Promise<void> {
     io.to('orders').emit('order_updated', data);
   });
 
+  appEvents.on('dispatcher:shift_changed', (event: { id: string; name: string; active: boolean }) => {
+    io.to('dispatchers').emit('dispatcher_shift_changed', event);
+  });
+
   appEvents.on('driver:status_changed', (event: DriverStatusEvent) => {
     io.to('tracking').emit('driver_status_changed', event);
     io.to('dispatchers').emit('driver_status_changed', event);

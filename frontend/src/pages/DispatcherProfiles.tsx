@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Search, ClipboardList, Package, DollarSign, TrendingUp, Clock, X, Mail, CheckCircle, AlertCircle, Phone, Shield, Eye, EyeOff, Edit2, Trash2, Truck, Hash } from 'lucide-react';
+import { Search, ClipboardList, Package, DollarSign, TrendingUp, Clock, X, Mail, CheckCircle, AlertCircle, Phone, Shield, Eye, EyeOff, Edit2, Trash2, Truck, Hash, Zap } from 'lucide-react';
 import type { ReactNode } from 'react';
 import api from '../services/api';
-import { format } from 'date-fns';
+import { getSocket } from '../services/socket';
+import { format, formatDistanceToNow } from 'date-fns';
 
 interface DispatcherProfile {
   id: string;
@@ -25,6 +26,8 @@ interface DispatcherProfile {
   availability: string;
   previous_companies: string;
   languages: string;
+  shift_active: number;
+  shift_changed_at: string | null;
 }
 
 function maskSSN(ssn: string): string {
@@ -199,6 +202,14 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
                   <span className={`w-1.5 h-1.5 rounded-full ${dispatcher.active ? 'bg-green-500' : 'bg-gray-400'}`} />
                   {dispatcher.active ? 'Activo' : 'Inactivo'}
                 </span>
+                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  dispatcher.shift_active
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                    : 'bg-gray-100 text-gray-400 dark:bg-slate-700 dark:text-slate-500'
+                }`}>
+                  <Zap className="w-2.5 h-2.5" />
+                  {dispatcher.shift_active ? 'En turno' : 'Libre'}
+                </span>
                 {dispatcher.dispatcher_code && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/20 px-2 py-0.5 rounded-full tracking-widest">
                     <Hash className="w-2.5 h-2.5" /> ID {dispatcher.dispatcher_code}
@@ -206,6 +217,11 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
                 )}
               </div>
               <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">Miembro desde {format(new Date(dispatcher.created_at), 'MMM d, yyyy')}</p>
+              {dispatcher.shift_changed_at && (
+                <p className="text-xs text-gray-400 dark:text-slate-500">
+                  {dispatcher.shift_active ? 'En turno' : 'Libre'} desde {formatDistanceToNow(new Date(dispatcher.shift_changed_at), { addSuffix: true })}
+                </p>
+              )}
             </div>
           </div>
 
@@ -363,6 +379,16 @@ export default function DispatcherProfiles() {
       .then(r => setDispatchers(r.data))
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    const socket = getSocket();
+    socket.emit('subscribe_dispatchers');
+    const onShiftChanged = (event: { id: string; name: string; active: boolean }) => {
+      setDispatchers(prev => prev.map(d => d.id === event.id
+        ? { ...d, shift_active: event.active ? 1 : 0, shift_changed_at: new Date().toISOString() }
+        : d));
+    };
+    socket.on('dispatcher_shift_changed', onShiftChanged);
+    return () => { socket.off('dispatcher_shift_changed', onShiftChanged); };
   }, []);
 
   async function handleDelete(d: DispatcherProfile) {
@@ -386,13 +412,15 @@ export default function DispatcherProfiles() {
   const totalOrders  = dispatchers.reduce((s, d) => s + d.total_orders, 0);
   const totalEarned  = dispatchers.reduce((s, d) => s + d.total_earned, 0);
   const totalPending = dispatchers.reduce((s, d) => s + d.pending, 0);
+  const onShiftCount = dispatchers.filter(d => d.shift_active).length;
 
   return (
     <div className="space-y-5 fade-in">
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
           { label: 'Dispatchers', value: dispatchers.length, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/20' },
+          { label: 'En turno ahora', value: onShiftCount, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
           { label: 'Órdenes gestionadas', value: totalOrders, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
           { label: 'Comisiones totales', value: `$${totalEarned.toFixed(2)}`, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
           { label: 'Pendiente por pagar', value: `$${totalPending.toFixed(2)}`, color: 'text-yellow-600', bg: 'bg-yellow-50 dark:bg-yellow-900/20' },
@@ -437,6 +465,12 @@ export default function DispatcherProfiles() {
                       }`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${d.active ? 'bg-green-500' : 'bg-gray-400'}`} />
                         {d.active ? 'Activo' : 'Inactivo'}
+                      </span>
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                        d.shift_active ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-400 dark:bg-slate-700 dark:text-slate-500'
+                      }`} title={d.shift_changed_at ? `Desde ${formatDistanceToNow(new Date(d.shift_changed_at), { addSuffix: true })}` : undefined}>
+                        <Zap className="w-2.5 h-2.5" />
+                        {d.shift_active ? 'En turno' : 'Libre'}
                       </span>
                       {d.dispatcher_code && (
                         <span className="text-[10px] font-bold text-orange-500 tracking-widest">{d.dispatcher_code}</span>
