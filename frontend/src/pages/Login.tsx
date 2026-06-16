@@ -9,8 +9,8 @@ function playLoginSound() {
     const t = ctx.currentTime;
     const master = ctx.createGain();
     master.gain.setValueAtTime(0, t);
-    master.gain.linearRampToValueAtTime(0.14, t + 0.6);
-    master.gain.setValueAtTime(0.14, t + 1.6);
+    master.gain.linearRampToValueAtTime(0.24, t + 0.6);
+    master.gain.setValueAtTime(0.24, t + 1.6);
     master.gain.linearRampToValueAtTime(0, t + 3.2);
     master.connect(ctx.destination);
 
@@ -18,7 +18,7 @@ function playLoginSound() {
     const delay = ctx.createDelay(0.5);
     delay.delayTime.value = 0.38;
     const delayGain = ctx.createGain();
-    delayGain.gain.value = 0.24;
+    delayGain.gain.value = 0.3;
     delay.connect(delayGain);
     delayGain.connect(delay);
     delayGain.connect(master);
@@ -30,7 +30,7 @@ function playLoginSound() {
       osc.frequency.value = freq;
       const g = ctx.createGain();
       g.gain.setValueAtTime(0, t + i * 0.08);
-      g.gain.linearRampToValueAtTime(0.46 - i * 0.05, t + i * 0.08 + 0.4);
+      g.gain.linearRampToValueAtTime(0.62 - i * 0.06, t + i * 0.08 + 0.4);
       g.gain.linearRampToValueAtTime(0, t + 3.2);
       osc.connect(g);
       g.connect(master);
@@ -44,7 +44,7 @@ function playLoginSound() {
       h.frequency.value = freq * 2;
       const hg = ctx.createGain();
       hg.gain.setValueAtTime(0, t + i * 0.08);
-      hg.gain.linearRampToValueAtTime(0.05, t + i * 0.08 + 0.5);
+      hg.gain.linearRampToValueAtTime(0.08, t + i * 0.08 + 0.5);
       hg.gain.linearRampToValueAtTime(0, t + 3.0);
       h.connect(hg);
       hg.connect(master);
@@ -58,7 +58,7 @@ function playLoginSound() {
     shimmer.frequency.value = 880;
     const sg = ctx.createGain();
     sg.gain.setValueAtTime(0, t + 0.5);
-    sg.gain.linearRampToValueAtTime(0.035, t + 1.0);
+    sg.gain.linearRampToValueAtTime(0.06, t + 1.0);
     sg.gain.linearRampToValueAtTime(0, t + 2.8);
     shimmer.connect(sg);
     sg.connect(master);
