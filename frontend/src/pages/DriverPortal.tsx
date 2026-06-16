@@ -487,7 +487,7 @@ export default function DriverPortal() {
 
   const playOnlineSound = () => {
     try {
-      const audio = new Audio('/sounds/truck-start.mp3');
+      const audio = new Audio('/sounds/truck-engine-6s-fadeout.mp3');
       audio.volume = 1.0;
       audio.play().catch(() => {});
     } catch {}
