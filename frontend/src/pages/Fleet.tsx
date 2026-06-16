@@ -1,14 +1,15 @@
 ﻿import { useState, useEffect } from 'react';
-import { Plus, Search, X, Edit2, Trash2, Fuel, Wrench, AlertTriangle, Eye } from 'lucide-react';
+import { Plus, Search, X, Edit2, Trash2, Fuel, Wrench, AlertTriangle, Eye, CheckCircle } from 'lucide-react';
 import { Truck } from '../types';
 import { trucksApi } from '../services/api';
 import { TruckStatusBadge } from '../components/StatusBadge';
 import { format, differenceInDays } from 'date-fns';
+import { playSuccessChime } from '../utils/sounds';
 
 interface TruckFormProps {
   truck?: Truck;
   onClose: () => void;
-  onSave: () => void;
+  onSave: (isNew: boolean) => void;
 }
 
 function TruckForm({ truck, onClose, onSave }: TruckFormProps) {
@@ -49,7 +50,7 @@ function TruckForm({ truck, onClose, onSave }: TruckFormProps) {
       } else {
         await trucksApi.create(data);
       }
-      onSave();
+      onSave(!truck);
       onClose();
     } catch {
     } finally {
@@ -151,6 +152,12 @@ export default function Fleet() {
   const [statusFilter, setStatusFilter] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editTruck, setEditTruck] = useState<Truck | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 4500);
+  };
 
   const fetchTrucks = async () => {
     try {
@@ -190,6 +197,14 @@ export default function Fleet() {
 
   return (
     <div className="space-y-4 fade-in">
+      {/* Toast notification */}
+      {toast && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-green-600 text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-2xl shadow-green-600/30 animate-fade-in">
+          <CheckCircle className="w-5 h-5 flex-shrink-0" />
+          {toast}
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
@@ -319,7 +334,7 @@ export default function Fleet() {
         <TruckForm
           truck={editTruck || undefined}
           onClose={() => { setShowForm(false); setEditTruck(null); }}
-          onSave={fetchTrucks}
+          onSave={(isNew) => { fetchTrucks(); if (isNew) { showToast('¡Camión agregado con éxito! 🚛'); playSuccessChime(); } }}
         />
       )}
     </div>

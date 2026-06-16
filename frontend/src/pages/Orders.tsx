@@ -8,6 +8,7 @@ import { ordersApi, driversApi, trucksApi } from '../services/api';
 import { OrderStatusBadge, PriorityBadge, DriverStatusBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
 import { getSocket } from '../services/socket';
+import { playSuccessChime } from '../utils/sounds';
 
 const STATUS_OPTIONS: OrderStatus[] = ['pending', 'offered', 'assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled'];
 const PRIORITY_OPTIONS: OrderPriority[] = ['low', 'normal', 'high', 'urgent'];
@@ -690,7 +691,7 @@ export default function Orders() {
       )}
 
       {/* Modals */}
-      {showCreate && <CreateOrderModal onClose={() => setShowCreate(false)} onSave={() => { fetchOrders(); showToast('¡Orden creada exitosamente! 🚛'); }} />}
+      {showCreate && <CreateOrderModal onClose={() => setShowCreate(false)} onSave={() => { fetchOrders(); showToast('¡Orden creada exitosamente! 🚛'); playSuccessChime(); }} />}
       {assignOrder && <AssignModal order={assignOrder} drivers={drivers} trucks={trucks} onClose={() => setAssignOrder(null)} onSave={fetchOrders} />}
       {detailOrder && <DetailModal order={detailOrder} onClose={() => setDetailOrder(null)} onRefresh={fetchOrders} />}
     </div>

@@ -1,10 +1,11 @@
 ﻿import { useState, useEffect } from 'react';
-import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin, Building2, Clock, Wallet, ShieldCheck, FileText, Calendar, AlertCircle } from 'lucide-react';
+import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin, Building2, Clock, Wallet, ShieldCheck, FileText, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 import { Driver, DriverStatus } from '../types';
 import { driversApi, trucksApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { DriverStatusBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
+import { playSuccessChime } from '../utils/sounds';
 
 const STATUS_OPTIONS: DriverStatus[] = ['available', 'busy', 'on_break', 'offline'];
 
@@ -24,7 +25,7 @@ function calcAuthority(since: string): string {
 interface DriverFormProps {
   driver?: Driver;
   onClose: () => void;
-  onSave: () => void;
+  onSave: (isNew: boolean) => void;
 }
 
 function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
@@ -55,7 +56,7 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
       } else {
         await driversApi.create(form);
       }
-      onSave();
+      onSave(!driver);
       onClose();
     } catch {
     } finally {
@@ -433,6 +434,12 @@ export default function Drivers() {
   const [showForm, setShowForm] = useState(false);
   const [editDriver, setEditDriver] = useState<Driver | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 4500);
+  };
 
   const fetchDrivers = async () => {
     try {
@@ -465,6 +472,14 @@ export default function Drivers() {
 
   return (
     <div className="space-y-4 fade-in">
+      {/* Toast notification */}
+      {toast && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-green-600 text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-2xl shadow-green-600/30 animate-fade-in">
+          <CheckCircle className="w-5 h-5 flex-shrink-0" />
+          {toast}
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
@@ -604,7 +619,7 @@ export default function Drivers() {
         <DriverForm
           driver={editDriver || undefined}
           onClose={() => { setShowForm(false); setEditDriver(null); }}
-          onSave={fetchDrivers}
+          onSave={(isNew) => { fetchDrivers(); if (isNew) { showToast('¡Conductor agregado con éxito! 🚚'); playSuccessChime(); } }}
         />
       )}
       {detailId && <DriverDetail driverId={detailId} onClose={() => setDetailId(null)} />}
