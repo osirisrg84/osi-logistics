@@ -34,33 +34,34 @@ function playShiftOnSound() {
     const t = ctx.currentTime;
     const master = ctx.createGain();
     master.gain.setValueAtTime(0, t);
-    master.gain.linearRampToValueAtTime(0.2, t + 0.25);
-    master.gain.linearRampToValueAtTime(0, t + 1.4);
+    master.gain.linearRampToValueAtTime(0.24, t + 0.05);
+    master.gain.linearRampToValueAtTime(0, t + 0.55);
     master.connect(ctx.destination);
 
-    const delay = ctx.createDelay(0.4);
-    delay.delayTime.value = 0.3;
+    const delay = ctx.createDelay(0.25);
+    delay.delayTime.value = 0.14;
     const delayGain = ctx.createGain();
-    delayGain.gain.value = 0.25;
+    delayGain.gain.value = 0.2;
     delay.connect(delayGain);
     delayGain.connect(delay);
     delayGain.connect(master);
 
-    const notes = [196, 246.94, 293.66, 392]; // G3, B3, D4, G4 — ascendente, cálido
-    notes.forEach((freq, i) => {
+    // E4 + G#4 — tercera mayor cálida, con leve detune tipo chorus
+    [329.63, 415.30].forEach((freq, i) => {
       const osc = ctx.createOscillator();
       osc.type = 'sine';
       osc.frequency.value = freq;
+      osc.detune.value = i === 0 ? -5 : 5;
       const g = ctx.createGain();
-      const s = t + i * 0.09;
+      const s = t + i * 0.04;
       g.gain.setValueAtTime(0, s);
-      g.gain.linearRampToValueAtTime(0.45, s + 0.15);
-      g.gain.linearRampToValueAtTime(0, s + 1.0);
+      g.gain.linearRampToValueAtTime(0.4, s + 0.07);
+      g.gain.exponentialRampToValueAtTime(0.001, s + 0.5);
       osc.connect(g);
       g.connect(master);
       g.connect(delay);
       osc.start(s);
-      osc.stop(s + 1.2);
+      osc.stop(s + 0.55);
     });
   } catch { /* AudioContext unavailable */ }
 }
