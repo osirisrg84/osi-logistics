@@ -3,15 +3,14 @@ import {
   Plus, Search, Filter, X, ChevronDown, Package,
   MapPin, User, Truck, Clock, DollarSign, Eye, Edit2, Trash2, UserCheck, CheckCircle
 } from 'lucide-react';
-import { Order, Driver, Truck as TruckType, OrderStatus, OrderPriority } from '../types';
+import { Order, Driver, Truck as TruckType, OrderStatus } from '../types';
 import { ordersApi, driversApi, trucksApi } from '../services/api';
-import { OrderStatusBadge, PriorityBadge, DriverStatusBadge } from '../components/StatusBadge';
+import { OrderStatusBadge, DriverStatusBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
 import { getSocket } from '../services/socket';
 import { playSuccessChime } from '../utils/sounds';
 
 const STATUS_OPTIONS: OrderStatus[] = ['pending', 'offered', 'assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled'];
-const PRIORITY_OPTIONS: OrderPriority[] = ['low', 'normal', 'high', 'urgent'];
 
 interface OrderModalProps {
   onClose: () => void;
@@ -25,7 +24,7 @@ function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps)
     customer_name: '', customer_phone: '', customer_email: '',
     pickup_name: '', pickup_address: '',
     delivery_name: '', delivery_address: '',
-    priority: 'normal', weight_kg: '', commodity: '',
+    weight_kg: '', commodity: '',
     notes: '', price: '', distance_mi: '', estimated_delivery: '',
   });
   const [extraPickups, setExtraPickups] = useState<string[]>([]);
@@ -64,7 +63,6 @@ function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps)
         delivery_address: form.delivery_address,
         delivery_contact: form.delivery_name,
         delivery_lat: 25.7907, delivery_lng: -80.1300,
-        priority: form.priority,
         weight_kg: Math.round(parseFloat(form.weight_kg || '0') * 0.453592 * 10) / 10,
         volume_m3: 0,
         description: form.commodity,
@@ -200,12 +198,6 @@ function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps)
               <Package className="w-4 h-4 text-orange-500" /> Shipment Details
             </h3>
             <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label className="label">Priority</label>
-                <select className="input" value={form.priority} onChange={e => setForm({...form, priority: e.target.value})}>
-                  {PRIORITY_OPTIONS.map(p => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
-                </select>
-              </div>
               <div>
                 <label className="label">Weight (lbs)</label>
                 <input className="input" type="number" value={form.weight_kg} onChange={e => setForm({...form, weight_kg: e.target.value})} placeholder="0" min="0" />
@@ -399,7 +391,6 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">{order.order_number}</h2>
             <div className="flex items-center gap-2 mt-1">
               <OrderStatusBadge status={order.status} />
-              <PriorityBadge priority={order.priority} />
             </div>
           </div>
           <button onClick={onClose}><X className="w-5 h-5 text-gray-500 dark:text-slate-400" /></button>
@@ -537,7 +528,6 @@ export default function Orders() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [priorityFilter, setPriorityFilter] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [assignOrder, setAssignOrder] = useState<Order | null>(null);
   const [detailOrder, setDetailOrder] = useState<Order | null>(null);
@@ -553,7 +543,6 @@ export default function Orders() {
     try {
       const params: Record<string, unknown> = {};
       if (statusFilter) params.status = statusFilter;
-      if (priorityFilter) params.priority = priorityFilter;
       if (search) params.search = search;
       const { data } = await ordersApi.getAll(params);
       setOrders(data.orders);
@@ -562,7 +551,7 @@ export default function Orders() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, priorityFilter, search]);
+  }, [statusFilter, search]);
 
   const fetchDriversAndTrucks = async () => {
     const [driversRes, trucksRes] = await Promise.all([
@@ -609,10 +598,6 @@ export default function Orders() {
             <option value="">All Status</option>
             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
           </select>
-          <select className="input w-full sm:w-32" value={priorityFilter} onChange={e => setPriorityFilter(e.target.value)}>
-            <option value="">All Priority</option>
-            {PRIORITY_OPTIONS.map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
         </div>
         <button onClick={() => setShowCreate(true)} className="btn-primary w-full sm:w-auto justify-center">
           <Plus className="w-4 h-4" /> New Order
@@ -642,8 +627,7 @@ export default function Orders() {
                   </div>
                 </div>
                 <p className="text-xs text-gray-500 truncate mb-2">{order.delivery_address}</p>
-                <div className="flex items-center justify-between">
-                  <PriorityBadge priority={order.priority} />
+                <div className="flex items-center justify-end">
                   <div className="flex gap-1">
                     <button onClick={() => setDetailOrder(order)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
                       <Eye className="w-4 h-4 text-gray-500 dark:text-slate-400" />
@@ -675,7 +659,6 @@ export default function Orders() {
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">PICKUP</th>
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">DELIVERY</th>
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">STATUS</th>
-                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">PRIORITY</th>
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3 hidden lg:table-cell">DRIVER</th>
                     <th className="text-right text-xs font-semibold text-gray-500 px-4 py-3">RATE</th>
                     <th className="text-center text-xs font-semibold text-gray-500 px-4 py-3">ACTIONS</th>
@@ -699,7 +682,6 @@ export default function Orders() {
                         <p className="text-xs text-gray-600 dark:text-slate-400 max-w-[160px] truncate">{order.delivery_address}</p>
                       </td>
                       <td className="px-4 py-3"><OrderStatusBadge status={order.status} /></td>
-                      <td className="px-4 py-3"><PriorityBadge priority={order.priority} /></td>
                       <td className="px-4 py-3 hidden lg:table-cell">
                         {order.driver_name
                           ? <p className="text-xs text-gray-700 dark:text-slate-300">{order.driver_name}</p>
