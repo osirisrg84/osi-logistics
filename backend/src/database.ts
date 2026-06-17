@@ -209,6 +209,18 @@ export async function initDatabase(): Promise<void> {
       type TEXT NOT NULL DEFAULT 'other',
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`,
+    `CREATE TABLE IF NOT EXISTS verifications (
+      id TEXT PRIMARY KEY,
+      entity_type TEXT NOT NULL,
+      entity_id TEXT NOT NULL,
+      check_name TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      notes TEXT NOT NULL DEFAULT '',
+      checked_by TEXT NOT NULL DEFAULT '',
+      checked_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(entity_type, entity_id, check_name)
+    )`,
   ]) {
     await db.execute(sql);
   }

@@ -20,6 +20,7 @@ import DispatcherCommissions from './pages/DispatcherCommissions';
 import Settings from './pages/Settings';
 import UsersManagement from './pages/UsersManagement';
 import DispatcherProfiles from './pages/DispatcherProfiles';
+import Verifications from './pages/Verifications';
 import DispatcherHub from './pages/DispatcherHub';
 import DriverPortal from './pages/DriverPortal';
 
@@ -119,6 +120,9 @@ function AppRoutes() {
         } />
         <Route path="dispatchers" element={
           <AdminGuard><DispatcherProfiles /></AdminGuard>
+        } />
+        <Route path="verifications" element={
+          <AdminGuard><Verifications /></AdminGuard>
         } />
       </Route>
 

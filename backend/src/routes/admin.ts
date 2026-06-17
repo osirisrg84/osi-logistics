@@ -166,6 +166,99 @@ router.put('/dispatchers/:id', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
+// ── Verifications ────────────────────────────────────────────────────────────
+
+const DRIVER_CHECKS = [
+  { name: 'identity',           label: 'Verificación de Identidad' },
+  { name: 'license',            label: 'Licencia de Conducir' },
+  { name: 'mvr',                label: 'MVR – Historial de Manejo' },
+  { name: 'insurance',          label: 'Seguro / COI' },
+  { name: 'criminal_background',label: 'Background Criminal' },
+  { name: 'drug_test',          label: 'Prueba de Drogas' },
+  { name: 'equipment',          label: 'Verificación de Equipo' },
+];
+
+const DISPATCHER_CHECKS = [
+  { name: 'identity',           label: 'Verificación de Identidad' },
+  { name: 'background',         label: 'Background Check' },
+  { name: 'employment_history', label: 'Historial Laboral' },
+  { name: 'references',         label: 'Referencias' },
+  { name: 'experience',         label: 'Verificación de Experiencia' },
+];
+
+async function ensureVerifications(entityType: string, entityId: string): Promise<void> {
+  const checks = entityType === 'driver' ? DRIVER_CHECKS : DISPATCHER_CHECKS;
+  for (const c of checks) {
+    const existing = await queryOne(
+      'SELECT id FROM verifications WHERE entity_type = ? AND entity_id = ? AND check_name = ?',
+      [entityType, entityId, c.name]
+    );
+    if (!existing) {
+      await exec(
+        'INSERT INTO verifications (id, entity_type, entity_id, check_name) VALUES (?, ?, ?, ?)',
+        [uuidv4(), entityType, entityId, c.name]
+      );
+    }
+  }
+}
+
+router.get('/verifications', async (_req: Request, res: Response) => {
+  try {
+    // Drivers with accounts
+    const drivers = await query<Record<string, unknown>>(`
+      SELECT d.id, d.name, d.email, d.phone, d.license_number, d.license_expiry,
+             d.equipment_type, d.company_name, d.mc_number, d.coi_filename,
+             d.coi_expiry, d.hire_date, d.avatar, d.driver_code
+      FROM drivers d
+      INNER JOIN users u ON u.driver_id = d.id AND u.active = 1
+      ORDER BY d.name ASC
+    `);
+    for (const d of drivers) await ensureVerifications('driver', d.id as string);
+
+    // Dispatchers
+    const dispatchers = await query<Record<string, unknown>>(`
+      SELECT u.id, u.name, u.email, u.phone, u.city, u.years_experience,
+             u.previous_companies, u.languages, u.availability,
+             u.equipment_experience, u.date_of_birth, u.dispatcher_code
+      FROM users u
+      WHERE u.role = 'dispatcher' AND u.active = 1
+      ORDER BY u.name ASC
+    `);
+    for (const d of dispatchers) await ensureVerifications('dispatcher', d.id as string);
+
+    const allChecks = await query(`
+      SELECT * FROM verifications ORDER BY entity_type, entity_id, check_name
+    `);
+
+    res.json({ drivers, dispatchers, checks: allChecks });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.put('/verifications/:entityType/:entityId/:checkName', async (req: Request, res: Response) => {
+  try {
+    const { entityType, entityId, checkName } = req.params;
+    const { status, notes, checked_by } = req.body;
+
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    let adminName = checked_by || 'Admin';
+    if (token) {
+      const session = await queryOne<{ name: string }>(`
+        SELECT u.name FROM sessions s JOIN users u ON s.user_id = u.id
+        WHERE s.token = ? AND s.expires_at > datetime('now')
+      `, [token]);
+      if (session) adminName = session.name;
+    }
+
+    await exec(`
+      UPDATE verifications
+      SET status = ?, notes = ?, checked_by = ?, checked_at = datetime('now')
+      WHERE entity_type = ? AND entity_id = ? AND check_name = ?
+    `, [status, notes ?? '', adminName, entityType, entityId, checkName]);
+
+    res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
 router.get('/stats', async (_req: Request, res: Response) => {
   try {
     const [total_users, admins, dispatchers, drivers_with_account, active_sessions, recent_logins] = await Promise.all([
