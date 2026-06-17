@@ -1,7 +1,6 @@
 import { useState, FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, Mail, Lock, Building2, Calendar, Hash } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
+import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, Mail, Lock, Building2, Calendar, Hash, Clock } from 'lucide-react';
 import api from '../services/api';
 
 const EQUIPMENT_TYPES = ['Dry Van', 'Reefer', 'Flatbed', 'Box Truck', 'Power Only', 'Hotshot', 'Tanker'];
@@ -18,8 +17,8 @@ function Field({ label, required, children }: { label: string; required?: boolea
 }
 
 export default function RegisterDriver() {
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const [registered, setRegistered] = useState(false);
+  const [registeredName, setRegisteredName] = useState('');
 
   const [form, setForm] = useState({
     name: '', phone: '', email: '', password: '', confirm: '',
@@ -51,7 +50,7 @@ export default function RegisterDriver() {
     if (form.password.length < 8) { setError('Password must be at least 8 characters'); return; }
     setLoading(true);
     try {
-      const { data } = await api.post('/auth/register-driver', {
+      await api.post('/auth/register-driver', {
         name:           form.name,
         email:          form.email,
         password:       form.password,
@@ -63,19 +62,42 @@ export default function RegisterDriver() {
         company_name:   form.company_name,
         authority_since: form.authority_since,
       });
-      // Store session returned by register
-      localStorage.setItem('osi_token', data.token);
-      localStorage.setItem('osi_user', JSON.stringify(data.user));
-      if (data.driverProfile) localStorage.setItem('osi_driver_profile', JSON.stringify(data.driverProfile));
-      // Log in to sync auth context
-      await login(form.email, form.password);
-      navigate('/driver', { replace: true });
+      setRegisteredName(form.name);
+      setRegistered(true);
     } catch (err: unknown) {
       setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
+
+  if (registered) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center px-4">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 text-center">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+            <CheckCircle2 className="w-10 h-10 text-green-500" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">¡Cuenta Creada!</h1>
+          <p className="text-gray-500 text-sm mb-1">Hola, <span className="font-semibold text-gray-800">{registeredName}</span></p>
+          <p className="text-gray-500 text-sm mb-6">
+            Tu cuenta de conductor fue registrada exitosamente. Un administrador de OSI Logistics la revisará y activará.
+            Recibirás acceso al Driver Portal en cuanto sea aprobada.
+          </p>
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-6 flex items-start gap-3 text-left">
+            <Clock className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-700">
+              <span className="font-semibold">Pendiente de aprobación.</span> Mientras tanto, no podrás iniciar sesión. El tiempo de revisión es normalmente menos de 24 horas.
+            </p>
+          </div>
+          <Link to="/driver/login"
+            className="block w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-2xl transition-colors text-sm">
+            Volver al inicio de sesión
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col items-center justify-start px-4 py-8">

@@ -30,9 +30,18 @@ router.post('/login', async (req: Request, res: Response) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
 
-    const user = await queryOne<Record<string, unknown>>('SELECT * FROM users WHERE email = ? AND active = 1', [email.toLowerCase()]);
+    const user = await queryOne<Record<string, unknown>>('SELECT * FROM users WHERE email = ?', [email.toLowerCase()]);
     if (!user || !verifyPassword(password, user.salt as string, user.password_hash as string)) {
       return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    if (user.approval_status === 'pending') {
+      return res.status(403).json({ error: 'Tu cuenta está pendiente de aprobación por el administrador. Te notificaremos cuando sea activada.' });
+    }
+    if (user.approval_status === 'rejected') {
+      return res.status(403).json({ error: 'Tu solicitud de cuenta fue rechazada. Contacta al administrador para más información.' });
+    }
+    if (!user.active) {
+      return res.status(403).json({ error: 'Esta cuenta está desactivada. Contacta al administrador.' });
     }
 
     const token = await createSession(user.id as string);
@@ -84,22 +93,16 @@ router.post('/register', async (req: Request, res: Response) => {
 
     await exec(`INSERT INTO users
       (id, name, email, password_hash, salt, role, driver_id,
-       phone, date_of_birth, city, years_experience, previous_companies, languages, availability, equipment_experience, dispatcher_code)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       phone, date_of_birth, city, years_experience, previous_companies, languages, availability, equipment_experience, dispatcher_code,
+       active, approval_status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending')`,
       [id, name, email.toLowerCase(), passwordHash, salt, role, driver_id,
        phone, date_of_birth, city, years_experience, previous_companies, languages, availability, equipment_experience, dispatcher_code]);
 
-    const token = await createSession(id);
+    await exec("INSERT INTO notifications (id, type, title, message, read) VALUES (?, 'system', 'Nueva Cuenta Pendiente de Aprobación', ?, 0)",
+      [uuidv4(), `${name} (${role}) se registró y está esperando aprobación.`]);
 
-    let driverProfile = null;
-    if (role === 'driver' && driver_id) {
-      driverProfile = await queryOne('SELECT * FROM drivers WHERE id = ?', [driver_id]);
-    }
-
-    await exec("INSERT INTO notifications (id, type, title, message, read) VALUES (?, 'system', 'New User Registered', ?, 0)",
-      [uuidv4(), `${name} (${role}) has created an account.`]);
-
-    res.status(201).json({ token, user: { id, name, email: email.toLowerCase(), role, driver_id }, driverProfile });
+    res.status(201).json({ pending: true, message: 'Tu cuenta fue creada exitosamente. Un administrador la revisará y activará pronto.' });
   } catch (err: unknown) {
     const msg = (err as { code?: string })?.code === 'SQLITE_CONSTRAINT'
       ? 'An account with this email already exists' : 'Registration failed';
@@ -183,20 +186,13 @@ router.post('/register-driver', async (req: Request, res: Response) => {
     const passwordHash = hashPassword(password, salt);
     const userId = uuidv4();
 
-    await exec('INSERT INTO users (id, name, email, password_hash, salt, role, driver_id) VALUES (?, ?, ?, ?, ?, \'driver\', ?)',
+    await exec("INSERT INTO users (id, name, email, password_hash, salt, role, driver_id, active, approval_status) VALUES (?, ?, ?, ?, ?, 'driver', ?, 0, 'pending')",
       [userId, name, email.toLowerCase(), passwordHash, salt, driverId]);
 
-    await exec("INSERT INTO notifications (id, type, title, message, read) VALUES (?, 'driver', 'New Driver Registered', ?, 0)",
-      [uuidv4(), `${name} has registered as a new driver.`]);
+    await exec("INSERT INTO notifications (id, type, title, message, read) VALUES (?, 'driver', 'Nuevo Driver Pendiente de Aprobación', ?, 0)",
+      [uuidv4(), `${name} se registró como conductor y está esperando aprobación.`]);
 
-    const token = await createSession(userId);
-    const driverProfile = await queryOne('SELECT * FROM drivers WHERE id = ?', [driverId]);
-
-    res.status(201).json({
-      token,
-      user: { id: userId, name, email: email.toLowerCase(), role: 'driver', driver_id: driverId },
-      driverProfile,
-    });
+    res.status(201).json({ pending: true, message: 'Tu cuenta fue creada exitosamente. Un administrador la revisará y activará pronto.' });
   } catch (err: unknown) {
     const msg = (err as { code?: string })?.code === 'SQLITE_CONSTRAINT'
       ? 'An account with this email already exists' : 'Registration failed';

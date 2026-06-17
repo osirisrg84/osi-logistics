@@ -84,6 +84,40 @@ router.delete('/users/:id', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
+router.get('/pending', async (_req: Request, res: Response) => {
+  try {
+    res.json(await query(`
+      SELECT u.id, u.name, u.email, u.role, u.phone, u.created_at, u.city,
+             u.years_experience, u.equipment_experience, u.languages, u.availability,
+             d.name as driver_name, d.license_number, d.equipment_type
+      FROM users u
+      LEFT JOIN drivers d ON u.driver_id = d.id
+      WHERE u.approval_status = 'pending'
+      ORDER BY u.created_at ASC
+    `));
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.put('/users/:id/approve', async (req: Request, res: Response) => {
+  try {
+    const user = await queryOne<Record<string, unknown>>('SELECT id, name, role FROM users WHERE id = ?', [req.params.id]);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    await exec("UPDATE users SET active = 1, approval_status = 'approved' WHERE id = ?", [req.params.id]);
+    await exec("INSERT INTO notifications (id, type, title, message, read) VALUES (?, 'system', 'Cuenta Aprobada', ?, 0)",
+      [uuidv4(), `La cuenta de ${user.name} (${user.role}) fue aprobada y está activa.`]);
+    res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.put('/users/:id/reject', async (req: Request, res: Response) => {
+  try {
+    const user = await queryOne<Record<string, unknown>>('SELECT id, name FROM users WHERE id = ?', [req.params.id]);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    await exec("UPDATE users SET active = 0, approval_status = 'rejected' WHERE id = ?", [req.params.id]);
+    res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
 router.get('/dispatchers', async (_req: Request, res: Response) => {
   try {
     res.json(await query(`

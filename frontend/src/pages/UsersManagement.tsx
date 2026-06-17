@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
-import { Plus, Search, Edit2, Trash2, X, Shield, UserCheck, Truck, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, X, Shield, UserCheck, Truck, AlertTriangle, Clock, CheckCircle, XCircle } from 'lucide-react';
 import api from '../services/api';
 import { format } from 'date-fns';
 
@@ -13,6 +13,23 @@ interface User {
   driver_name?: string;
   driver_status?: string;
   driver_avatar?: string;
+}
+
+interface PendingUser {
+  id: string;
+  name: string;
+  email: string;
+  role: 'dispatcher' | 'driver';
+  phone: string;
+  city: string;
+  created_at: string;
+  years_experience: number;
+  equipment_experience: string;
+  languages: string;
+  availability: string;
+  driver_name?: string;
+  license_number?: string;
+  equipment_type?: string;
 }
 
 interface AdminStats {
@@ -152,24 +169,49 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
 
 export default function UsersManagement() {
   const [users, setUsers] = useState<User[]>([]);
+  const [pending, setPending] = useState<PendingUser[]>([]);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchData = async () => {
     try {
-      const [usersRes, statsRes] = await Promise.all([
+      const [usersRes, statsRes, pendingRes] = await Promise.all([
         api.get('/admin/users'),
         api.get('/admin/stats'),
+        api.get('/admin/pending'),
       ]);
       setUsers(usersRes.data);
       setStats(statsRes.data);
+      setPending(pendingRes.data);
     } catch {
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApprove = async (id: string) => {
+    setActionLoading(id + '_approve');
+    try {
+      await api.put(`/admin/users/${id}/approve`);
+      fetchData();
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    if (!confirm('¿Rechazar esta solicitud de cuenta?')) return;
+    setActionLoading(id + '_reject');
+    try {
+      await api.put(`/admin/users/${id}/reject`);
+      fetchData();
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -198,6 +240,65 @@ export default function UsersManagement() {
 
   return (
     <div className="space-y-5 fade-in">
+
+      {/* Pending Approvals */}
+      {pending.length > 0 && (
+        <div className="card border-2 border-amber-200 dark:border-amber-700/40 bg-amber-50 dark:bg-amber-900/10 p-0 overflow-hidden">
+          <div className="flex items-center gap-3 px-5 py-3 border-b border-amber-200 dark:border-amber-700/30">
+            <div className="w-8 h-8 bg-amber-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Clock className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-amber-800 dark:text-amber-300">Cuentas Pendientes de Aprobación</h3>
+              <p className="text-xs text-amber-600 dark:text-amber-400">{pending.length} solicitud{pending.length !== 1 ? 'es' : ''} esperando revisión</p>
+            </div>
+          </div>
+          <div className="divide-y divide-amber-100 dark:divide-amber-800/30">
+            {pending.map(u => (
+              <div key={u.id} className="flex items-center gap-4 px-5 py-4">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold flex-shrink-0 ${u.role === 'dispatcher' ? 'bg-orange-500' : 'bg-blue-500'}`}>
+                  {u.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{u.name}</p>
+                    <span className={`badge border text-xs capitalize ${u.role === 'dispatcher' ? 'bg-orange-100 text-orange-700 border-orange-200' : 'bg-blue-100 text-blue-700 border-blue-200'}`}>
+                      {u.role}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{u.email} {u.phone && `· ${u.phone}`} {u.city && `· ${u.city}`}</p>
+                  {u.role === 'dispatcher' && u.years_experience > 0 && (
+                    <p className="text-xs text-gray-400 dark:text-slate-500">{u.years_experience} años exp. · {u.availability} {u.languages && `· ${u.languages}`}</p>
+                  )}
+                  {u.role === 'driver' && u.license_number && (
+                    <p className="text-xs text-gray-400 dark:text-slate-500">Licencia: {u.license_number} · {u.equipment_type}</p>
+                  )}
+                  <p className="text-xs text-gray-400 dark:text-slate-500">Registrado {format(new Date(u.created_at), 'MMM d, yyyy HH:mm')}</p>
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => handleApprove(u.id)}
+                    disabled={actionLoading === u.id + '_approve'}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white text-xs font-semibold transition-colors"
+                  >
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    {actionLoading === u.id + '_approve' ? 'Aprobando...' : 'Aprobar'}
+                  </button>
+                  <button
+                    onClick={() => handleReject(u.id)}
+                    disabled={actionLoading === u.id + '_reject'}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 disabled:opacity-50 text-red-600 dark:text-red-400 text-xs font-semibold transition-colors"
+                  >
+                    <XCircle className="w-3.5 h-3.5" />
+                    {actionLoading === u.id + '_reject' ? '...' : 'Rechazar'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Stats */}
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">

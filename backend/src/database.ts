@@ -228,6 +228,7 @@ export async function initDatabase(): Promise<void> {
   await addColumnIfMissing('users', 'dispatcher_code',      "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('users', 'shift_active',         "INTEGER NOT NULL DEFAULT 0");
   await addColumnIfMissing('users', 'shift_changed_at',     "TEXT");
+  await addColumnIfMissing('users', 'approval_status',      "TEXT NOT NULL DEFAULT 'approved'");
 
   // Assign dispatcher_code to existing dispatchers that don't have one
   const genCode = async (): Promise<string> => {
