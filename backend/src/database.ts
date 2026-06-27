@@ -7,8 +7,8 @@ let _db: Client;
 export function getDb(): Client {
   if (!_db) {
     _db = createClient({
-      url: process.env.TURSO_URL || 'file:./osi_logistics.db',
-      authToken: process.env.TURSO_AUTH_TOKEN || undefined,
+      url: (process.env.TURSO_URL || 'file:./osi_logistics.db').trim(),
+      authToken: process.env.TURSO_AUTH_TOKEN?.trim() || undefined,
     });
   }
   return _db;
