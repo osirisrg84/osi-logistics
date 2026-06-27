@@ -204,25 +204,28 @@ async function ensureVerifications(entityType: string, entityId: string): Promis
 
 router.get('/verifications', async (_req: Request, res: Response) => {
   try {
-    // Drivers with accounts
+    // Drivers with accounts (active OR pending approval)
     const drivers = await query<Record<string, unknown>>(`
       SELECT d.id, d.name, d.email, d.phone, d.license_number, d.license_expiry,
              d.equipment_type, d.company_name, d.mc_number, d.coi_filename,
-             d.coi_expiry, d.hire_date, d.avatar, d.driver_code
+             d.coi_expiry, d.hire_date, d.avatar, d.driver_code,
+             u.id as user_id, u.active, u.approval_status
       FROM drivers d
-      INNER JOIN users u ON u.driver_id = d.id AND u.active = 1
-      ORDER BY d.name ASC
+      INNER JOIN users u ON u.driver_id = d.id
+      WHERE u.approval_status IN ('pending', 'approved')
+      ORDER BY u.active ASC, d.name ASC
     `);
     for (const d of drivers) await ensureVerifications('driver', d.id as string);
 
-    // Dispatchers
+    // Dispatchers (active OR pending approval)
     const dispatchers = await query<Record<string, unknown>>(`
       SELECT u.id, u.name, u.email, u.phone, u.city, u.years_experience,
              u.previous_companies, u.languages, u.availability,
-             u.equipment_experience, u.date_of_birth, u.dispatcher_code
+             u.equipment_experience, u.date_of_birth, u.dispatcher_code,
+             u.active, u.approval_status
       FROM users u
-      WHERE u.role = 'dispatcher' AND u.active = 1
-      ORDER BY u.name ASC
+      WHERE u.role = 'dispatcher' AND u.approval_status IN ('pending', 'approved')
+      ORDER BY u.active ASC, u.name ASC
     `);
     for (const d of dispatchers) await ensureVerifications('dispatcher', d.id as string);
 

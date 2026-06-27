@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
-  ShieldCheck, ShieldX, Clock, ChevronDown, ChevronUp,
-  User, Truck, FileText, AlertTriangle, CheckCircle2,
-  XCircle, RefreshCw, Search,
+  ShieldCheck, Clock, ChevronDown, ChevronUp,
+  User, Truck, AlertTriangle, CheckCircle2,
+  XCircle, RefreshCw, Search, UserCheck,
 } from 'lucide-react';
 import api from '../services/api';
 import { format } from 'date-fns';
@@ -35,6 +35,9 @@ interface DriverEntity {
   hire_date: string;
   avatar: string;
   driver_code: string;
+  user_id: string;
+  active: number;
+  approval_status: string;
 }
 
 interface DispatcherEntity {
@@ -50,6 +53,8 @@ interface DispatcherEntity {
   equipment_experience: string;
   date_of_birth: string;
   dispatcher_code: string;
+  active: number;
+  approval_status: string;
 }
 
 const DRIVER_CHECK_LABELS: Record<string, string> = {
@@ -190,22 +195,50 @@ function CheckRow({ check, label, onUpdate }: CheckRowProps) {
 interface EntityCardProps {
   entityId: string;
   entityType: 'driver' | 'dispatcher';
+  userId: string;
+  approvalStatus: string;
   name: string;
   subtitle: string;
   detail: string;
   checks: VerificationCheck[];
   checkLabels: Record<string, string>;
   onUpdate: (entityId: string, checkName: string, status: CheckStatus, notes: string) => Promise<void>;
+  onApprove: (userId: string) => Promise<void>;
   children?: React.ReactNode;
 }
 
-function EntityCard({ entityId, entityType, name, subtitle, detail, checks, checkLabels, onUpdate, children }: EntityCardProps) {
+function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtitle, detail, checks, checkLabels, onUpdate, onApprove, children }: EntityCardProps) {
   const [open, setOpen] = useState(false);
+  const [approving, setApproving] = useState(false);
   const overall = overallStatus(checks);
   const pendingCount = checks.filter(c => c.status === 'pending').length;
+  const isPending = approvalStatus === 'pending';
+
+  const handleApprove = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setApproving(true);
+    await onApprove(userId);
+    setApproving(false);
+  };
 
   return (
-    <div className="card p-0 overflow-hidden">
+    <div className={`card p-0 overflow-hidden ${isPending ? 'border-2 border-amber-300 dark:border-amber-600/50' : ''}`}>
+      {isPending && (
+        <div className="flex items-center justify-between px-5 py-2.5 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700/40">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />
+            <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">Cuenta pendiente de aprobación</span>
+          </div>
+          <button
+            onClick={handleApprove}
+            disabled={approving}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white text-xs font-bold transition-colors"
+          >
+            <UserCheck className="w-3.5 h-3.5" />
+            {approving ? 'Aprobando...' : 'Aprobar cuenta'}
+          </button>
+        </div>
+      )}
       <button
         className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-slate-800/70 transition-colors"
         onClick={() => setOpen(v => !v)}
@@ -216,6 +249,7 @@ function EntityCard({ entityId, entityType, name, subtitle, detail, checks, chec
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{name}</p>
+            {isPending && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border border-amber-200 dark:border-amber-700/40">Pendiente</span>}
             {pendingCount > 0 && (
               <span className="bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{pendingCount}</span>
             )}
@@ -281,6 +315,11 @@ export default function Verifications() {
     await api.put(`/admin/verifications/${entityType}/${entityId}/${checkName}`, { status, notes });
     const updated = await api.get('/admin/verifications');
     setChecks(updated.data.checks);
+  };
+
+  const handleApprove = async (userId: string) => {
+    await api.put(`/admin/users/${userId}/approve`);
+    fetchData();
   };
 
   const getChecksFor = (entityType: string, entityId: string) =>
@@ -386,12 +425,15 @@ export default function Verifications() {
                   key={d.id}
                   entityId={d.id}
                   entityType="driver"
+                  userId={d.user_id}
+                  approvalStatus={d.approval_status}
                   name={d.name}
                   subtitle={`${d.email} · ${d.phone}`}
                   detail={`${d.equipment_type} · ${d.company_name}${d.mc_number ? ` · MC# ${d.mc_number}` : ''}`}
                   checks={dChecks}
                   checkLabels={DRIVER_CHECK_LABELS}
                   onUpdate={handleUpdate}
+                  onApprove={handleApprove}
                 >
                   <InfoRow label="Licencia #" value={d.license_number} />
                   <InfoRow label="Vence" value={d.license_expiry ? format(new Date(d.license_expiry), 'MMM d, yyyy') : '—'} warn={!!d.license_expiry && new Date(d.license_expiry) < new Date(Date.now() + 90*24*3600*1000)} />
@@ -416,12 +458,15 @@ export default function Verifications() {
                   key={d.id}
                   entityId={d.id}
                   entityType="dispatcher"
+                  userId={d.id}
+                  approvalStatus={d.approval_status}
                   name={d.name}
                   subtitle={`${d.email} · ${d.phone}`}
                   detail={`${d.city} · ${d.years_experience} años exp. · ${d.availability}`}
                   checks={dChecks}
                   checkLabels={DISPATCHER_CHECK_LABELS}
                   onUpdate={handleUpdate}
+                  onApprove={handleApprove}
                 >
                   <InfoRow label="Fecha Nacimiento" value={d.date_of_birth || '—'} />
                   <InfoRow label="Ciudad" value={d.city || '—'} />
