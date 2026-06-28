@@ -101,66 +101,83 @@ export default function DispatcherProfilePage() {
     <div className="max-w-lg mx-auto space-y-4 pb-8">
 
       {/* ── Hero card ──────────────────────────────────────── */}
-      <div className="rounded-3xl overflow-hidden shadow-xl p-5"
-           style={{ background: 'linear-gradient(to bottom, #132640, #0a1628)' }}>
+      <div className={`rounded-2xl overflow-hidden shadow-sm border ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
 
-        {/* Top row: avatar + company label + ID */}
-        <div className="flex items-start justify-between mb-4">
-          {/* Avatar */}
-          <div className="relative">
-            <div className="w-20 h-20 rounded-3xl flex items-center justify-center font-black text-3xl shadow-lg"
-                 style={{ background: accentGrad }}>
-              <span className="text-white drop-shadow">{initials}</span>
-            </div>
-            <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#0a1628] ${profile.shift_active ? 'bg-green-400 pulse-dot' : 'bg-slate-500'}`} />
+        {/* Dark banner */}
+        <div className="relative h-20 overflow-hidden" style={{
+          background: 'linear-gradient(135deg, #0a1628 0%, #0f2035 35%, #0c2a45 65%, #152a40 100%)',
+        }}>
+          <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 70% 100% at 90% 50%, ${accent}38 0%, transparent 70%)` }} />
+          <div className="absolute right-5 top-3 w-10 h-10 rounded-full border border-white/10" />
+          <div className="absolute right-12 top-5 w-5 h-5 rounded-full border border-white/8" />
+          <div className="absolute right-20 top-2 w-3 h-3 rounded-full" style={{ background: `${accent}18` }} />
+          <div className="absolute right-4 bottom-2.5 text-[9px] font-bold tracking-[0.3em] text-white/30 uppercase select-none">
+            OSI LOGISTICS · {isAdmin ? 'ADMIN' : 'DISPATCH'}
           </div>
+        </div>
 
-          {/* Company + ID */}
-          <div className="flex flex-col items-end gap-2 pt-1">
-            <span className="text-[11px] font-semibold tracking-widest text-white/30 uppercase">
-              OSI LOGISTICS · {isAdmin ? 'ADMIN' : 'DISPATCH'}
-            </span>
+        {/* Avatar + ID */}
+        <div className="px-5 pb-5">
+          <div className="flex items-end justify-between -mt-9 mb-3">
+            <div className="relative">
+              <div className="w-[68px] h-[68px] rounded-[18px] flex items-center justify-center text-white font-extrabold select-none"
+                   style={{
+                     fontSize: 22, letterSpacing: '-0.5px',
+                     background: accentGrad,
+                     boxShadow: `0 8px 24px ${accent}70, 0 2px 6px rgba(0,0,0,0.18)`,
+                     border: '3px solid white',
+                   }}>
+                {initials}
+              </div>
+              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 ${dark ? 'border-slate-800' : 'border-white'} shadow-sm ${profile.shift_active ? 'bg-green-400 pulse-dot' : 'bg-slate-400'}`} />
+            </div>
             {profile.dispatcher_code && (
-              <span className="text-xs font-black px-3 py-1 rounded-full border"
-                    style={{ color: accent, borderColor: `${accent}50`, background: `${accent}15` }}>
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full mb-1 tracking-widest border"
+                    style={{ color: accent, background: `${accent}12`, borderColor: `${accent}40` }}>
                 ID #{profile.dispatcher_code}
               </span>
             )}
           </div>
-        </div>
 
-        {/* Name + contact */}
-        <p className="text-2xl font-black text-white mb-2">{user?.name}</p>
-        <div className="space-y-1 mb-5">
-          {user?.email && (
-            <div className="flex items-center gap-2">
-              <Mail className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
-              <span className="text-sm text-blue-400 font-medium">{user.email}</span>
-            </div>
-          )}
-          {profile.phone && (
-            <div className="flex items-center gap-2">
-              <Phone className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-              <span className="text-sm text-slate-300">{profile.phone}</span>
-            </div>
-          )}
-        </div>
+          {/* Name */}
+          <p className={`font-extrabold text-lg leading-tight mb-2 ${dark ? 'text-white' : 'text-gray-900'}`}>{user?.name}</p>
 
-        {/* Stats 2×2 grid */}
-        <div className="grid grid-cols-2 gap-2.5">
-          {[
-            { icon: Package,    label: 'Total Loads',  value: String(totalLoads) },
-            { icon: TrendingUp, label: 'Este mes',     value: String(monthLoads) },
-            { icon: Star,       label: 'Rating',       value: `★ ${rating}` },
-            { icon: Award,      label: 'Logros',       value: `${unlockedCount}/${ACHIEVEMENTS.length}` },
-          ].map(s => (
-            <div key={s.label}
-                 className="rounded-2xl px-3 py-3 flex items-center gap-3 bg-white/5 border border-white/10">
-              <s.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
-              <div>
-                <p className="text-[10px] text-slate-500 font-medium">{s.label}</p>
-                <p className="text-base font-black text-white leading-tight">{s.value}</p>
+          {/* Contact */}
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <div className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 ${dark ? 'bg-blue-500/15' : 'bg-blue-50'}`}>
+                <Mail className="w-2.5 h-2.5 text-blue-500" />
               </div>
+              <p className="text-xs text-blue-500 font-medium">{user?.email}</p>
+            </div>
+            {profile.phone && (
+              <div className="flex items-center gap-2">
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 ${dark ? 'bg-slate-700' : 'bg-gray-100'}`}>
+                  <Phone className="w-2.5 h-2.5 text-gray-500 dark:text-slate-400" />
+                </div>
+                <p className={`text-xs ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{profile.phone}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Stats grid */}
+        <div className={`border-t mx-4 mb-1 ${dark ? 'border-slate-700' : 'border-gray-100'}`} />
+        <div className="grid grid-cols-2 gap-3 p-4">
+          {[
+            { label: 'Total Loads', value: String(totalLoads),                    icon: Package,    color: 'text-blue-500',   bg: dark ? 'bg-blue-500/10'   : 'bg-blue-50'   },
+            { label: 'Este mes',    value: String(monthLoads),                    icon: TrendingUp, color: 'text-green-500',  bg: dark ? 'bg-green-500/10'  : 'bg-green-50'  },
+            { label: 'Rating',      value: `★ ${rating}`,                         icon: Star,       color: 'text-amber-500',  bg: dark ? 'bg-amber-500/10'  : 'bg-amber-50'  },
+            { label: 'Logros',      value: `${unlockedCount}/${ACHIEVEMENTS.length}`, icon: Award,  color: 'text-purple-500', bg: dark ? 'bg-purple-500/10' : 'bg-purple-50' },
+          ].map(({ label, value, icon: Icon, color, bg }) => (
+            <div key={label} className={`rounded-xl p-3 ${dark ? 'bg-slate-700/60' : 'bg-gray-50'}`}>
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <div className={`w-5 h-5 rounded-md ${bg} flex items-center justify-center flex-shrink-0`}>
+                  <Icon className={`w-3 h-3 ${color}`} />
+                </div>
+                <p className={`text-[11px] font-medium ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{label}</p>
+              </div>
+              <p className={`text-sm font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>{value}</p>
             </div>
           ))}
         </div>
