@@ -281,6 +281,7 @@ export async function initDatabase(): Promise<void> {
   await addColumnIfMissing('drivers', 'truck_make',      "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('drivers', 'coi_filename',    "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('drivers', 'coi_expiry',      "TEXT NOT NULL DEFAULT ''");
+  await addColumnIfMissing('drivers', 'gps_active',      "INTEGER NOT NULL DEFAULT 0");
 
   // Assign driver_code to existing drivers without one
   const genDriverCode = async (): Promise<string> => {

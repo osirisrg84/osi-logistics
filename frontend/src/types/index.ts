@@ -29,6 +29,7 @@ export interface Driver {
   equipment_type?: string;
   company_name?: string;
   mc_number?: string;
+  gps_active?: number;
   authority_since?: string;
   payment_method?: string;
   payment_details?: string;

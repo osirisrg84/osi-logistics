@@ -113,6 +113,13 @@ router.put('/:id', async (req: Request, res: Response) => {
         lat: updated.current_lat, lng: updated.current_lng, avatar: updated.avatar,
       });
     }
+    if ('gps_active' in updates && updated) {
+      appEvents.emit('driver:gps_changed', {
+        id: req.params.id, name: updated.name, status: updated.status,
+        lat: updated.current_lat, lng: updated.current_lng, avatar: updated.avatar,
+        gps_active: Number(updates.gps_active),
+      });
+    }
     res.json(updated);
   } catch { res.status(500).json({ error: 'Failed' }); }
 });

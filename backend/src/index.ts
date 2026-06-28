@@ -187,11 +187,25 @@ async function isDemoDriver(driverId: string): Promise<boolean> {
 }
 
 async function startSimulation(): Promise<void> {
+  // Ensure demo drivers appear on the map (gps_active = 1)
+  await exec(`UPDATE drivers SET gps_active = 1 WHERE email LIKE '%${DEMO_EMAIL_SUFFIX}' AND status != 'offline'`).catch(() => {});
+
   const onlineDrivers = await query<{id:string}>(`
     SELECT id FROM drivers WHERE status IN ('busy','available','on_break')
     AND email LIKE '%${DEMO_EMAIL_SUFFIX}' LIMIT 5
   `);
   onlineDrivers.forEach(d => addToSimulation(d.id));
+
+  appEvents.on('driver:gps_changed', (event: { id: string; name: string; status: string; lat: number; lng: number; avatar: string; gps_active: number }) => {
+    if (event.gps_active) {
+      io.to('tracking').emit('driver_status_changed', event);
+      io.to('dispatchers').emit('driver_status_changed', event);
+    } else {
+      io.to('tracking').emit('driver_went_offline', { id: event.id });
+      io.to('dispatchers').emit('driver_went_offline', { id: event.id });
+      simStates.delete(event.id);
+    }
+  });
 
   appEvents.on('driver:location_updated', (data: { driver_id: string; lat: number; lng: number; speed: number; heading: number; address: string }) => {
     io.to('tracking').emit('location_update', [{

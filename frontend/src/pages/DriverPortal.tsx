@@ -607,6 +607,8 @@ export default function DriverPortal() {
   useEffect(() => {
     if (!user?.driver_id || !navigator.geolocation) return;
     if (trackingOn) {
+      // Appear on the map when GPS turns on
+      driversApi.update(user.driver_id, { gps_active: 1 }).catch(() => {});
       gpsWatchRef.current = navigator.geolocation.watchPosition(
         async (pos) => {
           try {
@@ -623,6 +625,8 @@ export default function DriverPortal() {
         { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
       );
     } else {
+      // Disappear from map when GPS turns off
+      driversApi.update(user.driver_id, { gps_active: 0 }).catch(() => {});
       if (gpsWatchRef.current !== null) {
         navigator.geolocation.clearWatch(gpsWatchRef.current);
         gpsWatchRef.current = null;

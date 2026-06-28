@@ -7,14 +7,14 @@ router.get('/live', async (_req: Request, res: Response) => {
   try {
     const drivers = await query(`
       SELECT d.id, d.name, d.status, d.current_lat, d.current_lng, d.current_address,
-             d.avatar, d.truck_id, d.rating,
+             d.avatar, d.truck_id, d.rating, d.gps_active,
              t.plate_number, t.make, t.model, t.type as truck_type,
              o.id as order_id, o.order_number, o.delivery_address,
              o.status as order_status, o.estimated_delivery
       FROM drivers d
       LEFT JOIN trucks t ON d.truck_id = t.id
       LEFT JOIN orders o ON o.driver_id = d.id AND o.status IN ('assigned','picked_up','in_transit')
-      WHERE d.status != 'offline'
+      WHERE d.gps_active = 1
     `);
     res.json(drivers);
   } catch { res.status(500).json({ error: 'Failed' }); }
