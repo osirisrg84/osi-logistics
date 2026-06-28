@@ -193,6 +193,17 @@ async function startSimulation(): Promise<void> {
   `);
   onlineDrivers.forEach(d => addToSimulation(d.id));
 
+  appEvents.on('driver:location_updated', (data: { driver_id: string; lat: number; lng: number; speed: number; heading: number; address: string }) => {
+    io.to('tracking').emit('location_update', [{
+      driver_id: data.driver_id,
+      lat: data.lat,
+      lng: data.lng,
+      speed: data.speed,
+      heading: data.heading,
+      current_address: data.address,
+    }]);
+  });
+
   appEvents.on('driver:notification', ({ driverId, notification }: { driverId: string; notification: unknown }) => {
     io.to(`driver:${driverId}`).emit('driver:notification', notification);
   });

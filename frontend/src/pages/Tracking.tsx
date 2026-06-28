@@ -60,7 +60,7 @@ function MapUpdater({ drivers }: { drivers: Driver[] }) {
   return null;
 }
 
-interface LocationUpdate { driver_id: string; lat: number; lng: number; speed: number; heading: number; }
+interface LocationUpdate { driver_id: string; lat: number; lng: number; speed: number; heading: number; current_address?: string; }
 interface StatusEvent { id: string; name: string; status: string; lat: number; lng: number; avatar: string; }
 interface StatusToast { id: string; name: string; online: boolean; }
 
@@ -103,7 +103,12 @@ export default function Tracking() {
           path.push([update.lat, update.lng]);
           if (path.length > 30) path.shift();
           driverRefs.current.set(d.id, path);
-          return { ...d, current_lat: update.lat, current_lng: update.lng };
+          return {
+            ...d,
+            current_lat: update.lat,
+            current_lng: update.lng,
+            ...(update.current_address ? { current_address: update.current_address } : {}),
+          };
         }
         return d;
       }));

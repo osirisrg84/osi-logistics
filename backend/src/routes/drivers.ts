@@ -131,6 +131,11 @@ router.post('/:id/location', async (req: Request, res: Response) => {
     if (!driver) return res.status(404).json({ error: 'Driver not found' });
     await exec('INSERT INTO tracking (id, driver_id, order_id, lat, lng, speed, heading) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [uuidv4(), req.params.id, (driver.current_order_id as string) || null, lat, lng, speed, heading]);
+    appEvents.emit('driver:location_updated', {
+      driver_id: req.params.id,
+      lat, lng, speed, heading,
+      address: address || (driver.current_address as string) || '',
+    });
     res.json({ success: true });
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
