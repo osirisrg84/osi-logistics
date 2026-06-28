@@ -716,6 +716,7 @@ export default function DriverPortal() {
   const onTimeRt  = driver?.on_time_rate || 0;
   const drvRating = driver?.rating || 0;
   const ACHIEVEMENTS = [
+    { icon: '✅', label: 'Perfil Completo',         desc: 'Todas las secciones del perfil llenas', unlocked: profileScore >= 7, current: profileScore,           target: 7,    showProgress: true  },
     { icon: '🚀', label: 'Primera Milla',          desc: 'Completa tu primera entrega',         unlocked: totalDel  >= 1,   current: Math.min(totalDel, 1),    target: 1,    showProgress: false },
     { icon: '📦', label: 'Arrancando',             desc: '10 entregas completadas',             unlocked: totalDel  >= 10,  current: Math.min(totalDel, 10),   target: 10,   showProgress: true  },
     { icon: '⭐', label: 'Estrella en Ascenso',    desc: '25 entregas completadas',             unlocked: totalDel  >= 25,  current: Math.min(totalDel, 25),   target: 25,   showProgress: true  },
@@ -723,7 +724,6 @@ export default function DriverPortal() {
     { icon: '🏆', label: 'Driver Élite',           desc: '100 entregas completadas',            unlocked: totalDel  >= 100, current: Math.min(totalDel, 100),  target: 100,  showProgress: true  },
     { icon: '⏰', label: 'Pro Puntualidad',         desc: '95%+ de entregas a tiempo',           unlocked: onTimeRt  >= 95,  current: Math.min(onTimeRt, 95),   target: 95,   showProgress: false },
     { icon: '🌟', label: 'Driver 5 Estrellas',     desc: 'Calificación de 4.8 o superior',      unlocked: drvRating >= 4.8, current: drvRating,                 target: 4.8,  showProgress: false },
-    { icon: '✅', label: 'Perfil Completo',         desc: 'Todas las secciones del perfil llenas', unlocked: profileScore >= 7, current: profileScore,           target: 7,    showProgress: true  },
   ];
   const unlockedCount = ACHIEVEMENTS.filter(a => a.unlocked).length;
 
