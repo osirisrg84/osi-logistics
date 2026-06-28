@@ -101,6 +101,46 @@ export default function DispatcherProfilePage() {
   return (
     <div className="max-w-lg mx-auto space-y-4 pb-8">
 
+      {/* ── Profile completion (first) ─────────────────────── */}
+      <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+               style={{ background: `${accent}18` }}>
+            <Edit3 className="w-4 h-4" style={{ color: accent }} />
+          </div>
+          <div className="flex-1">
+            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Completar perfil</h3>
+            <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{score} / {profileItems.length} secciones completas</p>
+          </div>
+          <span className="text-sm font-black" style={{ color: accent }}>{Math.round((score / profileItems.length) * 100)}%</span>
+        </div>
+        <div className={`h-1.5 rounded-full mb-3 ${dark ? 'bg-slate-700' : 'bg-gray-100'}`}>
+          <div className="h-full rounded-full transition-all"
+               style={{ width: `${(score / profileItems.length) * 100}%`, background: accentGrad }} />
+        </div>
+        <div className="space-y-1.5">
+          {profileItems.map(item => (
+            <div key={item.label} className="flex items-center gap-2">
+              <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${item.done ? '' : dark ? 'bg-slate-700' : 'bg-gray-100'}`}
+                   style={item.done ? { background: accentGrad } : {}}>
+                {item.done && <CheckCircle className="w-3 h-3 text-white" />}
+              </div>
+              <span className={`text-xs ${item.done ? dark ? 'text-slate-300' : 'text-gray-700' : dark ? 'text-slate-500' : 'text-gray-400'}`}>
+                {item.label}
+              </span>
+              {!item.done && (
+                <span className={`ml-auto text-[10px] font-medium ${dark ? 'text-slate-600' : 'text-gray-300'}`}>Pendiente</span>
+              )}
+            </div>
+          ))}
+        </div>
+        <a href="/settings"
+           className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-xl w-full transition-colors"
+           style={{ background: `${accent}15`, color: accent }}>
+          <Edit3 className="w-3 h-3" /> Editar en Settings
+        </a>
+      </div>
+
       {/* ── Hero card ──────────────────────────────────────── */}
       <div className="rounded-2xl overflow-hidden shadow-lg"
            style={{ background: accentGrad }}>
@@ -307,70 +347,6 @@ export default function DispatcherProfilePage() {
               </div>
               {a.unlocked && <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: accent }} />}
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Profile completion ─────────────────────────────── */}
-      <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-               style={{ background: `${accent}18` }}>
-            <Edit3 className="w-4 h-4" style={{ color: accent }} />
-          </div>
-          <div className="flex-1">
-            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Completar perfil</h3>
-            <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{score} / {profileItems.length} secciones completas</p>
-          </div>
-          <span className="text-sm font-black" style={{ color: accent }}>{Math.round((score / profileItems.length) * 100)}%</span>
-        </div>
-        <div className={`h-1.5 rounded-full mb-3 ${dark ? 'bg-slate-700' : 'bg-gray-100'}`}>
-          <div className="h-full rounded-full transition-all"
-               style={{ width: `${(score / profileItems.length) * 100}%`, background: accentGrad }} />
-        </div>
-        <div className="space-y-1.5">
-          {profileItems.map(item => (
-            <div key={item.label} className="flex items-center gap-2">
-              <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${item.done ? '' : dark ? 'bg-slate-700' : 'bg-gray-100'}`}
-                   style={item.done ? { background: accentGrad } : {}}>
-                {item.done && <CheckCircle className="w-3 h-3 text-white" />}
-              </div>
-              <span className={`text-xs ${item.done ? dark ? 'text-slate-300' : 'text-gray-700' : dark ? 'text-slate-500' : 'text-gray-400'}`}>
-                {item.label}
-              </span>
-              {!item.done && (
-                <span className={`ml-auto text-[10px] font-medium ${dark ? 'text-slate-600' : 'text-gray-300'}`}>Pendiente</span>
-              )}
-            </div>
-          ))}
-        </div>
-        <a href="/settings"
-           className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-xl w-full transition-colors"
-           style={{ background: `${accent}15`, color: accent }}>
-          <Edit3 className="w-3 h-3" /> Editar en Settings
-        </a>
-      </div>
-
-      {/* ── Quick info chips ────────────────────────────────── */}
-      <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
-        <div className="flex items-center gap-2 mb-3">
-          <Zap className="w-4 h-4" style={{ color: accent }} />
-          <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Resumen</h3>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {[
-            { label: isAdmin ? 'Admin' : 'Dispatcher', color: accent },
-            { label: profile.shift_active ? 'En turno' : 'Fuera de turno', color: profile.shift_active ? '#22c55e' : '#94a3b8' },
-            { label: `${totalLoads} loads`, color: '#3b82f6' },
-            { label: `⭐ ${rating}`, color: '#f59e0b' },
-            ...(profile.languages ? [{ label: profile.languages, color: '#8b5cf6' }] : []),
-            ...(profile.availability ? [{ label: profile.availability, color: '#10b981' }] : []),
-          ].map(chip => (
-            <span key={chip.label}
-                  className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                  style={{ background: `${chip.color}18`, color: chip.color, border: `1px solid ${chip.color}30` }}>
-              {chip.label}
-            </span>
           ))}
         </div>
       </div>
