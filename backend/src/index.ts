@@ -305,28 +305,31 @@ function startKeepAlive(): void {
   console.log(`   Token   : ${tursoToken ? `set (${tursoToken.length} chars)` : 'NOT SET'}`);
   console.log(`   NODE_ENV: ${process.env.NODE_ENV ?? 'undefined'}\n`);
 
-  // Retry loop — Turso free-tier databases can be sleeping and need a moment to wake
-  const MAX_ATTEMPTS = 5;
-  let lastErr: unknown;
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+  // Errors like 400/401/403 are permanent — no point retrying, switch to SQLite immediately.
+  // Transient errors (network, 5xx) get up to 3 retries.
+  const isPermanentError = (err: unknown) =>
+    err instanceof Error && /HTTP status (400|401|403)|Unauthorized|Forbidden/i.test(err.message);
+
+  let dbReady = false;
+  for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       await initDatabase();
-      lastErr = undefined;
+      dbReady = true;
       break;
     } catch (err) {
-      lastErr = err;
       const msg = err instanceof Error ? err.message : String(err);
-      console.error(`❌ DB init attempt ${attempt}/${MAX_ATTEMPTS} failed: ${msg}`);
-      if (attempt < MAX_ATTEMPTS) {
-        const delay = attempt * 3000;
-        console.log(`   Retrying in ${delay / 1000}s...`);
-        await new Promise(r => setTimeout(r, delay));
+      if (isPermanentError(err)) {
+        console.error(`❌ Turso permanent error (${msg}) — switching to local SQLite immediately`);
+        break;
+      }
+      console.error(`❌ DB init attempt ${attempt}/3: ${msg}`);
+      if (attempt < 3) {
+        await new Promise(r => setTimeout(r, attempt * 2000));
       }
     }
   }
 
-  if (lastErr) {
-    console.error('⚠️  Turso unavailable after all attempts — switching to local SQLite');
+  if (!dbReady) {
     switchToLocalSqlite();
     try {
       await initDatabase();
