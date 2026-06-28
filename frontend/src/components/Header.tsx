@@ -396,78 +396,22 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
       {/* MOBILE: switches + panels below header row */}
       {isDispatcher && (
-        <div className="md:hidden px-3 pb-3 pt-2 space-y-2"
-             style={{ background: dark ? 'linear-gradient(180deg,rgba(15,23,42,0) 0%,rgba(15,23,42,0.6) 100%)' : 'linear-gradient(180deg,rgba(248,250,252,0) 0%,rgba(241,245,249,0.8) 100%)', borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}` }}>
-          <div className="flex gap-2">
-            {/* Activo */}
-            <button
-              onClick={() => setDispActive(v => { const nv = !v; nv ? playShiftOnSound() : playShiftOffSound(); api.put('/auth/shift', { active: nv }).catch(() => {}); return nv; })}
-              className="flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-2xl select-none active:scale-[0.95] transition-all"
-              style={{
-                background: dispActive ? 'linear-gradient(135deg,rgba(34,197,94,0.18),rgba(22,163,74,0.1))' : dark ? 'rgba(30,41,59,0.8)' : 'rgba(255,255,255,0.9)',
-                border: `1.5px solid ${dispActive ? 'rgba(34,197,94,0.4)' : dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
-                boxShadow: dispActive ? '0 4px 12px rgba(34,197,94,0.15)' : '0 1px 4px rgba(0,0,0,0.06)',
-              }}>
-              <div className="w-7 h-7 rounded-xl flex items-center justify-center"
-                   style={{ background: dispActive ? 'rgba(34,197,94,0.2)' : dark ? 'rgba(51,65,85,0.6)' : 'rgba(241,245,249,0.8)' }}>
-                <Zap className="w-3.5 h-3.5" style={{ color: dispActive ? '#4ade80' : '#94a3b8' }} />
-              </div>
-              <div className="text-center">
-                <p className={`text-[10px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-800'}`}>Activo</p>
-                <p className="text-[9px] leading-none mt-0.5" style={{ color: dispActive ? '#4ade80' : '#64748b' }}>{dispActive ? 'En turno' : 'Libre'}</p>
-              </div>
-              <div className="relative rounded-full" style={{ width: 28, height: 15, background: dispActive ? 'linear-gradient(90deg,#22c55e,#16a34a)' : dark ? 'rgba(51,65,85,0.9)' : '#e2e8f0', boxShadow: dispActive ? '0 0 6px rgba(34,197,94,0.45)' : 'none', transition: 'background 0.25s' }}>
-                <div className="absolute rounded-full bg-white" style={{ width: 11, height: 11, top: 2, left: dispActive ? 15 : 2, transition: 'left 0.22s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' }} />
-              </div>
+        <div className="md:hidden border-t border-gray-100 dark:border-slate-800 px-3 py-2 space-y-2">
+          <div className="flex gap-1.5">
+            <button onClick={() => setDispActive(v => { const nv = !v; nv ? playShiftOnSound() : playShiftOffSound(); api.put('/auth/shift', { active: nv }).catch(() => {}); return nv; })} className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(dispActive,'rgba(34,197,94,0.13)','rgba(34,197,94,0.35)')}>
+              <Zap className={`w-3 h-3 flex-shrink-0 ${dispActive ? 'text-green-400' : 'text-slate-400'}`} />
+              <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Activo</p><p className="text-[8px] leading-none mt-0.5" style={{ color: dispActive ? '#4ade80' : '#94a3b8' }}>{dispActive ? 'En turno' : 'Libre'}</p></div>
+              <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(dispActive,'linear-gradient(90deg,#22c55e,#16a34a)','rgba(34,197,94,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(dispActive)} /></div>
             </button>
-
-            {/* Notas */}
-            <button
-              onClick={() => setNotesOpen(v => !v)}
-              className="flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-2xl select-none active:scale-[0.95] transition-all"
-              style={{
-                background: notesOpen ? 'linear-gradient(135deg,rgba(251,191,36,0.18),rgba(217,119,6,0.1))' : dark ? 'rgba(30,41,59,0.8)' : 'rgba(255,255,255,0.9)',
-                border: `1.5px solid ${notesOpen ? 'rgba(251,191,36,0.4)' : dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
-                boxShadow: notesOpen ? '0 4px 12px rgba(251,191,36,0.15)' : '0 1px 4px rgba(0,0,0,0.06)',
-              }}>
-              <div className="w-7 h-7 rounded-xl flex items-center justify-center relative"
-                   style={{ background: notesOpen ? 'rgba(251,191,36,0.2)' : dark ? 'rgba(51,65,85,0.6)' : 'rgba(241,245,249,0.8)' }}>
-                <StickyNote className="w-3.5 h-3.5" style={{ color: notesOpen ? '#fbbf24' : '#94a3b8' }} />
-                {notes.length > 0 && (
-                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-400 text-white text-[8px] font-bold rounded-full flex items-center justify-center">
-                    {notes.length > 9 ? '9+' : notes.length}
-                  </span>
-                )}
-              </div>
-              <div className="text-center">
-                <p className={`text-[10px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-800'}`}>Notas</p>
-                <p className="text-[9px] leading-none mt-0.5" style={{ color: notesOpen ? '#fbbf24' : '#64748b' }}>{notes.length > 0 ? `${notes.length} nota${notes.length !== 1 ? 's' : ''}` : 'Vacío'}</p>
-              </div>
-              <div className="relative rounded-full" style={{ width: 28, height: 15, background: notesOpen ? 'linear-gradient(90deg,#f59e0b,#d97706)' : dark ? 'rgba(51,65,85,0.9)' : '#e2e8f0', boxShadow: notesOpen ? '0 0 6px rgba(251,191,36,0.45)' : 'none', transition: 'background 0.25s' }}>
-                <div className="absolute rounded-full bg-white" style={{ width: 11, height: 11, top: 2, left: notesOpen ? 15 : 2, transition: 'left 0.22s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' }} />
-              </div>
+            <button onClick={() => setNotesOpen(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(notesOpen,'rgba(251,191,36,0.13)','rgba(251,191,36,0.35)')}>
+              <StickyNote className={`w-3 h-3 flex-shrink-0 ${notesOpen ? 'text-amber-400' : 'text-slate-400'}`} />
+              <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Notas</p><p className="text-[8px] leading-none mt-0.5" style={{ color: notesOpen ? '#fbbf24' : '#94a3b8' }}>{notes.length > 0 ? `${notes.length} nota${notes.length !== 1 ? 's' : ''}` : 'Vacío'}</p></div>
+              <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(notesOpen,'linear-gradient(90deg,#f59e0b,#d97706)','rgba(251,191,36,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(notesOpen)} /></div>
             </button>
-
-            {/* Music */}
-            <button
-              onClick={() => setMusicOn(v => !v)}
-              className="flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-2xl select-none active:scale-[0.95] transition-all"
-              style={{
-                background: musicOn ? 'linear-gradient(135deg,rgba(168,85,247,0.18),rgba(124,58,237,0.1))' : dark ? 'rgba(30,41,59,0.8)' : 'rgba(255,255,255,0.9)',
-                border: `1.5px solid ${musicOn ? 'rgba(168,85,247,0.4)' : dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
-                boxShadow: musicOn ? '0 4px 12px rgba(168,85,247,0.15)' : '0 1px 4px rgba(0,0,0,0.06)',
-              }}>
-              <div className="w-7 h-7 rounded-xl flex items-center justify-center"
-                   style={{ background: musicOn ? 'rgba(168,85,247,0.2)' : dark ? 'rgba(51,65,85,0.6)' : 'rgba(241,245,249,0.8)' }}>
-                <Headphones className="w-3.5 h-3.5" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }} />
-              </div>
-              <div className="text-center">
-                <p className={`text-[10px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-800'}`}>Music</p>
-                <p className="text-[9px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#64748b' }}>{musicOn ? '▶ Play' : 'Pop'}</p>
-              </div>
-              <div className="relative rounded-full" style={{ width: 28, height: 15, background: musicOn ? 'linear-gradient(90deg,#a855f7,#7c3aed)' : dark ? 'rgba(51,65,85,0.9)' : '#e2e8f0', boxShadow: musicOn ? '0 0 6px rgba(168,85,247,0.45)' : 'none', transition: 'background 0.25s' }}>
-                <div className="absolute rounded-full bg-white" style={{ width: 11, height: 11, top: 2, left: musicOn ? 15 : 2, transition: 'left 0.22s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' }} />
-              </div>
+            <button onClick={() => setMusicOn(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(musicOn,'rgba(168,85,247,0.13)','rgba(168,85,247,0.35)')}>
+              <Headphones className={`w-3 h-3 flex-shrink-0 ${musicOn ? 'text-purple-400' : 'text-slate-400'}`} />
+              <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Music</p><p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }}>{musicOn ? '▶ Play' : 'Pop'}</p></div>
+              <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(musicOn,'linear-gradient(90deg,#a855f7,#7c3aed)','rgba(168,85,247,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(musicOn)} /></div>
             </button>
           </div>
           {SwitchPanels()}
