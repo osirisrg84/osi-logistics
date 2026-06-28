@@ -102,7 +102,7 @@ export default function DispatcherProfilePage() {
 
       {/* ── Hero card ──────────────────────────────────────── */}
       <div className="rounded-3xl overflow-hidden shadow-xl p-5"
-           style={{ background: 'linear-gradient(160deg, #1e3a5f 0%, #1e3f6b 50%, #2a4f7a 100%)' }}>
+           style={{ background: 'linear-gradient(to bottom, #132640, #0a1628)' }}>
 
         {/* Top row: avatar + company label + ID */}
         <div className="flex items-start justify-between mb-4">
@@ -112,7 +112,7 @@ export default function DispatcherProfilePage() {
                  style={{ background: accentGrad }}>
               <span className="text-white drop-shadow">{initials}</span>
             </div>
-            <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#0f1e35] ${profile.shift_active ? 'bg-green-400 pulse-dot' : 'bg-slate-500'}`} />
+            <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#0a1628] ${profile.shift_active ? 'bg-green-400 pulse-dot' : 'bg-slate-500'}`} />
           </div>
 
           {/* Company + ID */}
@@ -156,7 +156,7 @@ export default function DispatcherProfilePage() {
           ].map(s => (
             <div key={s.label}
                  className="rounded-2xl px-3 py-3 flex items-center gap-3"
-                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                 className="bg-white/[0.06] border border-white/10">
               <s.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
               <div>
                 <p className="text-[10px] text-slate-500 font-medium">{s.label}</p>
