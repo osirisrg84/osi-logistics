@@ -13,6 +13,14 @@ import { playSuccessChime } from '../utils/sounds';
 
 const STATUS_OPTIONS: OrderStatus[] = ['pending', 'offered', 'assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled'];
 
+const US_STATES = [
+  'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA',
+  'HI','ID','IL','IN','IA','KS','KY','LA','ME','MD',
+  'MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
+  'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC',
+  'SD','TN','TX','UT','VT','VA','WA','WV','WI','WY',
+];
+
 interface OrderModalProps {
   onClose: () => void;
   onSave: () => void;
@@ -130,11 +138,14 @@ function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps)
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="label">City</label>
-                    <input className="input" value={form.pickup_name} onChange={e => setForm({...form, pickup_name: e.target.value})} placeholder="Ej: ABC Warehouse" />
+                    <input className="input" value={form.pickup_name} onChange={e => setForm({...form, pickup_name: e.target.value})} placeholder="Ej: Miami" />
                   </div>
                   <div>
                     <label className="label">State *</label>
-                    <input className="input" value={form.pickup_address} onChange={e => setForm({...form, pickup_address: e.target.value})} placeholder="Full street address" required />
+                    <select className="input" value={form.pickup_address} onChange={e => setForm({...form, pickup_address: e.target.value})} required>
+                      <option value="">— Select State —</option>
+                      {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
                   </div>
                 </div>
               </div>
@@ -167,11 +178,14 @@ function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps)
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="label">City</label>
-                    <input className="input" value={form.delivery_name} onChange={e => setForm({...form, delivery_name: e.target.value})} placeholder="Ej: Cliente XYZ" />
+                    <input className="input" value={form.delivery_name} onChange={e => setForm({...form, delivery_name: e.target.value})} placeholder="Ej: Atlanta" />
                   </div>
                   <div>
                     <label className="label">State *</label>
-                    <input className="input" value={form.delivery_address} onChange={e => setForm({...form, delivery_address: e.target.value})} placeholder="Full street address" required />
+                    <select className="input" value={form.delivery_address} onChange={e => setForm({...form, delivery_address: e.target.value})} required>
+                      <option value="">— Select State —</option>
+                      {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
                   </div>
                 </div>
               </div>
