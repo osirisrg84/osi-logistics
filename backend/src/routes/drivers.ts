@@ -120,8 +120,13 @@ router.put('/:id', async (req: Request, res: Response) => {
 router.post('/:id/location', async (req: Request, res: Response) => {
   try {
     const { lat, lng, speed = 0, heading = 0, address = '' } = req.body;
-    await exec('UPDATE drivers SET current_lat = ?, current_lng = ?, current_address = ? WHERE id = ?',
-      [lat, lng, address, req.params.id]);
+    if (address) {
+      await exec('UPDATE drivers SET current_lat = ?, current_lng = ?, current_address = ? WHERE id = ?',
+        [lat, lng, address, req.params.id]);
+    } else {
+      await exec('UPDATE drivers SET current_lat = ?, current_lng = ? WHERE id = ?',
+        [lat, lng, req.params.id]);
+    }
     const driver = await queryOne<Record<string, unknown>>('SELECT * FROM drivers WHERE id = ?', [req.params.id]);
     if (!driver) return res.status(404).json({ error: 'Driver not found' });
     await exec('INSERT INTO tracking (id, driver_id, order_id, lat, lng, speed, heading) VALUES (?, ?, ?, ?, ?, ?, ?)',
