@@ -99,7 +99,7 @@ export default function DispatcherProfilePage() {
   }
 
   return (
-    <div className="max-w-lg mx-auto space-y-4 pb-8">
+    <div className="max-w-lg mx-auto space-y-4 pb-8 px-4">
 
       {/* ── Hero card ──────────────────────────────────────── */}
       <div className="rounded-2xl overflow-hidden shadow-lg"
