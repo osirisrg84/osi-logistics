@@ -73,10 +73,34 @@ export default function Tracking() {
   const [toasts, setToasts] = useState<StatusToast[]>([]);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const driverRefs = useRef<Map<string, [number, number][]>>(new Map());
+  const geocodeCache = useRef<Map<string, string>>(new Map());
 
   const showToast = (toast: StatusToast) => {
     setToasts(prev => [...prev, toast]);
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== toast.id)), 4000);
+  };
+
+  const reverseGeocodeDriver = async (driverId: string, lat: number, lng: number): Promise<void> => {
+    const key = `${Math.round(lat * 200) / 200},${Math.round(lng * 200) / 200}`;
+    const cached = geocodeCache.current.get(key);
+    if (cached !== undefined) {
+      if (cached) setDrivers(prev => prev.map(d => d.id === driverId ? { ...d, current_address: cached } : d));
+      return;
+    }
+    try {
+      const r = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+        { headers: { 'Accept-Language': 'en-US,en' } }
+      );
+      const data = await r.json();
+      const city  = data.address?.city || data.address?.town || data.address?.village || data.address?.county || '';
+      const state = (data.address?.['ISO3166-2-lvl4'] as string | undefined)?.split('-')[1]
+                 || (data.address?.state as string | undefined)?.slice(0, 2).toUpperCase()
+                 || '';
+      const address = city ? `${city}, ${state}` : '';
+      geocodeCache.current.set(key, address);
+      if (address) setDrivers(prev => prev.map(d => d.id === driverId ? { ...d, current_address: address } : d));
+    } catch { geocodeCache.current.set(key, ''); }
   };
 
   const fetchLive = async () => {
@@ -84,6 +108,12 @@ export default function Tracking() {
       const { data } = await trackingApi.getLive();
       setDrivers(data);
       setLastUpdate(new Date());
+      // Geocode drivers that have coordinates but no saved address
+      for (const d of data as Driver[]) {
+        if (!d.current_address && d.current_lat && d.current_lng) {
+          reverseGeocodeDriver(d.id, d.current_lat, d.current_lng);
+        }
+      }
     } catch {
     } finally {
       setLoading(false);
