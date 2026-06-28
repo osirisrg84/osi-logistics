@@ -554,7 +554,32 @@ export default function DriverPortal() {
     } catch {}
   };
 
-  const gpsWatchRef = useRef<number | null>(null);
+  const gpsWatchRef  = useRef<number | null>(null);
+  const lastAddrRef  = useRef<{ lat: number; lng: number; address: string } | null>(null);
+
+  const reverseGeocode = useCallback(async (lat: number, lng: number): Promise<string> => {
+    const prev = lastAddrRef.current;
+    // skip API call if we haven't moved more than ~500 m
+    if (prev && Math.abs(lat - prev.lat) < 0.005 && Math.abs(lng - prev.lng) < 0.005) {
+      return prev.address;
+    }
+    try {
+      const r = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+        { headers: { 'Accept-Language': 'en-US,en' } }
+      );
+      const d = await r.json();
+      const city  = d.address?.city || d.address?.town || d.address?.village || d.address?.county || '';
+      const state = (d.address?.['ISO3166-2-lvl4'] as string | undefined)?.split('-')[1]
+                 || (d.address?.state as string | undefined)?.slice(0, 2).toUpperCase()
+                 || '';
+      const address = city ? `${city}, ${state}` : '';
+      lastAddrRef.current = { lat, lng, address };
+      return address;
+    } catch {
+      return lastAddrRef.current?.address ?? '';
+    }
+  }, []);
 
   useEffect(() => {
     if (!user?.driver_id || !navigator.geolocation) return;
@@ -562,10 +587,12 @@ export default function DriverPortal() {
       gpsWatchRef.current = navigator.geolocation.watchPosition(
         async (pos) => {
           try {
+            const address = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
             await driversApi.updateLocation(user.driver_id!, {
               lat: pos.coords.latitude,
               lng: pos.coords.longitude,
               speed: pos.coords.speed ?? 0,
+              address,
             });
           } catch { /* non-critical */ }
         },
@@ -584,7 +611,7 @@ export default function DriverPortal() {
         gpsWatchRef.current = null;
       }
     };
-  }, [trackingOn, user?.driver_id]);
+  }, [trackingOn, user?.driver_id, reverseGeocode]);
 
   const setStatus = async (newStatus: DriverStatus) => {
     if (!user?.driver_id || togglingStatus) return;
