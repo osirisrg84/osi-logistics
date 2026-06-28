@@ -851,24 +851,6 @@ export default function DriverPortal() {
 
               </div>
 
-              {/* Actualizar ubicación GPS — visible cuando GPS está activo */}
-              {trackingOn && (
-                <button
-                  onClick={shareLocation}
-                  disabled={gpsUpdating}
-                  className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-[11px] font-semibold transition-all active:scale-[0.97]"
-                  style={{
-                    background: 'rgba(6,182,212,0.10)',
-                    border: '1px solid rgba(6,182,212,0.30)',
-                    color: gpsUpdating ? '#475569' : '#22d3ee',
-                  }}>
-                  {gpsUpdating
-                    ? <div className="w-3 h-3 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
-                    : <Navigation className="w-3 h-3" />}
-                  {gpsUpdating ? 'Actualizando…' : 'Actualizar mi ubicación GPS'}
-                </button>
-              )}
-
               {/* Spotify embed — when music is ON */}
               {musicOn && (
                 <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(168,85,247,0.22)' }}>
