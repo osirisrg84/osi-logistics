@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Star, Award, Package, TrendingUp, Clock, CheckCircle,
-  Phone, Mail, Shield, Lock, Edit3, User, Calendar,
+  Phone, Mail, Lock, Edit3, User, Calendar,
   DollarSign, BarChart3,
 } from 'lucide-react';
 import { billingApi, userApi } from '../services/api';
@@ -68,11 +68,10 @@ export default function DispatcherProfilePage() {
 
   // ── Profile completion ──────────────────────────────────
   const profileItems = [
-    { label: 'Teléfono',          done: !!profile.phone },
-    { label: 'Código Dispatcher', done: !!profile.dispatcher_code },
-    { label: 'Método de Pago',    done: !!profile.payout_method },
-    { label: 'Años experiencia',  done: !!profile.years_experience },
-    { label: 'Idiomas',           done: !!profile.languages },
+    { label: 'Teléfono',         done: !!profile.phone },
+    { label: 'Método de Pago',   done: !!profile.payout_method },
+    { label: 'Años experiencia', done: !!profile.years_experience },
+    { label: 'Idiomas',          done: !!profile.languages },
   ];
   const score = profileItems.filter(i => i.done).length;
 
@@ -119,7 +118,15 @@ export default function DispatcherProfilePage() {
 
             {/* Name & role */}
             <div className="flex-1 min-w-0">
-              <p className="text-base font-bold text-white leading-tight truncate">{user?.name}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-base font-bold text-white leading-tight truncate">{user?.name}</p>
+                {profile.dispatcher_code && (
+                  <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md flex-shrink-0"
+                        style={{ background: `${accent}25`, color: accent }}>
+                    ID #{profile.dispatcher_code}
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-slate-400 mt-0.5 truncate">
                 {profile.availability || (isAdmin ? 'Full-time Admin' : 'Full-time Dispatcher')}
               </p>
@@ -206,10 +213,9 @@ export default function DispatcherProfilePage() {
         </div>
         <div className="space-y-2">
           {[
-            { icon: Mail,   label: user?.email || '—',          sub: 'Email' },
-            { icon: Phone,  label: profile.phone || 'Sin teléfono', sub: 'Teléfono' },
-            { icon: Shield, label: profile.dispatcher_code ? `#${profile.dispatcher_code}` : 'Sin código', sub: 'Código Dispatcher' },
-            { icon: Clock,  label: profile.availability || 'Full-time', sub: 'Disponibilidad' },
+            { icon: Mail,  label: user?.email || '—',               sub: 'Email' },
+            { icon: Phone, label: profile.phone || 'Sin teléfono',  sub: 'Teléfono' },
+            { icon: Clock, label: profile.availability || 'Full-time', sub: 'Disponibilidad' },
           ].map(row => (
             <div key={row.sub} className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
               <row.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
