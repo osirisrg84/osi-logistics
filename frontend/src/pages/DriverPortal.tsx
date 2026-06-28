@@ -5,7 +5,7 @@ import {
   Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet, Building2, CreditCard,
   Lock, ShieldCheck, Send, Bell, BellOff, CheckCheck, Award, Edit3, Zap,
   Headphones, Radio, Users, PhoneCall, MessageSquare, Heart,
-  FileText, Upload, Calendar, AlertCircle
+  FileText, Upload, Calendar, AlertCircle, Mail
 } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
 import { useAuth } from '../context/AuthContext';
@@ -266,6 +266,11 @@ export default function DriverPortal() {
       setLocalTruckMake(driver.truck_make || '');
       setCoiFileName((driver as unknown as Record<string, string>).coi_filename || '');
       setCoiExpiry((driver as unknown as Record<string, string>).coi_expiry || '');
+      const d = driver as unknown as Record<string, string>;
+      setFactoringCompany(d.factoring_company || '');
+      setFactoringPhone(d.factoring_phone || '');
+      setFactoringEmail(d.factoring_email || '');
+      setFactoringNoa(d.factoring_noa === '1' || d.factoring_noa === 'true');
     }
   }, [driver?.id]);
 
@@ -345,6 +350,14 @@ export default function DriverPortal() {
   const [coiFileName, setCoiFileName] = useState('');
   const [coiExpiry, setCoiExpiry] = useState('');
   const [coiEditing, setCoiEditing] = useState(false);
+
+  // Factoring
+  const [factoringCompany, setFactoringCompany] = useState('');
+  const [factoringPhone,   setFactoringPhone]   = useState('');
+  const [factoringEmail,   setFactoringEmail]   = useState('');
+  const [factoringNoa,     setFactoringNoa]     = useState(false); // NOA active?
+  const [editingFactoring, setEditingFactoring] = useState(false);
+  const [savingFactoring,  setSavingFactoring]  = useState(false);
 
   const fetchOrders = useCallback(async () => {
     if (!user?.driver_id) return;
@@ -708,6 +721,7 @@ export default function DriverPortal() {
     { label: 'Método de Pago',   done: !!payoutMethod },
     { label: 'Company / MC#',    done: !!(driver?.company_name && driver?.mc_number) },
     { label: 'COI / Seguro',     done: !!coiFileName },
+    { label: 'Factoring',        done: !!factoringCompany },
   ];
   const profileScore = profileItems.filter(i => i.done).length;
 
@@ -716,7 +730,7 @@ export default function DriverPortal() {
   const onTimeRt  = driver?.on_time_rate || 0;
   const drvRating = driver?.rating || 0;
   const ACHIEVEMENTS = [
-    { icon: '✅', label: 'Perfil Completo',         desc: 'Todas las secciones del perfil llenas', unlocked: profileScore >= 7, current: profileScore,           target: 7,    showProgress: true  },
+    { icon: '✅', label: 'Perfil Completo',         desc: 'Todas las secciones del perfil llenas', unlocked: profileScore >= 8, current: profileScore,           target: 8,    showProgress: true  },
     { icon: '🚀', label: 'Primera Milla',          desc: 'Completa tu primera entrega',         unlocked: totalDel  >= 1,   current: Math.min(totalDel, 1),    target: 1,    showProgress: false },
     { icon: '📦', label: 'Arrancando',             desc: '10 entregas completadas',             unlocked: totalDel  >= 10,  current: Math.min(totalDel, 10),   target: 10,   showProgress: true  },
     { icon: '⭐', label: 'Estrella en Ascenso',    desc: '25 entregas completadas',             unlocked: totalDel  >= 25,  current: Math.min(totalDel, 25),   target: 25,   showProgress: true  },
@@ -1806,6 +1820,109 @@ export default function DriverPortal() {
               </div>
             );
           })()}
+
+          {/* Factoring */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center">
+                  <Building2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Factoring</h3>
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500">Broker Check · NOA</p>
+                </div>
+              </div>
+              <button onClick={() => setEditingFactoring(v => !v)}
+                className="flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-700 font-medium px-2 py-1 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">
+                <Edit3 className="w-3 h-3" /> {editingFactoring ? 'Cerrar' : 'Editar'}
+              </button>
+            </div>
+
+            {/* NOA badge */}
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${factoringNoa ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400'}`}>
+                {factoringNoa ? '✓ NOA Activo' : 'Sin NOA'}
+              </span>
+              {factoringCompany && (
+                <span className="text-xs font-medium text-gray-700 dark:text-slate-300 truncate">{factoringCompany}</span>
+              )}
+            </div>
+
+            {!factoringCompany && !editingFactoring && (
+              <p className="text-xs text-gray-400 dark:text-slate-500">Sin información de factoring</p>
+            )}
+
+            {factoringCompany && !editingFactoring && (
+              <div className="space-y-1 text-xs text-gray-500 dark:text-slate-400">
+                {factoringPhone && <p className="flex items-center gap-1"><Phone className="w-3 h-3 flex-shrink-0 text-indigo-400" />{factoringPhone}</p>}
+                {factoringEmail && <p className="flex items-center gap-1"><Mail className="w-3 h-3 flex-shrink-0 text-indigo-400" />{factoringEmail}</p>}
+              </div>
+            )}
+
+            {editingFactoring && (
+              <div className="mt-3 space-y-2.5">
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Empresa de Factoring</p>
+                  <input className="input text-sm w-full" value={factoringCompany}
+                    onChange={e => setFactoringCompany(e.target.value)}
+                    placeholder="Ej: OTR Solutions, RTS Financial..." />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Teléfono</p>
+                    <input className="input text-sm w-full" value={factoringPhone}
+                      onChange={e => setFactoringPhone(e.target.value)}
+                      placeholder="(800) 000-0000" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Email</p>
+                    <input className="input text-sm w-full" value={factoringEmail}
+                      onChange={e => setFactoringEmail(e.target.value)}
+                      placeholder="noa@factor.com" />
+                  </div>
+                </div>
+                {/* NOA toggle */}
+                <div className="flex items-center justify-between py-2 px-3 rounded-xl bg-gray-50 dark:bg-slate-700/50">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-700 dark:text-slate-300">NOA (Notice of Assignment)</p>
+                    <p className="text-[10px] text-gray-400 dark:text-slate-500">Brokers deben pagar a la empresa de factoring</p>
+                  </div>
+                  <button onClick={() => setFactoringNoa(v => !v)}
+                    className="relative rounded-full flex-shrink-0 ml-3"
+                    style={{ width: 36, height: 20, background: factoringNoa ? '#6366f1' : 'rgba(100,116,139,0.4)', transition: 'background 0.2s' }}>
+                    <div className="absolute rounded-full bg-white"
+                      style={{ width: 14, height: 14, top: 3, left: factoringNoa ? 19 : 3, transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
+                  </button>
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <button onClick={() => setEditingFactoring(false)}
+                    className="flex-1 text-xs py-1.5 rounded-xl border border-gray-200 dark:border-slate-600 text-gray-500">
+                    Cancelar
+                  </button>
+                  <button
+                    disabled={savingFactoring}
+                    onClick={async () => {
+                      if (!driverId) return;
+                      setSavingFactoring(true);
+                      try {
+                        await driversApi.update(driverId, {
+                          factoring_company: factoringCompany,
+                          factoring_phone:   factoringPhone,
+                          factoring_email:   factoringEmail,
+                          factoring_noa:     factoringNoa ? '1' : '0',
+                        });
+                        setEditingFactoring(false);
+                      } catch {} finally { setSavingFactoring(false); }
+                    }}
+                    className="flex-1 text-xs py-1.5 rounded-xl bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors flex items-center justify-center gap-1">
+                    {savingFactoring ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+                    Guardar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Pagos shortcut */}
           <button

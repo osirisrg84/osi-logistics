@@ -30,6 +30,10 @@ export interface Driver {
   company_name?: string;
   mc_number?: string;
   gps_active?: number;
+  factoring_company?: string;
+  factoring_phone?: string;
+  factoring_email?: string;
+  factoring_noa?: string;
   authority_since?: string;
   payment_method?: string;
   payment_details?: string;
