@@ -179,9 +179,17 @@ function addToSimulation(driverId: string): void {
   }
 }
 
+const DEMO_EMAIL_SUFFIX = '@osilogistics.com';
+
+async function isDemoDriver(driverId: string): Promise<boolean> {
+  const row = await queryOne<{email:string}>('SELECT email FROM drivers WHERE id = ?', [driverId]);
+  return !!row?.email?.endsWith(DEMO_EMAIL_SUFFIX);
+}
+
 async function startSimulation(): Promise<void> {
   const onlineDrivers = await query<{id:string}>(`
-    SELECT id FROM drivers WHERE status IN ('busy','available','on_break') LIMIT 5
+    SELECT id FROM drivers WHERE status IN ('busy','available','on_break')
+    AND email LIKE '%${DEMO_EMAIL_SUFFIX}' LIMIT 5
   `);
   onlineDrivers.forEach(d => addToSimulation(d.id));
 
@@ -214,7 +222,7 @@ async function startSimulation(): Promise<void> {
     }
 
     if (event.status !== 'offline') {
-      addToSimulation(event.id);
+      isDemoDriver(event.id).then(isDemo => { if (isDemo) addToSimulation(event.id); });
     } else {
       simStates.delete(event.id);
       io.to('tracking').emit('driver_went_offline', { id: event.id });
