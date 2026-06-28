@@ -554,13 +554,33 @@ export default function DriverPortal() {
     } catch {}
   };
 
+  const shareLocation = useCallback(async (driverId: string) => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          await driversApi.updateLocation(driverId, {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            speed: pos.coords.speed ?? 0,
+          });
+        } catch { /* non-critical */ }
+      },
+      () => { /* permission denied — keep existing coords */ },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  }, []);
+
   const setStatus = async (newStatus: DriverStatus) => {
     if (!user?.driver_id || togglingStatus) return;
     setTogglingStatus(true);
     try {
       await driversApi.update(user.driver_id, { status: newStatus });
       setDriverStatus(newStatus);
-      if (newStatus === 'available' && driverStatus === 'offline') playOnlineSound();
+      if (newStatus === 'available' && driverStatus === 'offline') {
+        playOnlineSound();
+        shareLocation(user.driver_id);
+      }
       if (newStatus === 'offline') playOfflineSound();
     } catch {
     } finally {
@@ -762,6 +782,16 @@ export default function DriverPortal() {
                     loading="lazy"
                   />
                 </div>
+              )}
+
+              {/* Update location — only when online */}
+              {driverStatus !== 'offline' && user?.driver_id && (
+                <button
+                  onClick={() => shareLocation(user.driver_id!)}
+                  className="w-full flex items-center justify-center gap-1.5 text-[11px] font-semibold py-1.5 rounded-xl border border-blue-500/25 text-blue-400 bg-blue-500/8 hover:bg-blue-500/15 transition-colors"
+                >
+                  <Navigation className="w-3 h-3" /> Actualizar mi ubicación GPS
+                </button>
               )}
 
               {/* Break / Resume — only when online */}
