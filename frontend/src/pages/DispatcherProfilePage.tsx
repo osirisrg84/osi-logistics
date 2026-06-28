@@ -106,7 +106,7 @@ export default function DispatcherProfilePage() {
            style={{ background: 'linear-gradient(to bottom, #132640, #0a1628)' }}>
 
         {/* Identity card */}
-        <div className="px-4 pb-4">
+        <div className="p-4">
           <div className="flex items-center gap-4 rounded-2xl px-4 py-3.5 bg-white/[0.06] border border-white/10">
             {/* Avatar */}
             <div className="relative flex-shrink-0">
