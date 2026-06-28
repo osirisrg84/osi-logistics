@@ -298,7 +298,38 @@ function startKeepAlive(): void {
 }
 
 (async () => {
-  await initDatabase();
+  const tursoUrl = process.env.TURSO_URL?.trim();
+  const tursoToken = process.env.TURSO_AUTH_TOKEN?.trim();
+  console.log(`\n🚛 OSI Logistics — Node ${process.version}`);
+  console.log(`   DB      : ${tursoUrl ? tursoUrl.replace(/^(libsql:\/\/[^/]{0,30}).*/, '$1...') : 'local SQLite (TURSO_URL not set)'}`);
+  console.log(`   Token   : ${tursoToken ? `set (${tursoToken.length} chars)` : 'NOT SET'}`);
+  console.log(`   NODE_ENV: ${process.env.NODE_ENV ?? 'undefined'}\n`);
+
+  // Retry loop — Turso free-tier databases can be sleeping and need a moment to wake
+  const MAX_ATTEMPTS = 5;
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      await initDatabase();
+      lastErr = undefined;
+      break;
+    } catch (err) {
+      lastErr = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`❌ DB init attempt ${attempt}/${MAX_ATTEMPTS} failed: ${msg}`);
+      if (attempt < MAX_ATTEMPTS) {
+        const delay = attempt * 3000;
+        console.log(`   Retrying in ${delay / 1000}s...`);
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+  }
+
+  if (lastErr) {
+    console.error('💀 Fatal: could not initialize database after all attempts.');
+    console.error('   Full error:', lastErr);
+    process.exit(1);
+  }
 
   httpServer.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`\n🚛 OSI Logistics Backend running on port ${PORT}`);
