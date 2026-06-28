@@ -3,7 +3,7 @@ import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
-import { initDatabase, exec, query, queryOne } from './database';
+import { initDatabase, switchToLocalSqlite, exec, query, queryOne } from './database';
 import { appEvents, DriverStatusEvent } from './events';
 import ordersRouter from './routes/orders';
 import driversRouter from './routes/drivers';
@@ -326,9 +326,14 @@ function startKeepAlive(): void {
   }
 
   if (lastErr) {
-    console.error('💀 Fatal: could not initialize database after all attempts.');
-    console.error('   Full error:', lastErr);
-    process.exit(1);
+    console.error('⚠️  Turso unavailable after all attempts — switching to local SQLite');
+    switchToLocalSqlite();
+    try {
+      await initDatabase();
+    } catch (localErr) {
+      console.error('💀 Fatal: local SQLite also failed:', localErr);
+      process.exit(1);
+    }
   }
 
   httpServer.listen(Number(PORT), '0.0.0.0', () => {

@@ -2,16 +2,20 @@ import { createClient, Client } from '@libsql/client';
 import { scryptSync, randomBytes } from 'node:crypto';
 import { v4 as uuidv4 } from 'uuid';
 
-let _db: Client;
+let _db: Client | undefined;
 
 export function getDb(): Client {
   if (!_db) {
-    _db = createClient({
-      url: (process.env.TURSO_URL || 'file:./osi_logistics.db').replace(/\s+/g, '') || 'file:./osi_logistics.db',
-      authToken: process.env.TURSO_AUTH_TOKEN?.replace(/\s+/g, '') || undefined,
-    });
+    const url = (process.env.TURSO_URL || '').replace(/\s+/g, '') || 'file:./osi_logistics.db';
+    const authToken = process.env.TURSO_AUTH_TOKEN?.replace(/\s+/g, '') || undefined;
+    _db = createClient({ url, authToken });
   }
   return _db;
+}
+
+export function switchToLocalSqlite(): void {
+  _db = createClient({ url: 'file:./osi_logistics.db' });
+  console.log('⚠️  Using local SQLite (Turso unavailable — data resets on each deploy)');
 }
 
 type ArgValue = null | boolean | number | bigint | string | ArrayBuffer;
