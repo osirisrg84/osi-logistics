@@ -129,11 +129,11 @@ function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps)
                 <p className="text-xs font-bold text-orange-600 dark:text-orange-400">Stop #1</p>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="label">Nombre del lugar</label>
+                    <label className="label">City</label>
                     <input className="input" value={form.pickup_name} onChange={e => setForm({...form, pickup_name: e.target.value})} placeholder="Ej: ABC Warehouse" />
                   </div>
                   <div>
-                    <label className="label">Dirección *</label>
+                    <label className="label">State *</label>
                     <input className="input" value={form.pickup_address} onChange={e => setForm({...form, pickup_address: e.target.value})} placeholder="Full street address" required />
                   </div>
                 </div>
@@ -166,11 +166,11 @@ function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps)
                 <p className="text-xs font-bold text-green-600 dark:text-green-400">Stop #2</p>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="label">Nombre del lugar</label>
+                    <label className="label">City</label>
                     <input className="input" value={form.delivery_name} onChange={e => setForm({...form, delivery_name: e.target.value})} placeholder="Ej: Cliente XYZ" />
                   </div>
                   <div>
-                    <label className="label">Dirección *</label>
+                    <label className="label">State *</label>
                     <input className="input" value={form.delivery_address} onChange={e => setForm({...form, delivery_address: e.target.value})} placeholder="Full street address" required />
                   </div>
                 </div>
