@@ -4,7 +4,6 @@ import {
   Phone, Mail, Shield, Zap, Lock, Edit3, User, Calendar,
   DollarSign, BarChart3,
 } from 'lucide-react';
-import osiLogo from '../assets/osi-logo.jpeg';
 import { billingApi, userApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -105,27 +104,6 @@ export default function DispatcherProfilePage() {
       {/* ── Hero card ──────────────────────────────────────── */}
       <div className="rounded-2xl overflow-hidden shadow-lg"
            style={{ background: 'linear-gradient(to bottom, #132640, #0a1628)' }}>
-
-        {/* Top bar: logo + label + shift status */}
-        <div className="px-4 pt-4 pb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src={osiLogo} alt="OSI" className="h-7 w-auto object-contain rounded-md flex-shrink-0" />
-            <span className="text-[11px] font-bold px-2.5 py-1 rounded-full tracking-wide"
-                  style={{
-                    color: isAdmin ? '#c4b5fd' : '#fdba74',
-                    background: isAdmin ? 'rgba(168,85,247,0.2)' : 'rgba(249,115,22,0.2)',
-                    border: `1px solid ${isAdmin ? 'rgba(168,85,247,0.3)' : 'rgba(249,115,22,0.3)'}`,
-                  }}>
-              OSI LOGISTICS – {isAdmin ? 'ADMIN' : 'DISPATCH'}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className={`w-2 h-2 rounded-full ${profile.shift_active ? 'bg-green-400 animate-pulse' : 'bg-slate-600'}`} />
-            <span className="text-[10px] text-white/50 font-medium">
-              {profile.shift_active ? 'En turno' : 'Fuera de turno'}
-            </span>
-          </div>
-        </div>
 
         {/* Identity card */}
         <div className="px-4 pb-4">
