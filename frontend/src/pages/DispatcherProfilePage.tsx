@@ -101,64 +101,69 @@ export default function DispatcherProfilePage() {
     <div className="max-w-lg mx-auto space-y-4 pb-8">
 
       {/* ── Hero card ──────────────────────────────────────── */}
-      <div className="rounded-2xl overflow-hidden shadow-lg"
-           style={{ background: 'linear-gradient(to bottom, #132640, #0a1628)' }}>
+      <div className="rounded-3xl overflow-hidden shadow-xl p-5"
+           style={{ background: 'linear-gradient(160deg, #0f1e35 0%, #132640 50%, #1a2f4a 100%)' }}>
 
-        {/* Identity card */}
-        <div className="p-4">
-          <div className="flex items-center gap-4 rounded-2xl px-4 py-3.5 bg-white/[0.06] border border-white/10">
-            {/* Avatar */}
-            <div className="relative flex-shrink-0">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl shadow-lg"
-                   style={{ background: accentGrad }}>
-                <span className="text-white drop-shadow-sm">{initials}</span>
-              </div>
-              <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#0f1e35] ${profile.shift_active ? 'bg-green-400 pulse-dot' : 'bg-slate-500'}`} />
+        {/* Top row: avatar + company label + ID */}
+        <div className="flex items-start justify-between mb-4">
+          {/* Avatar */}
+          <div className="relative">
+            <div className="w-20 h-20 rounded-3xl flex items-center justify-center font-black text-3xl shadow-lg"
+                 style={{ background: accentGrad }}>
+              <span className="text-white drop-shadow">{initials}</span>
             </div>
+            <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#0f1e35] ${profile.shift_active ? 'bg-green-400 pulse-dot' : 'bg-slate-500'}`} />
+          </div>
 
-            {/* Name & role */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <p className="text-base font-bold text-white leading-tight truncate">{user?.name}</p>
-                {profile.dispatcher_code && (
-                  <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md flex-shrink-0"
-                        style={{ background: `${accent}25`, color: accent }}>
-                    ID #{profile.dispatcher_code}
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-slate-400 mt-0.5 truncate">
-                {profile.availability || (isAdmin ? 'Full-time Admin' : 'Full-time Dispatcher')}
-              </p>
-              <span className="inline-flex items-center gap-1 text-xs font-semibold mt-1.5 px-2 py-0.5 rounded-full"
-                    style={{ background: `${accent}20`, color: accent }}>
-                <span className={`w-1.5 h-1.5 rounded-full ${profile.shift_active ? 'bg-green-400 pulse-dot' : 'bg-slate-500'}`} />
-                {isAdmin ? '👑 Admin' : '🎧 Dispatcher'}
+          {/* Company + ID */}
+          <div className="flex flex-col items-end gap-2 pt-1">
+            <span className="text-[11px] font-semibold tracking-widest text-white/30 uppercase">
+              OSI LOGISTICS · {isAdmin ? 'ADMIN' : 'DISPATCH'}
+            </span>
+            {profile.dispatcher_code && (
+              <span className="text-xs font-black px-3 py-1 rounded-full border"
+                    style={{ color: accent, borderColor: `${accent}50`, background: `${accent}15` }}>
+                ID #{profile.dispatcher_code}
               </span>
-            </div>
-
-            {/* Rating badge */}
-            <div className="flex flex-col items-center rounded-2xl px-3 py-2 flex-shrink-0 bg-amber-500/10 border border-amber-500/20">
-              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-              <span className="text-sm font-bold text-white mt-0.5">{rating}</span>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* Stats bar */}
-        <div className="px-4 pb-5">
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { label: 'Total Loads', value: String(totalLoads) },
-              { label: 'Este mes',    value: String(monthLoads) },
-              { label: 'Logros',      value: `${unlockedCount}/${ACHIEVEMENTS.length}` },
-            ].map(s => (
-              <div key={s.label} className="rounded-2xl px-2 py-4 text-center bg-white/[0.06] border border-white/10">
-                <p className="text-2xl font-bold" style={{ color: accent }}>{s.value}</p>
-                <p className="text-xs mt-0.5 text-slate-500">{s.label}</p>
+        {/* Name + contact */}
+        <p className="text-2xl font-black text-white mb-2">{user?.name}</p>
+        <div className="space-y-1 mb-5">
+          {user?.email && (
+            <div className="flex items-center gap-2">
+              <Mail className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+              <span className="text-sm text-blue-400 font-medium">{user.email}</span>
+            </div>
+          )}
+          {profile.phone && (
+            <div className="flex items-center gap-2">
+              <Phone className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+              <span className="text-sm text-slate-300">{profile.phone}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Stats 2×2 grid */}
+        <div className="grid grid-cols-2 gap-2.5">
+          {[
+            { icon: Package,    label: 'Total Loads',  value: String(totalLoads) },
+            { icon: TrendingUp, label: 'Este mes',     value: String(monthLoads) },
+            { icon: Star,       label: 'Rating',       value: `★ ${rating}` },
+            { icon: Award,      label: 'Logros',       value: `${unlockedCount}/${ACHIEVEMENTS.length}` },
+          ].map(s => (
+            <div key={s.label}
+                 className="rounded-2xl px-3 py-3 flex items-center gap-3"
+                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <s.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
+              <div>
+                <p className="text-[10px] text-slate-500 font-medium">{s.label}</p>
+                <p className="text-base font-black text-white leading-tight">{s.value}</p>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
 
