@@ -4,6 +4,7 @@ import {
   Phone, Mail, Shield, Zap, Lock, Edit3, User, Calendar,
   DollarSign, BarChart3,
 } from 'lucide-react';
+import osiLogo from '../assets/osi-logo.jpeg';
 import { billingApi, userApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -103,68 +104,76 @@ export default function DispatcherProfilePage() {
 
       {/* ── Hero card ──────────────────────────────────────── */}
       <div className="rounded-2xl overflow-hidden shadow-lg"
-           style={{ background: accentGrad }}>
-        <div className="px-5 pt-6 pb-4">
-          {/* Avatar + name */}
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-2xl font-black text-white shadow-inner flex-shrink-0">
-              {initials}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-xl font-black text-white truncate">{user?.name}</h2>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white">
-                  {isAdmin ? '👑 Admin' : '🎧 Dispatcher'}
-                </span>
-                {profile.dispatcher_code && (
-                  <span className="text-[11px] font-mono text-white/70">#{profile.dispatcher_code}</span>
-                )}
-              </div>
-            </div>
-          </div>
+           style={{ background: 'linear-gradient(to bottom, #132640, #0a1628)' }}>
 
-          {/* Star rating */}
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex gap-0.5">
-              {[1,2,3,4,5].map(i => {
-                const filled = Number(rating) >= i;
-                const half   = !filled && Number(rating) >= i - 0.5;
-                return (
-                  <Star key={i}
-                    className="w-5 h-5"
-                    style={{ color: '#fbbf24', fill: filled ? '#fbbf24' : half ? 'url(#half)' : 'none' }} />
-                );
-              })}
-            </div>
-            <span className="text-white font-black text-lg">{rating}</span>
-            <span className="text-white/60 text-xs">/ 5.0</span>
-            <span className="text-white/50 text-[10px] ml-1">({totalLoads} loads)</span>
+        {/* Top bar: logo + label + shift status */}
+        <div className="px-4 pt-4 pb-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <img src={osiLogo} alt="OSI" className="h-7 w-auto object-contain rounded-md flex-shrink-0" />
+            <span className="text-[11px] font-bold px-2.5 py-1 rounded-full tracking-wide"
+                  style={{
+                    color: isAdmin ? '#c4b5fd' : '#fdba74',
+                    background: isAdmin ? 'rgba(168,85,247,0.2)' : 'rgba(249,115,22,0.2)',
+                    border: `1px solid ${isAdmin ? 'rgba(168,85,247,0.3)' : 'rgba(249,115,22,0.3)'}`,
+                  }}>
+              OSI LOGISTICS – {isAdmin ? 'ADMIN' : 'DISPATCH'}
+            </span>
           </div>
-
-          {/* Quick stats row */}
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { label: 'Total Loads', value: totalLoads },
-              { label: 'Este mes',    value: monthLoads },
-              { label: 'Logros',      value: `${unlockedCount}/${ACHIEVEMENTS.length}` },
-            ].map(s => (
-              <div key={s.label} className="bg-white/15 rounded-xl p-2.5 text-center">
-                <p className="text-lg font-black text-white">{s.value}</p>
-                <p className="text-[10px] text-white/60 font-medium">{s.label}</p>
-              </div>
-            ))}
+          <div className="flex items-center gap-1.5">
+            <div className={`w-2 h-2 rounded-full ${profile.shift_active ? 'bg-green-400 animate-pulse' : 'bg-slate-600'}`} />
+            <span className="text-[10px] text-white/50 font-medium">
+              {profile.shift_active ? 'En turno' : 'Fuera de turno'}
+            </span>
           </div>
         </div>
 
-        {/* Shift status bar */}
-        <div className="px-5 py-2.5 bg-black/20 flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${profile.shift_active ? 'bg-green-400 animate-pulse' : 'bg-slate-500'}`} />
-          <span className="text-xs text-white/80 font-medium">
-            {profile.shift_active ? 'Turno activo · En línea' : 'Fuera de turno'}
-          </span>
-          {profile.years_experience ? (
-            <span className="ml-auto text-xs text-white/50">{profile.years_experience} año{profile.years_experience !== 1 ? 's' : ''} de experiencia</span>
-          ) : null}
+        {/* Identity card */}
+        <div className="px-4 pb-4">
+          <div className="flex items-center gap-4 rounded-2xl px-4 py-3.5 bg-white/[0.06] border border-white/10">
+            {/* Avatar */}
+            <div className="relative flex-shrink-0">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl shadow-lg"
+                   style={{ background: accentGrad }}>
+                <span className="text-white drop-shadow-sm">{initials}</span>
+              </div>
+              <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#0f1e35] ${profile.shift_active ? 'bg-green-400 pulse-dot' : 'bg-slate-500'}`} />
+            </div>
+
+            {/* Name & role */}
+            <div className="flex-1 min-w-0">
+              <p className="text-base font-bold text-white leading-tight truncate">{user?.name}</p>
+              <p className="text-xs text-slate-400 mt-0.5 truncate">
+                {profile.availability || (isAdmin ? 'Full-time Admin' : 'Full-time Dispatcher')}
+              </p>
+              <span className="inline-flex items-center gap-1 text-xs font-semibold mt-1.5 px-2 py-0.5 rounded-full"
+                    style={{ background: `${accent}20`, color: accent }}>
+                <span className={`w-1.5 h-1.5 rounded-full ${profile.shift_active ? 'bg-green-400 pulse-dot' : 'bg-slate-500'}`} />
+                {isAdmin ? '👑 Admin' : '🎧 Dispatcher'}
+              </span>
+            </div>
+
+            {/* Rating badge */}
+            <div className="flex flex-col items-center rounded-2xl px-3 py-2 flex-shrink-0 bg-amber-500/10 border border-amber-500/20">
+              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              <span className="text-sm font-bold text-white mt-0.5">{rating}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats bar */}
+        <div className="px-4 pb-5">
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label: 'Total Loads', value: String(totalLoads) },
+              { label: 'Este mes',    value: String(monthLoads) },
+              { label: 'Logros',      value: `${unlockedCount}/${ACHIEVEMENTS.length}` },
+            ].map(s => (
+              <div key={s.label} className="rounded-2xl px-2 py-4 text-center bg-white/[0.06] border border-white/10">
+                <p className="text-2xl font-bold" style={{ color: accent }}>{s.value}</p>
+                <p className="text-xs mt-0.5 text-slate-500">{s.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
