@@ -102,7 +102,7 @@ export default function DispatcherProfilePage() {
 
       {/* ── Hero card ──────────────────────────────────────── */}
       <div className="rounded-3xl overflow-hidden shadow-xl p-5"
-           style={{ background: 'linear-gradient(160deg, #0f1e35 0%, #132640 50%, #1a2f4a 100%)' }}>
+           style={{ background: 'linear-gradient(160deg, #1e3a5f 0%, #1e3f6b 50%, #2a4f7a 100%)' }}>
 
         {/* Top row: avatar + company label + ID */}
         <div className="flex items-start justify-between mb-4">
