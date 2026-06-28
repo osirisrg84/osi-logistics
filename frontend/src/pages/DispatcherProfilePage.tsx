@@ -155,7 +155,7 @@ export default function DispatcherProfilePage() {
             { icon: Award,      label: 'Logros',       value: `${unlockedCount}/${ACHIEVEMENTS.length}` },
           ].map(s => (
             <div key={s.label}
-                 className="rounded-2xl px-3 py-3 flex items-center gap-3 bg-white/[0.06] border border-white/10">
+                 className="rounded-2xl px-3 py-3 flex items-center gap-3 bg-white/5 border border-white/10">
               <s.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
               <div>
                 <p className="text-[10px] text-slate-500 font-medium">{s.label}</p>
