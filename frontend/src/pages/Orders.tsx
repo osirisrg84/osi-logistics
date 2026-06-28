@@ -1,7 +1,8 @@
 ﻿import { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Search, Filter, X, ChevronDown, Package,
-  MapPin, User, Truck, Clock, DollarSign, Eye, Edit2, Trash2, UserCheck, CheckCircle
+  MapPin, User, Truck, Clock, DollarSign, Eye, Edit2, Trash2, UserCheck, CheckCircle,
+  Building2, Phone, Mail, Hash
 } from 'lucide-react';
 import { Order, Driver, Truck as TruckType, OrderStatus } from '../types';
 import { ordersApi, driversApi, trucksApi } from '../services/api';
@@ -231,9 +232,52 @@ function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps)
               <UserCheck className="w-4 h-4 text-blue-500" /> Asignar Driver <span className="text-xs font-normal text-gray-400">(opcional)</span>
             </h3>
             <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30 rounded-xl p-4 space-y-3">
+
+              {/* Company header — shown when a driver is selected */}
+              {(() => {
+                const sel = availableDrivers.find(d => d.id === assignDriverId);
+                if (!sel) return null;
+                return (
+                  <div className="bg-white dark:bg-slate-700/60 rounded-lg border border-blue-200 dark:border-blue-700/40 p-3 mb-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Building2 className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                      <span className="text-sm font-bold text-gray-800 dark:text-slate-100 truncate">
+                        {sel.company_name || 'OSI Logistics LLC'}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-slate-400">
+                      <div className="flex items-center gap-1 col-span-1">
+                        <Phone className="w-3 h-3 flex-shrink-0 text-blue-400" />
+                        <span className="truncate">{sel.phone || '—'}</span>
+                      </div>
+                      <div className="flex items-center gap-1 col-span-2">
+                        <Mail className="w-3 h-3 flex-shrink-0 text-blue-400" />
+                        <span className="truncate">{sel.email || '—'}</span>
+                      </div>
+                      {sel.mc_number && (
+                        <div className="flex items-center gap-1 col-span-3">
+                          <Hash className="w-3 h-3 flex-shrink-0 text-blue-400" />
+                          <span className="font-medium text-gray-600 dark:text-slate-300">MC# {sel.mc_number}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-blue-100 dark:border-blue-700/30 flex items-center gap-2 text-xs text-gray-600 dark:text-slate-300">
+                      <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
+                        {sel.avatar || sel.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <span className="font-semibold">{sel.name}</span>
+                      <span className="text-gray-400">·</span>
+                      <span>★ {sel.rating.toFixed(1)}</span>
+                      <span className="text-gray-400">·</span>
+                      <span>{sel.total_deliveries} viajes</span>
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div>
                 <label className="label">Conductor ({availableDrivers.length} disponibles)</label>
-                <select className="input" value={assignDriverId} onChange={e => setAssignDriverId(e.target.value)}>
+                <select className="input" value={assignDriverId} onChange={e => { setAssignDriverId(e.target.value); setAssignTruckId(''); }}>
                   <option value="">Sin asignar — asignar después</option>
                   {availableDrivers.map(d => (
                     <option key={d.id} value={d.id}>{d.name} · ★{d.rating.toFixed(1)} · {d.total_deliveries} viajes</option>
