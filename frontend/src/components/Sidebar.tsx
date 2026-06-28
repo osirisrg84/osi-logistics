@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import osiLogo from '../assets/osi-logo.jpeg';
 import {
   LayoutDashboard, Package, MapPin, Users, Truck,
-  BarChart3, Settings, Zap, Shield, ClipboardList, UserCog, X, Receipt, TrendingUp, Headset, Layers, ShieldCheck
+  BarChart3, Settings, Zap, Shield, ClipboardList, UserCog, X, Receipt, TrendingUp, Headset, Layers, ShieldCheck, UserCircle
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -18,13 +18,15 @@ const SHARED_NAV = [
 ];
 
 const DISPATCHER_ONLY_NAV = [
-  { to: '/commissions', icon: TrendingUp, label: 'Mis Comisiones' },
+  { to: '/commissions', icon: TrendingUp,  label: 'Mis Comisiones' },
+  { to: '/profile',     icon: UserCircle,  label: 'Mi Perfil'      },
 ];
 
 const ADMIN_ONLY_NAV = [
   { to: '/billing',       icon: Receipt,     label: 'Billing'         },
   { to: '/users',         icon: UserCog,     label: 'Users'           },
   { to: '/verifications', icon: ShieldCheck, label: 'Verificaciones'  },
+  { to: '/profile',       icon: UserCircle,  label: 'Mi Perfil'       },
   { to: '/settings',      icon: Settings,    label: 'Settings'        },
 ];
 
