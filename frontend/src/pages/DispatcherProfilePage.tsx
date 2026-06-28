@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Star, Award, Package, TrendingUp, Clock, CheckCircle,
-  Phone, Mail, Shield, Zap, Lock, Edit3, User, Calendar,
+  Phone, Mail, Shield, Lock, Edit3, User, Calendar,
   DollarSign, BarChart3,
 } from 'lucide-react';
 import { billingApi, userApi } from '../services/api';
@@ -155,149 +155,6 @@ export default function DispatcherProfilePage() {
         </div>
       </div>
 
-      {/* ── Earnings summary ───────────────────────────────── */}
-      <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-               style={{ background: isAdmin ? 'rgba(168,85,247,0.12)' : 'rgba(249,115,22,0.12)' }}>
-            <DollarSign className="w-4 h-4" style={{ color: accent }} />
-          </div>
-          <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Comisiones</h3>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            { label: 'Cobrado',   value: `$${totalEarned.toFixed(2)}`,   color: '#22c55e' },
-            { label: 'Pendiente', value: `$${pendingEarned.toFixed(2)}`, color: '#f59e0b' },
-          ].map(s => (
-            <div key={s.label} className={`rounded-xl p-3 ${dark ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-              <p className="text-xs font-semibold" style={{ color: s.color }}>{s.label}</p>
-              <p className={`text-lg font-black mt-0.5 ${dark ? 'text-white' : 'text-gray-900'}`}>{s.value}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Performance stats ──────────────────────────────── */}
-      <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-               style={{ background: 'rgba(59,130,246,0.12)' }}>
-            <BarChart3 className="w-4 h-4 text-blue-500" />
-          </div>
-          <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Performance</h3>
-        </div>
-        <div className="space-y-2.5">
-          {[
-            { icon: Package,   label: 'Cargas totales despachadas', value: totalLoads,               unit: 'loads',  color: accent },
-            { icon: Calendar,  label: 'Cargas este mes',             value: monthLoads,               unit: 'loads',  color: '#3b82f6' },
-            { icon: TrendingUp,label: 'Rating actual',               value: rating,                   unit: '/ 5.0',  color: '#f59e0b' },
-            { icon: Award,     label: 'Logros desbloqueados',        value: unlockedCount,            unit: `/ ${ACHIEVEMENTS.length}`, color: '#22c55e' },
-          ].map(s => (
-            <div key={s.label} className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                   style={{ background: `${s.color}18` }}>
-                <s.icon className="w-4 h-4" style={{ color: s.color }} />
-              </div>
-              <div className="flex-1">
-                <p className={`text-xs ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{s.label}</p>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className={`text-sm font-black ${dark ? 'text-white' : 'text-gray-900'}`}>{s.value}</span>
-                <span className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{s.unit}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Contact info ───────────────────────────────────── */}
-      <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-               style={{ background: 'rgba(16,185,129,0.12)' }}>
-            <User className="w-4 h-4 text-emerald-500" />
-          </div>
-          <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Información de contacto</h3>
-        </div>
-        <div className="space-y-2">
-          {[
-            { icon: Mail,   label: user?.email || '—',          sub: 'Email' },
-            { icon: Phone,  label: profile.phone || 'Sin teléfono', sub: 'Teléfono' },
-            { icon: Shield, label: profile.dispatcher_code ? `#${profile.dispatcher_code}` : 'Sin código', sub: 'Código Dispatcher' },
-            { icon: Clock,  label: profile.availability || 'Full-time', sub: 'Disponibilidad' },
-          ].map(row => (
-            <div key={row.sub} className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
-              <row.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
-              <div>
-                <p className={`text-xs font-medium ${dark ? 'text-white' : 'text-gray-800'}`}>{row.label}</p>
-                <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{row.sub}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Achievements ───────────────────────────────────── */}
-      <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                 style={{ background: 'rgba(251,191,36,0.12)' }}>
-              <Award className="w-4 h-4 text-yellow-500" />
-            </div>
-            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Logros</h3>
-          </div>
-          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${dark ? 'bg-slate-700 text-slate-300' : 'bg-gray-100 text-gray-600'}`}>
-            {unlockedCount} / {ACHIEVEMENTS.length}
-          </span>
-        </div>
-
-        {/* Progress bar */}
-        <div className={`h-1.5 rounded-full mb-4 mt-2 ${dark ? 'bg-slate-700' : 'bg-gray-100'}`}>
-          <div className="h-full rounded-full transition-all"
-               style={{ width: `${(unlockedCount / ACHIEVEMENTS.length) * 100}%`, background: accentGrad }} />
-        </div>
-
-        <div className="space-y-2">
-          {ACHIEVEMENTS.map(a => (
-            <div key={a.label}
-                 className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
-                   a.unlocked
-                     ? dark ? 'bg-slate-700/60' : 'bg-gray-50'
-                     : dark ? 'bg-slate-800/40 opacity-60' : 'bg-gray-50/50 opacity-60'
-                 }`}>
-              <div className="text-2xl w-9 h-9 flex items-center justify-center flex-shrink-0">
-                {a.unlocked ? a.icon : <Lock className="w-4 h-4 text-gray-400 dark:text-slate-600" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className={`text-sm font-semibold truncate ${dark ? 'text-white' : 'text-gray-900'}`}>{a.label}</p>
-                  {a.unlocked && (
-                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
-                          style={{ background: `${accent}20`, color: accent }}>
-                      UNLOCKED
-                    </span>
-                  )}
-                </div>
-                <p className={`text-[11px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{a.desc}</p>
-                {!a.unlocked && (
-                  <div className="mt-1.5">
-                    <div className={`h-1 rounded-full ${dark ? 'bg-slate-600' : 'bg-gray-200'}`}>
-                      <div className="h-full rounded-full transition-all"
-                           style={{ width: `${Math.min((a.current / a.target) * 100, 100)}%`, background: accentGrad }} />
-                    </div>
-                    <p className={`text-[9px] mt-0.5 ${dark ? 'text-slate-600' : 'text-gray-300'}`}>
-                      {typeof a.current === 'number' && a.current % 1 !== 0 ? a.current.toFixed(1) : a.current} / {a.target}
-                    </p>
-                  </div>
-                )}
-              </div>
-              {a.unlocked && <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: accent }} />}
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* ── Profile completion ─────────────────────────────── */}
       <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
         <div className="flex items-center gap-2 mb-3">
@@ -338,26 +195,142 @@ export default function DispatcherProfilePage() {
         </a>
       </div>
 
-      {/* ── Quick info chips ────────────────────────────────── */}
+      {/* ── Contact info ───────────────────────────────────── */}
       <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
         <div className="flex items-center gap-2 mb-3">
-          <Zap className="w-4 h-4" style={{ color: accent }} />
-          <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Resumen</h3>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+               style={{ background: 'rgba(16,185,129,0.12)' }}>
+            <User className="w-4 h-4 text-emerald-500" />
+          </div>
+          <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Información de contacto</h3>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="space-y-2">
           {[
-            { label: isAdmin ? 'Admin' : 'Dispatcher', color: accent },
-            { label: profile.shift_active ? 'En turno' : 'Fuera de turno', color: profile.shift_active ? '#22c55e' : '#94a3b8' },
-            { label: `${totalLoads} loads`, color: '#3b82f6' },
-            { label: `⭐ ${rating}`, color: '#f59e0b' },
-            ...(profile.languages ? [{ label: profile.languages, color: '#8b5cf6' }] : []),
-            ...(profile.availability ? [{ label: profile.availability, color: '#10b981' }] : []),
-          ].map(chip => (
-            <span key={chip.label}
-                  className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                  style={{ background: `${chip.color}18`, color: chip.color, border: `1px solid ${chip.color}30` }}>
-              {chip.label}
-            </span>
+            { icon: Mail,   label: user?.email || '—',          sub: 'Email' },
+            { icon: Phone,  label: profile.phone || 'Sin teléfono', sub: 'Teléfono' },
+            { icon: Shield, label: profile.dispatcher_code ? `#${profile.dispatcher_code}` : 'Sin código', sub: 'Código Dispatcher' },
+            { icon: Clock,  label: profile.availability || 'Full-time', sub: 'Disponibilidad' },
+          ].map(row => (
+            <div key={row.sub} className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
+              <row.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
+              <div>
+                <p className={`text-xs font-medium ${dark ? 'text-white' : 'text-gray-800'}`}>{row.label}</p>
+                <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{row.sub}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Performance stats ──────────────────────────────── */}
+      <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+               style={{ background: 'rgba(59,130,246,0.12)' }}>
+            <BarChart3 className="w-4 h-4 text-blue-500" />
+          </div>
+          <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Performance</h3>
+        </div>
+        <div className="space-y-2.5">
+          {[
+            { icon: Package,    label: 'Cargas totales despachadas', value: totalLoads,  unit: 'loads',               color: accent },
+            { icon: Calendar,   label: 'Cargas este mes',            value: monthLoads,  unit: 'loads',               color: '#3b82f6' },
+            { icon: TrendingUp, label: 'Rating actual',              value: rating,      unit: '/ 5.0',               color: '#f59e0b' },
+            { icon: Award,      label: 'Logros desbloqueados',       value: unlockedCount, unit: `/ ${ACHIEVEMENTS.length}`, color: '#22c55e' },
+          ].map(s => (
+            <div key={s.label} className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                   style={{ background: `${s.color}18` }}>
+                <s.icon className="w-4 h-4" style={{ color: s.color }} />
+              </div>
+              <div className="flex-1">
+                <p className={`text-xs ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{s.label}</p>
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className={`text-sm font-black ${dark ? 'text-white' : 'text-gray-900'}`}>{s.value}</span>
+                <span className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{s.unit}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Earnings summary ───────────────────────────────── */}
+      <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+               style={{ background: isAdmin ? 'rgba(168,85,247,0.12)' : 'rgba(249,115,22,0.12)' }}>
+            <DollarSign className="w-4 h-4" style={{ color: accent }} />
+          </div>
+          <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Comisiones</h3>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { label: 'Cobrado',   value: `$${totalEarned.toFixed(2)}`,   color: '#22c55e' },
+            { label: 'Pendiente', value: `$${pendingEarned.toFixed(2)}`, color: '#f59e0b' },
+          ].map(s => (
+            <div key={s.label} className={`rounded-xl p-3 ${dark ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+              <p className="text-xs font-semibold" style={{ color: s.color }}>{s.label}</p>
+              <p className={`text-lg font-black mt-0.5 ${dark ? 'text-white' : 'text-gray-900'}`}>{s.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Achievements ───────────────────────────────────── */}
+      <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                 style={{ background: 'rgba(251,191,36,0.12)' }}>
+              <Award className="w-4 h-4 text-yellow-500" />
+            </div>
+            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Logros</h3>
+          </div>
+          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${dark ? 'bg-slate-700 text-slate-300' : 'bg-gray-100 text-gray-600'}`}>
+            {unlockedCount} / {ACHIEVEMENTS.length}
+          </span>
+        </div>
+        <div className={`h-1.5 rounded-full mb-4 mt-2 ${dark ? 'bg-slate-700' : 'bg-gray-100'}`}>
+          <div className="h-full rounded-full transition-all"
+               style={{ width: `${(unlockedCount / ACHIEVEMENTS.length) * 100}%`, background: accentGrad }} />
+        </div>
+        <div className="space-y-2">
+          {ACHIEVEMENTS.map(a => (
+            <div key={a.label}
+                 className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
+                   a.unlocked
+                     ? dark ? 'bg-slate-700/60' : 'bg-gray-50'
+                     : dark ? 'bg-slate-800/40 opacity-60' : 'bg-gray-50/50 opacity-60'
+                 }`}>
+              <div className="text-2xl w-9 h-9 flex items-center justify-center flex-shrink-0">
+                {a.unlocked ? a.icon : <Lock className="w-4 h-4 text-gray-400 dark:text-slate-600" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className={`text-sm font-semibold truncate ${dark ? 'text-white' : 'text-gray-900'}`}>{a.label}</p>
+                  {a.unlocked && (
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
+                          style={{ background: `${accent}20`, color: accent }}>
+                      UNLOCKED
+                    </span>
+                  )}
+                </div>
+                <p className={`text-[11px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{a.desc}</p>
+                {!a.unlocked && (
+                  <div className="mt-1.5">
+                    <div className={`h-1 rounded-full ${dark ? 'bg-slate-600' : 'bg-gray-200'}`}>
+                      <div className="h-full rounded-full transition-all"
+                           style={{ width: `${Math.min((a.current / a.target) * 100, 100)}%`, background: accentGrad }} />
+                    </div>
+                    <p className={`text-[9px] mt-0.5 ${dark ? 'text-slate-600' : 'text-gray-300'}`}>
+                      {typeof a.current === 'number' && a.current % 1 !== 0 ? a.current.toFixed(1) : a.current} / {a.target}
+                    </p>
+                  </div>
+                )}
+              </div>
+              {a.unlocked && <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: accent }} />}
+            </div>
           ))}
         </div>
       </div>
