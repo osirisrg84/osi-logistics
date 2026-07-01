@@ -951,30 +951,12 @@ export default function DriverPortal() {
               <p className="text-xs mt-0.5 text-slate-500">Active Orders</p>
             </div>
             <button onClick={() => setTab('delivered')}
-              className="rounded-2xl px-2 py-4 text-center relative overflow-hidden active:scale-95 transition-transform w-full"
-                 style={{
-                   background: 'linear-gradient(135deg, rgba(4,120,87,0.35) 0%, rgba(16,185,129,0.18) 40%, rgba(52,211,153,0.28) 70%, rgba(6,95,70,0.4) 100%)',
-                   border: '1px solid rgba(52,211,153,0.45)',
-                   boxShadow: '0 0 18px rgba(16,185,129,0.35), 0 0 6px rgba(52,211,153,0.25), inset 0 1px 0 rgba(167,243,208,0.2)'
-                 }}>
-              {/* Gem shine streak */}
-              <div className="absolute top-0 left-1/4 w-1/2 h-px opacity-70"
-                   style={{ background: 'linear-gradient(90deg, transparent, rgba(167,243,208,0.9), transparent)' }} />
-              <div className="absolute top-1 left-[38%] w-3 h-3 rounded-full opacity-40 blur-[3px]"
-                   style={{ background: 'radial-gradient(circle, #a7f3d0, transparent)' }} />
-              <p className="font-black relative leading-tight"
-                 style={{
-                   fontSize: 'clamp(14px, 4.5vw, 20px)',
-                   background: 'linear-gradient(160deg, #6ee7b7 0%, #34d399 25%, #ffffff 48%, #34d399 65%, #059669 100%)',
-                   WebkitBackgroundClip: 'text',
-                   WebkitTextFillColor: 'transparent',
-                   backgroundClip: 'text',
-                   filter: 'drop-shadow(0 0 6px rgba(52,211,153,0.7))',
-                   textShadow: 'none',
-                 }}>
+              className="rounded-2xl px-2 py-4 text-center active:scale-95 transition-transform w-full bg-white/6 border border-white/10">
+              <p className="font-bold text-emerald-400 leading-tight"
+                 style={{ fontSize: 'clamp(13px, 4vw, 18px)' }}>
                 ${todayRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
-              <p className="text-xs mt-0.5 text-emerald-400/70">Today's Revenue</p>
+              <p className="text-xs mt-0.5 text-slate-500">Today's Revenue</p>
             </button>
             <div className="rounded-2xl px-2 py-4 text-center bg-white/6 border border-white/10">
               <Award className="w-5 h-5 text-orange-400 mx-auto" />
