@@ -1,0 +1,218 @@
+<!-- OSI Logistics Chat Widget -->
+<style>
+  #osi-chat-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #1d4ed8;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(29,78,216,0.45);
+    z-index: 9999;
+    transition: background 0.2s, transform 0.2s;
+  }
+  #osi-chat-btn:hover { background: #1e40af; transform: scale(1.07); }
+  #osi-chat-btn svg { width: 26px; height: 26px; fill: #fff; }
+
+  #osi-chat-box {
+    position: fixed;
+    bottom: 92px;
+    right: 24px;
+    width: 340px;
+    max-height: 520px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    display: none;
+    flex-direction: column;
+    z-index: 9998;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+  }
+  #osi-chat-box.open { display: flex; }
+
+  #osi-close-btn { background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; padding: 4px; line-height: 1; flex-shrink: 0; }
+  #osi-close-btn:hover { color: #475569; }
+
+  /* Messages */
+  #osi-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #f8fafc;
+  }
+  .osi-msg {
+    max-width: 82%;
+    padding: 9px 13px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.45;
+    word-break: break-word;
+  }
+  .osi-msg.bot {
+    background: #fff;
+    color: #1e293b;
+    align-self: flex-start;
+    border: 1px solid #e2e8f0;
+    border-bottom-left-radius: 4px;
+  }
+  .osi-msg.user {
+    background: #1d4ed8;
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+  .osi-msg.typing { color: #94a3b8; font-style: italic; }
+
+  /* Bottom: agent row + input */
+  #osi-bottom {
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+  }
+  #osi-agent-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  #osi-agent-row .av {
+    width: 38px; height: 38px; border-radius: 50%;
+    overflow: hidden; flex-shrink: 0;
+    border: 2px solid #e2e8f0;
+  }
+  #osi-agent-row .av img { width: 100%; height: 100%; object-fit: cover; }
+  #osi-agent-row .info { flex: 1; }
+  #osi-agent-row .name { font-size: 13px; font-weight: 700; color: #1e293b; line-height: 1.2; }
+  #osi-agent-row .role { font-size: 10.5px; color: #94a3b8; }
+  #osi-agent-row .status {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 10.5px; color: #22c55e; font-weight: 500; flex-shrink: 0;
+  }
+  #osi-agent-row .dot {
+    width: 6px; height: 6px; background: #22c55e;
+    border-radius: 50%; flex-shrink: 0;
+  }
+  #osi-input-row {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px 12px;
+  }
+  #osi-input {
+    flex: 1;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    padding: 9px 14px;
+    font-size: 13px;
+    outline: none;
+    font-family: inherit;
+  }
+  #osi-input:focus { border-color: #1d4ed8; }
+  #osi-send-btn {
+    width: 38px; height: 38px; flex-shrink: 0;
+    background: #1d4ed8; border: none; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  #osi-send-btn:hover { background: #1e40af; }
+  #osi-send-btn svg { width: 16px; height: 16px; fill: #fff; }
+</style>
+
+<button id="osi-chat-btn" aria-label="Abrir chat">
+  <svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg>
+</button>
+
+<div id="osi-chat-box">
+  <div id="osi-messages"></div>
+
+  <div id="osi-bottom">
+    <div id="osi-agent-row">
+      <div class="av">
+        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sofia Reyes" />
+      </div>
+      <div class="info">
+        <div class="name">Sofia Reyes</div>
+        <div class="role">Dispatch Specialist · OSI Logistics</div>
+      </div>
+      <div class="status"><span class="dot"></span> En línea ahora</div>
+      <button id="osi-close-btn" aria-label="Cerrar" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;padding:4px;line-height:1;flex-shrink:0;">✕</button>
+    </div>
+    <div id="osi-input-row">
+      <input id="osi-input" type="text" placeholder="Escribe tu mensaje..." autocomplete="off" />
+      <button id="osi-send-btn" aria-label="Enviar">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const API = 'https://osi-logistics-backend.onrender.com/api/chat';
+  const btn = document.getElementById('osi-chat-btn');
+  const box = document.getElementById('osi-chat-box');
+  const closeBtn = document.getElementById('osi-close-btn');
+  const input = document.getElementById('osi-input');
+  const sendBtn = document.getElementById('osi-send-btn');
+  const msgs = document.getElementById('osi-messages');
+  let history = [], opened = false;
+
+  function addMsg(text, role) {
+    const el = document.createElement('div');
+    el.className = 'osi-msg ' + role;
+    el.textContent = text;
+    msgs.appendChild(el);
+    msgs.scrollTop = msgs.scrollHeight;
+    return el;
+  }
+
+  function openChat() {
+    box.classList.add('open');
+    opened = true;
+    if (msgs.children.length === 0)
+      addMsg('¡Hola! Soy Sofia, Dispatch Specialist de OSI Logistics. ¿En qué puedo ayudarte hoy? 😊', 'bot');
+    input.focus();
+  }
+
+  function closeChat() { box.classList.remove('open'); }
+
+  btn.addEventListener('click', function () { opened ? closeChat() : openChat(); opened = !opened; });
+  closeBtn.addEventListener('click', function () { closeChat(); opened = false; });
+
+  async function send() {
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    addMsg(text, 'user');
+    history.push({ role: 'user', content: text });
+    const typing = addMsg('Escribiendo...', 'bot typing');
+    try {
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history }),
+      });
+      const data = await res.json();
+      const reply = data.reply || 'Lo siento, hubo un error. Llámanos al (305) 335-8114.';
+      typing.remove();
+      addMsg(reply, 'bot');
+      history.push({ role: 'assistant', content: reply });
+    } catch {
+      typing.remove();
+      addMsg('Error de conexión. Llámanos al (305) 335-8114.', 'bot');
+    }
+  }
+
+  sendBtn.addEventListener('click', send);
+  input.addEventListener('keydown', function (e) { if (e.key === 'Enter') send(); });
+})();
+</script>
