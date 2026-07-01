@@ -504,6 +504,7 @@ export default function DriverPortal() {
       audio.volume = 0.25;
       audio.play().catch(() => {});
     } catch {}
+    navigator.vibrate?.([300, 100, 200, 100, 400]);
   };
 
   const playBreakSound = () => {
