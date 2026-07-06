@@ -730,7 +730,10 @@ export default function DriverPortal() {
     { label: 'Truck #',          done: !!truckNum },
     { label: 'Trailer #',        done: !!trailerNum },
     { label: 'Método de Pago',   done: !!payoutMethod },
-    { label: 'Company / MC#',    done: !!(driver?.company_name && driver?.mc_number) },
+    { label: EQUIP_WITH_DIMS.includes(localEquipType) ? 'Company / DOT#' : 'Company / MC#',
+      done: EQUIP_WITH_DIMS.includes(localEquipType)
+        ? !!(driver?.company_name && (driver as unknown as Record<string,string>).dot_number)
+        : !!(driver?.company_name && driver?.mc_number) },
     { label: 'COI / Seguro',     done: !!coiFileName },
     { label: 'Factoring',        done: !!factoringCompany },
   ];
@@ -1551,34 +1554,40 @@ export default function DriverPortal() {
             </div>
           )}
 
-          {/* Empresa / Autoridad MC */}
-          {(driver.company_name || driver.mc_number) && (
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Building2 className="w-4 h-4 text-green-500" />
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Company / Authority</h3>
+          {/* Empresa / Autoridad */}
+          {(() => {
+            const d = driver as unknown as Record<string, string>;
+            const isDotType = EQUIP_WITH_DIMS.includes(localEquipType);
+            const authNum = isDotType ? d.dot_number : driver.mc_number;
+            return (driver.company_name || authNum) ? (
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Building2 className="w-4 h-4 text-green-500" />
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Company / Authority</h3>
+                </div>
+                <div className="space-y-2.5">
+                  {driver.company_name && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500 dark:text-slate-400">Company Name</span>
+                      <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{driver.company_name}</span>
+                    </div>
+                  )}
+                  {authNum && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500 dark:text-slate-400">{isDotType ? 'DOT#' : 'MC#'}</span>
+                      <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">{authNum}</span>
+                    </div>
+                  )}
+                  {driver.authority_since && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> Tiempo con autoridad</span>
+                      <span className="text-sm font-semibold text-green-600 dark:text-green-400">{calcAuthority(driver.authority_since)}</span>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="space-y-2.5">
-                {driver.company_name && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-slate-400">Company Name</span>
-                    <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{driver.company_name}</span>
-                  </div>
-                )}
-                {driver.mc_number && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-slate-400">MC# / Póliza Comercial</span>
-                    <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">{driver.mc_number}</span>
-                  </div>
-                )}
-                {driver.authority_since && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> Tiempo con autoridad</span>
-                    <span className="text-sm font-semibold text-green-600 dark:text-green-400">{calcAuthority(driver.authority_since)}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+            ) : null;
+          })()}
           )}
 
           {/* ── My Equipment (editable) ───────────────────────── */}

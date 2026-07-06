@@ -43,8 +43,11 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
     equipment_type: driver?.equipment_type || 'Dry Van',
     company_name: driver?.company_name || '',
     mc_number: driver?.mc_number || '',
+    dot_number: (driver as unknown as Record<string,string>)?.dot_number || '',
     authority_since: driver?.authority_since || '',
   });
+  const DOT_TYPES = ['Van', 'Box Truck', 'Hotshot'];
+  const isDotType = DOT_TYPES.includes(form.equipment_type);
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,12 +110,21 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
             <div>
               <label className="label">Equipment Type</label>
               <select className="input" value={form.equipment_type} onChange={e => setForm({...form, equipment_type: e.target.value})}>
-                {['Dry Van', 'Reefer', 'Flatbed', 'Box Truck', 'Power Only', 'Hotshot', 'Tanker'].map(t => <option key={t} value={t}>{t}</option>)}
+                {['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'].map(t => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
             <div>
-              <label className="label">MC# / Póliza Comercial</label>
-              <input className="input" value={form.mc_number} onChange={e => setForm({...form, mc_number: e.target.value})} placeholder="MC-000000" />
+              {isDotType ? (
+                <>
+                  <label className="label">DOT#</label>
+                  <input className="input" value={form.dot_number} onChange={e => setForm({...form, dot_number: e.target.value})} placeholder="DOT-000000" />
+                </>
+              ) : (
+                <>
+                  <label className="label">MC#</label>
+                  <input className="input" value={form.mc_number} onChange={e => setForm({...form, mc_number: e.target.value})} placeholder="MC-000000" />
+                </>
+              )}
             </div>
             <div className="col-span-2">
               <label className="label">Company Name</label>
@@ -249,8 +261,12 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
             </div>
           )}
 
-          {/* Empresa / Autoridad MC */}
-          {(driver.company_name || driver.mc_number) && (
+          {/* Empresa / Autoridad */}
+          {(() => {
+            const dr = driver as unknown as Record<string, string>;
+            const isDot = ['Van', 'Box Truck', 'Hotshot'].includes(driver.equipment_type);
+            const authNum = isDot ? dr.dot_number : driver.mc_number;
+            return (driver.company_name || authNum) ? (
             <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
               <p className="text-xs font-semibold text-green-700 dark:text-green-400 flex items-center gap-2 mb-3">
                 <Building2 className="w-3 h-3" /> COMPANY / AUTHORITY
@@ -262,10 +278,10 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
                     <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{driver.company_name}</span>
                   </div>
                 )}
-                {driver.mc_number && (
+                {authNum && (
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-slate-400">MC# / Póliza Comercial</span>
-                    <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">{driver.mc_number}</span>
+                    <span className="text-xs text-gray-500 dark:text-slate-400">{isDot ? 'DOT#' : 'MC#'}</span>
+                    <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">{authNum}</span>
                   </div>
                 )}
                 {driver.authority_since && (
@@ -276,7 +292,8 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
                 )}
               </div>
             </div>
-          )}
+            ) : null;
+          })()}
 
           {/* Payment Method */}
           {(() => {

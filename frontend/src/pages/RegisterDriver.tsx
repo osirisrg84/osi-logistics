@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, Mail, Lock, Building2, Calendar, Hash, Clock } from 'lucide-react';
 import api from '../services/api';
 
-const EQUIPMENT_TYPES = ['Dry Van', 'Reefer', 'Flatbed', 'Box Truck', 'Power Only', 'Hotshot', 'Tanker'];
+const EQUIPMENT_TYPES = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'];
+const DOT_TYPES = ['Van', 'Box Truck', 'Hotshot'];
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
@@ -23,7 +24,7 @@ export default function RegisterDriver() {
   const [form, setForm] = useState({
     name: '', phone: '', email: '', password: '', confirm: '',
     license_number: '', license_expiry: '',
-    equipment_type: 'Dry Van', mc_number: '', company_name: '', authority_since: '',
+    equipment_type: 'Dry Van', mc_number: '', dot_number: '', company_name: '', authority_since: '',
   });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -220,10 +221,17 @@ export default function RegisterDriver() {
                   {EQUIPMENT_TYPES.map(t => <option key={t}>{t}</option>)}
                 </select>
               </Field>
-              <Field label="MC# / Póliza Comercial">
-                <input className="input" type="text" placeholder="MC-000000"
-                  value={form.mc_number} onChange={set('mc_number')} />
-              </Field>
+              {DOT_TYPES.includes(form.equipment_type) ? (
+                <Field label="DOT#">
+                  <input className="input" type="text" placeholder="DOT-000000"
+                    value={form.dot_number} onChange={set('dot_number')} />
+                </Field>
+              ) : (
+                <Field label="MC#">
+                  <input className="input" type="text" placeholder="MC-000000"
+                    value={form.mc_number} onChange={set('mc_number')} />
+                </Field>
+              )}
             </div>
 
             <Field label="Company Name">
