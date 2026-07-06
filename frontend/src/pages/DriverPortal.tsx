@@ -1557,8 +1557,8 @@ export default function DriverPortal() {
           {/* Empresa / Autoridad */}
           {(() => {
             const d = driver as unknown as Record<string, string>;
-            const isDotType = EQUIP_WITH_DIMS.includes(localEquipType);
-            const authNum = isDotType ? d.dot_number : driver.mc_number;
+            const isDotType = EQUIP_WITH_DIMS.includes(driver.equipment_type);
+            const authNum = isDotType ? (d.dot_number || driver.mc_number) : driver.mc_number;
             return (driver.company_name || authNum) ? (
               <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
                 <div className="flex items-center gap-2 mb-3">
@@ -1588,7 +1588,6 @@ export default function DriverPortal() {
               </div>
             ) : null;
           })()}
-          )}
 
           {/* ── My Equipment (editable) ───────────────────────── */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
