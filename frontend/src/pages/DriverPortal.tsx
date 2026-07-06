@@ -1637,9 +1637,15 @@ export default function DriverPortal() {
                 {EQUIP_WITH_DIMS.includes(localEquipType) && (
                   <>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500 dark:text-slate-400">Dimensiones (pies)</span>
-                      <span className={`text-sm font-semibold ${equipLength || equipWidth ? 'text-gray-800 dark:text-slate-200' : 'text-gray-300 dark:text-slate-600 italic'}`}>
-                        {equipLength && equipWidth ? `${equipLength} L × ${equipWidth} A` : equipLength || equipWidth || 'Not set'}
+                      <span className="text-xs text-gray-500 dark:text-slate-400">Largo (pies)</span>
+                      <span className={`text-sm font-semibold ${equipLength ? 'text-gray-800 dark:text-slate-200' : 'text-gray-300 dark:text-slate-600 italic'}`}>
+                        {equipLength || 'Not set'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500 dark:text-slate-400">Ancho (pies)</span>
+                      <span className={`text-sm font-semibold ${equipWidth ? 'text-gray-800 dark:text-slate-200' : 'text-gray-300 dark:text-slate-600 italic'}`}>
+                        {equipWidth || 'Not set'}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
