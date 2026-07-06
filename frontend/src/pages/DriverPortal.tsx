@@ -161,7 +161,8 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
   );
 }
 
-const EQUIP_TYPES  = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker'];
+const EQUIP_TYPES     = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'];
+const EQUIP_WITH_DIMS = ['Van', 'Box Truck', 'Hotshot'];
 const TRUCK_MAKES  = ['Peterbilt 579', 'Kenworth W900', 'Freightliner Cascadia', 'Volvo 860', 'Ford Transit 250'];
 
 const STATUS_CONFIG: Record<DriverStatus, { label: string; dot: string; bg: string; text: string }> = {
@@ -231,6 +232,9 @@ export default function DriverPortal() {
   const [trailerNum, setTrailerNum] = useState('');
   const [localEquipType, setLocalEquipType] = useState('');
   const [localTruckMake, setLocalTruckMake] = useState('');
+  const [equipLength, setEquipLength] = useState('');
+  const [equipWidth, setEquipWidth] = useState('');
+  const [loadCapacity, setLoadCapacity] = useState('');
   const [editingEquip, setEditingEquip] = useState(false);
   const [savingEquip, setSavingEquip] = useState(false);
 
@@ -264,9 +268,12 @@ export default function DriverPortal() {
       setTrailerNum(driver.trailer_number || '');
       setLocalEquipType(driver.equipment_type || '');
       setLocalTruckMake(driver.truck_make || '');
-      setCoiFileName((driver as unknown as Record<string, string>).coi_filename || '');
-      setCoiExpiry((driver as unknown as Record<string, string>).coi_expiry || '');
       const d = driver as unknown as Record<string, string>;
+      setEquipLength(d.equip_length || '');
+      setEquipWidth(d.equip_width || '');
+      setLoadCapacity(d.load_capacity || '');
+      setCoiFileName(d.coi_filename || '');
+      setCoiExpiry(d.coi_expiry || '');
       setFactoringCompany(d.factoring_company || '');
       setFactoringPhone(d.factoring_phone || '');
       setFactoringEmail(d.factoring_email || '');
@@ -278,7 +285,10 @@ export default function DriverPortal() {
     if (!driverId) return;
     setSavingEquip(true);
     try {
-      await driversApi.update(driverId, { truck_number: truckNum, trailer_number: trailerNum, equipment_type: localEquipType, truck_make: localTruckMake });
+      const dimFields = EQUIP_WITH_DIMS.includes(localEquipType)
+        ? { equip_length: equipLength, equip_width: equipWidth, load_capacity: loadCapacity }
+        : { equip_length: '', equip_width: '', load_capacity: '' };
+      await driversApi.update(driverId, { truck_number: truckNum, trailer_number: trailerNum, equipment_type: localEquipType, truck_make: localTruckMake, ...dimFields });
       setEditingEquip(false);
     } catch {} finally { setSavingEquip(false); }
   };
@@ -1624,6 +1634,22 @@ export default function DriverPortal() {
                     {trailerNum || 'Not set'}
                   </span>
                 </div>
+                {EQUIP_WITH_DIMS.includes(localEquipType) && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500 dark:text-slate-400">Dimensiones (pies)</span>
+                      <span className={`text-sm font-semibold ${equipLength || equipWidth ? 'text-gray-800 dark:text-slate-200' : 'text-gray-300 dark:text-slate-600 italic'}`}>
+                        {equipLength && equipWidth ? `${equipLength} L × ${equipWidth} A` : equipLength || equipWidth || 'Not set'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500 dark:text-slate-400">Capacidad de carga (lbs)</span>
+                      <span className={`text-sm font-semibold ${loadCapacity ? 'text-gray-800 dark:text-slate-200' : 'text-gray-300 dark:text-slate-600 italic'}`}>
+                        {loadCapacity ? `${Number(loadCapacity).toLocaleString()} lbs` : 'Not set'}
+                      </span>
+                    </div>
+                  </>
+                )}
                 {!localTruckMake && !truckNum && !trailerNum && (
                   <button onClick={() => setEditingEquip(true)}
                     className="w-full mt-1 py-2.5 rounded-xl text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
@@ -1673,6 +1699,30 @@ export default function DriverPortal() {
                   <input type="text" placeholder="e.g. T4126" value={trailerNum} onChange={e => setTrailerNum(e.target.value)}
                     className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
                 </div>
+                {EQUIP_WITH_DIMS.includes(localEquipType) && (
+                  <>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">Dimensiones (pies)</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[10px] text-gray-400 dark:text-slate-500 mb-1 block">Largo</label>
+                          <input type="number" placeholder="ej. 16" value={equipLength} onChange={e => setEquipLength(e.target.value)}
+                            className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-gray-400 dark:text-slate-500 mb-1 block">Ancho</label>
+                          <input type="number" placeholder="ej. 8" value={equipWidth} onChange={e => setEquipWidth(e.target.value)}
+                            className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">Capacidad de carga (libras)</label>
+                      <input type="number" placeholder="ej. 10000" value={loadCapacity} onChange={e => setLoadCapacity(e.target.value)}
+                        className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
