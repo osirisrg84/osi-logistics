@@ -161,7 +161,7 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
   );
 }
 
-const EQUIP_TYPES  = ['Dry Van', 'Reefer', 'Flatbed', 'Box Truck', 'Power Only', 'Hotshot', 'Tanker'];
+const EQUIP_TYPES  = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker'];
 const TRUCK_MAKES  = ['Peterbilt 579', 'Kenworth W900', 'Freightliner Cascadia', 'Volvo 860', 'Ford Transit 250'];
 
 const STATUS_CONFIG: Record<DriverStatus, { label: string; dot: string; bg: string; text: string }> = {
