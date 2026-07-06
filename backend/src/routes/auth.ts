@@ -204,13 +204,13 @@ router.get('/profile', async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: 'No token' });
-    const row = await queryOne<{ payout_method: string; payout_details: string; ssn: string }>(`
-      SELECT u.payout_method, u.payout_details, u.ssn
+    const row = await queryOne<{ payout_method: string; payout_details: string; ssn: string; dispatcher_code: string }>(`
+      SELECT u.payout_method, u.payout_details, u.ssn, u.dispatcher_code
       FROM sessions s JOIN users u ON s.user_id = u.id
       WHERE s.token = ? AND s.expires_at > datetime('now')
     `, [token]);
     if (!row) return res.status(401).json({ error: 'Invalid session' });
-    res.json({ payout_method: row.payout_method, payout_details: row.payout_details, ssn: row.ssn });
+    res.json({ payout_method: row.payout_method, payout_details: row.payout_details, ssn: row.ssn, dispatcher_code: row.dispatcher_code });
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
