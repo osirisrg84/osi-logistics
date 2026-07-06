@@ -264,7 +264,7 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
           {/* Empresa / Autoridad */}
           {(() => {
             const dr = driver as unknown as Record<string, string>;
-            const isDot = ['Van', 'Box Truck', 'Hotshot'].includes(driver.equipment_type);
+            const isDot = ['Van', 'Box Truck', 'Hotshot'].includes(driver.equipment_type || '');
             const authNum = isDot ? dr.dot_number : driver.mc_number;
             return (driver.company_name || authNum) ? (
             <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
