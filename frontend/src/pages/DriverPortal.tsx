@@ -1557,7 +1557,8 @@ export default function DriverPortal() {
           {/* Empresa / Autoridad */}
           {(() => {
             const d = driver as unknown as Record<string, string>;
-            const isDotType = EQUIP_WITH_DIMS.includes(driver.equipment_type);
+            const equipType = localEquipType || driver.equipment_type || '';
+            const isDotType = EQUIP_WITH_DIMS.includes(equipType);
             const authNum = isDotType ? (d.dot_number || driver.mc_number) : driver.mc_number;
             return (driver.company_name || authNum) ? (
               <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
