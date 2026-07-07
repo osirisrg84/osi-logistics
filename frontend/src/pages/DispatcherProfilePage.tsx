@@ -256,11 +256,11 @@ export default function DispatcherProfilePage() {
             </div>
           ))}
         </div>
-        <a href="/settings"
+        <button onClick={() => setEditingContact(true)}
            className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-xl w-full transition-colors"
            style={{ background: `${accent}15`, color: accent }}>
-          <Edit3 className="w-3 h-3" /> Editar en Settings
-        </a>
+          <Edit3 className="w-3 h-3" /> Editar información
+        </button>
       </div>
 
       {/* ── Contact info ───────────────────────────────────── */}
