@@ -739,6 +739,10 @@ export default function DriverPortal() {
       { label: 'Truck #',        done: !!truckNum },
       { label: 'Trailer #',      done: !!trailerNum },
     ] : []),
+    ...(isDotEquip ? [
+      { label: 'Dimensiones (pies)',        done: !!(equipLength && equipWidth) },
+      { label: 'Capacidad de carga (lbs)',  done: !!loadCapacity },
+    ] : []),
     { label: 'Método de Pago',   done: !!payoutMethod },
     { label: isDotEquip ? 'Company / DOT#' : 'Company / MC#',
       done: !!(driver?.company_name && authorityNum) },
@@ -1735,7 +1739,7 @@ export default function DriverPortal() {
                       </div>
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">Capacidad de carga (libras)</label>
+                      <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">Capacidad de carga (lbs)</label>
                       <input type="number" placeholder="ej. 10000" value={loadCapacity} onChange={e => setLoadCapacity(e.target.value)}
                         className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
                     </div>
