@@ -40,8 +40,8 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
     truck_make: driver?.truck_make || '',
     equipment_type: driver?.equipment_type || 'Dry Van',
     company_name: driver?.company_name || '',
-    mc_number: driver?.mc_number || '',
-    dot_number: (driver as unknown as Record<string,string>)?.dot_number || '',
+    mc_number: (driver?.mc_number || '').replace(/^(MC-|DOT-)/i, ''),
+    dot_number: ((driver as unknown as Record<string,string>)?.dot_number || '').replace(/^(MC-|DOT-)/i, ''),
     authority_since: driver?.authority_since || '',
   });
   const DOT_TYPES = ['Van', 'Box Truck', 'Hotshot'];
@@ -119,7 +119,7 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
               ) : (
                 <>
                   <label className="label">MC/DOT#</label>
-                  <input className="input" value={form.mc_number.replace(/^(MC-|DOT-)/i,'')} onChange={e => setForm({...form, mc_number: e.target.value})} placeholder="000000" />
+                  <input className="input" value={form.mc_number} onChange={e => setForm({...form, mc_number: e.target.value})} placeholder="000000" />
                 </>
               )}
             </div>
