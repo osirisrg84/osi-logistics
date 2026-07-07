@@ -313,6 +313,11 @@ export async function initDatabase(): Promise<void> {
       [p.company, p.mc, p.authority, p.email]);
   }
 
+  // Remove duplicate drivers (keep the one with the smallest id per email)
+  await exec(`DELETE FROM drivers WHERE id NOT IN (
+    SELECT MIN(id) FROM drivers GROUP BY email
+  )`);
+
   await seedDatabase();
   await seedUsers();
   await seedFavorites();
