@@ -254,7 +254,7 @@ export default function RegisterDriver() {
                 value={form.company_name} onChange={set('company_name')} />
             </Field>
 
-            <Field label="Autoridad MC desde">
+            <Field label="Autoridad MC/DOT desde">
               <input className="input" type="date"
                 value={form.authority_since} onChange={set('authority_since')} />
             </Field>
