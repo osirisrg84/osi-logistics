@@ -46,7 +46,8 @@ export default function DispatcherProfilePage() {
   const [loading, setLoading]   = useState(true);
   const [editingContact, setEditingContact] = useState(false);
   const [savingContact, setSavingContact]   = useState(false);
-  const [contactForm, setContactForm] = useState({ phone: '', city: '', availability: 'full-time', languages: '', years_experience: '' });
+  const EQUIP_TYPES = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'];
+  const [contactForm, setContactForm] = useState({ phone: '', city: '', availability: 'full-time', languages: '', years_experience: '', equipment_experience: '' });
 
   useEffect(() => {
     if (!user?.id) return;
@@ -57,11 +58,12 @@ export default function DispatcherProfilePage() {
       const p = profileRes.data || {};
       setProfile(p);
       setContactForm({
-        phone:            p.phone            || '',
-        city:             p.city             || '',
-        availability:     p.availability     || 'full-time',
-        languages:        p.languages        || '',
-        years_experience: p.years_experience != null ? String(p.years_experience) : '',
+        phone:                p.phone            || '',
+        city:                 p.city             || '',
+        availability:         p.availability     || 'full-time',
+        languages:            p.languages        || '',
+        years_experience:     p.years_experience != null ? String(p.years_experience) : '',
+        equipment_experience: p.equipment_experience || '',
       });
       setCommRows(Array.isArray(commRes.data) ? commRes.data : []);
     }).finally(() => setLoading(false));
@@ -71,19 +73,21 @@ export default function DispatcherProfilePage() {
     setSavingContact(true);
     try {
       await userApi.updateProfile({
-        phone:            contactForm.phone,
-        city:             contactForm.city,
-        availability:     contactForm.availability,
-        languages:        contactForm.languages,
-        years_experience: contactForm.years_experience ? Number(contactForm.years_experience) : 0,
+        phone:                contactForm.phone,
+        city:                 contactForm.city,
+        availability:         contactForm.availability,
+        languages:            contactForm.languages,
+        years_experience:     contactForm.years_experience ? Number(contactForm.years_experience) : 0,
+        equipment_experience: contactForm.equipment_experience,
       });
       setProfile(prev => ({
         ...prev,
-        phone:            contactForm.phone,
-        city:             contactForm.city,
-        availability:     contactForm.availability,
-        languages:        contactForm.languages,
-        years_experience: contactForm.years_experience ? Number(contactForm.years_experience) : 0,
+        phone:                contactForm.phone,
+        city:                 contactForm.city,
+        availability:         contactForm.availability,
+        languages:            contactForm.languages,
+        years_experience:     contactForm.years_experience ? Number(contactForm.years_experience) : 0,
+        equipment_experience: contactForm.equipment_experience,
       }));
       setEditingContact(false);
     } finally {
@@ -321,6 +325,29 @@ export default function DispatcherProfilePage() {
                 {['full-time', 'part-time', 'contract', 'on-call'].map(o => <option key={o}>{o}</option>)}
               </select>
             </div>
+            <div>
+              <label className={`block text-[10px] font-semibold mb-2 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Experiencia con equipos</label>
+              <div className="flex flex-wrap gap-1.5">
+                {EQUIP_TYPES.map(eq => {
+                  const selected = contactForm.equipment_experience.split(',').map(s => s.trim()).filter(Boolean).includes(eq);
+                  return (
+                    <button key={eq} type="button"
+                      onClick={() => {
+                        const current = contactForm.equipment_experience.split(',').map(s => s.trim()).filter(Boolean);
+                        const updated = selected ? current.filter(e => e !== eq) : [...current, eq];
+                        setContactForm(f => ({ ...f, equipment_experience: updated.join(', ') }));
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                        selected
+                          ? 'bg-emerald-500 text-white'
+                          : dark ? 'bg-slate-600 text-slate-300 hover:bg-slate-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}>
+                      {eq}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         ) : (
           <div className="space-y-2">
@@ -340,6 +367,16 @@ export default function DispatcherProfilePage() {
                 </div>
               </div>
             ))}
+            {profile.equipment_experience && (
+              <div className={`p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
+                <p className={`text-[10px] font-semibold mb-1.5 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Experiencia con equipos</p>
+                <div className="flex flex-wrap gap-1">
+                  {profile.equipment_experience.split(',').map(s => s.trim()).filter(Boolean).map(eq => (
+                    <span key={eq} className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">{eq}</span>
+                  ))}
+                </div>
+              </div>
+            )}
             {!profile.phone && (
               <button onClick={() => setEditingContact(true)}
                 className={`w-full mt-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${dark ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-gray-200 text-gray-400 hover:bg-gray-50'}`}>
