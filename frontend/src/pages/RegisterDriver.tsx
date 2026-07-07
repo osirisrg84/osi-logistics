@@ -26,6 +26,7 @@ export default function RegisterDriver() {
     license_number: '', license_expiry: '',
     equipment_type: 'Dry Van', mc_number: '', dot_number: '', company_name: '', authority_since: '',
   });
+  const [authorityType, setAuthorityType] = useState<'MC#' | 'DOT#'>('MC#');
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -222,18 +223,31 @@ export default function RegisterDriver() {
                   {EQUIPMENT_TYPES.map(t => <option key={t}>{t}</option>)}
                 </select>
               </Field>
-              {DOT_TYPES.includes(form.equipment_type) ? (
-                <Field label="DOT#">
-                  <input className="input" type="text" placeholder="000000"
-                    value={form.dot_number} onChange={set('dot_number')} />
-                </Field>
-              ) : (
-                <Field label="MC#">
-                  <input className="input" type="text" placeholder="000000"
-                    value={form.mc_number} onChange={set('mc_number')} />
-                </Field>
-              )}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1.5">
+                  Tipo de Autoridad
+                </label>
+                <div className="flex rounded-xl overflow-hidden border border-gray-200 h-[42px]">
+                  {(['MC#', 'DOT#'] as const).map(type => (
+                    <button key={type} type="button"
+                      onClick={() => setAuthorityType(type)}
+                      className={`flex-1 text-xs font-bold transition-colors ${
+                        authorityType === type
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-white text-gray-500 hover:bg-gray-50'
+                      }`}>
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
+
+            <Field label={authorityType}>
+              <input className="input" type="text" placeholder="000000"
+                value={authorityType === 'MC#' ? form.mc_number : form.dot_number}
+                onChange={authorityType === 'MC#' ? set('mc_number') : set('dot_number')} />
+            </Field>
 
             <Field label="Company Name">
               <input className="input" type="text" placeholder="OSI Logistics LLC"
