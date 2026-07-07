@@ -230,7 +230,7 @@ export default function RegisterDispatcher() {
                     <input
                       className="input flex-1"
                       type="text"
-                      placeholder={`Company ${i + 1}`}
+                      placeholder={i === 0 ? 'e.g. Amazon Freight' : i === 1 ? 'e.g. XPO Logistics' : `Company ${i + 1}`}
                       value={c}
                       onChange={e => updateCompany(i, e.target.value)}
                     />
