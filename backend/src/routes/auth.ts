@@ -288,6 +288,33 @@ router.put('/shift', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
+// One-time admin creation — protected by ADMIN_SETUP_SECRET env var
+router.post('/setup-admin', async (req: Request, res: Response) => {
+  try {
+    const { secret, name, email, password } = req.body;
+    const expected = process.env.ADMIN_SETUP_SECRET;
+    if (!expected || secret !== expected) return res.status(403).json({ error: 'Invalid secret' });
+    if (!name || !email || !password || password.length < 8)
+      return res.status(400).json({ error: 'name, email and password (min 8 chars) are required' });
+
+    const existing = await queryOne<{ id: string }>('SELECT id FROM users WHERE email = ?', [email.toLowerCase()]);
+    const salt = randomBytes(16).toString('hex');
+    const hash = hashPassword(password, salt);
+    if (existing) {
+      await exec(
+        "UPDATE users SET name=?, password_hash=?, salt=?, role='admin', active=1, approval_status='approved' WHERE id=?",
+        [name, hash, salt, existing.id]
+      );
+      return res.json({ updated: true, email: email.toLowerCase() });
+    }
+    await exec(
+      "INSERT INTO users (id, name, email, password_hash, salt, role, active, approval_status) VALUES (?, ?, ?, ?, ?, 'admin', 1, 'approved')",
+      [uuidv4(), name, email.toLowerCase(), hash, salt]
+    );
+    res.status(201).json({ created: true, email: email.toLowerCase() });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
 router.get('/drivers-list', async (_req: Request, res: Response) => {
   try {
     const drivers = await query(`
