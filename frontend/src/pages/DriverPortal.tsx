@@ -392,18 +392,37 @@ export default function DriverPortal() {
   const playOfferSound = () => {
     try {
       const ctx = new AudioContext();
-      [659.25, 783.99, 1046.50, 783.99, 1046.50].forEach((freq, i) => {
+      // Alarma potente: patrón urgente de 3 pulsos dobles
+      const pattern = [880, 1174.66, 880, 1174.66, 880, 1174.66, 1318.51, 1568];
+      pattern.forEach((freq, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.connect(gain); gain.connect(ctx.destination);
-        osc.type = 'sine'; osc.frequency.value = freq;
-        const start = ctx.currentTime + i * 0.15;
+        osc.type = 'sawtooth'; osc.frequency.value = freq;
+        const start = ctx.currentTime + i * 0.18;
         gain.gain.setValueAtTime(0, start);
-        gain.gain.linearRampToValueAtTime(0.3, start + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
-        osc.start(start); osc.stop(start + 0.35);
+        gain.gain.linearRampToValueAtTime(0.6, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.28);
+        osc.start(start); osc.stop(start + 0.3);
       });
     } catch {}
+    navigator.vibrate?.([400, 150, 400, 150, 600, 300, 400, 150, 400]);
+  };
+
+  const stopAlarm = () => {
+    if (alarmIntervalRef.current) {
+      clearInterval(alarmIntervalRef.current);
+      alarmIntervalRef.current = null;
+    }
+    navigator.vibrate?.(0);
+  };
+
+  const startAlarm = () => {
+    stopAlarm();
+    playOfferSound();
+    alarmIntervalRef.current = setInterval(() => {
+      playOfferSound();
+    }, 8000);
   };
 
   const playAcceptSound = () => {
@@ -471,8 +490,8 @@ export default function DriverPortal() {
     });
     socket.on('driver:offer', (offer: Order) => {
       setPendingOffer(offer);
-      setOfferCountdown(60);
-      playOfferSound();
+      setOfferCountdown(7200);
+      startAlarm();
     });
     socket.emit('radio:join');
     socket.on('radio:msg', (data: {name:string; msg:string; ts:string}) => {
@@ -493,6 +512,7 @@ export default function DriverPortal() {
   useEffect(() => {
     if (!pendingOffer) return;
     if (offerCountdown <= 0) {
+      stopAlarm();
       ordersApi.ignore(pendingOffer.id).catch(() => {});
       setPendingOffer(null);
       return;
@@ -577,8 +597,9 @@ export default function DriverPortal() {
     } catch {}
   };
 
-  const gpsWatchRef    = useRef<number | null>(null);
-  const lastAddrRef    = useRef<{ lat: number; lng: number; address: string } | null>(null);
+  const gpsWatchRef      = useRef<number | null>(null);
+  const lastAddrRef      = useRef<{ lat: number; lng: number; address: string } | null>(null);
+  const alarmIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [gpsUpdating, setGpsUpdating] = useState(false);
 
   const reverseGeocode = useCallback(async (lat: number, lng: number): Promise<string> => {
@@ -3279,19 +3300,22 @@ export default function DriverPortal() {
                 <p className="text-orange-100 text-xs font-bold uppercase tracking-widest">¡Nueva Oferta!</p>
                 <p className="text-white font-bold text-xl">{pendingOffer.order_number}</p>
               </div>
-              <div className={`w-14 h-14 rounded-full flex items-center justify-center border-4 transition-colors ${
-                offerCountdown <= 10 ? 'border-red-300 bg-red-500/40' : 'border-white/40 bg-white/20'
+              <div className={`w-16 h-16 rounded-full flex flex-col items-center justify-center border-4 transition-colors ${
+                offerCountdown <= 60 ? 'border-red-300 bg-red-500/40' : 'border-white/40 bg-white/20'
               }`}>
-                <span className={`font-bold text-2xl ${offerCountdown <= 10 ? 'text-red-100' : 'text-white'}`}>
-                  {offerCountdown}
+                <span className={`font-bold text-sm leading-tight ${offerCountdown <= 60 ? 'text-red-100' : 'text-white'}`}>
+                  {String(Math.floor(offerCountdown / 3600)).padStart(2,'0')}:{String(Math.floor((offerCountdown % 3600) / 60)).padStart(2,'0')}
+                </span>
+                <span className={`text-[9px] ${offerCountdown <= 60 ? 'text-red-200' : 'text-orange-200'}`}>
+                  {String(offerCountdown % 60).padStart(2,'0')}s
                 </span>
               </div>
             </div>
             {/* Timer bar */}
             <div className="h-1.5 bg-gray-100 dark:bg-slate-700">
               <div
-                className={`h-full transition-all duration-1000 ${offerCountdown <= 10 ? 'bg-red-500' : 'bg-orange-400'}`}
-                style={{ width: `${(offerCountdown / 60) * 100}%` }}
+                className={`h-full transition-all duration-1000 ${offerCountdown <= 60 ? 'bg-red-500' : 'bg-orange-400'}`}
+                style={{ width: `${(offerCountdown / 7200) * 100}%` }}
               />
             </div>
 
@@ -3344,6 +3368,7 @@ export default function DriverPortal() {
               <div className="flex gap-3 pt-1">
                 <button
                   onClick={async () => {
+                    stopAlarm();
                     await ordersApi.ignore(pendingOffer.id).catch(() => {});
                     setPendingOffer(null);
                     fetchOrders();
@@ -3354,6 +3379,7 @@ export default function DriverPortal() {
                 </button>
                 <button
                   onClick={async () => {
+                    stopAlarm();
                     playAcceptSound();
                     await ordersApi.accept(pendingOffer.id).catch(() => {});
                     setPendingOffer(null);
