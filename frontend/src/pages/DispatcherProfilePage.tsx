@@ -144,7 +144,7 @@ export default function DispatcherProfilePage() {
     { label: 'Idiomas',              done: !!profile.languages },
     { label: 'Años de experiencia',  done: !!profile.years_experience },
     { label: 'Disponibilidad',       done: !!profile.availability },
-    { label: 'Exp. con loads',        done: !!profile.equipment_experience },
+    { label: 'Exp. con equipos',      done: !!profile.equipment_experience },
   ];
   const score = profileItems.filter(i => i.done).length;
 
