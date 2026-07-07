@@ -29,8 +29,6 @@ interface DriverFormProps {
 }
 
 function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
-  const TRUCK_MAKES = ['', 'Peterbilt 579', 'Kenworth W900', 'Freightliner Cascadia', 'Volvo 860', 'Ford Transit 250'];
-
   const [form, setForm] = useState({
     name: driver?.name || '',
     phone: driver?.phone || '',
@@ -102,10 +100,9 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
               </p>
             </div>
             <div>
-              <label className="label">Make *</label>
-              <select className="input" value={form.truck_make} onChange={e => setForm({...form, truck_make: e.target.value})}>
-                {TRUCK_MAKES.map(m => <option key={m} value={m}>{m || '— Select make —'}</option>)}
-              </select>
+              <label className="label">Make and Model *</label>
+              <input className="input" type="text" placeholder="e.g. Volvo 860, Kenworth T680"
+                value={form.truck_make} onChange={e => setForm({...form, truck_make: e.target.value})} />
             </div>
             <div>
               <label className="label">Equipment Type</label>
@@ -121,8 +118,8 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
                 </>
               ) : (
                 <>
-                  <label className="label">MC#</label>
-                  <input className="input" value={form.mc_number} onChange={e => setForm({...form, mc_number: e.target.value})} placeholder="000000" />
+                  <label className="label">MC/DOT#</label>
+                  <input className="input" value={form.mc_number.replace(/^(MC-|DOT-)/i,'')} onChange={e => setForm({...form, mc_number: e.target.value})} placeholder="000000" />
                 </>
               )}
             </div>
@@ -131,7 +128,7 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
               <input className="input" value={form.company_name} onChange={e => setForm({...form, company_name: e.target.value})} placeholder="OSI Logistics LLC" />
             </div>
             <div className="col-span-2">
-              <label className="label">Autoridad MC desde</label>
+              <label className="label">Autoridad MC/DOT desde</label>
               <input className="input" type="date" value={form.authority_since} onChange={e => setForm({...form, authority_since: e.target.value})} />
             </div>
             {driver && (
