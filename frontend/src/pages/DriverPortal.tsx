@@ -735,8 +735,10 @@ export default function DriverPortal() {
   const profileItems = [
     { label: 'Truck Make',       done: !!localTruckMake },
     { label: 'Tipo de Equipo',   done: !!localEquipType },
-    { label: 'Truck #',          done: !!truckNum },
-    { label: 'Trailer #',        done: !!trailerNum },
+    ...(!isDotEquip ? [
+      { label: 'Truck #',        done: !!truckNum },
+      { label: 'Trailer #',      done: !!trailerNum },
+    ] : []),
     { label: 'Método de Pago',   done: !!payoutMethod },
     { label: isDotEquip ? 'Company / DOT#' : 'Company / MC#',
       done: !!(driver?.company_name && authorityNum) },
@@ -1633,18 +1635,22 @@ export default function DriverPortal() {
                     {localEquipType || 'Not set'}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500 dark:text-slate-400">Truck #</span>
-                  <span className={`text-sm font-mono font-semibold ${truckNum ? 'text-gray-800 dark:text-slate-200' : 'text-gray-300 dark:text-slate-600 italic'}`}>
-                    {truckNum || 'Not set'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500 dark:text-slate-400">Trailer #</span>
-                  <span className={`text-sm font-mono font-semibold ${trailerNum ? 'text-gray-800 dark:text-slate-200' : 'text-gray-300 dark:text-slate-600 italic'}`}>
-                    {trailerNum || 'Not set'}
-                  </span>
-                </div>
+                {!EQUIP_WITH_DIMS.includes(localEquipType) && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500 dark:text-slate-400">Truck #</span>
+                      <span className={`text-sm font-mono font-semibold ${truckNum ? 'text-gray-800 dark:text-slate-200' : 'text-gray-300 dark:text-slate-600 italic'}`}>
+                        {truckNum || 'Not set'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500 dark:text-slate-400">Trailer #</span>
+                      <span className={`text-sm font-mono font-semibold ${trailerNum ? 'text-gray-800 dark:text-slate-200' : 'text-gray-300 dark:text-slate-600 italic'}`}>
+                        {trailerNum || 'Not set'}
+                      </span>
+                    </div>
+                  </>
+                )}
                 {EQUIP_WITH_DIMS.includes(localEquipType) && (
                   <>
                     <div className="flex items-center justify-between">
@@ -1697,16 +1703,20 @@ export default function DriverPortal() {
                     ))}
                   </div>
                 </div>
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">Truck #</label>
-                  <input type="text" placeholder="e.g. 9809" value={truckNum} onChange={e => setTruckNum(e.target.value)}
-                    className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">Trailer #</label>
-                  <input type="text" placeholder="e.g. T4126" value={trailerNum} onChange={e => setTrailerNum(e.target.value)}
-                    className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
-                </div>
+                {!EQUIP_WITH_DIMS.includes(localEquipType) && (
+                  <>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">Truck #</label>
+                      <input type="text" placeholder="e.g. 9809" value={truckNum} onChange={e => setTruckNum(e.target.value)}
+                        className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">Trailer #</label>
+                      <input type="text" placeholder="e.g. T4126" value={trailerNum} onChange={e => setTrailerNum(e.target.value)}
+                        className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
+                    </div>
+                  </>
+                )}
                 {EQUIP_WITH_DIMS.includes(localEquipType) && (
                   <>
                     <div>
