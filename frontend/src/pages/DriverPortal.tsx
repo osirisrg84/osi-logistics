@@ -163,7 +163,6 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
 
 const EQUIP_TYPES     = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'];
 const EQUIP_WITH_DIMS = ['Van', 'Box Truck', 'Hotshot'];
-const TRUCK_MAKES  = ['Peterbilt 579', 'Kenworth W900', 'Freightliner Cascadia', 'Volvo 860', 'Ford Transit 250'];
 
 const STATUS_CONFIG: Record<DriverStatus, { label: string; dot: string; bg: string; text: string }> = {
   available: { label: 'Online',      dot: 'bg-green-400',  bg: 'bg-green-50 dark:bg-green-900/30',   text: 'text-green-700 dark:text-green-400' },
@@ -727,9 +726,10 @@ export default function DriverPortal() {
   const currentEquipType = localEquipType || (driver?.equipment_type ?? '');
   const isDotEquip = EQUIP_WITH_DIMS.includes(currentEquipType);
   const driverExtra = driver as unknown as Record<string, string>;
+  const stripPrefix = (v: string) => v.replace(/^(MC-|DOT-)/i, '');
   const authorityNum = isDotEquip
-    ? (driverExtra?.dot_number || driver?.mc_number || '')
-    : (driver?.mc_number || '');
+    ? stripPrefix(driverExtra?.dot_number || driver?.mc_number || '')
+    : stripPrefix(driver?.mc_number || '');
 
   // ── Profile completion ─────────────────────────────────────
   const profileItems = [
@@ -1513,10 +1513,12 @@ export default function DriverPortal() {
             <div className="border-t border-gray-100 dark:border-slate-700 mx-4 mb-1" />
             <div className="grid grid-cols-2 gap-3 p-4">
               {[
-                { label: 'Total Deliveries', value: driver.total_deliveries, icon: Package,  color: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-500/10' },
+                { label: 'Total Deliveries', value: driver.total_deliveries,                icon: Package,   color: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-500/10' },
                 { label: 'On-Time Rate',     value: `${driver.on_time_rate.toFixed(0)}%`,   icon: Clock,     color: 'text-green-500',  bg: 'bg-green-50 dark:bg-green-500/10' },
-                { label: 'License',          value: driver.license_number,                  icon: FileText,  color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-500/10' },
+                { label: 'License #',        value: driver.license_number,                  icon: FileText,  color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-500/10' },
                 { label: 'Rating',           value: `★ ${driver.rating.toFixed(1)}`,        icon: Star,      color: 'text-amber-500',  bg: 'bg-amber-50 dark:bg-amber-500/10' },
+                { label: 'Lic. Expiry',      value: driver.license_expiry || '—',           icon: Calendar,  color: 'text-rose-500',   bg: 'bg-rose-50 dark:bg-rose-500/10' },
+                { label: 'Hire Date',        value: driver.hire_date || '—',                icon: Briefcase, color: 'text-teal-500',   bg: 'bg-teal-50 dark:bg-teal-500/10' },
               ].map(({ label, value, icon: Icon, color, bg }) => (
                 <div key={label} className="bg-gray-50 dark:bg-slate-700/60 rounded-xl p-3">
                   <div className="flex items-center gap-1.5 mb-1.5">
@@ -1675,19 +1677,10 @@ export default function DriverPortal() {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-2 block">Truck Make / Model</label>
-                  <div className="grid grid-cols-1 gap-1.5">
-                    {TRUCK_MAKES.map(m => (
-                      <button key={m} onClick={() => setLocalTruckMake(m)}
-                        className={`py-2 px-3 rounded-xl text-xs font-semibold transition-colors text-left ${
-                          localTruckMake === m
-                            ? 'bg-blue-500 text-white shadow-sm'
-                            : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'
-                        }`}>
-                        {m}
-                      </button>
-                    ))}
-                  </div>
+                  <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">Truck Make / Model</label>
+                  <input type="text" placeholder="e.g. Volvo 860, Kenworth T680"
+                    value={localTruckMake} onChange={e => setLocalTruckMake(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl text-sm bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 border-0 outline-none focus:ring-2 focus:ring-blue-500/40" />
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-2 block">Trailer / Equipment Type</label>

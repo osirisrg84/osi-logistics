@@ -117,12 +117,12 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
               {isDotType ? (
                 <>
                   <label className="label">DOT#</label>
-                  <input className="input" value={form.dot_number} onChange={e => setForm({...form, dot_number: e.target.value})} placeholder="DOT-000000" />
+                  <input className="input" value={form.dot_number} onChange={e => setForm({...form, dot_number: e.target.value})} placeholder="000000" />
                 </>
               ) : (
                 <>
                   <label className="label">MC#</label>
-                  <input className="input" value={form.mc_number} onChange={e => setForm({...form, mc_number: e.target.value})} placeholder="MC-000000" />
+                  <input className="input" value={form.mc_number} onChange={e => setForm({...form, mc_number: e.target.value})} placeholder="000000" />
                 </>
               )}
             </div>
@@ -265,7 +265,8 @@ function DriverDetail({ driverId, onClose }: DriverDetailProps) {
           {(() => {
             const dr = driver as unknown as Record<string, string>;
             const isDot = ['Van', 'Box Truck', 'Hotshot'].includes(driver.equipment_type || '');
-            const authNum = isDot ? dr.dot_number : driver.mc_number;
+            const stripPfx = (v: string) => v.replace(/^(MC-|DOT-)/i, '');
+            const authNum = stripPfx(isDot ? (dr.dot_number || driver.mc_number || '') : (driver.mc_number || ''));
             return (driver.company_name || authNum) ? (
             <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
               <p className="text-xs font-semibold text-green-700 dark:text-green-400 flex items-center gap-2 mb-3">

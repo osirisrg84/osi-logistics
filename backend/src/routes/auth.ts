@@ -148,7 +148,7 @@ router.post('/register-driver', async (req: Request, res: Response) => {
       license_number, license_expiry,
       hire_date = new Date().toISOString().split('T')[0],
       equipment_type = 'Dry Van', company_name = 'OSI Logistics LLC',
-      mc_number = '', authority_since = '',
+      mc_number = '', dot_number = '', authority_since = '',
     } = req.body;
 
     if (!name || !email || !password || !phone || !license_number || !license_expiry) {
@@ -176,11 +176,11 @@ router.post('/register-driver', async (req: Request, res: Response) => {
       (id, name, phone, email, license_number, license_expiry, status,
        current_lat, current_lng, current_address,
        rating, total_deliveries, on_time_rate, avatar, hire_date,
-       equipment_type, company_name, mc_number, authority_since, driver_code)
+       equipment_type, company_name, mc_number, dot_number, authority_since, driver_code)
       VALUES (?, ?, ?, ?, ?, ?, 'offline', 25.7617, -80.1918, 'Miami, FL',
-              5.0, 0, 100.0, ?, ?, ?, ?, ?, ?, ?)`,
+              5.0, 0, 100.0, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [driverId, name, phone, email.toLowerCase(), license_number, license_expiry,
-       initials, hire_date, equipment_type, company_name, mc_number, authority_since, driver_code]);
+       initials, hire_date, equipment_type, company_name, mc_number, dot_number, authority_since, driver_code]);
 
     const salt = randomBytes(16).toString('hex');
     const passwordHash = hashPassword(password, salt);
@@ -204,13 +204,35 @@ router.get('/profile', async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: 'No token' });
-    const row = await queryOne<{ payout_method: string; payout_details: string; ssn: string; dispatcher_code: string }>(`
-      SELECT u.payout_method, u.payout_details, u.ssn, u.dispatcher_code
+    const row = await queryOne<{
+      payout_method: string; payout_details: string; ssn: string; dispatcher_code: string;
+      phone: string; availability: string; languages: string; years_experience: number;
+      city: string; date_of_birth: string; previous_companies: string; equipment_experience: string;
+      shift_active: number;
+    }>(`
+      SELECT u.payout_method, u.payout_details, u.ssn, u.dispatcher_code,
+             u.phone, u.availability, u.languages, u.years_experience,
+             u.city, u.date_of_birth, u.previous_companies, u.equipment_experience,
+             u.shift_active
       FROM sessions s JOIN users u ON s.user_id = u.id
       WHERE s.token = ? AND s.expires_at > datetime('now')
     `, [token]);
     if (!row) return res.status(401).json({ error: 'Invalid session' });
-    res.json({ payout_method: row.payout_method, payout_details: row.payout_details, ssn: row.ssn, dispatcher_code: row.dispatcher_code });
+    res.json({
+      payout_method:        row.payout_method,
+      payout_details:       row.payout_details,
+      ssn:                  row.ssn,
+      dispatcher_code:      row.dispatcher_code,
+      phone:                row.phone,
+      availability:         row.availability,
+      languages:            row.languages,
+      years_experience:     row.years_experience,
+      city:                 row.city,
+      date_of_birth:        row.date_of_birth,
+      previous_companies:   row.previous_companies,
+      equipment_experience: row.equipment_experience,
+      shift_active:         row.shift_active,
+    });
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
@@ -220,12 +242,24 @@ router.put('/profile', async (req: Request, res: Response) => {
     if (!token) return res.status(401).json({ error: 'No token' });
     const session = await queryOne<{ user_id: string }>('SELECT user_id FROM sessions WHERE token = ? AND expires_at > datetime(\'now\')', [token]);
     if (!session) return res.status(401).json({ error: 'Invalid session' });
-    const { payout_method, payout_details, ssn } = req.body;
+    const {
+      payout_method, payout_details, ssn,
+      phone, availability, languages, years_experience,
+      city, date_of_birth, previous_companies, equipment_experience,
+    } = req.body;
     const updates: string[] = [];
     const vals: unknown[] = [];
-    if (payout_method !== undefined) { updates.push('payout_method = ?'); vals.push(payout_method); }
-    if (payout_details !== undefined) { updates.push('payout_details = ?'); vals.push(payout_details); }
-    if (ssn !== undefined)            { updates.push('ssn = ?');            vals.push(ssn); }
+    if (payout_method        !== undefined) { updates.push('payout_method = ?');        vals.push(payout_method); }
+    if (payout_details       !== undefined) { updates.push('payout_details = ?');       vals.push(payout_details); }
+    if (ssn                  !== undefined) { updates.push('ssn = ?');                  vals.push(ssn); }
+    if (phone                !== undefined) { updates.push('phone = ?');                vals.push(phone); }
+    if (availability         !== undefined) { updates.push('availability = ?');         vals.push(availability); }
+    if (languages            !== undefined) { updates.push('languages = ?');            vals.push(languages); }
+    if (years_experience     !== undefined) { updates.push('years_experience = ?');     vals.push(years_experience); }
+    if (city                 !== undefined) { updates.push('city = ?');                 vals.push(city); }
+    if (date_of_birth        !== undefined) { updates.push('date_of_birth = ?');        vals.push(date_of_birth); }
+    if (previous_companies   !== undefined) { updates.push('previous_companies = ?');   vals.push(previous_companies); }
+    if (equipment_experience !== undefined) { updates.push('equipment_experience = ?'); vals.push(equipment_experience); }
     if (updates.length) {
       vals.push(session.user_id);
       await exec(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, vals);

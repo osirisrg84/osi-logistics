@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Star, Award, Package, TrendingUp, Clock, CheckCircle,
   Phone, Mail, Lock, Edit3, User, Calendar,
-  DollarSign, BarChart3,
+  DollarSign, BarChart3, MapPin, Briefcase, Globe,
 } from 'lucide-react';
 import { billingApi, userApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -17,6 +17,10 @@ interface ProfileData {
   payout_method?: string;
   languages?: string;
   availability?: string;
+  city?: string;
+  date_of_birth?: string;
+  previous_companies?: string;
+  equipment_experience?: string;
 }
 
 interface CommissionRow {
@@ -42,14 +46,15 @@ export default function DispatcherProfilePage() {
   const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
+    if (!user?.id) return;
     Promise.all([
       userApi.getProfile().catch(() => ({ data: {} })),
-      billingApi.getByDispatcher().catch(() => ({ data: [] })),
+      billingApi.getRecords({ dispatcher_user_id: user.id }).catch(() => ({ data: [] })),
     ]).then(([profileRes, commRes]) => {
       setProfile(profileRes.data || {});
       setCommRows(Array.isArray(commRes.data) ? commRes.data : []);
     }).finally(() => setLoading(false));
-  }, []);
+  }, [user?.id]);
 
   // ── Computed stats ──────────────────────────────────────
   const totalLoads    = commRows.length;
@@ -233,11 +238,14 @@ export default function DispatcherProfilePage() {
           <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Información de contacto</h3>
         </div>
         <div className="space-y-2">
-          {[
-            { icon: Mail,  label: user?.email || '—',               sub: 'Email' },
-            { icon: Phone, label: profile.phone || 'Sin teléfono',  sub: 'Teléfono' },
-            { icon: Clock, label: profile.availability || 'Full-time', sub: 'Disponibilidad' },
-          ].map(row => (
+          {([
+            { icon: Mail,     label: user?.email || '—',                        sub: 'Email' },
+            { icon: Phone,    label: profile.phone || 'Sin teléfono',            sub: 'Teléfono' },
+            { icon: MapPin,   label: profile.city || '—',                        sub: 'Ciudad' },
+            { icon: Clock,    label: profile.availability || 'Full-time',        sub: 'Disponibilidad' },
+            { icon: Briefcase,label: profile.years_experience ? `${profile.years_experience} años` : '—', sub: 'Experiencia' },
+            { icon: Globe,    label: profile.languages || '—',                   sub: 'Idiomas' },
+          ] as { icon: React.ComponentType<{ className?: string }>; label: string; sub: string }[]).filter(row => row.label && row.label !== '—').map(row => (
             <div key={row.sub} className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
               <row.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
               <div>

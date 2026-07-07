@@ -224,12 +224,12 @@ export default function RegisterDriver() {
               </Field>
               {DOT_TYPES.includes(form.equipment_type) ? (
                 <Field label="DOT#">
-                  <input className="input" type="text" placeholder="DOT-000000"
+                  <input className="input" type="text" placeholder="000000"
                     value={form.dot_number} onChange={set('dot_number')} />
                 </Field>
               ) : (
                 <Field label="MC#">
-                  <input className="input" type="text" placeholder="MC-000000"
+                  <input className="input" type="text" placeholder="000000"
                     value={form.mc_number} onChange={set('mc_number')} />
                 </Field>
               )}
