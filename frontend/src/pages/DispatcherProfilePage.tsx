@@ -49,11 +49,14 @@ export default function DispatcherProfilePage() {
   const [savingContact,  setSavingContact]  = useState(false);
   const [contactForm, setContactForm] = useState({ phone: '' });
 
+  const [editingPersonal, setEditingPersonal] = useState(false);
+  const [savingPersonal,  setSavingPersonal]  = useState(false);
+  const [personalForm, setPersonalForm] = useState({ city: '', date_of_birth: '' });
+
   const [editingProfile, setEditingProfile] = useState(false);
   const [savingProfile,  setSavingProfile]  = useState(false);
   const [profileForm, setProfileForm] = useState({
-    city: '', availability: 'full-time', languages: '',
-    years_experience: '', equipment_experience: '', date_of_birth: '',
+    availability: 'full-time', languages: '', years_experience: '', equipment_experience: '',
   });
 
   useEffect(() => {
@@ -65,13 +68,15 @@ export default function DispatcherProfilePage() {
       const p = profileRes.data || {};
       setProfile(p);
       setContactForm({ phone: p.phone || '' });
+      setPersonalForm({
+        city:          p.city          || '',
+        date_of_birth: p.date_of_birth || '',
+      });
       setProfileForm({
-        city:                 p.city                 || '',
         availability:         p.availability         || 'full-time',
         languages:            p.languages            || '',
         years_experience:     p.years_experience != null ? String(p.years_experience) : '',
         equipment_experience: p.equipment_experience || '',
-        date_of_birth:        p.date_of_birth        || '',
       });
       setCommRows(Array.isArray(commRes.data) ? commRes.data : []);
     }).finally(() => setLoading(false));
@@ -86,25 +91,30 @@ export default function DispatcherProfilePage() {
     } finally { setSavingContact(false); }
   };
 
+  const savePersonal = async () => {
+    setSavingPersonal(true);
+    try {
+      await userApi.updateProfile({ city: personalForm.city, date_of_birth: personalForm.date_of_birth });
+      setProfile(prev => ({ ...prev, city: personalForm.city, date_of_birth: personalForm.date_of_birth }));
+      setEditingPersonal(false);
+    } finally { setSavingPersonal(false); }
+  };
+
   const saveProfile = async () => {
     setSavingProfile(true);
     try {
       await userApi.updateProfile({
-        city:                 profileForm.city,
         availability:         profileForm.availability,
         languages:            profileForm.languages,
         years_experience:     profileForm.years_experience ? Number(profileForm.years_experience) : 0,
         equipment_experience: profileForm.equipment_experience,
-        date_of_birth:        profileForm.date_of_birth,
       });
       setProfile(prev => ({
         ...prev,
-        city:                 profileForm.city,
         availability:         profileForm.availability,
         languages:            profileForm.languages,
         years_experience:     profileForm.years_experience ? Number(profileForm.years_experience) : 0,
         equipment_experience: profileForm.equipment_experience,
-        date_of_birth:        profileForm.date_of_birth,
       }));
       setEditingProfile(false);
     } finally { setSavingProfile(false); }
@@ -350,6 +360,75 @@ export default function DispatcherProfilePage() {
         )}
       </div>
 
+      {/* ── Información personal ───────────────────────────── */}
+      <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                 style={{ background: 'rgba(59,130,246,0.12)' }}>
+              <User className="w-4 h-4 text-blue-500" />
+            </div>
+            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Información personal</h3>
+          </div>
+          {!editingPersonal ? (
+            <button onClick={() => setEditingPersonal(true)}
+              className="flex items-center gap-1 text-xs font-semibold text-blue-500 hover:text-blue-600 transition-colors">
+              <Edit3 className="w-3.5 h-3.5" /> Editar
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button onClick={() => setEditingPersonal(false)}
+                className="flex items-center gap-1 text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors">
+                <X className="w-3.5 h-3.5" /> Cancelar
+              </button>
+              <button onClick={savePersonal} disabled={savingPersonal}
+                className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg text-white transition-colors disabled:opacity-50"
+                style={{ background: '#3b82f6' }}>
+                {savingPersonal ? <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" /> : <Save className="w-3 h-3" />}
+                Guardar
+              </button>
+            </div>
+          )}
+        </div>
+        {editingPersonal ? (
+          <div className="space-y-3">
+            <div>
+              <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Ciudad</label>
+              <input type="text" placeholder="Miami, FL" value={personalForm.city}
+                onChange={e => setPersonalForm(f => ({ ...f, city: e.target.value }))}
+                className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-blue-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`} />
+            </div>
+            <div>
+              <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Fecha de nacimiento</label>
+              <input type="date" value={personalForm.date_of_birth}
+                onChange={e => setPersonalForm(f => ({ ...f, date_of_birth: e.target.value }))}
+                className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-blue-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`} />
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {([
+              { icon: MapPin,   label: profile.city || '—',          sub: 'Ciudad' },
+              { icon: Calendar, label: profile.date_of_birth || '—', sub: 'Fecha de nacimiento' },
+            ] as { icon: React.ComponentType<{ className?: string }>; label: string; sub: string }[]).filter(row => row.label && row.label !== '—').map(row => (
+              <div key={row.sub} className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
+                <row.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
+                <div>
+                  <p className={`text-xs font-medium ${dark ? 'text-white' : 'text-gray-800'}`}>{row.label}</p>
+                  <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{row.sub}</p>
+                </div>
+              </div>
+            ))}
+            {!profile.city && !profile.date_of_birth && (
+              <button onClick={() => setEditingPersonal(true)}
+                className={`w-full mt-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${dark ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-gray-200 text-gray-400 hover:bg-gray-50'}`}>
+                + Agregar información personal
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* ── Perfil profesional ─────────────────────────────── */}
       <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
         <div className="flex items-center justify-between mb-3">
@@ -384,10 +463,8 @@ export default function DispatcherProfilePage() {
         {editingProfile ? (
           <div className="space-y-3">
             {([
-              { label: 'Ciudad',               key: 'city',             placeholder: 'Miami, FL',        type: 'text'   },
-              { label: 'Fecha de nacimiento',  key: 'date_of_birth',    placeholder: '',                 type: 'date'   },
-              { label: 'Idiomas',              key: 'languages',        placeholder: 'English, Spanish', type: 'text'   },
-              { label: 'Años de experiencia',  key: 'years_experience', placeholder: '5',                type: 'number' },
+              { label: 'Idiomas',             key: 'languages',        placeholder: 'English, Spanish', type: 'text'   },
+              { label: 'Años de experiencia', key: 'years_experience', placeholder: '5',                type: 'number' },
             ] as { label: string; key: string; placeholder: string; type: string }[]).map(({ label, key, placeholder, type }) => (
               <div key={key}>
                 <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{label}</label>
@@ -428,8 +505,6 @@ export default function DispatcherProfilePage() {
         ) : (
           <div className="space-y-2">
             {([
-              { icon: MapPin,    label: profile.city || '—',                        sub: 'Ciudad' },
-              { icon: Calendar,  label: profile.date_of_birth || '—',               sub: 'Fecha de nacimiento' },
               { icon: Clock,     label: profile.availability || '—',                sub: 'Disponibilidad' },
               { icon: Briefcase, label: profile.years_experience ? `${profile.years_experience} años` : '—', sub: 'Experiencia' },
               { icon: Globe,     label: profile.languages || '—',                   sub: 'Idiomas' },
