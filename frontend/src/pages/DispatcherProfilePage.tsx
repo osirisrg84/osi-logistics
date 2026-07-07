@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Star, Award, Package, TrendingUp, Clock, CheckCircle,
   Phone, Mail, Lock, Edit3, User, Calendar,
-  DollarSign, BarChart3, MapPin, Briefcase, Globe,
+  DollarSign, BarChart3, MapPin, Briefcase, Globe, Save, X,
 } from 'lucide-react';
 import { billingApi, userApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -44,6 +44,9 @@ export default function DispatcherProfilePage() {
   const [profile, setProfile]   = useState<ProfileData>({});
   const [commRows, setCommRows] = useState<CommissionRow[]>([]);
   const [loading, setLoading]   = useState(true);
+  const [editingContact, setEditingContact] = useState(false);
+  const [savingContact, setSavingContact]   = useState(false);
+  const [contactForm, setContactForm] = useState({ phone: '', city: '', availability: 'full-time', languages: '', years_experience: '' });
 
   useEffect(() => {
     if (!user?.id) return;
@@ -51,10 +54,42 @@ export default function DispatcherProfilePage() {
       userApi.getProfile().catch(() => ({ data: {} })),
       billingApi.getRecords({ dispatcher_user_id: user.id }).catch(() => ({ data: [] })),
     ]).then(([profileRes, commRes]) => {
-      setProfile(profileRes.data || {});
+      const p = profileRes.data || {};
+      setProfile(p);
+      setContactForm({
+        phone:            p.phone            || '',
+        city:             p.city             || '',
+        availability:     p.availability     || 'full-time',
+        languages:        p.languages        || '',
+        years_experience: p.years_experience != null ? String(p.years_experience) : '',
+      });
       setCommRows(Array.isArray(commRes.data) ? commRes.data : []);
     }).finally(() => setLoading(false));
   }, [user?.id]);
+
+  const saveContact = async () => {
+    setSavingContact(true);
+    try {
+      await userApi.updateProfile({
+        phone:            contactForm.phone,
+        city:             contactForm.city,
+        availability:     contactForm.availability,
+        languages:        contactForm.languages,
+        years_experience: contactForm.years_experience ? Number(contactForm.years_experience) : 0,
+      });
+      setProfile(prev => ({
+        ...prev,
+        phone:            contactForm.phone,
+        city:             contactForm.city,
+        availability:     contactForm.availability,
+        languages:        contactForm.languages,
+        years_experience: contactForm.years_experience ? Number(contactForm.years_experience) : 0,
+      }));
+      setEditingContact(false);
+    } finally {
+      setSavingContact(false);
+    }
+  };
 
   // ── Computed stats ──────────────────────────────────────
   const totalLoads    = commRows.length;
@@ -230,31 +265,89 @@ export default function DispatcherProfilePage() {
 
       {/* ── Contact info ───────────────────────────────────── */}
       <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-               style={{ background: 'rgba(16,185,129,0.12)' }}>
-            <User className="w-4 h-4 text-emerald-500" />
-          </div>
-          <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Información de contacto</h3>
-        </div>
-        <div className="space-y-2">
-          {([
-            { icon: Mail,     label: user?.email || '—',                        sub: 'Email' },
-            { icon: Phone,    label: profile.phone || 'Sin teléfono',            sub: 'Teléfono' },
-            { icon: MapPin,   label: profile.city || '—',                        sub: 'Ciudad' },
-            { icon: Clock,    label: profile.availability || 'Full-time',        sub: 'Disponibilidad' },
-            { icon: Briefcase,label: profile.years_experience ? `${profile.years_experience} años` : '—', sub: 'Experiencia' },
-            { icon: Globe,    label: profile.languages || '—',                   sub: 'Idiomas' },
-          ] as { icon: React.ComponentType<{ className?: string }>; label: string; sub: string }[]).filter(row => row.label && row.label !== '—').map(row => (
-            <div key={row.sub} className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
-              <row.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
-              <div>
-                <p className={`text-xs font-medium ${dark ? 'text-white' : 'text-gray-800'}`}>{row.label}</p>
-                <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{row.sub}</p>
-              </div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                 style={{ background: 'rgba(16,185,129,0.12)' }}>
+              <User className="w-4 h-4 text-emerald-500" />
             </div>
-          ))}
+            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Información de contacto</h3>
+          </div>
+          {!editingContact ? (
+            <button onClick={() => setEditingContact(true)}
+              className="flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
+              <Edit3 className="w-3.5 h-3.5" /> Editar
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button onClick={() => setEditingContact(false)}
+                className="flex items-center gap-1 text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors">
+                <X className="w-3.5 h-3.5" /> Cancelar
+              </button>
+              <button onClick={saveContact} disabled={savingContact}
+                className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg text-white transition-colors disabled:opacity-50"
+                style={{ background: 'rgba(16,185,129,1)' }}>
+                {savingContact ? <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" /> : <Save className="w-3 h-3" />}
+                Guardar
+              </button>
+            </div>
+          )}
         </div>
+
+        {editingContact ? (
+          <div className="space-y-3">
+            {[
+              { label: 'Teléfono', key: 'phone', placeholder: '(305) 555-0000', type: 'tel' },
+              { label: 'Ciudad',   key: 'city',  placeholder: 'Miami, FL',       type: 'text' },
+              { label: 'Idiomas',  key: 'languages', placeholder: 'English, Spanish', type: 'text' },
+              { label: 'Años de experiencia', key: 'years_experience', placeholder: '5', type: 'number' },
+            ].map(({ label, key, placeholder, type }) => (
+              <div key={key}>
+                <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{label}</label>
+                <input
+                  type={type}
+                  placeholder={placeholder}
+                  value={contactForm[key as keyof typeof contactForm]}
+                  onChange={e => setContactForm(f => ({ ...f, [key]: e.target.value }))}
+                  className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-emerald-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`}
+                />
+              </div>
+            ))}
+            <div>
+              <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Disponibilidad</label>
+              <select value={contactForm.availability}
+                onChange={e => setContactForm(f => ({ ...f, availability: e.target.value }))}
+                className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-emerald-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`}>
+                {['full-time', 'part-time', 'contract', 'on-call'].map(o => <option key={o}>{o}</option>)}
+              </select>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {([
+              { icon: Mail,      label: user?.email || '—',                        sub: 'Email' },
+              { icon: Phone,     label: profile.phone || '—',                      sub: 'Teléfono' },
+              { icon: MapPin,    label: profile.city || '—',                       sub: 'Ciudad' },
+              { icon: Clock,     label: profile.availability || 'Full-time',       sub: 'Disponibilidad' },
+              { icon: Briefcase, label: profile.years_experience ? `${profile.years_experience} años` : '—', sub: 'Experiencia' },
+              { icon: Globe,     label: profile.languages || '—',                  sub: 'Idiomas' },
+            ] as { icon: React.ComponentType<{ className?: string }>; label: string; sub: string }[]).filter(row => row.label && row.label !== '—').map(row => (
+              <div key={row.sub} className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
+                <row.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
+                <div>
+                  <p className={`text-xs font-medium ${dark ? 'text-white' : 'text-gray-800'}`}>{row.label}</p>
+                  <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{row.sub}</p>
+                </div>
+              </div>
+            ))}
+            {!profile.phone && (
+              <button onClick={() => setEditingContact(true)}
+                className={`w-full mt-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${dark ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-gray-200 text-gray-400 hover:bg-gray-50'}`}>
+                + Agregar información de contacto
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── Performance stats ──────────────────────────────── */}
