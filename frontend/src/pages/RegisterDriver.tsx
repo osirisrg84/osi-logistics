@@ -60,6 +60,7 @@ export default function RegisterDriver() {
         license_expiry: form.license_expiry,
         equipment_type: form.equipment_type,
         mc_number:      form.mc_number,
+        dot_number:     form.dot_number,
         company_name:   form.company_name,
         authority_since: form.authority_since,
       });
