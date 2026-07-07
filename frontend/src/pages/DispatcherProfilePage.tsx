@@ -44,10 +44,17 @@ export default function DispatcherProfilePage() {
   const [profile, setProfile]   = useState<ProfileData>({});
   const [commRows, setCommRows] = useState<CommissionRow[]>([]);
   const [loading, setLoading]   = useState(true);
-  const [editingContact, setEditingContact] = useState(false);
-  const [savingContact, setSavingContact]   = useState(false);
   const EQUIP_TYPES = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'];
-  const [contactForm, setContactForm] = useState({ phone: '', city: '', availability: 'full-time', languages: '', years_experience: '', equipment_experience: '' });
+  const [editingContact, setEditingContact] = useState(false);
+  const [savingContact,  setSavingContact]  = useState(false);
+  const [contactForm, setContactForm] = useState({ phone: '' });
+
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [savingProfile,  setSavingProfile]  = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    city: '', availability: 'full-time', languages: '',
+    years_experience: '', equipment_experience: '', date_of_birth: '',
+  });
 
   useEffect(() => {
     if (!user?.id) return;
@@ -57,13 +64,14 @@ export default function DispatcherProfilePage() {
     ]).then(([profileRes, commRes]) => {
       const p = profileRes.data || {};
       setProfile(p);
-      setContactForm({
-        phone:                p.phone            || '',
-        city:                 p.city             || '',
-        availability:         p.availability     || 'full-time',
-        languages:            p.languages        || '',
+      setContactForm({ phone: p.phone || '' });
+      setProfileForm({
+        city:                 p.city                 || '',
+        availability:         p.availability         || 'full-time',
+        languages:            p.languages            || '',
         years_experience:     p.years_experience != null ? String(p.years_experience) : '',
         equipment_experience: p.equipment_experience || '',
+        date_of_birth:        p.date_of_birth        || '',
       });
       setCommRows(Array.isArray(commRes.data) ? commRes.data : []);
     }).finally(() => setLoading(false));
@@ -72,27 +80,34 @@ export default function DispatcherProfilePage() {
   const saveContact = async () => {
     setSavingContact(true);
     try {
+      await userApi.updateProfile({ phone: contactForm.phone });
+      setProfile(prev => ({ ...prev, phone: contactForm.phone }));
+      setEditingContact(false);
+    } finally { setSavingContact(false); }
+  };
+
+  const saveProfile = async () => {
+    setSavingProfile(true);
+    try {
       await userApi.updateProfile({
-        phone:                contactForm.phone,
-        city:                 contactForm.city,
-        availability:         contactForm.availability,
-        languages:            contactForm.languages,
-        years_experience:     contactForm.years_experience ? Number(contactForm.years_experience) : 0,
-        equipment_experience: contactForm.equipment_experience,
+        city:                 profileForm.city,
+        availability:         profileForm.availability,
+        languages:            profileForm.languages,
+        years_experience:     profileForm.years_experience ? Number(profileForm.years_experience) : 0,
+        equipment_experience: profileForm.equipment_experience,
+        date_of_birth:        profileForm.date_of_birth,
       });
       setProfile(prev => ({
         ...prev,
-        phone:                contactForm.phone,
-        city:                 contactForm.city,
-        availability:         contactForm.availability,
-        languages:            contactForm.languages,
-        years_experience:     contactForm.years_experience ? Number(contactForm.years_experience) : 0,
-        equipment_experience: contactForm.equipment_experience,
+        city:                 profileForm.city,
+        availability:         profileForm.availability,
+        languages:            profileForm.languages,
+        years_experience:     profileForm.years_experience ? Number(profileForm.years_experience) : 0,
+        equipment_experience: profileForm.equipment_experience,
+        date_of_birth:        profileForm.date_of_birth,
       }));
-      setEditingContact(false);
-    } finally {
-      setSavingContact(false);
-    }
+      setEditingProfile(false);
+    } finally { setSavingProfile(false); }
   };
 
   // ── Computed stats ──────────────────────────────────────
@@ -112,10 +127,14 @@ export default function DispatcherProfilePage() {
 
   // ── Profile completion ──────────────────────────────────
   const profileItems = [
-    { label: 'Teléfono',         done: !!profile.phone },
-    { label: 'Método de Pago',   done: !!profile.payout_method },
-    { label: 'Años experiencia', done: !!profile.years_experience },
-    { label: 'Idiomas',          done: !!profile.languages },
+    { label: 'Teléfono',             done: !!profile.phone },
+    { label: 'Método de Pago',       done: !!profile.payout_method },
+    { label: 'Ciudad',               done: !!profile.city },
+    { label: 'Fecha de nacimiento',  done: !!profile.date_of_birth },
+    { label: 'Idiomas',              done: !!profile.languages },
+    { label: 'Años de experiencia',  done: !!profile.years_experience },
+    { label: 'Disponibilidad',       done: !!profile.availability },
+    { label: 'Exp. con equipos',     done: !!profile.equipment_experience },
   ];
   const score = profileItems.filter(i => i.done).length;
 
@@ -300,28 +319,89 @@ export default function DispatcherProfilePage() {
 
         {editingContact ? (
           <div className="space-y-3">
-            {[
-              { label: 'Teléfono', key: 'phone', placeholder: '(305) 555-0000', type: 'tel' },
-              { label: 'Ciudad',   key: 'city',  placeholder: 'Miami, FL',       type: 'text' },
-              { label: 'Idiomas',  key: 'languages', placeholder: 'English, Spanish', type: 'text' },
-              { label: 'Años de experiencia', key: 'years_experience', placeholder: '5', type: 'number' },
-            ].map(({ label, key, placeholder, type }) => (
+            <div>
+              <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Teléfono</label>
+              <input type="tel" placeholder="(305) 555-0000" value={contactForm.phone}
+                onChange={e => setContactForm({ phone: e.target.value })}
+                className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-emerald-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`} />
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {([
+              { icon: Mail,  label: user?.email || '—',   sub: 'Email' },
+              { icon: Phone, label: profile.phone || '—', sub: 'Teléfono' },
+            ] as { icon: React.ComponentType<{ className?: string }>; label: string; sub: string }[]).filter(row => row.label && row.label !== '—').map(row => (
+              <div key={row.sub} className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
+                <row.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
+                <div>
+                  <p className={`text-xs font-medium ${dark ? 'text-white' : 'text-gray-800'}`}>{row.label}</p>
+                  <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{row.sub}</p>
+                </div>
+              </div>
+            ))}
+            {!profile.phone && (
+              <button onClick={() => setEditingContact(true)}
+                className={`w-full mt-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${dark ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-gray-200 text-gray-400 hover:bg-gray-50'}`}>
+                + Agregar teléfono
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Perfil profesional ─────────────────────────────── */}
+      <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                 style={{ background: 'rgba(249,115,22,0.12)' }}>
+              <Briefcase className="w-4 h-4 text-orange-500" />
+            </div>
+            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Perfil profesional</h3>
+          </div>
+          {!editingProfile ? (
+            <button onClick={() => setEditingProfile(true)}
+              className="flex items-center gap-1 text-xs font-semibold text-orange-500 hover:text-orange-600 transition-colors">
+              <Edit3 className="w-3.5 h-3.5" /> Editar
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button onClick={() => setEditingProfile(false)}
+                className="flex items-center gap-1 text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors">
+                <X className="w-3.5 h-3.5" /> Cancelar
+              </button>
+              <button onClick={saveProfile} disabled={savingProfile}
+                className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg text-white transition-colors disabled:opacity-50"
+                style={{ background: '#f97316' }}>
+                {savingProfile ? <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" /> : <Save className="w-3 h-3" />}
+                Guardar
+              </button>
+            </div>
+          )}
+        </div>
+
+        {editingProfile ? (
+          <div className="space-y-3">
+            {([
+              { label: 'Ciudad',               key: 'city',             placeholder: 'Miami, FL',        type: 'text'   },
+              { label: 'Fecha de nacimiento',  key: 'date_of_birth',    placeholder: '',                 type: 'date'   },
+              { label: 'Idiomas',              key: 'languages',        placeholder: 'English, Spanish', type: 'text'   },
+              { label: 'Años de experiencia',  key: 'years_experience', placeholder: '5',                type: 'number' },
+            ] as { label: string; key: string; placeholder: string; type: string }[]).map(({ label, key, placeholder, type }) => (
               <div key={key}>
                 <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{label}</label>
-                <input
-                  type={type}
-                  placeholder={placeholder}
-                  value={contactForm[key as keyof typeof contactForm]}
-                  onChange={e => setContactForm(f => ({ ...f, [key]: e.target.value }))}
-                  className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-emerald-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`}
-                />
+                <input type={type} placeholder={placeholder}
+                  value={profileForm[key as keyof typeof profileForm]}
+                  onChange={e => setProfileForm(f => ({ ...f, [key]: e.target.value }))}
+                  className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-orange-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`} />
               </div>
             ))}
             <div>
               <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Disponibilidad</label>
-              <select value={contactForm.availability}
-                onChange={e => setContactForm(f => ({ ...f, availability: e.target.value }))}
-                className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-emerald-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`}>
+              <select value={profileForm.availability}
+                onChange={e => setProfileForm(f => ({ ...f, availability: e.target.value }))}
+                className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-orange-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`}>
                 {['full-time', 'part-time', 'contract', 'on-call'].map(o => <option key={o}>{o}</option>)}
               </select>
             </div>
@@ -329,19 +409,15 @@ export default function DispatcherProfilePage() {
               <label className={`block text-[10px] font-semibold mb-2 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Experiencia con equipos</label>
               <div className="flex flex-wrap gap-1.5">
                 {EQUIP_TYPES.map(eq => {
-                  const selected = contactForm.equipment_experience.split(',').map(s => s.trim()).filter(Boolean).includes(eq);
+                  const selected = profileForm.equipment_experience.split(',').map(s => s.trim()).filter(Boolean).includes(eq);
                   return (
                     <button key={eq} type="button"
                       onClick={() => {
-                        const current = contactForm.equipment_experience.split(',').map(s => s.trim()).filter(Boolean);
+                        const current = profileForm.equipment_experience.split(',').map(s => s.trim()).filter(Boolean);
                         const updated = selected ? current.filter(e => e !== eq) : [...current, eq];
-                        setContactForm(f => ({ ...f, equipment_experience: updated.join(', ') }));
+                        setProfileForm(f => ({ ...f, equipment_experience: updated.join(', ') }));
                       }}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
-                        selected
-                          ? 'bg-emerald-500 text-white'
-                          : dark ? 'bg-slate-600 text-slate-300 hover:bg-slate-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}>
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${selected ? 'bg-orange-500 text-white' : dark ? 'bg-slate-600 text-slate-300 hover:bg-slate-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
                       {eq}
                     </button>
                   );
@@ -352,12 +428,11 @@ export default function DispatcherProfilePage() {
         ) : (
           <div className="space-y-2">
             {([
-              { icon: Mail,      label: user?.email || '—',                        sub: 'Email' },
-              { icon: Phone,     label: profile.phone || '—',                      sub: 'Teléfono' },
-              { icon: MapPin,    label: profile.city || '—',                       sub: 'Ciudad' },
-              { icon: Clock,     label: profile.availability || 'Full-time',       sub: 'Disponibilidad' },
+              { icon: MapPin,    label: profile.city || '—',                        sub: 'Ciudad' },
+              { icon: Calendar,  label: profile.date_of_birth || '—',               sub: 'Fecha de nacimiento' },
+              { icon: Clock,     label: profile.availability || '—',                sub: 'Disponibilidad' },
               { icon: Briefcase, label: profile.years_experience ? `${profile.years_experience} años` : '—', sub: 'Experiencia' },
-              { icon: Globe,     label: profile.languages || '—',                  sub: 'Idiomas' },
+              { icon: Globe,     label: profile.languages || '—',                   sub: 'Idiomas' },
             ] as { icon: React.ComponentType<{ className?: string }>; label: string; sub: string }[]).filter(row => row.label && row.label !== '—').map(row => (
               <div key={row.sub} className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
                 <row.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
@@ -372,16 +447,10 @@ export default function DispatcherProfilePage() {
                 <p className={`text-[10px] font-semibold mb-1.5 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Experiencia con equipos</p>
                 <div className="flex flex-wrap gap-1">
                   {profile.equipment_experience.split(',').map(s => s.trim()).filter(Boolean).map(eq => (
-                    <span key={eq} className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">{eq}</span>
+                    <span key={eq} className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-orange-100 dark:bg-orange-500/15 text-orange-700 dark:text-orange-400">{eq}</span>
                   ))}
                 </div>
               </div>
-            )}
-            {!profile.phone && (
-              <button onClick={() => setEditingContact(true)}
-                className={`w-full mt-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${dark ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-gray-200 text-gray-400 hover:bg-gray-50'}`}>
-                + Agregar información de contacto
-              </button>
             )}
           </div>
         )}

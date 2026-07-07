@@ -167,7 +167,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <div className={`rounded-xl overflow-hidden ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-gray-50 border border-gray-200'}`}>
             <div className="flex gap-2 px-3 py-2.5" style={{ borderBottom: notes.length > 0 ? `1px solid ${dark ? 'rgba(255,255,255,0.04)' : '#f1f5f9'}` : 'none' }}>
               <input value={noteInput} onChange={e => setNoteInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addNote(); }}
-                placeholder="Apuntar algo importante..." maxLength={200}
+                placeholder="Apunta algo importante..." maxLength={200}
                 className={`flex-1 text-sm px-3 py-2 rounded-lg outline-none border-0 ${dark ? 'bg-slate-700 text-slate-200 placeholder:text-slate-500' : 'bg-white text-gray-800 placeholder:text-gray-400'}`} />
               <button onClick={addNote} disabled={!noteInput.trim()}
                 className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 active:scale-90 disabled:opacity-40"
