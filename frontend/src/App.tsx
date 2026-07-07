@@ -24,6 +24,7 @@ import Verifications from './pages/Verifications';
 import DispatcherHub from './pages/DispatcherHub';
 import DispatcherProfilePage from './pages/DispatcherProfilePage';
 import DriverPortal from './pages/DriverPortal';
+import SetupAdmin from './pages/SetupAdmin';
 
 function Spinner() {
   return (
@@ -86,6 +87,7 @@ function AppRoutes() {
     <Routes>
       {/* Landing — portal selector */}
       <Route path="/" element={<PublicOnly><Landing /></PublicOnly>} />
+      <Route path="/setup-admin" element={<SetupAdmin />} />
 
       {/* Portal logins */}
       <Route path="/admin"         element={<PublicOnly><AdminLogin /></PublicOnly>} />
