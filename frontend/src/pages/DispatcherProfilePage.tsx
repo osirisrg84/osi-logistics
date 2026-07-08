@@ -74,7 +74,7 @@ export default function DispatcherProfilePage() {
     try {
       await userApi.sendVerification(type);
       setCodeSent(true);
-      setVerifyMsg('Código enviado a tu correo');
+      setVerifyMsg(type === 'phone' ? 'Código enviado — revisa tus SMS' : 'Código enviado — revisa tu correo');
     } catch { setVerifyMsg('Error al enviar el código'); }
     finally { setSendingCode(false); }
   };
@@ -421,7 +421,7 @@ export default function DispatcherProfilePage() {
                   </button>
                 ) : (
                   <div className="space-y-2">
-                    <p className="text-[11px] text-emerald-600 font-medium">✓ Código enviado — revisa tu correo</p>
+                    <p className="text-[11px] text-emerald-600 font-medium">✓ {verifyMsg || 'Código enviado'}</p>
                     <input
                       type="text" inputMode="numeric" maxLength={6}
                       placeholder="000000"

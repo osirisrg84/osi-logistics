@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne } from '../database';
 import { appEvents } from '../events';
 import { sendVerificationCode } from '../email';
+import { sendSmsCode } from '../sms';
 
 const router = Router();
 
@@ -296,8 +297,8 @@ router.post('/send-verification', async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: 'No token' });
-    const session = await queryOne<{ user_id: string; name: string; email: string }>(
-      `SELECT s.user_id, u.name, u.email FROM sessions s
+    const session = await queryOne<{ user_id: string; name: string; email: string; phone: string }>(
+      `SELECT s.user_id, u.name, u.email, u.phone FROM sessions s
        JOIN users u ON s.user_id = u.id
        WHERE s.token = ? AND s.expires_at > datetime('now')`, [token]
     );
@@ -306,21 +307,33 @@ router.post('/send-verification', async (req: Request, res: Response) => {
     const { type } = req.body as { type: 'email' | 'phone' };
     if (!['email', 'phone'].includes(type)) return res.status(400).json({ error: 'type must be email or phone' });
 
-    const code = String(Math.floor(100000 + Math.random() * 900000)); // 6 digits
+    if (type === 'phone' && !session.phone)
+      return res.status(400).json({ error: 'No tienes un número de teléfono guardado en tu perfil' });
+
+    const code = String(Math.floor(100000 + Math.random() * 900000));
     const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
-    await exec(
-      "DELETE FROM verification_codes WHERE user_id = ? AND type = ?",
-      [session.user_id, type]
-    );
+    await exec("DELETE FROM verification_codes WHERE user_id = ? AND type = ?", [session.user_id, type]);
     await exec(
       "INSERT INTO verification_codes (id, user_id, code, type, expires_at, used) VALUES (?, ?, ?, ?, ?, 0)",
       [uuidv4(), session.user_id, code, type, expires]
     );
 
-    await sendVerificationCode(session.email, session.name, code, type);
+    if (type === 'phone') {
+      // Normalizar número: asegurar que tenga +1 si es de USA
+      let phone = session.phone.replace(/\D/g, '');
+      if (phone.length === 10) phone = '+1' + phone;
+      else if (!phone.startsWith('+')) phone = '+' + phone;
+      await sendSmsCode(phone, code);
+    } else {
+      await sendVerificationCode(session.email, session.name, code, type);
+    }
+
     res.json({ sent: true });
-  } catch { res.status(500).json({ error: 'Failed to send code' }); }
+  } catch (e) {
+    const msg = (e as Error).message || '';
+    res.status(500).json({ error: msg.includes('Twilio not configured') ? 'SMS no configurado. Contacta al administrador.' : 'Failed to send code' });
+  }
 });
 
 // ── Verify code ────────────────────────────────────────────────────
