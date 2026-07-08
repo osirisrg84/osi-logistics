@@ -77,6 +77,11 @@ export default function DispatcherProfilePage() {
     setSendingCode(true); setVerifyMsg('');
     try {
       if (type === 'phone') {
+        if (!firebaseAuth) {
+          setVerifyMsg('SMS no disponible — revisa tus SMS o correo');
+          setSendingCode(false);
+          return;
+        }
         recaptchaRef.current?.clear();
         recaptchaRef.current = new RecaptchaVerifier(firebaseAuth, 'recaptcha-container-disp', { size: 'invisible' });
         const digits = (profile.phone || '').replace(/\D/g, '');

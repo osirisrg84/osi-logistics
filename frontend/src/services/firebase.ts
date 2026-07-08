@@ -1,15 +1,25 @@
-import { initializeApp, getApps } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
+import { getAuth, Auth } from 'firebase/auth';
 
-const apiKey = import.meta.env.VITE_FIREBASE_API_KEY || '';
+let firebaseApp: FirebaseApp | null = null;
+let _firebaseAuth: Auth | null = null;
 
-// Only initialize if config is present — prevents crash when env vars are missing
-const app = getApps().length === 0
-  ? initializeApp({
-      apiKey,
-      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
-      projectId:  import.meta.env.VITE_FIREBASE_PROJECT_ID  || '',
-    })
-  : getApps()[0];
+const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
 
-export const firebaseAuth = getAuth(app);
+if (apiKey) {
+  try {
+    firebaseApp = getApps().length === 0
+      ? initializeApp({
+          apiKey,
+          authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
+          projectId:  import.meta.env.VITE_FIREBASE_PROJECT_ID  || '',
+        })
+      : getApps()[0];
+    _firebaseAuth = getAuth(firebaseApp);
+  } catch (e) {
+    console.warn('[Firebase] init failed:', e);
+  }
+}
+
+export const firebaseAuth = _firebaseAuth;
+export const firebaseReady = !!_firebaseAuth;

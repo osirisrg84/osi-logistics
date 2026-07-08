@@ -244,6 +244,11 @@ export default function DriverPortal() {
     setSendingCode(true); setVerifyMsg('');
     try {
       if (type === 'phone') {
+        if (!firebaseAuth) {
+          setVerifyMsg('SMS no disponible — revisa tus SMS o correo');
+          setSendingCode(false);
+          return;
+        }
         recaptchaRef.current?.clear();
         recaptchaRef.current = new RecaptchaVerifier(firebaseAuth, 'recaptcha-container', { size: 'invisible' });
         const digits = (driver?.phone || '').replace(/\D/g, '');
