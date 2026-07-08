@@ -74,7 +74,7 @@ export default function DispatcherProfilePage() {
     try {
       await userApi.sendVerification(type);
       setCodeSent(true);
-      setVerifyMsg(type === 'phone' ? 'Código enviado — revisa tus SMS' : 'Código enviado — revisa tu correo');
+      setVerifyMsg('Código enviado — revisa tu correo');
     } catch { setVerifyMsg('Error al enviar el código'); }
     finally { setSendingCode(false); }
   };

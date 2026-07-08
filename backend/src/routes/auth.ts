@@ -310,23 +310,18 @@ router.post('/send-verification', async (req: Request, res: Response) => {
     const { type } = req.body as { type: 'email' | 'phone' };
     if (!['email', 'phone'].includes(type)) return res.status(400).json({ error: 'type must be email or phone' });
 
-    if (type === 'phone') {
-      if (!session.phone)
-        return res.status(400).json({ error: 'No tienes un número de teléfono guardado en tu perfil' });
-      let phone = session.phone.replace(/\D/g, '');
-      if (phone.length === 10) phone = '+1' + phone;
-      else if (!phone.startsWith('+')) phone = '+' + phone;
-      await sendSmsVerification(phone);
-    } else {
-      const code = String(Math.floor(100000 + Math.random() * 900000));
-      const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-      await exec("DELETE FROM verification_codes WHERE user_id = ? AND type = ?", [session.user_id, type]);
-      await exec(
-        "INSERT INTO verification_codes (id, user_id, code, type, expires_at, used) VALUES (?, ?, ?, ?, ?, 0)",
-        [uuidv4(), session.user_id, code, type, expires]
-      );
-      await sendVerificationCode(session.email, session.name, code, type);
-    }
+    if (type === 'phone' && !session.phone)
+      return res.status(400).json({ error: 'No tienes un número de teléfono guardado en tu perfil' });
+
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    await exec("DELETE FROM verification_codes WHERE user_id = ? AND type = ?", [session.user_id, type]);
+    await exec(
+      "INSERT INTO verification_codes (id, user_id, code, type, expires_at, used) VALUES (?, ?, ?, ?, ?, 0)",
+      [uuidv4(), session.user_id, code, type, expires]
+    );
+    // Both email and phone verification deliver code via email (SMS requires paid Twilio)
+    await sendVerificationCode(session.email, session.name, code, type);
 
     res.json({ sent: true });
   } catch (e) {
@@ -350,24 +345,6 @@ router.post('/verify-code', async (req: Request, res: Response) => {
 
     const { type, code } = req.body as { type: 'email' | 'phone'; code: string };
 
-    if (type === 'phone') {
-      const phoneRow = await queryOne<{ phone: string }>(
-        `SELECT COALESCE(NULLIF(u.phone,''), d.phone, '') as phone
-         FROM sessions s JOIN users u ON s.user_id = u.id
-         LEFT JOIN drivers d ON u.driver_id = d.id
-         WHERE s.token = ? AND s.expires_at > datetime('now')`,
-        [req.headers.authorization?.replace('Bearer ', '') || '']
-      );
-      if (!phoneRow?.phone) return res.status(400).json({ error: 'No hay teléfono registrado' });
-      let phone = phoneRow.phone.replace(/\D/g, '');
-      if (phone.length === 10) phone = '+1' + phone;
-      else if (!phone.startsWith('+')) phone = '+' + phone;
-      const approved = await checkSmsVerification(phone, String(code).trim());
-      if (!approved) return res.status(400).json({ error: 'Código incorrecto o expirado' });
-      await exec('UPDATE users SET phone_verified = 1 WHERE id = ?', [session.user_id]);
-      return res.json({ verified: true });
-    }
-
     const row = await queryOne<{ id: string; code: string; expires_at: string; used: number }>(
       "SELECT * FROM verification_codes WHERE user_id = ? AND type = ? AND used = 0 ORDER BY expires_at DESC LIMIT 1",
       [session.user_id, type]
@@ -377,7 +354,8 @@ router.post('/verify-code', async (req: Request, res: Response) => {
     if (row.code !== String(code).trim()) return res.status(400).json({ error: 'Código incorrecto' });
 
     await exec("UPDATE verification_codes SET used = 1 WHERE id = ?", [row.id]);
-    await exec('UPDATE users SET email_verified = 1 WHERE id = ?', [session.user_id]);
+    const field = type === 'email' ? 'email_verified' : 'phone_verified';
+    await exec(`UPDATE users SET ${field} = 1 WHERE id = ?`, [session.user_id]);
     res.json({ verified: true });
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
