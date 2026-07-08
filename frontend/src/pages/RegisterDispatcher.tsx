@@ -174,7 +174,7 @@ export default function RegisterDispatcher() {
                 <input className="input" type="date"
                   value={form.date_of_birth} onChange={set('date_of_birth')} required />
               </Field>
-              <Field label="Ciudad / Ubicación">
+              <Field label="Ciudad actual / Ubicación">
                 <div className="relative">
                   <MapPin className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input className="input pl-8" type="text" placeholder="Miami, FL"
