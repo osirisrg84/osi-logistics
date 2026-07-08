@@ -20,9 +20,30 @@ const sections: SettingsSection[] = [
 ];
 
 export default function Settings() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [activeSection, setActiveSection] = useState('company');
   const [saved, setSaved] = useState(false);
+
+  // Change name
+  const [nameVal, setNameVal]       = useState('');
+  const [nameStatus, setNameStatus] = useState<'idle'|'saving'|'ok'|'error'>('idle');
+  const [nameMsg, setNameMsg]       = useState('');
+
+  // initialise once user loads
+  if (user && !nameVal) setNameVal(user.name);
+
+  const saveName = async () => {
+    if (!nameVal.trim()) { setNameMsg('El nombre no puede estar vacío'); setNameStatus('error'); return; }
+    setNameStatus('saving'); setNameMsg('');
+    try {
+      await api.put('/auth/account', { name: nameVal.trim() });
+      updateUser({ name: nameVal.trim() });
+      setNameStatus('ok'); setNameMsg('Nombre actualizado');
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { error?: string } } };
+      setNameMsg(err?.response?.data?.error || 'Error al guardar'); setNameStatus('error');
+    }
+  };
 
   // Change password
   const [pwForm, setPwForm]   = useState({ current: '', newPw: '', confirm: '' });
@@ -361,8 +382,36 @@ export default function Settings() {
           <div className="space-y-4">
             <div className="card">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-1">Cuenta actual</h3>
-              <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">{user?.name} · {user?.email}</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">{user?.email}</p>
 
+              {/* Name */}
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Nombre visible</h4>
+              <div className="space-y-2 max-w-sm mb-6">
+                <input
+                  className="input"
+                  value={nameVal}
+                  onChange={e => { setNameVal(e.target.value); setNameStatus('idle'); }}
+                  placeholder="Tu nombre completo"
+                />
+                {nameStatus !== 'idle' && (
+                  <div className={`flex items-center gap-2 text-sm rounded-xl px-3 py-2 ${
+                    nameStatus === 'ok'
+                      ? 'bg-green-50 text-green-700 border border-green-100'
+                      : 'bg-red-50 text-red-600 border border-red-100'
+                  }`}>
+                    {nameStatus === 'ok' ? <CheckCircle className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
+                    {nameMsg}
+                  </div>
+                )}
+                <button onClick={saveName} disabled={nameStatus === 'saving'}
+                  className="btn-primary flex items-center gap-2 disabled:opacity-50">
+                  {nameStatus === 'saving'
+                    ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Guardando...</>
+                    : <><Save className="w-4 h-4" /> Guardar nombre</>}
+                </button>
+              </div>
+
+              <div className="border-t border-gray-100 dark:border-slate-700 pt-5">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Cambiar contraseña</h4>
               <div className="space-y-3 max-w-sm">
                 {[
@@ -407,6 +456,7 @@ export default function Settings() {
                     ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Guardando...</>
                     : <><Save className="w-4 h-4" /> Guardar contraseña</>}
                 </button>
+              </div>
               </div>
             </div>
           </div>

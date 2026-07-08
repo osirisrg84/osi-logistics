@@ -350,6 +350,22 @@ router.post('/verify-code', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
+// ── Update account name/email ─────────────────────────────────────
+router.put('/account', async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ error: 'No token' });
+    const session = await queryOne<{ user_id: string }>(
+      "SELECT user_id FROM sessions WHERE token = ? AND expires_at > datetime('now')", [token]
+    );
+    if (!session) return res.status(401).json({ error: 'Sesión inválida' });
+    const { name } = req.body;
+    if (!name || !name.trim()) return res.status(400).json({ error: 'El nombre no puede estar vacío' });
+    await exec('UPDATE users SET name = ? WHERE id = ?', [name.trim(), session.user_id]);
+    res.json({ success: true, name: name.trim() });
+  } catch { res.status(500).json({ error: 'Error al actualizar cuenta' }); }
+});
+
 // ── Change password ───────────────────────────────────────────────
 router.put('/change-password', async (req: Request, res: Response) => {
   try {

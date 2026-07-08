@@ -16,6 +16,7 @@ interface AuthContextValue {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (updates: Partial<AuthUser>) => void;
   isAdmin: boolean;
   isDispatcher: boolean;
   isDriver: boolean;
@@ -63,6 +64,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setDriverProfile(null);
   };
 
+  const updateUser = (updates: Partial<AuthUser>) => {
+    setUser(u => u ? { ...u, ...updates } : u);
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -70,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       login,
       logout,
+      updateUser,
       isAdmin: user?.role === 'admin',
       isDispatcher: user?.role === 'dispatcher' || user?.role === 'admin',
       isDriver: user?.role === 'driver',
