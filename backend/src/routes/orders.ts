@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne, createCommission } from '../database';
 import { appEvents } from '../events';
-import { sendOfferEmail } from '../email';
+import { sendOfferEmail, sendOfferAcceptedEmail } from '../email';
 
 type AuthRequest = Request & { user?: { id: string; name: string; role: string; driver_id?: string } };
 
@@ -292,6 +292,24 @@ router.post('/:id/accept', async (req: Request, res: Response) => {
     await exec("INSERT INTO notifications (id, type, title, message, read, related_id) VALUES (?, 'order', '✅ Oferta Aceptada', ?, 0, ?)",
       [uuidv4(), `El conductor aceptó la orden ${order.order_number}`, req.params.id]);
     appEvents.emit('order:status_changed', { id: req.params.id, order_number: order.order_number, status: 'assigned' });
+
+    // Email al dispatcher
+    if (order.dispatcher_user_id) {
+      const dispatcher = await queryOne<{ email: string; name: string }>(
+        'SELECT email, name FROM users WHERE id = ? AND active = 1', [order.dispatcher_user_id]
+      );
+      const driver = await queryOne<{ name: string }>('SELECT name FROM drivers WHERE id = ?', [driverId]);
+      if (dispatcher?.email) {
+        sendOfferAcceptedEmail(
+          dispatcher.email,
+          dispatcher.name,
+          driver?.name || 'El conductor',
+          order.order_number as string,
+          order.pickup_address as string,
+          order.delivery_address as string,
+        ).catch(e => console.error('[Email] Accept email failed:', e));
+      }
+    }
 
     res.json(await queryOne(`
       SELECT o.*, d.name as driver_name, t.plate_number FROM orders o
