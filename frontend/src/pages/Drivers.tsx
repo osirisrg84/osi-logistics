@@ -153,36 +153,21 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
 }
 
 interface DriverDetailProps {
-  driverId: string;
+  driver: Driver;
   onClose: () => void;
 }
 
 interface Favorite { id: string; name: string; address: string; type: string; }
 const FAV_ICONS: Record<string, string> = { home: '🏠', work: '🏢', frequent: '⭐', other: '📍' };
 
-function DriverDetail({ driverId, onClose }: DriverDetailProps) {
-  const [data, setData] = useState<{ driver: Driver; recentOrders: unknown[]; } | null>(null);
+function DriverDetail({ driver, onClose }: DriverDetailProps) {
+  const [recentOrders, setRecentOrders] = useState<unknown[]>([]);
   const [favorites, setFavorites] = useState<Favorite[]>([]);
-  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
-    setData(null); setLoadError(false);
-    driversApi.getById(driverId)
-      .then(r => setData(r.data))
-      .catch(() => setLoadError(true));
-    driversApi.getFavorites(driverId).then(r => setFavorites(r.data as Favorite[])).catch(() => {});
-  }, [driverId]);
-
-  if (!data) return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg p-10 flex flex-col items-center gap-4" onClick={e => e.stopPropagation()}>
-        {loadError
-          ? <><AlertCircle className="w-8 h-8 text-red-400" /><p className="text-sm text-gray-500">No se pudo cargar el perfil</p><button onClick={onClose} className="btn-secondary text-xs">Cerrar</button></>
-          : <div className="w-8 h-8 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin" />}
-      </div>
-    </div>
-  );
-  const { driver, recentOrders } = data;
+    ordersApi.getAll({ driver_id: driver.id, limit: 10 }).then(r => setRecentOrders(r.data)).catch(() => {});
+    driversApi.getFavorites(driver.id).then(r => setFavorites(r.data as Favorite[])).catch(() => {});
+  }, [driver.id]);
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -460,7 +445,7 @@ export default function Drivers() {
   const [statusFilter, setStatusFilter] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editDriver, setEditDriver] = useState<Driver | null>(null);
-  const [detailId, setDetailId] = useState<string | null>(null);
+  const [detailDriver, setDetailDriver] = useState<Driver | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -569,7 +554,7 @@ export default function Drivers() {
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <button onClick={() => setDetailId(driver.id)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
+                <button onClick={() => setDetailDriver(driver)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
                   <Eye className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
                 </button>
                 <button onClick={() => { setEditDriver(driver); setShowForm(true); }} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
@@ -649,7 +634,7 @@ export default function Drivers() {
           onSave={(isNew) => { fetchDrivers(); if (isNew) { showToast('¡Conductor agregado con éxito! 🚚'); playSuccessChime(); } }}
         />
       )}
-      {detailId && <DriverDetail driverId={detailId} onClose={() => setDetailId(null)} />}
+      {detailDriver && <DriverDetail driver={detailDriver} onClose={() => setDetailDriver(null)} />}
     </div>
   );
 }
