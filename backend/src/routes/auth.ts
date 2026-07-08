@@ -350,14 +350,18 @@ router.post('/verify-code', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
-// One-time admin creation — protected by ADMIN_SETUP_SECRET env var
+// One-time admin creation — no secret needed if zero admins exist, otherwise requires ADMIN_SETUP_SECRET
 router.post('/setup-admin', async (req: Request, res: Response) => {
   try {
     const { secret, name, email, password } = req.body;
-    const expected = process.env.ADMIN_SETUP_SECRET;
-    if (!expected || secret !== expected) return res.status(403).json({ error: 'Invalid secret' });
+    const adminCount = await queryOne<{ c: number }>("SELECT COUNT(*) as c FROM users WHERE role='admin' AND active=1");
+    const hasAdmins = (adminCount?.c ?? 0) > 0;
+    if (hasAdmins) {
+      const expected = process.env.ADMIN_SETUP_SECRET;
+      if (!expected || secret !== expected) return res.status(403).json({ error: 'Ya existe un admin. Se requiere el secret.' });
+    }
     if (!name || !email || !password || password.length < 8)
-      return res.status(400).json({ error: 'name, email and password (min 8 chars) are required' });
+      return res.status(400).json({ error: 'name, email y password (mín. 8 chars) son requeridos' });
 
     const existing = await queryOne<{ id: string }>('SELECT id FROM users WHERE email = ?', [email.toLowerCase()]);
     const salt = randomBytes(16).toString('hex');
