@@ -163,13 +163,25 @@ const FAV_ICONS: Record<string, string> = { home: '🏠', work: '🏢', frequent
 function DriverDetail({ driverId, onClose }: DriverDetailProps) {
   const [data, setData] = useState<{ driver: Driver; recentOrders: unknown[]; } | null>(null);
   const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
-    driversApi.getById(driverId).then(r => setData(r.data));
+    setData(null); setLoadError(false);
+    driversApi.getById(driverId)
+      .then(r => setData(r.data))
+      .catch(() => setLoadError(true));
     driversApi.getFavorites(driverId).then(r => setFavorites(r.data as Favorite[])).catch(() => {});
   }, [driverId]);
 
-  if (!data) return null;
+  if (!data) return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg p-10 flex flex-col items-center gap-4" onClick={e => e.stopPropagation()}>
+        {loadError
+          ? <><AlertCircle className="w-8 h-8 text-red-400" /><p className="text-sm text-gray-500">No se pudo cargar el perfil</p><button onClick={onClose} className="btn-secondary text-xs">Cerrar</button></>
+          : <div className="w-8 h-8 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin" />}
+      </div>
+    </div>
+  );
   const { driver, recentOrders } = data;
 
   return (
