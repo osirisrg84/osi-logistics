@@ -298,8 +298,11 @@ router.post('/send-verification', async (req: Request, res: Response) => {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: 'No token' });
     const session = await queryOne<{ user_id: string; name: string; email: string; phone: string }>(
-      `SELECT s.user_id, u.name, u.email, u.phone FROM sessions s
+      `SELECT s.user_id, u.name, u.email,
+              COALESCE(NULLIF(u.phone,''), d.phone, '') as phone
+       FROM sessions s
        JOIN users u ON s.user_id = u.id
+       LEFT JOIN drivers d ON u.driver_id = d.id
        WHERE s.token = ? AND s.expires_at > datetime('now')`, [token]
     );
     if (!session) return res.status(401).json({ error: 'Invalid session' });
