@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
+import { firebaseAuth } from '../services/firebase';
 import {
   Package, MapPin, CheckCircle, Truck, Phone,
   Clock, Star, Navigation, LogOut, User, Activity,
@@ -227,38 +229,67 @@ export default function DriverPortal() {
   const [savingPayout,  setSavingPayout]  = useState(false);
 
   // ── Verification ──────────────────────────────────────────────
-  const [emailVerified,   setEmailVerified]   = useState(false);
-  const [phoneVerified,   setPhoneVerified]   = useState(false);
-  const [verifying,       setVerifying]       = useState<'email' | 'phone' | null>(null);
-  const [codeInput,       setCodeInput]       = useState('');
-  const [codeSent,        setCodeSent]        = useState(false);
-  const [sendingCode,     setSendingCode]     = useState(false);
-  const [verifyingCode,   setVerifyingCode]   = useState(false);
-  const [verifyMsg,       setVerifyMsg]       = useState('');
+  const [emailVerified,      setEmailVerified]      = useState(false);
+  const [phoneVerified,      setPhoneVerified]      = useState(false);
+  const [verifying,          setVerifying]          = useState<'email' | 'phone' | null>(null);
+  const [codeInput,          setCodeInput]          = useState('');
+  const [codeSent,           setCodeSent]           = useState(false);
+  const [sendingCode,        setSendingCode]        = useState(false);
+  const [verifyingCode,      setVerifyingCode]      = useState(false);
+  const [verifyMsg,          setVerifyMsg]          = useState('');
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const recaptchaRef = useRef<RecaptchaVerifier | null>(null);
 
   const handleSendCode = async (type: 'email' | 'phone') => {
     setSendingCode(true); setVerifyMsg('');
     try {
-      await userApi.sendVerification(type);
-      setCodeSent(true); setVerifyMsg('Código enviado — revisa tu correo');
+      if (type === 'phone') {
+        recaptchaRef.current?.clear();
+        recaptchaRef.current = new RecaptchaVerifier(firebaseAuth, 'recaptcha-container', { size: 'invisible' });
+        const digits = (driver?.phone || '').replace(/\D/g, '');
+        const e164 = digits.length === 10 ? '+1' + digits : '+' + digits;
+        const result = await signInWithPhoneNumber(firebaseAuth, e164, recaptchaRef.current);
+        setConfirmationResult(result);
+        setCodeSent(true);
+        setVerifyMsg('Código enviado — revisa tus SMS');
+      } else {
+        await userApi.sendVerification(type);
+        setCodeSent(true);
+        setVerifyMsg('Código enviado — revisa tu correo');
+      }
     } catch (e: unknown) {
-      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Error al enviar el código';
+      const msg = (e as { response?: { data?: { error?: string } }; message?: string })
+        ?.response?.data?.error || (e as { message?: string })?.message || 'Error al enviar el código';
       setVerifyMsg(msg);
-    }
-    finally { setSendingCode(false); }
+      recaptchaRef.current?.clear();
+      recaptchaRef.current = null;
+    } finally { setSendingCode(false); }
   };
+
   const handleVerifyCode = async () => {
     if (!verifying) return;
     setVerifyingCode(true); setVerifyMsg('');
     try {
-      await userApi.verifyCode(verifying, codeInput);
-      if (verifying === 'email') setEmailVerified(true);
-      else setPhoneVerified(true);
-      setVerifying(null); setCodeInput(''); setCodeSent(false);
+      if (verifying === 'phone' && confirmationResult) {
+        const credential = await confirmationResult.confirm(codeInput);
+        const fbToken = await credential.user.getIdToken();
+        await userApi.confirmPhoneVerified(fbToken);
+        setPhoneVerified(true);
+      } else {
+        await userApi.verifyCode(verifying, codeInput);
+        if (verifying === 'email') setEmailVerified(true);
+        else setPhoneVerified(true);
+      }
+      setVerifying(null); setCodeInput(''); setCodeSent(false); setConfirmationResult(null);
     } catch { setVerifyMsg('Código incorrecto o expirado'); }
     finally { setVerifyingCode(false); }
   };
-  const cancelVerify = () => { setVerifying(null); setCodeInput(''); setCodeSent(false); setVerifyMsg(''); };
+
+  const cancelVerify = () => {
+    setVerifying(null); setCodeInput(''); setCodeSent(false); setVerifyMsg('');
+    setConfirmationResult(null);
+    recaptchaRef.current?.clear(); recaptchaRef.current = null;
+  };
 
   // ── Equipment profile ─────────────────────────────────────
   const [truckNum, setTruckNum] = useState('');
@@ -3484,6 +3515,8 @@ export default function DriverPortal() {
         </div>
       )}
 
+      {/* Invisible reCAPTCHA container for Firebase Phone Auth */}
+      <div id="recaptcha-container" />
     </div>
   );
 }

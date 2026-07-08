@@ -5,6 +5,7 @@ import { exec, query, queryOne } from '../database';
 import { appEvents } from '../events';
 import { sendVerificationCode } from '../email';
 import { sendSmsVerification, checkSmsVerification } from '../sms';
+import { getFirebaseAdmin } from '../firebase-admin';
 
 const router = Router();
 
@@ -437,6 +438,38 @@ router.post('/setup-admin', async (req: Request, res: Response) => {
     );
     res.status(201).json({ created: true, email: email.toLowerCase() });
   } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+// ── Confirm Firebase phone verification ──────────────────────────
+router.post('/confirm-phone-verified', async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ error: 'No token' });
+    const session = await queryOne<{ user_id: string; phone: string }>(
+      `SELECT s.user_id, COALESCE(NULLIF(u.phone,''), d.phone, '') as phone
+       FROM sessions s JOIN users u ON s.user_id = u.id
+       LEFT JOIN drivers d ON u.driver_id = d.id
+       WHERE s.token = ? AND s.expires_at > datetime('now')`, [token]
+    );
+    if (!session) return res.status(401).json({ error: 'Invalid session' });
+
+    const { firebaseToken } = req.body;
+    const firebase = getFirebaseAdmin();
+    const decoded = await firebase.auth().verifyIdToken(firebaseToken);
+
+    const normalize = (p: string) => {
+      const d = p.replace(/\D/g, '');
+      return d.length === 10 ? '+1' + d : '+' + d;
+    };
+    if (decoded.phone_number !== normalize(session.phone))
+      return res.status(400).json({ error: 'El número verificado no coincide con tu perfil' });
+
+    await exec('UPDATE users SET phone_verified = 1 WHERE id = ?', [session.user_id]);
+    res.json({ verified: true });
+  } catch (e) {
+    console.error('[confirm-phone-verified]', (e as Error).message);
+    res.status(500).json({ error: (e as Error).message || 'Error al verificar' });
+  }
 });
 
 router.get('/drivers-list', async (_req: Request, res: Response) => {
