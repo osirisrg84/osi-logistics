@@ -241,7 +241,10 @@ export default function DriverPortal() {
     try {
       await userApi.sendVerification(type);
       setCodeSent(true); setVerifyMsg(type === 'phone' ? 'Código enviado — revisa tus SMS' : 'Código enviado — revisa tu correo');
-    } catch { setVerifyMsg('Error al enviar el código'); }
+    } catch (e: unknown) {
+      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Error al enviar el código';
+      setVerifyMsg(msg);
+    }
     finally { setSendingCode(false); }
   };
   const handleVerifyCode = async () => {

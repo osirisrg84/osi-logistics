@@ -331,9 +331,10 @@ router.post('/send-verification', async (req: Request, res: Response) => {
 
     res.json({ sent: true });
   } catch (e) {
-    const msg = (e as Error).message || '';
-    console.error('[send-verification] error:', msg);
-    res.status(500).json({ error: msg.includes('Twilio not configured') ? 'SMS no configurado. Contacta al administrador.' : 'Failed to send code' });
+    const err = e as Record<string, unknown>;
+    const msg = (err.message as string) || JSON.stringify(err);
+    console.error('[send-verification] error:', msg, err.code, err.status);
+    res.status(500).json({ error: msg.includes('Twilio not configured') ? 'SMS no configurado.' : msg });
   }
 });
 
