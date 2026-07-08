@@ -227,7 +227,10 @@ export default function Tracking() {
                   </p>
                 )}
                 {(driver as typeof driver & { equipment_type?: string }).equipment_type && (
-                  <p className="text-xs text-gray-600 mb-1">🚛 {(driver as typeof driver & { equipment_type?: string }).equipment_type} · {driver.make} {driver.model}</p>
+                  <p className="text-xs font-medium text-blue-600 mb-1">
+                    🚛 {(driver as typeof driver & { equipment_type?: string }).equipment_type}
+                    {driver.make ? ` · ${driver.make}${driver.model ? ' ' + driver.model : ''}` : ''}
+                  </p>
                 )}
                 {driver.order_number && driver.status !== 'available' && (
                   <p className="text-xs text-blue-600 font-medium flex items-center gap-1">
@@ -237,7 +240,7 @@ export default function Tracking() {
                 {driver.delivery_address && driver.status !== 'available' && (
                   <p className="text-xs text-gray-500 mt-0.5 pl-4">{driver.delivery_address}</p>
                 )}
-                <p className="text-xs text-gray-400 mt-2">★ {driver.rating.toFixed(1)} · {driver.total_deliveries} trips</p>
+                <p className="text-xs text-gray-400 mt-2">★ {driver.rating.toFixed(1)} · {(driver as typeof driver & { total_deliveries?: number }).total_deliveries ?? 0} trips</p>
               </div>
             </Popup>
           </Marker>
