@@ -209,12 +209,12 @@ router.get('/profile', async (req: Request, res: Response) => {
       payout_method: string; payout_details: string; ssn: string; dispatcher_code: string;
       phone: string; availability: string; languages: string; years_experience: number;
       city: string; date_of_birth: string; previous_companies: string; equipment_experience: string;
-      shift_active: number;
+      shift_active: number; email_verified: number; phone_verified: number;
     }>(`
       SELECT u.payout_method, u.payout_details, u.ssn, u.dispatcher_code,
              u.phone, u.availability, u.languages, u.years_experience,
              u.city, u.date_of_birth, u.previous_companies, u.equipment_experience,
-             u.shift_active
+             u.shift_active, u.email_verified, u.phone_verified
       FROM sessions s JOIN users u ON s.user_id = u.id
       WHERE s.token = ? AND s.expires_at > datetime('now')
     `, [token]);
@@ -233,6 +233,8 @@ router.get('/profile', async (req: Request, res: Response) => {
       previous_companies:   row.previous_companies,
       equipment_experience: row.equipment_experience,
       shift_active:         row.shift_active,
+      email_verified:       !!row.email_verified,
+      phone_verified:       !!row.phone_verified,
     });
   } catch { res.status(500).json({ error: 'Failed' }); }
 });

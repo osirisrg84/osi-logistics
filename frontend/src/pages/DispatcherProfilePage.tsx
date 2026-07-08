@@ -21,6 +21,8 @@ interface ProfileData {
   date_of_birth?: string;
   previous_companies?: string;
   equipment_experience?: string;
+  email_verified?: boolean;
+  phone_verified?: boolean;
 }
 
 interface CommissionRow {
@@ -58,6 +60,38 @@ export default function DispatcherProfilePage() {
   const [profileForm, setProfileForm] = useState({
     availability: 'full-time', languages: '', years_experience: '', equipment_experience: '',
   });
+
+  // Verification
+  const [verifying, setVerifying]   = useState<'email' | 'phone' | null>(null);
+  const [codeInput, setCodeInput]   = useState('');
+  const [codeSent,  setCodeSent]    = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [verifyingCode, setVerifyingCode] = useState(false);
+  const [verifyMsg, setVerifyMsg]   = useState('');
+
+  const handleSendCode = async (type: 'email' | 'phone') => {
+    setSendingCode(true); setVerifyMsg('');
+    try {
+      await userApi.sendVerification(type);
+      setCodeSent(true);
+      setVerifyMsg('Código enviado a tu correo');
+    } catch { setVerifyMsg('Error al enviar el código'); }
+    finally { setSendingCode(false); }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!verifying) return;
+    setVerifyingCode(true); setVerifyMsg('');
+    try {
+      await userApi.verifyCode(verifying, codeInput);
+      setProfile(prev => ({ ...prev, [`${verifying}_verified`]: true }));
+      setVerifying(null); setCodeInput(''); setCodeSent(false);
+      setVerifyMsg('');
+    } catch { setVerifyMsg('Código incorrecto o expirado'); }
+    finally { setVerifyingCode(false); }
+  };
+
+  const cancelVerify = () => { setVerifying(null); setCodeInput(''); setCodeSent(false); setVerifyMsg(''); };
 
   useEffect(() => {
     if (!user?.id) return;
@@ -338,23 +372,73 @@ export default function DispatcherProfilePage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {([
-              { icon: Mail,  label: user?.email || '—',   sub: 'Email' },
-              { icon: Phone, label: profile.phone || '—', sub: 'Teléfono' },
-            ] as { icon: React.ComponentType<{ className?: string }>; label: string; sub: string }[]).filter(row => row.label && row.label !== '—').map(row => (
-              <div key={row.sub} className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
-                <row.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
-                <div>
-                  <p className={`text-xs font-medium ${dark ? 'text-white' : 'text-gray-800'}`}>{row.label}</p>
-                  <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{row.sub}</p>
-                </div>
+            {/* Email row */}
+            <div className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
+              <Mail className="w-4 h-4 flex-shrink-0 text-slate-400" />
+              <div className="flex-1 min-w-0">
+                <p className={`text-xs font-medium truncate ${dark ? 'text-white' : 'text-gray-800'}`}>{user?.email}</p>
+                <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>Email</p>
               </div>
-            ))}
+              {profile.email_verified
+                ? <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500"><CheckCircle className="w-3.5 h-3.5" /> Verificado</span>
+                : <button onClick={() => { setVerifying('email'); setCodeSent(false); setCodeInput(''); setVerifyMsg(''); }}
+                    className="text-[10px] font-bold text-orange-500 hover:text-orange-600 whitespace-nowrap">Verificar →</button>
+              }
+            </div>
+            {/* Phone row */}
+            {profile.phone && (
+              <div className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
+                <Phone className="w-4 h-4 flex-shrink-0 text-slate-400" />
+                <div className="flex-1 min-w-0">
+                  <p className={`text-xs font-medium ${dark ? 'text-white' : 'text-gray-800'}`}>{profile.phone}</p>
+                  <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>Teléfono</p>
+                </div>
+                {profile.phone_verified
+                  ? <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500"><CheckCircle className="w-3.5 h-3.5" /> Verificado</span>
+                  : <button onClick={() => { setVerifying('phone'); setCodeSent(false); setCodeInput(''); setVerifyMsg(''); }}
+                      className="text-[10px] font-bold text-orange-500 hover:text-orange-600 whitespace-nowrap">Verificar →</button>
+                }
+              </div>
+            )}
             {!profile.phone && (
               <button onClick={() => setEditingContact(true)}
                 className={`w-full mt-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${dark ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-gray-200 text-gray-400 hover:bg-gray-50'}`}>
                 + Agregar teléfono
               </button>
+            )}
+
+            {/* Verification panel */}
+            {verifying && (
+              <div className={`mt-2 p-3 rounded-xl border ${dark ? 'bg-slate-700/60 border-slate-600' : 'bg-orange-50 border-orange-100'}`}>
+                <p className={`text-xs font-semibold mb-2 ${dark ? 'text-white' : 'text-gray-800'}`}>
+                  Verificar {verifying === 'email' ? 'correo electrónico' : 'teléfono'}
+                </p>
+                {!codeSent ? (
+                  <button onClick={() => handleSendCode(verifying)} disabled={sendingCode}
+                    className="w-full py-2 rounded-lg text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center gap-1.5">
+                    {sendingCode ? <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" /> : null}
+                    Enviar código de 6 dígitos
+                  </button>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-[11px] text-emerald-600 font-medium">✓ Código enviado — revisa tu correo</p>
+                    <input
+                      type="text" inputMode="numeric" maxLength={6}
+                      placeholder="000000"
+                      value={codeInput}
+                      onChange={e => setCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      className={`w-full px-3 py-2 rounded-lg text-center text-lg font-bold tracking-widest border outline-none focus:ring-2 focus:ring-orange-400/40 ${dark ? 'bg-slate-600 border-slate-500 text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+                    />
+                    <button onClick={handleVerifyCode} disabled={verifyingCode || codeInput.length < 6}
+                      className="w-full py-2 rounded-lg text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 flex items-center justify-center gap-1.5">
+                      {verifyingCode ? <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" /> : null}
+                      Confirmar código
+                    </button>
+                  </div>
+                )}
+                {verifyMsg && <p className={`text-[11px] mt-1.5 font-medium ${verifyMsg.includes('Error') || verifyMsg.includes('ncorrecto') ? 'text-red-500' : 'text-emerald-600'}`}>{verifyMsg}</p>}
+                <button onClick={cancelVerify} className="mt-2 text-[10px] text-gray-400 hover:text-gray-600">Cancelar</button>
+              </div>
             )}
           </div>
         )}
