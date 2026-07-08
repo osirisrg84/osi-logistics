@@ -350,6 +350,38 @@ router.post('/verify-code', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
+// ── Change password ───────────────────────────────────────────────
+router.put('/change-password', async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ error: 'No token' });
+
+    const session = await queryOne<{ user_id: string }>(
+      "SELECT user_id FROM sessions WHERE token = ? AND expires_at > datetime('now')", [token]
+    );
+    if (!session) return res.status(401).json({ error: 'Sesión inválida' });
+
+    const { current_password, new_password } = req.body;
+    if (!current_password || !new_password) return res.status(400).json({ error: 'Completa todos los campos' });
+    if (new_password.length < 8) return res.status(400).json({ error: 'Mínimo 8 caracteres' });
+
+    const user = await queryOne<{ id: string; password_hash: string; salt: string }>(
+      'SELECT id, password_hash, salt FROM users WHERE id = ?', [session.user_id]
+    );
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    if (!verifyPassword(current_password, user.salt, user.password_hash))
+      return res.status(400).json({ error: 'La contraseña actual es incorrecta' });
+
+    const newSalt = randomBytes(16).toString('hex');
+    const newHash = hashPassword(new_password, newSalt);
+    await exec('UPDATE users SET password_hash = ?, salt = ? WHERE id = ?', [newHash, newSalt, user.id]);
+    await exec('DELETE FROM sessions WHERE user_id = ? AND token != ?', [user.id, token]);
+
+    res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Error al cambiar contraseña' }); }
+});
+
 // One-time admin creation — no secret needed if zero admins exist, otherwise requires ADMIN_SETUP_SECRET
 router.post('/setup-admin', async (req: Request, res: Response) => {
   try {

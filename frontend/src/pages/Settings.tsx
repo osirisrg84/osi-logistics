@@ -1,5 +1,7 @@
 ﻿import { useState } from 'react';
-import { Save, Bell, Map, Truck, Shield, Globe, Palette, Server } from 'lucide-react';
+import { Save, Bell, Map, Truck, Shield, Globe, Palette, Server, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
+import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 interface SettingsSection {
   id: string;
@@ -18,8 +20,30 @@ const sections: SettingsSection[] = [
 ];
 
 export default function Settings() {
+  const { user } = useAuth();
   const [activeSection, setActiveSection] = useState('company');
   const [saved, setSaved] = useState(false);
+
+  // Change password
+  const [pwForm, setPwForm]   = useState({ current: '', newPw: '', confirm: '' });
+  const [showPw, setShowPw]   = useState(false);
+  const [pwStatus, setPwStatus] = useState<'idle'|'saving'|'ok'|'error'>('idle');
+  const [pwMsg, setPwMsg]     = useState('');
+
+  const changePassword = async () => {
+    if (!pwForm.current || !pwForm.newPw) { setPwMsg('Completa todos los campos'); setPwStatus('error'); return; }
+    if (pwForm.newPw !== pwForm.confirm)  { setPwMsg('Las contraseñas no coinciden'); setPwStatus('error'); return; }
+    if (pwForm.newPw.length < 8)          { setPwMsg('Mínimo 8 caracteres'); setPwStatus('error'); return; }
+    setPwStatus('saving'); setPwMsg('');
+    try {
+      await api.put('/auth/change-password', { current_password: pwForm.current, new_password: pwForm.newPw });
+      setPwStatus('ok'); setPwMsg('Contraseña actualizada'); setPwForm({ current: '', newPw: '', confirm: '' });
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { error?: string } } };
+      setPwMsg(err?.response?.data?.error || 'Error al cambiar contraseña');
+      setPwStatus('error');
+    }
+  };
 
   const [companySettings, setCompanySettings] = useState({
     company_name: 'OSI Logistics',
@@ -334,25 +358,55 @@ export default function Settings() {
         )}
 
         {activeSection === 'security' && (
-          <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">Security Settings</h3>
-            <div className="space-y-4">
-              <div className="bg-green-50 border border-green-100 rounded-xl p-4">
-                <p className="text-sm font-medium text-green-800">✓ System is running securely</p>
-                <p className="text-xs text-green-600 mt-1">All connections are encrypted and data is stored locally</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="label">Session Timeout (minutes)</label>
-                  <input className="input" type="number" defaultValue={60} min="15" max="480" />
-                </div>
-                <div>
-                  <label className="label">Max Login Attempts</label>
-                  <input className="input" type="number" defaultValue={5} min="3" max="10" />
-                </div>
-              </div>
-              <div className="pt-2">
-                <button className="btn-secondary">Change Password</button>
+          <div className="space-y-4">
+            <div className="card">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-1">Cuenta actual</h3>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">{user?.name} · {user?.email}</p>
+
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Cambiar contraseña</h4>
+              <div className="space-y-3 max-w-sm">
+                {[
+                  { label: 'Contraseña actual',  key: 'current' },
+                  { label: 'Nueva contraseña',   key: 'newPw'   },
+                  { label: 'Confirmar nueva',    key: 'confirm' },
+                ].map(({ label, key }) => (
+                  <div key={key}>
+                    <label className="label">{label}</label>
+                    <div className="relative">
+                      <input
+                        type={showPw ? 'text' : 'password'}
+                        className="input pr-10"
+                        placeholder="••••••••"
+                        value={pwForm[key as keyof typeof pwForm]}
+                        onChange={e => setPwForm(f => ({ ...f, [key]: e.target.value }))}
+                      />
+                      <button type="button" onClick={() => setShowPw(v => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                {pwStatus !== 'idle' && (
+                  <div className={`flex items-center gap-2 text-sm rounded-xl px-3 py-2 ${
+                    pwStatus === 'ok'
+                      ? 'bg-green-50 text-green-700 border border-green-100'
+                      : 'bg-red-50 text-red-600 border border-red-100'
+                  }`}>
+                    {pwStatus === 'ok'
+                      ? <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                      : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
+                    {pwMsg}
+                  </div>
+                )}
+
+                <button onClick={changePassword} disabled={pwStatus === 'saving'}
+                  className="btn-primary flex items-center gap-2 disabled:opacity-50">
+                  {pwStatus === 'saving'
+                    ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Guardando...</>
+                    : <><Save className="w-4 h-4" /> Guardar contraseña</>}
+                </button>
               </div>
             </div>
           </div>
