@@ -1,6 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
-import { firebaseAuth } from '../services/firebase';
 import {
   Package, MapPin, CheckCircle, Truck, Phone,
   Clock, Star, Navigation, LogOut, User, Activity,
@@ -237,41 +235,18 @@ export default function DriverPortal() {
   const [sendingCode,        setSendingCode]        = useState(false);
   const [verifyingCode,      setVerifyingCode]      = useState(false);
   const [verifyMsg,          setVerifyMsg]          = useState('');
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
-  const recaptchaRef = useRef<RecaptchaVerifier | null>(null);
   const [profilePhone, setProfilePhone] = useState('');
 
   const handleSendCode = async (type: 'email' | 'phone') => {
     setSendingCode(true); setVerifyMsg('');
     try {
-      if (type === 'phone' && firebaseAuth) {
-        recaptchaRef.current?.clear();
-        recaptchaRef.current = new RecaptchaVerifier(firebaseAuth, 'recaptcha-container', { size: 'invisible' });
-        const digits = (profilePhone || driver?.phone || '').replace(/\D/g, '');
-        const e164 = digits.length === 10 ? '+1' + digits : '+' + digits;
-        try {
-          const result = await signInWithPhoneNumber(firebaseAuth, e164, recaptchaRef.current);
-          setConfirmationResult(result);
-          setCodeSent(true);
-          setVerifyMsg('Código enviado — revisa tus SMS');
-          return;
-        } catch (fbErr: unknown) {
-          recaptchaRef.current?.clear();
-          recaptchaRef.current = null;
-          const fbCode = (fbErr as { code?: string })?.code || '';
-          if (!['auth/billing-not-enabled', 'auth/operation-not-allowed', 'auth/invalid-phone-number'].includes(fbCode)) throw fbErr;
-          // Fall through to email delivery
-        }
-      }
       await userApi.sendVerification(type);
       setCodeSent(true);
-      setVerifyMsg(type === 'phone' ? 'Código enviado a tu correo' : 'Código enviado — revisa tu correo');
+      setVerifyMsg(type === 'phone' ? 'Código enviado — revisa tus SMS' : 'Código enviado — revisa tu correo');
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { error?: string } }; message?: string })
         ?.response?.data?.error || (e as { message?: string })?.message || 'Error al enviar el código';
       setVerifyMsg(msg);
-      recaptchaRef.current?.clear();
-      recaptchaRef.current = null;
     } finally { setSendingCode(false); }
   };
 
@@ -279,25 +254,16 @@ export default function DriverPortal() {
     if (!verifying) return;
     setVerifyingCode(true); setVerifyMsg('');
     try {
-      if (verifying === 'phone' && confirmationResult) {
-        const credential = await confirmationResult.confirm(codeInput);
-        const fbToken = await credential.user.getIdToken();
-        await userApi.confirmPhoneVerified(fbToken);
-        setPhoneVerified(true);
-      } else {
-        await userApi.verifyCode(verifying, codeInput);
-        if (verifying === 'email') setEmailVerified(true);
-        else setPhoneVerified(true);
-      }
-      setVerifying(null); setCodeInput(''); setCodeSent(false); setConfirmationResult(null);
+      await userApi.verifyCode(verifying, codeInput);
+      if (verifying === 'email') setEmailVerified(true);
+      else setPhoneVerified(true);
+      setVerifying(null); setCodeInput(''); setCodeSent(false);
     } catch { setVerifyMsg('Código incorrecto o expirado'); }
     finally { setVerifyingCode(false); }
   };
 
   const cancelVerify = () => {
     setVerifying(null); setCodeInput(''); setCodeSent(false); setVerifyMsg('');
-    setConfirmationResult(null);
-    recaptchaRef.current?.clear(); recaptchaRef.current = null;
   };
 
   // ── Equipment profile ─────────────────────────────────────
@@ -3525,8 +3491,6 @@ export default function DriverPortal() {
         </div>
       )}
 
-      {/* Invisible reCAPTCHA container for Firebase Phone Auth */}
-      <div id="recaptcha-container" />
     </div>
   );
 }

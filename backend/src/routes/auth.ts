@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne } from '../database';
 import { appEvents } from '../events';
 import { sendVerificationCode } from '../email';
-import { sendSmsVerification, checkSmsVerification } from '../sms';
+import { sendSmsCode } from '../sms';
 import { getFirebaseAdmin } from '../firebase-admin';
 
 const router = Router();
@@ -321,8 +321,17 @@ router.post('/send-verification', async (req: Request, res: Response) => {
       "INSERT INTO verification_codes (id, user_id, code, type, expires_at, used) VALUES (?, ?, ?, ?, ?, 0)",
       [uuidv4(), session.user_id, code, type, expires]
     );
-    // Both email and phone verification deliver code via email (SMS requires paid Twilio)
-    await sendVerificationCode(session.email, session.name, code, type, session.role);
+    if (type === 'phone') {
+      try {
+        await sendSmsCode(session.phone, code);
+        console.log(`[SMS] Sent to ${session.phone}`);
+      } catch (smsErr) {
+        console.warn('[SMS] Textbelt failed, falling back to email:', (smsErr as Error).message);
+        await sendVerificationCode(session.email, session.name, code, type, session.role);
+      }
+    } else {
+      await sendVerificationCode(session.email, session.name, code, type, session.role);
+    }
 
     res.json({ sent: true });
   } catch (e) {
