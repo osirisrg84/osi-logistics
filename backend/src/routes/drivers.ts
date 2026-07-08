@@ -154,6 +154,8 @@ router.delete('/:id', async (req: Request, res: Response) => {
     const active = await queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders WHERE driver_id = ? AND status NOT IN ('delivered','cancelled')`, [req.params.id]);
     if ((active?.c ?? 0) > 0) return res.status(400).json({ error: 'Cannot delete driver with active orders' });
     await exec('DELETE FROM tracking WHERE driver_id = ?', [req.params.id]);
+    await exec('DELETE FROM sessions WHERE user_id IN (SELECT id FROM users WHERE driver_id = ?)', [req.params.id]);
+    await exec('DELETE FROM users WHERE driver_id = ?', [req.params.id]);
     await exec('DELETE FROM drivers WHERE id = ?', [req.params.id]);
     res.json({ success: true });
   } catch { res.status(500).json({ error: 'Failed' }); }

@@ -318,6 +318,14 @@ export async function initDatabase(): Promise<void> {
     SELECT MIN(id) FROM drivers GROUP BY email
   )`);
 
+  // Remove orphaned user accounts whose driver no longer exists
+  await exec(`DELETE FROM sessions WHERE user_id IN (
+    SELECT id FROM users WHERE role = 'driver' AND driver_id IS NOT NULL
+    AND driver_id NOT IN (SELECT id FROM drivers)
+  )`);
+  await exec(`DELETE FROM users WHERE role = 'driver' AND driver_id IS NOT NULL
+    AND driver_id NOT IN (SELECT id FROM drivers)`);
+
   await seedDatabase();
   await seedUsers();
   await seedFavorites();
