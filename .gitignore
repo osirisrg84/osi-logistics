@@ -7,3 +7,9 @@ dist/
 .env.local
 .DS_Store
 *.log
+turso-credentials.env
+backend/*.json
+backend/*.txt
+!backend/package.json
+!backend/package-lock.json
+!backend/tsconfig.json
