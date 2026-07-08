@@ -182,33 +182,31 @@ export async function sendOfferAcceptedEmail(to: string, dispatcherName: string,
   });
 }
 
-export async function sendVerificationCode(to: string, name: string, code: string, type: 'email' | 'phone') {
+export async function sendVerificationCode(to: string, name: string, code: string, type: 'email' | 'phone', role = 'driver') {
   const label = type === 'email' ? 'correo electrónico' : 'número de teléfono';
+  const accent = role === 'admin' ? '#4f46e5' : role === 'dispatcher' ? '#f97316' : '#2563eb';
   await resend.emails.send({
     from: FROM,
     to,
-    subject: `🔐 Tu código de verificación OSI Logistics: ${code}`,
+    subject: `Tu código de verificación OSI Logistics: ${code}`,
     html: `
-      <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#f8f9fa;padding:32px;border-radius:16px;">
-        <div style="text-align:center;margin-bottom:24px;">
-          <h1 style="color:#f97316;margin:0;font-size:28px;">OSI Logistics</h1>
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;background:#f1f5f9;padding:32px 16px;">
+        <div style="background:#0f172a;border-radius:12px 12px 0 0;padding:20px 32px;text-align:center;">
+          <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;letter-spacing:1px;">OSI Logistics</h1>
         </div>
-        <div style="background:#fff;border-radius:12px;padding:24px;border:1px solid #e5e7eb;">
-          <h2 style="color:#111827;margin:0 0 12px;">Hola, ${name}</h2>
-          <p style="color:#374151;line-height:1.6;">
+        <div style="background:#fff;border-radius:0 0 12px 12px;padding:32px;border:1px solid #e2e8f0;border-top:none;">
+          <h2 style="color:#111827;margin:0 0 8px;font-size:18px;">Hola, ${name}</h2>
+          <p style="color:#374151;line-height:1.6;margin:0 0 28px;">
             Tu código para verificar tu <strong>${label}</strong>:
           </p>
-          <div style="text-align:center;margin:28px 0;">
-            <div style="background:#f97316;color:#fff;font-size:36px;font-weight:bold;letter-spacing:12px;
-                        padding:20px 32px;border-radius:12px;display:inline-block;">
-              ${code}
-            </div>
+          <div style="background:${accent};border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
+            <span style="color:#fff;font-size:40px;font-weight:800;letter-spacing:10px;">${code}</span>
           </div>
-          <p style="color:#6b7280;font-size:13px;text-align:center;">
+          <p style="color:#6b7280;font-size:13px;text-align:center;margin:0;">
             Válido por <strong>10 minutos</strong>. No compartas este código con nadie.
           </p>
         </div>
-        <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:16px;">© OSI Logistics · Miami, FL</p>
+        <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px;">© OSI Logistics · Miami, FL</p>
       </div>
     `,
   });

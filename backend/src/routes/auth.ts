@@ -297,8 +297,8 @@ router.post('/send-verification', async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: 'No token' });
-    const session = await queryOne<{ user_id: string; name: string; email: string; phone: string }>(
-      `SELECT s.user_id, u.name, u.email,
+    const session = await queryOne<{ user_id: string; name: string; email: string; phone: string; role: string }>(
+      `SELECT s.user_id, u.name, u.email, u.role,
               COALESCE(NULLIF(u.phone,''), d.phone, '') as phone
        FROM sessions s
        JOIN users u ON s.user_id = u.id
@@ -321,7 +321,7 @@ router.post('/send-verification', async (req: Request, res: Response) => {
       [uuidv4(), session.user_id, code, type, expires]
     );
     // Both email and phone verification deliver code via email (SMS requires paid Twilio)
-    await sendVerificationCode(session.email, session.name, code, type);
+    await sendVerificationCode(session.email, session.name, code, type, session.role);
 
     res.json({ sent: true });
   } catch (e) {
