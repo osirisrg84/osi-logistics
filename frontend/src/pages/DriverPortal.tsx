@@ -239,6 +239,7 @@ export default function DriverPortal() {
   const [verifyMsg,          setVerifyMsg]          = useState('');
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const recaptchaRef = useRef<RecaptchaVerifier | null>(null);
+  const [profilePhone, setProfilePhone] = useState('');
 
   const handleSendCode = async (type: 'email' | 'phone') => {
     setSendingCode(true); setVerifyMsg('');
@@ -251,7 +252,7 @@ export default function DriverPortal() {
         }
         recaptchaRef.current?.clear();
         recaptchaRef.current = new RecaptchaVerifier(firebaseAuth, 'recaptcha-container', { size: 'invisible' });
-        const digits = (driver?.phone || '').replace(/\D/g, '');
+        const digits = (profilePhone || driver?.phone || '').replace(/\D/g, '');
         const e164 = digits.length === 10 ? '+1' + digits : '+' + digits;
         const result = await signInWithPhoneNumber(firebaseAuth, e164, recaptchaRef.current);
         setConfirmationResult(result);
@@ -368,6 +369,7 @@ export default function DriverPortal() {
       try { setPayoutDetails(data.payout_details ? JSON.parse(data.payout_details) : {}); } catch { setPayoutDetails({}); }
       setEmailVerified(!!data.email_verified);
       setPhoneVerified(!!data.phone_verified);
+      setProfilePhone(data.phone || '');
     }).catch(() => {});
   }, []);
 
