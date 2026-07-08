@@ -245,6 +245,17 @@ export async function initDatabase(): Promise<void> {
   await addColumnIfMissing('users', 'shift_active',         "INTEGER NOT NULL DEFAULT 0");
   await addColumnIfMissing('users', 'shift_changed_at',     "TEXT");
   await addColumnIfMissing('users', 'approval_status',      "TEXT NOT NULL DEFAULT 'approved'");
+  await addColumnIfMissing('users', 'email_verified',       "INTEGER NOT NULL DEFAULT 0");
+  await addColumnIfMissing('users', 'phone_verified',       "INTEGER NOT NULL DEFAULT 0");
+
+  await exec(`CREATE TABLE IF NOT EXISTS verification_codes (
+    id        TEXT PRIMARY KEY,
+    user_id   TEXT NOT NULL,
+    code      TEXT NOT NULL,
+    type      TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    used      INTEGER NOT NULL DEFAULT 0
+  )`);
 
   // Assign dispatcher_code to existing dispatchers that don't have one
   const genCode = async (): Promise<string> => {

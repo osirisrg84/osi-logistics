@@ -3,6 +3,7 @@ import { scryptSync, randomBytes, timingSafeEqual } from 'node:crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne } from '../database';
 import { appEvents } from '../events';
+import { sendVerificationCode } from '../email';
 
 const router = Router();
 
@@ -285,6 +286,65 @@ router.put('/shift', async (req: Request, res: Response) => {
     if (user) appEvents.emit('dispatcher:shift_changed', { id: user.id, name: user.name, active });
 
     res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+// ── Send verification code ──────────────────────────────────────────
+router.post('/send-verification', async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ error: 'No token' });
+    const session = await queryOne<{ user_id: string; name: string; email: string }>(
+      `SELECT s.user_id, u.name, u.email FROM sessions s
+       JOIN users u ON s.user_id = u.id
+       WHERE s.token = ? AND s.expires_at > datetime('now')`, [token]
+    );
+    if (!session) return res.status(401).json({ error: 'Invalid session' });
+
+    const { type } = req.body as { type: 'email' | 'phone' };
+    if (!['email', 'phone'].includes(type)) return res.status(400).json({ error: 'type must be email or phone' });
+
+    const code = String(Math.floor(100000 + Math.random() * 900000)); // 6 digits
+    const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+
+    await exec(
+      "DELETE FROM verification_codes WHERE user_id = ? AND type = ?",
+      [session.user_id, type]
+    );
+    await exec(
+      "INSERT INTO verification_codes (id, user_id, code, type, expires_at, used) VALUES (?, ?, ?, ?, ?, 0)",
+      [uuidv4(), session.user_id, code, type, expires]
+    );
+
+    await sendVerificationCode(session.email, session.name, code, type);
+    res.json({ sent: true });
+  } catch { res.status(500).json({ error: 'Failed to send code' }); }
+});
+
+// ── Verify code ────────────────────────────────────────────────────
+router.post('/verify-code', async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ error: 'No token' });
+    const session = await queryOne<{ user_id: string }>(
+      `SELECT s.user_id FROM sessions s
+       WHERE s.token = ? AND s.expires_at > datetime('now')`, [token]
+    );
+    if (!session) return res.status(401).json({ error: 'Invalid session' });
+
+    const { type, code } = req.body as { type: 'email' | 'phone'; code: string };
+    const row = await queryOne<{ id: string; code: string; expires_at: string; used: number }>(
+      "SELECT * FROM verification_codes WHERE user_id = ? AND type = ? AND used = 0 ORDER BY expires_at DESC LIMIT 1",
+      [session.user_id, type]
+    );
+    if (!row) return res.status(400).json({ error: 'No hay código pendiente' });
+    if (new Date(row.expires_at) < new Date()) return res.status(400).json({ error: 'Código expirado' });
+    if (row.code !== String(code).trim()) return res.status(400).json({ error: 'Código incorrecto' });
+
+    await exec("UPDATE verification_codes SET used = 1 WHERE id = ?", [row.id]);
+    const field = type === 'email' ? 'email_verified' : 'phone_verified';
+    await exec(`UPDATE users SET ${field} = 1 WHERE id = ?`, [session.user_id]);
+    res.json({ verified: true });
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 

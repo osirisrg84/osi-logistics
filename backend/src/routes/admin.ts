@@ -3,6 +3,7 @@ import { scryptSync, randomBytes } from 'node:crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne } from '../database';
 import { requireRole } from '../middleware/auth';
+import { sendActivationEmail } from '../email';
 
 const router = Router();
 router.use(requireRole('admin'));
@@ -100,11 +101,15 @@ router.get('/pending', async (_req: Request, res: Response) => {
 
 router.put('/users/:id/approve', async (req: Request, res: Response) => {
   try {
-    const user = await queryOne<Record<string, unknown>>('SELECT id, name, role FROM users WHERE id = ?', [req.params.id]);
+    const user = await queryOne<{ id: string; name: string; email: string; role: string }>(
+      'SELECT id, name, email, role FROM users WHERE id = ?', [req.params.id]
+    );
     if (!user) return res.status(404).json({ error: 'User not found' });
     await exec("UPDATE users SET active = 1, approval_status = 'approved' WHERE id = ?", [req.params.id]);
     await exec("INSERT INTO notifications (id, type, title, message, read) VALUES (?, 'system', 'Cuenta Aprobada', ?, 0)",
       [uuidv4(), `La cuenta de ${user.name} (${user.role}) fue aprobada y está activa.`]);
+    // Send activation email (non-blocking)
+    sendActivationEmail(user.email, user.name, user.role).catch(() => {});
     res.json({ success: true });
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
