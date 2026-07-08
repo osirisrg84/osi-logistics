@@ -108,10 +108,31 @@ router.put('/users/:id/approve', async (req: Request, res: Response) => {
     await exec("UPDATE users SET active = 1, approval_status = 'approved' WHERE id = ?", [req.params.id]);
     await exec("INSERT INTO notifications (id, type, title, message, read) VALUES (?, 'system', 'Cuenta Aprobada', ?, 0)",
       [uuidv4(), `La cuenta de ${user.name} (${user.role}) fue aprobada y está activa.`]);
-    // Send activation email (non-blocking)
-    sendActivationEmail(user.email, user.name, user.role).catch(() => {});
-    res.json({ success: true });
+    // Send activation email
+    let emailSent = false;
+    try {
+      await sendActivationEmail(user.email, user.name, user.role);
+      emailSent = true;
+    } catch (e) {
+      console.error('[Email] Activation email failed:', e);
+    }
+    res.json({ success: true, emailSent });
   } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.post('/users/:id/resend-activation', async (req: Request, res: Response) => {
+  try {
+    const user = await queryOne<{ id: string; name: string; email: string; role: string; active: number }>(
+      'SELECT id, name, email, role, active FROM users WHERE id = ?', [req.params.id]
+    );
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user.active) return res.status(400).json({ error: 'La cuenta no está activa todavía' });
+    await sendActivationEmail(user.email, user.name, user.role);
+    res.json({ success: true });
+  } catch (e) {
+    console.error('[Email] Resend activation failed:', e);
+    res.status(500).json({ error: 'No se pudo enviar el email. Verifica las variables SMTP en Render.' });
+  }
 });
 
 router.put('/users/:id/reject', async (req: Request, res: Response) => {

@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
-import { Plus, Search, Edit2, Trash2, X, Shield, UserCheck, Truck, AlertTriangle, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, X, Shield, UserCheck, Truck, AlertTriangle, Clock, CheckCircle, XCircle, Mail } from 'lucide-react';
 import api from '../services/api';
 import { format } from 'date-fns';
 
@@ -197,8 +197,24 @@ export default function UsersManagement() {
   const handleApprove = async (id: string) => {
     setActionLoading(id + '_approve');
     try {
-      await api.put(`/admin/users/${id}/approve`);
+      const res = await api.put(`/admin/users/${id}/approve`);
+      if (!res.data.emailSent) {
+        alert('✅ Cuenta aprobada.\n\n⚠️ El email de activación no se pudo enviar (SMTP no configurado en Render). Usa el botón "Reenviar email" cuando lo configures.');
+      }
       fetchData();
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleResendEmail = async (id: string, name: string) => {
+    setActionLoading(id + '_email');
+    try {
+      await api.post(`/admin/users/${id}/resend-activation`);
+      alert(`✅ Email de activación reenviado a ${name}`);
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { error?: string } } };
+      alert(`❌ ${err?.response?.data?.error || 'Error al enviar el email'}`);
     } finally {
       setActionLoading(null);
     }
@@ -400,6 +416,11 @@ export default function UsersManagement() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
+                        <button onClick={() => handleResendEmail(user.id, user.name)}
+                          disabled={actionLoading === user.id + '_email'}
+                          className="p-1.5 hover:bg-blue-50 rounded-lg disabled:opacity-40" title="Reenviar email de activación">
+                          <Mail className="w-3.5 h-3.5 text-blue-500" />
+                        </button>
                         <button onClick={() => { setEditUser(user); setShowForm(true); }}
                           className="p-1.5 hover:bg-purple-50 rounded-lg" title="Edit">
                           <Edit2 className="w-3.5 h-3.5 text-purple-500" />
