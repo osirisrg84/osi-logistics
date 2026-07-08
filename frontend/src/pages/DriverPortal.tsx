@@ -226,6 +226,37 @@ export default function DriverPortal() {
   const [editingPayout, setEditingPayout] = useState(false);
   const [savingPayout,  setSavingPayout]  = useState(false);
 
+  // ── Verification ──────────────────────────────────────────────
+  const [emailVerified,   setEmailVerified]   = useState(false);
+  const [phoneVerified,   setPhoneVerified]   = useState(false);
+  const [verifying,       setVerifying]       = useState<'email' | 'phone' | null>(null);
+  const [codeInput,       setCodeInput]       = useState('');
+  const [codeSent,        setCodeSent]        = useState(false);
+  const [sendingCode,     setSendingCode]     = useState(false);
+  const [verifyingCode,   setVerifyingCode]   = useState(false);
+  const [verifyMsg,       setVerifyMsg]       = useState('');
+
+  const handleSendCode = async (type: 'email' | 'phone') => {
+    setSendingCode(true); setVerifyMsg('');
+    try {
+      await userApi.sendVerification(type);
+      setCodeSent(true); setVerifyMsg('Código enviado — revisa tu correo');
+    } catch { setVerifyMsg('Error al enviar el código'); }
+    finally { setSendingCode(false); }
+  };
+  const handleVerifyCode = async () => {
+    if (!verifying) return;
+    setVerifyingCode(true); setVerifyMsg('');
+    try {
+      await userApi.verifyCode(verifying, codeInput);
+      if (verifying === 'email') setEmailVerified(true);
+      else setPhoneVerified(true);
+      setVerifying(null); setCodeInput(''); setCodeSent(false);
+    } catch { setVerifyMsg('Código incorrecto o expirado'); }
+    finally { setVerifyingCode(false); }
+  };
+  const cancelVerify = () => { setVerifying(null); setCodeInput(''); setCodeSent(false); setVerifyMsg(''); };
+
   // ── Equipment profile ─────────────────────────────────────
   const [truckNum, setTruckNum] = useState('');
   const [trailerNum, setTrailerNum] = useState('');
@@ -296,6 +327,8 @@ export default function DriverPortal() {
     userApi.getProfile().then(({ data }) => {
       setPayoutMethod(data.payout_method || '');
       try { setPayoutDetails(data.payout_details ? JSON.parse(data.payout_details) : {}); } catch { setPayoutDetails({}); }
+      setEmailVerified(!!data.email_verified);
+      setPhoneVerified(!!data.phone_verified);
     }).catch(() => {});
   }, []);
 
@@ -1521,18 +1554,61 @@ export default function DriverPortal() {
               <p className="font-extrabold text-gray-900 dark:text-white text-lg leading-tight mb-2">{driver.name}</p>
 
               <div className="space-y-1.5">
+                {/* Email row */}
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-500/15 flex items-center justify-center flex-shrink-0">
                     <Send className="w-2.5 h-2.5 text-blue-500" />
                   </div>
-                  <p className="text-xs text-blue-500 dark:text-blue-400 font-medium">{driver.email}</p>
+                  <p className="text-xs text-blue-500 dark:text-blue-400 font-medium flex-1 truncate">{driver.email}</p>
+                  {emailVerified
+                    ? <span className="flex items-center gap-0.5 text-[9px] font-bold text-emerald-500 flex-shrink-0"><CheckCircle className="w-3 h-3" /> OK</span>
+                    : <button onClick={() => { setVerifying('email'); setCodeSent(false); setCodeInput(''); setVerifyMsg(''); }}
+                        className="text-[9px] font-bold text-orange-500 hover:text-orange-600 flex-shrink-0">Verificar</button>
+                  }
                 </div>
+                {/* Phone row */}
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-md bg-gray-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
                     <Phone className="w-2.5 h-2.5 text-gray-500 dark:text-slate-400" />
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-slate-400">{driver.phone}</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400 flex-1">{driver.phone}</p>
+                  {phoneVerified
+                    ? <span className="flex items-center gap-0.5 text-[9px] font-bold text-emerald-500 flex-shrink-0"><CheckCircle className="w-3 h-3" /> OK</span>
+                    : <button onClick={() => { setVerifying('phone'); setCodeSent(false); setCodeInput(''); setVerifyMsg(''); }}
+                        className="text-[9px] font-bold text-orange-500 hover:text-orange-600 flex-shrink-0">Verificar</button>
+                  }
                 </div>
+                {/* Verification panel */}
+                {verifying && (
+                  <div className="mt-2 p-3 rounded-xl border border-orange-100 bg-orange-50 dark:bg-slate-700/60 dark:border-slate-600">
+                    <p className="text-xs font-semibold text-gray-800 dark:text-white mb-2">
+                      Verificar {verifying === 'email' ? 'correo' : 'teléfono'}
+                    </p>
+                    {!codeSent ? (
+                      <button onClick={() => handleSendCode(verifying)} disabled={sendingCode}
+                        className="w-full py-2 rounded-lg text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center gap-1.5">
+                        {sendingCode && <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />}
+                        Enviar código de 6 dígitos
+                      </button>
+                    ) : (
+                      <div className="space-y-2">
+                        <p className="text-[10px] text-emerald-600 font-medium">✓ {verifyMsg}</p>
+                        <input type="text" inputMode="numeric" maxLength={6} placeholder="000000"
+                          value={codeInput}
+                          onChange={e => setCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                          className="w-full px-3 py-2 rounded-lg text-center text-lg font-bold tracking-widest border border-gray-200 dark:border-slate-500 outline-none focus:ring-2 focus:ring-orange-400/40 bg-white dark:bg-slate-600 text-gray-900 dark:text-white" />
+                        <button onClick={handleVerifyCode} disabled={verifyingCode || codeInput.length < 6}
+                          className="w-full py-2 rounded-lg text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 flex items-center justify-center gap-1.5">
+                          {verifyingCode && <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />}
+                          Confirmar código
+                        </button>
+                      </div>
+                    )}
+                    {!codeSent && verifyMsg && <p className="text-[10px] text-red-500 mt-1">{verifyMsg}</p>}
+                    {codeSent && verifyMsg && verifyMsg.includes('ncorrecto') && <p className="text-[10px] text-red-500 mt-1">{verifyMsg}</p>}
+                    <button onClick={cancelVerify} className="mt-2 text-[10px] text-gray-400 hover:text-gray-600">Cancelar</button>
+                  </div>
+                )}
               </div>
             </div>
 
