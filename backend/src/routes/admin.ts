@@ -120,6 +120,19 @@ router.put('/users/:id/approve', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
+router.post('/test-email', async (req: Request, res: Response) => {
+  try {
+    const { to } = req.body;
+    if (!to) return res.status(400).json({ error: 'to is required' });
+    await sendActivationEmail(to, 'Test User', 'dispatcher');
+    res.json({ success: true, message: `Email enviado a ${to}` });
+  } catch (e) {
+    const msg = (e as Error).message || 'Unknown error';
+    console.error('[Email] Test failed:', msg);
+    res.status(500).json({ error: msg });
+  }
+});
+
 router.post('/users/:id/resend-activation', async (req: Request, res: Response) => {
   try {
     const user = await queryOne<{ id: string; name: string; email: string; role: string; active: number }>(
