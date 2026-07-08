@@ -354,11 +354,11 @@ router.post('/verify-code', async (req: Request, res: Response) => {
 router.post('/setup-admin', async (req: Request, res: Response) => {
   try {
     const { secret, name, email, password } = req.body;
-    const adminCount = await queryOne<{ c: number }>("SELECT COUNT(*) as c FROM users WHERE role='admin' AND active=1");
-    const hasAdmins = (adminCount?.c ?? 0) > 0;
-    if (hasAdmins) {
+    const realAdmins = await queryOne<{ c: number }>("SELECT COUNT(*) as c FROM users WHERE role='admin' AND active=1 AND email != 'admin@osilogistics.com'");
+    const hasRealAdmin = (realAdmins?.c ?? 0) > 0;
+    if (hasRealAdmin) {
       const expected = process.env.ADMIN_SETUP_SECRET;
-      if (!expected || secret !== expected) return res.status(403).json({ error: 'Ya existe un admin. Se requiere el secret.' });
+      if (!expected || secret !== expected) return res.status(403).json({ error: 'Ya existe un admin real. Se requiere el secret.' });
     }
     if (!name || !email || !password || password.length < 8)
       return res.status(400).json({ error: 'name, email y password (mín. 8 chars) son requeridos' });
