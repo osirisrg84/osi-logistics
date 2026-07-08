@@ -1,16 +1,7 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-const transporter = nodemailer.createTransport({
-  host:   process.env.SMTP_HOST || 'smtp.gmail.com',
-  port:   Number(process.env.SMTP_PORT) || 587,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
-
-const FROM = process.env.SMTP_FROM || process.env.SMTP_USER || 'OSI Logistics <noreply@osilogistics.com>';
+const resend = new Resend(process.env.RESEND_API_KEY);
+const FROM = process.env.RESEND_FROM || 'OSI Logistics <onboarding@resend.dev>';
 
 export async function sendActivationEmail(to: string, name: string, role: string) {
   const portal = role === 'driver' ? 'Driver Portal' : 'Dispatch Center';
@@ -18,7 +9,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
     ? `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/driver/login`
     : `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/dispatcher`;
 
-  await transporter.sendMail({
+  await resend.emails.send({
     from: FROM,
     to,
     subject: '✅ Tu cuenta en OSI Logistics está activa',
@@ -52,7 +43,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
 
 export async function sendVerificationCode(to: string, name: string, code: string, type: 'email' | 'phone') {
   const label = type === 'email' ? 'correo electrónico' : 'número de teléfono';
-  await transporter.sendMail({
+  await resend.emails.send({
     from: FROM,
     to,
     subject: `🔐 Tu código de verificación OSI Logistics: ${code}`,
