@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne, createCommission } from '../database';
 import { appEvents } from '../events';
-import { sendOfferEmail, sendOfferAcceptedEmail } from '../email';
+import { sendOfferEmail, sendOfferAcceptedEmail, sendDeliveryEmail } from '../email';
 
 type AuthRequest = Request & { user?: { id: string; name: string; role: string; driver_id?: string } };
 
@@ -214,6 +214,27 @@ router.post('/:id/status', async (req: Request, res: Response) => {
     await exec("INSERT INTO notifications (id, type, title, message, read, related_id) VALUES (?, 'order', ?, ?, 0, ?)",
       [uuidv4(), `Order ${status.replace('_', ' ').toUpperCase()}`,
        `Order ${order.order_number} status updated to ${status}`, req.params.id]);
+
+    // Emails de entrega completada
+    if (status === 'delivered') {
+      const [driverUser, dispatcherUser] = await Promise.all([
+        order.driver_id
+          ? queryOne<{ email: string; name: string }>('SELECT u.email, u.name FROM users u WHERE u.driver_id = ? AND u.active = 1 LIMIT 1', [order.driver_id])
+          : Promise.resolve(null),
+        order.dispatcher_user_id
+          ? queryOne<{ email: string; name: string }>('SELECT email, name FROM users WHERE id = ? AND active = 1', [order.dispatcher_user_id])
+          : Promise.resolve(null),
+      ]);
+      const args = [
+        order.order_number as string,
+        order.pickup_address as string,
+        order.delivery_address as string,
+        now,
+        (order.price as number) || 0,
+      ] as const;
+      if (driverUser?.email)     sendDeliveryEmail(driverUser.email,     driverUser.name,     'driver',      ...args).catch(e => console.error('[Email] Delivery driver:', e));
+      if (dispatcherUser?.email) sendDeliveryEmail(dispatcherUser.email, dispatcherUser.name, 'dispatcher',  ...args).catch(e => console.error('[Email] Delivery dispatcher:', e));
+    }
 
     res.json(await queryOne('SELECT * FROM orders WHERE id = ?', [req.params.id]));
   } catch { res.status(500).json({ error: 'Failed' }); }
