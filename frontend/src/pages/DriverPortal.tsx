@@ -1893,7 +1893,7 @@ export default function DriverPortal() {
             const isExpired = daysLeft !== null && daysLeft < 0;
             const isExpiringSoon = daysLeft !== null && daysLeft >= 0 && daysLeft <= 30;
             const statusColor = isExpired ? '#ef4444' : isExpiringSoon ? '#f59e0b' : coiExpiry ? '#22c55e' : '#94a3b8';
-            const statusLabel = isExpired ? `Vencido hace ${Math.abs(daysLeft!)} días` : isExpiringSoon ? `Vence en ${daysLeft} días` : coiExpiry ? 'Vigente' : 'No cargado';
+            const statusLabel = isExpired ? `Vencido hace ${Math.abs(daysLeft!)} días` : isExpiringSoon ? `Vence en ${daysLeft} días` : coiExpiry ? 'Vigente' : coiFileName ? 'Sin vencimiento' : 'No cargado';
             return (
               <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -1936,10 +1936,10 @@ export default function DriverPortal() {
                     {/* File upload */}
                     <div>
                       <p className="text-xs text-gray-500 dark:text-slate-400 mb-1.5">Archivo (PDF, JPG, PNG)</p>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-dashed border-blue-300 dark:border-blue-700 hover:border-blue-400 transition-colors flex-1">
+                      <label className="flex items-center gap-2 cursor-pointer min-w-0">
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-dashed border-blue-300 dark:border-blue-700 hover:border-blue-400 transition-colors flex-1 min-w-0 overflow-hidden">
                           <Upload className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                          <span className="text-xs text-gray-500 dark:text-slate-400 truncate">
+                          <span className="text-xs text-gray-500 dark:text-slate-400 truncate min-w-0">
                             {coiFileName || 'Seleccionar archivo...'}
                           </span>
                         </div>
