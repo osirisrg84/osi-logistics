@@ -244,25 +244,28 @@ export default function DriverPortal() {
   const handleSendCode = async (type: 'email' | 'phone') => {
     setSendingCode(true); setVerifyMsg('');
     try {
-      if (type === 'phone') {
-        if (!firebaseAuth) {
-          setVerifyMsg('SMS no disponible — revisa tus SMS o correo');
-          setSendingCode(false);
-          return;
-        }
+      if (type === 'phone' && firebaseAuth) {
         recaptchaRef.current?.clear();
         recaptchaRef.current = new RecaptchaVerifier(firebaseAuth, 'recaptcha-container', { size: 'invisible' });
         const digits = (profilePhone || driver?.phone || '').replace(/\D/g, '');
         const e164 = digits.length === 10 ? '+1' + digits : '+' + digits;
-        const result = await signInWithPhoneNumber(firebaseAuth, e164, recaptchaRef.current);
-        setConfirmationResult(result);
-        setCodeSent(true);
-        setVerifyMsg('Código enviado — revisa tus SMS');
-      } else {
-        await userApi.sendVerification(type);
-        setCodeSent(true);
-        setVerifyMsg('Código enviado — revisa tu correo');
+        try {
+          const result = await signInWithPhoneNumber(firebaseAuth, e164, recaptchaRef.current);
+          setConfirmationResult(result);
+          setCodeSent(true);
+          setVerifyMsg('Código enviado — revisa tus SMS');
+          return;
+        } catch (fbErr: unknown) {
+          recaptchaRef.current?.clear();
+          recaptchaRef.current = null;
+          const fbCode = (fbErr as { code?: string })?.code || '';
+          if (!['auth/billing-not-enabled', 'auth/operation-not-allowed', 'auth/invalid-phone-number'].includes(fbCode)) throw fbErr;
+          // Fall through to email delivery
+        }
       }
+      await userApi.sendVerification(type);
+      setCodeSent(true);
+      setVerifyMsg(type === 'phone' ? 'Código enviado a tu correo' : 'Código enviado — revisa tu correo');
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { error?: string } }; message?: string })
         ?.response?.data?.error || (e as { message?: string })?.message || 'Error al enviar el código';
