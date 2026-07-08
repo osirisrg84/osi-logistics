@@ -45,6 +45,52 @@ export async function sendActivationEmail(to: string, name: string, role: string
   });
 }
 
+export async function sendOfferEmail(to: string, driverName: string, orderNumber: string, pickup: string, delivery: string, rate: number) {
+  await resend.emails.send({
+    from: FROM,
+    to,
+    subject: `🚛 Nueva oferta de carga — ${orderNumber}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#f8f9fa;padding:32px;border-radius:16px;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <h1 style="color:#3b82f6;margin:0;font-size:28px;">OSI Logistics</h1>
+          <p style="color:#6b7280;margin:4px 0 0;">Driver Portal</p>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:24px;border:1px solid #e5e7eb;">
+          <h2 style="color:#111827;margin:0 0 4px;">¡Hola, ${driverName}!</h2>
+          <p style="color:#6b7280;margin:0 0 20px;font-size:14px;">Tienes una nueva oferta de carga esperando tu respuesta.</p>
+
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px;margin-bottom:20px;">
+            <p style="margin:0 0 8px;font-size:12px;font-weight:bold;color:#3b82f6;text-transform:uppercase;letter-spacing:1px;">Orden ${orderNumber}</p>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:flex-start;gap:8px;">
+                <span style="color:#10b981;font-size:16px;margin-top:2px;">●</span>
+                <div><p style="margin:0;font-size:11px;color:#6b7280;">Origen</p><p style="margin:0;font-size:14px;font-weight:600;color:#111827;">${pickup}</p></div>
+              </div>
+              <div style="border-left:2px dashed #bfdbfe;margin-left:7px;height:12px;"></div>
+              <div style="display:flex;align-items:flex-start;gap:8px;">
+                <span style="color:#ef4444;font-size:16px;margin-top:2px;">●</span>
+                <div><p style="margin:0;font-size:11px;color:#6b7280;">Destino</p><p style="margin:0;font-size:14px;font-weight:600;color:#111827;">${delivery}</p></div>
+              </div>
+            </div>
+            ${rate ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #bfdbfe;"><p style="margin:0;font-size:18px;font-weight:bold;color:#10b981;">$${rate.toLocaleString('en-US', {minimumFractionDigits:2})}</p><p style="margin:0;font-size:11px;color:#6b7280;">Tarifa de carga</p></div>` : ''}
+          </div>
+
+          <p style="color:#6b7280;font-size:13px;margin:0 0 20px;">Inicia sesión en el Driver Portal para aceptar o rechazar la oferta.</p>
+
+          <div style="text-align:center;">
+            <a href="${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/driver/login"
+              style="background:#3b82f6;color:#fff;text-decoration:none;padding:14px 32px;border-radius:10px;font-weight:bold;font-size:15px;display:inline-block;">
+              Ver oferta →
+            </a>
+          </div>
+        </div>
+        <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:16px;">© OSI Logistics · Miami, FL</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendVerificationCode(to: string, name: string, code: string, type: 'email' | 'phone') {
   const label = type === 'email' ? 'correo electrónico' : 'número de teléfono';
   await resend.emails.send({

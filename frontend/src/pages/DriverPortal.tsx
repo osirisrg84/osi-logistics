@@ -525,6 +525,16 @@ export default function DriverPortal() {
       setPendingOffer(offer);
       setOfferCountdown(7200);
       startAlarm();
+      // Browser push notification
+      if ('Notification' in window) {
+        const show = () => new Notification('🚛 Nueva oferta de carga', {
+          body: `Orden ${offer.order_number} · ${offer.pickup_address} → ${offer.delivery_address}`,
+          icon: '/favicon.ico',
+          requireInteraction: true,
+        });
+        if (Notification.permission === 'granted') show();
+        else if (Notification.permission !== 'denied') Notification.requestPermission().then(p => { if (p === 'granted') show(); });
+      }
     });
     socket.emit('radio:join');
     socket.on('radio:msg', (data: {name:string; msg:string; ts:string}) => {

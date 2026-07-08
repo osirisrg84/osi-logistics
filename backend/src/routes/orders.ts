@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne, createCommission } from '../database';
 import { appEvents } from '../events';
+import { sendOfferEmail } from '../email';
 
 type AuthRequest = Request & { user?: { id: string; name: string; role: string; driver_id?: string } };
 
@@ -249,6 +250,22 @@ router.post('/:id/offer', async (req: Request, res: Response) => {
 
     appEvents.emit('driver:offer', { driverId: driver_id, offer: updated });
     appEvents.emit('order:status_changed', { id: req.params.id, order_number: order.order_number, status: 'offered' });
+
+    // Email al driver
+    const driverUser = await queryOne<{ email: string; name: string }>(
+      'SELECT u.email, u.name FROM users u WHERE u.driver_id = ? AND u.active = 1 LIMIT 1', [driver_id]
+    );
+    if (driverUser?.email) {
+      sendOfferEmail(
+        driverUser.email,
+        driverUser.name || (driver.name as string),
+        order.order_number as string,
+        order.pickup_address as string,
+        order.delivery_address as string,
+        (order.rate as number) || 0,
+      ).catch(e => console.error('[Email] Offer email failed:', e));
+    }
+
     res.json(updated);
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
