@@ -95,6 +95,18 @@ export default function Dashboard() {
     color: STATUS_COLORS[s.status] || '#94a3b8',
   })) || [];
 
+  // Always fill 7 days so the chart never appears blank
+  const revenueMap = new Map(
+    (stats?.dailyRevenue || []).map((r: { date: string; revenue: number; orders: number }) => [r.date, r])
+  );
+  const chartData = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    const key = d.toISOString().slice(0, 10);
+    const row = revenueMap.get(key);
+    return { date: key, revenue: row?.revenue || 0, orders: row?.orders || 0 };
+  });
+
   return (
     <div className="space-y-6 fade-in">
       {/* KPI Cards */}
@@ -181,7 +193,7 @@ export default function Dashboard() {
             <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-lg">Last 7 days</span>
           </div>
           <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={stats?.dailyRevenue || []}>
+            <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#f97316" stopOpacity={0.15} />
