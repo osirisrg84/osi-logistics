@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+.grecaptcha-badge { visibility: hidden !important; }
+
 @layer base {
   * { box-sizing: border-box; }
 
