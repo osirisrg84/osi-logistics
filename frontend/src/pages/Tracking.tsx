@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { Users, MapPin, Navigation, Activity, RefreshCw, Wifi, WifiOff, Map as MapIcon } from 'lucide-react';
+import { Users, MapPin, Navigation, Activity, RefreshCw, Wifi, WifiOff, Map as MapIcon, Truck } from 'lucide-react';
 import { trackingApi, driversApi } from '../services/api';
 import { Driver } from '../types';
 import { getSocket } from '../services/socket';
@@ -228,7 +228,7 @@ export default function Tracking() {
                 )}
                 {(driver as typeof driver & { equipment_type?: string }).equipment_type && (
                   <p className="text-xs font-medium text-blue-600 mb-1">
-                    🚛 {(driver as typeof driver & { equipment_type?: string }).equipment_type}
+                    {(driver as typeof driver & { equipment_type?: string }).equipment_type}
                     {driver.make ? ` · ${driver.make}${driver.model ? ' ' + driver.model : ''}` : ''}
                   </p>
                 )}
@@ -397,7 +397,7 @@ export default function Tracking() {
                   {/* Equipment type */}
                   {(driver as typeof driver & { equipment_type?: string }).equipment_type && (
                     <p className="text-xs text-gray-400 dark:text-slate-500 mt-1.5 ml-12 flex items-center gap-1.5">
-                      🚛
+                      <Truck className="w-3 h-3 text-gray-400 dark:text-slate-500 flex-shrink-0" />
                       <span className={`px-1.5 py-0.5 rounded text-xs font-semibold ${
                         (driver as typeof driver & { equipment_type?: string }).equipment_type === 'Reefer'    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
                         (driver as typeof driver & { equipment_type?: string }).equipment_type === 'Flatbed'   ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' :
