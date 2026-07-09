@@ -406,9 +406,12 @@ export default function Tracking() {
                       }`}>
                         {(driver as typeof driver & { equipment_type?: string }).equipment_type}
                       </span>
-                      {driver.make && driver.model && (
-                        <span>{driver.make} {driver.model}</span>
-                      )}
+                      {(driver.make && driver.model)
+                        ? <span>{driver.make} {driver.model}</span>
+                        : (driver as typeof driver & { truck_make?: string }).truck_make
+                          ? <span>{(driver as typeof driver & { truck_make?: string }).truck_make}</span>
+                          : null
+                      }
                     </p>
                   )}
                 </button>
