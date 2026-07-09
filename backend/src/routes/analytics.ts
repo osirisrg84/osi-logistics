@@ -8,7 +8,7 @@ router.get('/dashboard', async (_req: Request, res: Response) => {
     const [ordersByStatus, dailyRevenue, topDrivers, deliveryByHour, ordersByPriority, recentActivity,
            totalRevRow, monthRevRow, avgValRow, onTimeRow, avgHrRow] = await Promise.all([
       query("SELECT status, COUNT(*) as count FROM orders GROUP BY status"),
-      query("SELECT date(created_at) as date, SUM(price) as revenue, COUNT(*) as orders FROM orders WHERE created_at >= date('now', '-7 days') GROUP BY date(created_at) ORDER BY date ASC"),
+      query("SELECT date(COALESCE(delivered_at, created_at)) as date, SUM(CASE WHEN status='delivered' THEN price ELSE 0 END) as revenue, COUNT(*) as orders FROM orders WHERE COALESCE(delivered_at, created_at) >= date('now', '-7 days') GROUP BY date(COALESCE(delivered_at, created_at)) ORDER BY date ASC"),
       query(`SELECT d.name, d.rating, d.total_deliveries, d.on_time_rate, d.avatar,
                COUNT(o.id) as recent_deliveries, SUM(o.price) as revenue
              FROM drivers d LEFT JOIN orders o ON o.driver_id = d.id AND o.status = 'delivered'
@@ -20,7 +20,7 @@ router.get('/dashboard', async (_req: Request, res: Response) => {
              FROM order_history oh JOIN orders o ON oh.order_id = o.id LEFT JOIN drivers d ON o.driver_id = d.id
              ORDER BY oh.timestamp DESC LIMIT 10`),
       queryOne<{r:number}>("SELECT COALESCE(SUM(price),0) as r FROM orders WHERE status='delivered'"),
-      queryOne<{r:number}>("SELECT COALESCE(SUM(price),0) as r FROM orders WHERE status='delivered' AND created_at >= date('now', 'start of month')"),
+      queryOne<{r:number}>("SELECT COALESCE(SUM(price),0) as r FROM orders WHERE status='delivered' AND delivered_at >= date('now', 'start of month')"),
       queryOne<{a:number}>("SELECT COALESCE(AVG(price),0) as a FROM orders WHERE status='delivered'"),
       queryOne<{r:number}>("SELECT COALESCE(AVG(CASE WHEN delivered_at <= estimated_delivery THEN 100.0 ELSE 0 END),0) as r FROM orders WHERE status='delivered' AND estimated_delivery IS NOT NULL"),
       queryOne<{avg:number|null}>("SELECT AVG((julianday(delivered_at) - julianday(picked_up_at)) * 24) as avg FROM orders WHERE delivered_at IS NOT NULL AND picked_up_at IS NOT NULL"),
