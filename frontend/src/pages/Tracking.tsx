@@ -408,11 +408,9 @@ export default function Tracking() {
                       </span>
                       {(driver.make && driver.model)
                         ? <span>{driver.make} {driver.model}</span>
-                        : (() => {
-                            const d = driver as typeof driver & { truck_make?: string; truck_number?: string };
-                            const label = [d.truck_make, d.truck_number].filter(Boolean).join(' ');
-                            return label ? <span>{label}</span> : null;
-                          })()
+                        : (driver as typeof driver & { truck_make?: string }).truck_make
+                          ? <span>{(driver as typeof driver & { truck_make?: string }).truck_make}</span>
+                          : null
                       }
                     </p>
                   )}
