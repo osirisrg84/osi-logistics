@@ -58,6 +58,7 @@ export default function Dashboard() {
   const [orderStats, setOrderStats] = useState<Record<string, number>>({});
   const [driverStats, setDriverStats] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [chartDays, setChartDays] = useState<7 | 30>(7);
 
   useEffect(() => {
     async function load() {
@@ -99,9 +100,9 @@ export default function Dashboard() {
   const revenueMap = new Map(
     (stats?.dailyRevenue || []).map((r: { date: string; revenue: number; orders: number }) => [r.date, r])
   );
-  const chartData = Array.from({ length: 30 }, (_, i) => {
+  const chartData = Array.from({ length: chartDays }, (_, i) => {
     const d = new Date();
-    d.setDate(d.getDate() - (29 - i));
+    d.setDate(d.getDate() - (chartDays - 1 - i));
     const key = d.toISOString().slice(0, 10);
     const row = revenueMap.get(key);
     return { date: key, revenue: row?.revenue || 0, orders: row?.orders || 0 };
@@ -189,8 +190,18 @@ export default function Dashboard() {
         {/* Revenue Chart */}
         <div className="card lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900 dark:text-slate-100">Revenue & Orders (30 days)</h3>
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-lg">Last 30 days</span>
+            <h3 className="font-semibold text-gray-900 dark:text-slate-100">Revenue & Orders</h3>
+            <div className="flex gap-1">
+              {([7, 30] as const).map(d => (
+                <button
+                  key={d}
+                  onClick={() => setChartDays(d)}
+                  className={`text-xs px-2 py-1 rounded-lg transition-colors ${chartDays === d ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                >
+                  {d === 7 ? 'Last 7 days' : 'Last 30 days'}
+                </button>
+              ))}
+            </div>
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={chartData} margin={{ top: 4, right: 40, left: 0, bottom: 0 }}>

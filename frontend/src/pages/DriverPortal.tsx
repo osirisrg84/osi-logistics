@@ -1654,6 +1654,21 @@ export default function DriverPortal() {
                           {verifyingCode && <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />}
                           Confirmar código
                         </button>
+                        {confirmationResult && verifying === 'phone' && (
+                          <button onClick={async () => {
+                            recaptchaRef.current?.clear(); recaptchaRef.current = null;
+                            setConfirmationResult(null); setCodeSent(false); setCodeInput(''); setVerifyMsg('');
+                            setSendingCode(true);
+                            try {
+                              await userApi.sendVerification('phone');
+                              setCodeSent(true);
+                              setVerifyMsg('Código enviado — revisa tu correo');
+                            } catch { setVerifyMsg('Error al reenviar'); }
+                            finally { setSendingCode(false); }
+                          }} className="text-[10px] text-gray-400 underline w-full text-center">
+                            ¿No llegó el SMS? Enviar al correo
+                          </button>
+                        )}
                       </div>
                     )}
                     {!codeSent && verifyMsg && <p className="text-[10px] text-red-500 mt-1">{verifyMsg}</p>}
