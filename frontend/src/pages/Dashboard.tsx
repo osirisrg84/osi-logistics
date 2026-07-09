@@ -95,13 +95,13 @@ export default function Dashboard() {
     color: STATUS_COLORS[s.status] || '#94a3b8',
   })) || [];
 
-  // Always fill 7 days so the chart never appears blank
+  // Fill 30 days so chart always shows meaningful history
   const revenueMap = new Map(
     (stats?.dailyRevenue || []).map((r: { date: string; revenue: number; orders: number }) => [r.date, r])
   );
-  const chartData = Array.from({ length: 7 }, (_, i) => {
+  const chartData = Array.from({ length: 30 }, (_, i) => {
     const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
+    d.setDate(d.getDate() - (29 - i));
     const key = d.toISOString().slice(0, 10);
     const row = revenueMap.get(key);
     return { date: key, revenue: row?.revenue || 0, orders: row?.orders || 0 };
@@ -189,8 +189,8 @@ export default function Dashboard() {
         {/* Revenue Chart */}
         <div className="card lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900 dark:text-slate-100">Revenue & Orders (7 days)</h3>
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-lg">Last 7 days</span>
+            <h3 className="font-semibold text-gray-900 dark:text-slate-100">Revenue & Orders (30 days)</h3>
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-lg">Last 30 days</span>
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={chartData} margin={{ top: 4, right: 40, left: 0, bottom: 0 }}>

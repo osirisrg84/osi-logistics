@@ -8,7 +8,7 @@ router.get('/dashboard', async (_req: Request, res: Response) => {
     const [ordersByStatus, dailyRevenue, topDrivers, deliveryByHour, ordersByPriority, recentActivity,
            totalRevRow, monthRevRow, avgValRow, onTimeRow, avgHrRow] = await Promise.all([
       query("SELECT status, COUNT(*) as count FROM orders GROUP BY status"),
-      query("SELECT date(COALESCE(delivered_at, created_at)) as date, SUM(CASE WHEN status='delivered' THEN price ELSE 0 END) as revenue, COUNT(*) as orders FROM orders WHERE COALESCE(delivered_at, created_at) >= date('now', '-7 days') GROUP BY date(COALESCE(delivered_at, created_at)) ORDER BY date ASC"),
+      query("SELECT date(COALESCE(delivered_at, created_at)) as date, SUM(CASE WHEN status='delivered' THEN price ELSE 0 END) as revenue, COUNT(*) as orders FROM orders WHERE COALESCE(delivered_at, created_at) >= date('now', '-30 days') GROUP BY date(COALESCE(delivered_at, created_at)) ORDER BY date ASC"),
       query(`SELECT d.name, d.rating, d.total_deliveries, d.on_time_rate, d.avatar,
                COUNT(o.id) as recent_deliveries, SUM(o.price) as revenue
              FROM drivers d LEFT JOIN orders o ON o.driver_id = d.id AND o.status = 'delivered'
