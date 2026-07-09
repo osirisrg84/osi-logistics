@@ -188,7 +188,7 @@ export default function Dashboard() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Revenue Chart */}
-        <div className="card lg:col-span-2 !p-3 sm:!p-5">
+        <div className="card lg:col-span-2 !px-2 !py-3 sm:!p-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-3">
             <h3 className="font-semibold text-gray-900 dark:text-slate-100">Revenue & Orders</h3>
             <div className="flex gap-1">
@@ -204,7 +204,7 @@ export default function Dashboard() {
             </div>
           </div>
           <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={chartData} margin={{ top: 4, right: 32, left: 0, bottom: 0 }}>
+            <AreaChart data={chartData} margin={{ top: 4, right: 2, left: -8, bottom: 0 }}>
               <defs>
                 <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#f97316" stopOpacity={0.2} />
@@ -217,8 +217,8 @@ export default function Dashboard() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
               <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={d => format(new Date(d + 'T00:00:00'), 'MM/dd')} />
-              <YAxis yAxisId="rev" orientation="left" tick={{ fontSize: 10 }} tickFormatter={v => v >= 1000 ? `$${(v/1000).toFixed(0)}k` : `$${v}`} width={45} />
-              <YAxis yAxisId="ord" orientation="right" tick={{ fontSize: 10 }} allowDecimals={false} width={30} />
+              <YAxis yAxisId="rev" orientation="left" tick={{ fontSize: 10 }} tickFormatter={v => v >= 1000 ? `$${(v/1000).toFixed(0)}k` : `$${v}`} width={36} />
+              <YAxis yAxisId="ord" orientation="right" tick={{ fontSize: 10 }} allowDecimals={false} width={20} />
               <Tooltip
                 formatter={(value: number, name: string) => [
                   name === 'revenue' ? `$${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : value,
