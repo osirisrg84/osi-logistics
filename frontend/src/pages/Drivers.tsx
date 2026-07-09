@@ -588,9 +588,10 @@ export default function Drivers() {
                   )}
                   {(driver.make && driver.model)
                     ? <span className="text-gray-500 dark:text-slate-400">{driver.make} {driver.model}</span>
-                    : driver.truck_make
-                      ? <span className="text-gray-500 dark:text-slate-400">{driver.truck_make}</span>
-                      : null
+                    : (() => {
+                        const label = [driver.truck_make, driver.truck_number].filter(Boolean).join(' ');
+                        return label ? <span className="text-gray-500 dark:text-slate-400">{label}</span> : null;
+                      })()
                   }
                 </div>
               )}
