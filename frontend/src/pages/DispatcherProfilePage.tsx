@@ -665,38 +665,6 @@ export default function DispatcherProfilePage() {
         )}
       </div>
 
-      {/* ── Performance stats ──────────────────────────────── */}
-      <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-               style={{ background: 'rgba(59,130,246,0.12)' }}>
-            <BarChart3 className="w-4 h-4 text-blue-500" />
-          </div>
-          <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Performance</h3>
-        </div>
-        <div className="space-y-2.5">
-          {[
-            { icon: Package,    label: 'Cargas totales despachadas', value: totalLoads,  unit: 'loads',               color: accent },
-            { icon: Calendar,   label: 'Cargas este mes',            value: monthLoads,  unit: 'loads',               color: '#3b82f6' },
-            { icon: TrendingUp, label: 'Rating actual',              value: rating,      unit: '/ 5.0',               color: '#f59e0b' },
-            { icon: Award,      label: 'Logros desbloqueados',       value: unlockedCount, unit: `/ ${ACHIEVEMENTS.length}`, color: '#22c55e' },
-          ].map(s => (
-            <div key={s.label} className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                   style={{ background: `${s.color}18` }}>
-                <s.icon className="w-4 h-4" style={{ color: s.color }} />
-              </div>
-              <div className="flex-1">
-                <p className={`text-xs ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{s.label}</p>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className={`text-sm font-black ${dark ? 'text-white' : 'text-gray-900'}`}>{s.value}</span>
-                <span className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{s.unit}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* ── Earnings summary ───────────────────────────────── */}
       <div className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'}`}>
