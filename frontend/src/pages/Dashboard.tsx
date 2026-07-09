@@ -58,7 +58,7 @@ export default function Dashboard() {
   const [orderStats, setOrderStats] = useState<Record<string, number>>({});
   const [driverStats, setDriverStats] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
-  const [chartDays, setChartDays] = useState<7 | 30>(7);
+  const [chartDays, setChartDays] = useState<7 | 14 | 28>(7);
 
   useEffect(() => {
     async function load() {
@@ -192,13 +192,13 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-gray-900 dark:text-slate-100">Revenue & Orders</h3>
             <div className="flex gap-1">
-              {([7, 30] as const).map(d => (
+              {([7, 14, 28] as const).map(d => (
                 <button
                   key={d}
                   onClick={() => setChartDays(d)}
                   className={`text-xs px-2 py-1 rounded-lg transition-colors ${chartDays === d ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
                 >
-                  {d === 7 ? 'Last 7 days' : 'Last 30 days'}
+                  {`Last ${d} days`}
                 </button>
               ))}
             </div>
