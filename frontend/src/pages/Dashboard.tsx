@@ -4,7 +4,7 @@ import {
   Clock, CheckCircle, AlertTriangle, Activity,
 } from 'lucide-react';
 import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import { analyticsApi, ordersApi, driversApi } from '../services/api';
@@ -188,23 +188,23 @@ export default function Dashboard() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Revenue Chart */}
-        <div className="card lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
+        <div className="card lg:col-span-2 !p-3 sm:!p-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-3">
             <h3 className="font-semibold text-gray-900 dark:text-slate-100">Revenue & Orders</h3>
             <div className="flex gap-1">
               {([7, 14, 28] as const).map(d => (
                 <button
                   key={d}
                   onClick={() => setChartDays(d)}
-                  className={`text-xs px-2 py-1 rounded-lg transition-colors ${chartDays === d ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                  className={`flex-1 sm:flex-none text-xs px-2 py-1.5 rounded-lg transition-colors ${chartDays === d ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
                 >
-                  {`Last ${d} days`}
+                  {`${d}d`}
                 </button>
               ))}
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={chartData} margin={{ top: 4, right: 40, left: 0, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={280}>
+            <AreaChart data={chartData} margin={{ top: 4, right: 32, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#f97316" stopOpacity={0.2} />
