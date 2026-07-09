@@ -575,7 +575,7 @@ export default function Drivers() {
               <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
                 <Mail className="w-3 h-3 text-gray-400 dark:text-slate-500" /> {driver.email}
               </div>
-              {(driver.equipment_type || driver.make) && (
+              {(driver.equipment_type || driver.make || driver.truck_make) && (
                 <div className="flex items-center gap-2">
                   <Truck className="w-3 h-3 text-gray-400 dark:text-slate-500 flex-shrink-0" />
                   {driver.equipment_type && (
@@ -586,9 +586,12 @@ export default function Drivers() {
                       'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
                     }`}>{driver.equipment_type}</span>
                   )}
-                  {driver.make && driver.model && (
-                    <span className="text-gray-500 dark:text-slate-400">{driver.make} {driver.model}</span>
-                  )}
+                  {(driver.make && driver.model)
+                    ? <span className="text-gray-500 dark:text-slate-400">{driver.make} {driver.model}</span>
+                    : driver.truck_make
+                      ? <span className="text-gray-500 dark:text-slate-400">{driver.truck_make}</span>
+                      : null
+                  }
                 </div>
               )}
               {driver.current_address && (
