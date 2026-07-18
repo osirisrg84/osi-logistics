@@ -95,6 +95,8 @@ export function useInstallPrompt() {
     promptInstall,
     /** True once we know no native prompt will ever fire (Firefox, Safari) — show manual instructions instead. */
     needsManualInstall: !isInstalled && !supportsNativePrompt(),
+    /** True when Chrome/Edge supports install but beforeinstallprompt hasn't fired yet (e.g. cooldown after uninstall). */
+    showManualFallback: !isInstalled && supportsNativePrompt() && event === null,
     isIOS: isIOS(),
   };
 }
