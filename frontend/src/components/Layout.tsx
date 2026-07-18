@@ -6,6 +6,7 @@ import Header from './Header';
 import { useAuth } from '../context/AuthContext';
 import { getSocket } from '../services/socket';
 import api from '../services/api';
+import { setAppManifest, DISPATCH_MANIFEST } from '../utils/appManifest';
 
 const BACKEND = import.meta.env.PROD
   ? 'https://osi-logistics-backend.onrender.com'
@@ -129,6 +130,10 @@ export default function Layout() {
 
   const removeToast = useCallback((id: string) => {
     setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  useEffect(() => {
+    setAppManifest(DISPATCH_MANIFEST);
   }, []);
 
   useEffect(() => {

@@ -4,8 +4,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title || 'OSI Logistics', {
       body: data.body || '',
-      icon: '/osi-icon.png',
-      badge: '/osi-icon.png',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
       tag: 'driver-online-' + (data.driverId || Date.now()),
       renotify: true,
       data: { url: '/tracking' },

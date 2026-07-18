@@ -2,6 +2,7 @@
 import { useLocation } from 'react-router-dom';
 import { Bell, Search, RefreshCw, X, Check, LogOut, ChevronDown, Shield, Truck, ClipboardList, Sun, Moon, Zap, StickyNote, Headphones, Plus, Pin } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
+import InstallAppButton from './InstallAppButton';
 import api, { notificationsApi } from '../services/api';
 import { Notification } from '../types';
 import { getSocket } from '../services/socket';
@@ -299,6 +300,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
           className="p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors hidden sm:block">
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
         </button>
+
+        {/* Install App (only rendered once the browser fires beforeinstallprompt) */}
+        <InstallAppButton />
 
         {/* Dark mode toggle */}
         <button

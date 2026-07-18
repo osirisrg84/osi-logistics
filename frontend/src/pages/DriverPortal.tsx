@@ -10,6 +10,8 @@ import {
   FileText, Upload, Calendar, AlertCircle, Mail
 } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
+import InstallAppButton from '../components/InstallAppButton';
+import { setAppManifest, DRIVER_MANIFEST, DISPATCH_MANIFEST } from '../utils/appManifest';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { ordersApi, driversApi, billingApi, notificationsApi, userApi } from '../services/api';
@@ -186,6 +188,11 @@ export default function DriverPortal() {
   const [deliveredToday, setDeliveredToday] = useState<Order[]>([]);
   const [tab, setTab] = useState<Tab>('active');
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setAppManifest(DRIVER_MANIFEST);
+    return () => setAppManifest(DISPATCH_MANIFEST);
+  }, []);
 
   // ── Notifications ─────────────────────────────────────────
   interface DriverNotif {
@@ -889,6 +896,10 @@ export default function DriverPortal() {
               </span>
             </div>
             <div className="flex items-center gap-0.5">
+              <InstallAppButton
+                className="p-2 rounded-xl hover:bg-white/10 transition-colors"
+                iconClassName="w-4 h-4 text-slate-300"
+              />
               <button onClick={toggleTheme} className="p-2 rounded-xl hover:bg-white/10 transition-colors">
                 {dark ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-slate-300" />}
               </button>
