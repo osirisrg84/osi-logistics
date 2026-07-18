@@ -12,6 +12,20 @@ function isStandalone() {
   );
 }
 
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !('MSStream' in window);
+}
+
+/**
+ * Chromium (Chrome/Edge/Samsung Internet) defines `onbeforeinstallprompt` on
+ * `window` even before the event ever fires. Firefox and Safari don't define
+ * it at all — that's the only reliable way to know up front whether the
+ * native install prompt can ever appear, vs. just hasn't fired yet.
+ */
+function supportsNativePrompt() {
+  return 'onbeforeinstallprompt' in window;
+}
+
 /**
  * Captures the browser's `beforeinstallprompt` event (Chrome/Edge/Android) so a
  * custom "Install App" button can trigger it on demand instead of relying on the
@@ -54,5 +68,8 @@ export function useInstallPrompt() {
     canInstall: !installed && deferredEvent !== null,
     installed,
     promptInstall,
+    /** True once we know no native prompt will ever fire (Firefox, Safari) — show manual instructions instead. */
+    needsManualInstall: !installed && !supportsNativePrompt(),
+    isIOS: isIOS(),
   };
 }

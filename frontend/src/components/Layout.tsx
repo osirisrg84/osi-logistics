@@ -3,6 +3,7 @@ import { Outlet, NavLink } from 'react-router-dom';
 import { LayoutDashboard, Package, MapPin, Users, BarChart3, MoreHorizontal, X, Truck, Layers } from 'lucide-react';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import InstallAppBanner from './InstallAppBanner';
 import { useAuth } from '../context/AuthContext';
 import { getSocket } from '../services/socket';
 import api from '../services/api';
@@ -174,6 +175,9 @@ export default function Layout() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-y-auto p-3 md:p-6 pb-16 md:pb-6">
+          <div className="mb-3 md:mb-6">
+            <InstallAppBanner dismissKey="osi_install_banner_dismissed_dispatch" variant="light" />
+          </div>
           <Outlet />
         </main>
       </div>

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
 import InstallAppButton from '../components/InstallAppButton';
+import InstallAppBanner from '../components/InstallAppBanner';
 import { setAppManifest, DRIVER_MANIFEST, DISPATCH_MANIFEST } from '../utils/appManifest';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -1039,6 +1040,10 @@ export default function DriverPortal() {
       <div className="bg-gradient-to-b from-[#132640] to-[#0a1628]">
         <div className="px-4 pb-4">
           <div className="max-w-lg mx-auto">
+
+            <div className="mb-3">
+              <InstallAppBanner dismissKey="osi_install_banner_dismissed_driver" variant="dark" />
+            </div>
 
             {/* Driver card */}
             <div className="flex items-center gap-4 rounded-2xl px-4 py-3.5 bg-white/6 border border-white/10">
