@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -23,53 +23,78 @@ function isIOS() {
  * native install prompt can ever appear, vs. just hasn't fired yet.
  */
 function supportsNativePrompt() {
-  return 'onbeforeinstallprompt' in window;
+  return typeof window !== 'undefined' && 'onbeforeinstallprompt' in window;
 }
 
 /**
- * Captures the browser's `beforeinstallprompt` event (Chrome/Edge/Android) so a
- * custom "Install App" button can trigger it on demand instead of relying on the
- * browser's own install UI. Safari/iOS never fires this event — there's no
- * programmatic install prompt there, only the manual "Add to Home Screen" flow.
+ * `beforeinstallprompt` fires at most once per page load, whichever component
+ * happens to be mounted at that moment. Dispatch and Driver Portal are
+ * mutually-exclusive routes — if the event fires while one is mounted, a
+ * per-component listener in the other would simply never see it. So the
+ * listener is registered once at module scope (not inside a component effect)
+ * and the captured event is shared through this tiny store; every component
+ * using useInstallPrompt() reads the same state regardless of which one was
+ * on screen when the browser actually fired the event.
+ */
+let deferredEvent: BeforeInstallPromptEvent | null = null;
+let installed = typeof window !== 'undefined' && isStandalone();
+const listeners = new Set<() => void>();
+
+function emitChange() {
+  listeners.forEach((listener) => listener());
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function getSnapshot() {
+  return deferredEvent;
+}
+
+function getInstalledSnapshot() {
+  return installed;
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredEvent = event as BeforeInstallPromptEvent;
+    emitChange();
+  });
+  window.addEventListener('appinstalled', () => {
+    installed = true;
+    deferredEvent = null;
+    emitChange();
+  });
+}
+
+/**
+ * Exposes the shared `beforeinstallprompt` event so a custom "Install App"
+ * button can trigger it on demand instead of relying on the browser's own
+ * install UI. Safari/iOS never fires this event — there's no programmatic
+ * install prompt there, only the manual "Add to Home Screen" flow.
  */
 export function useInstallPrompt() {
-  const [deferredEvent, setDeferredEvent] = useState<BeforeInstallPromptEvent | null>(null);
-  const [installed, setInstalled] = useState(isStandalone);
-
-  useEffect(() => {
-    if (installed) return;
-
-    const onBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setDeferredEvent(event as BeforeInstallPromptEvent);
-    };
-    const onAppInstalled = () => {
-      setInstalled(true);
-      setDeferredEvent(null);
-    };
-
-    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt);
-    window.addEventListener('appinstalled', onAppInstalled);
-    return () => {
-      window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', onAppInstalled);
-    };
-  }, [installed]);
+  const event = useSyncExternalStore(subscribe, getSnapshot);
+  const isInstalled = useSyncExternalStore(subscribe, getInstalledSnapshot);
 
   const promptInstall = useCallback(async () => {
     if (!deferredEvent) return false;
     await deferredEvent.prompt();
     const { outcome } = await deferredEvent.userChoice;
-    setDeferredEvent(null);
+    deferredEvent = null;
+    emitChange();
     return outcome === 'accepted';
-  }, [deferredEvent]);
+  }, []);
 
   return {
-    canInstall: !installed && deferredEvent !== null,
-    installed,
+    canInstall: !isInstalled && event !== null,
+    installed: isInstalled,
     promptInstall,
     /** True once we know no native prompt will ever fire (Firefox, Safari) — show manual instructions instead. */
-    needsManualInstall: !installed && !supportsNativePrompt(),
+    needsManualInstall: !isInstalled && !supportsNativePrompt(),
     isIOS: isIOS(),
   };
 }
