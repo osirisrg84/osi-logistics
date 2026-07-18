@@ -13,9 +13,9 @@ import osiLogo from '../assets/osi-logo.jpeg';
 import InstallAppButton from '../components/InstallAppButton';
 import InstallAppBanner from '../components/InstallAppBanner';
 import { setAppManifest, setThemeColor, DRIVER_MANIFEST, DISPATCH_MANIFEST, DRIVER_COLOR, DISPATCH_COLOR } from '../utils/appManifest';
-import { useAuth } from '../context/AuthContext';
+import { useDriverAuth } from '../context/DriverAuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { ordersApi, driversApi, billingApi, notificationsApi, userApi } from '../services/api';
+import { ordersApi, driversApi, billingApi, notificationsApi, userApi } from '../services/driverApi';
 import { Order, Driver, DriverStatus } from '../types';
 import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -179,7 +179,7 @@ const STATUS_CONFIG: Record<DriverStatus, { label: string; dot: string; bg: stri
 type Tab = 'active' | 'delivered' | 'map' | 'profile' | 'payments' | 'hub';
 
 export default function DriverPortal() {
-  const { user, driverProfile, logout } = useAuth();
+  const { user, driverProfile, logout } = useDriverAuth();
   const { dark, toggle: toggleTheme } = useTheme();
   const driver = driverProfile as Driver | null;
 

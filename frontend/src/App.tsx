@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { DriverAuthProvider, useDriverAuth } from './context/DriverAuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/Layout';
 import Landing from './pages/Landing';
@@ -73,12 +74,20 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-/** Protected: driver only */
+/** Redirect driver-portal public pages if driver is already logged in */
+function DriverPublicOnly({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useDriverAuth();
+  if (loading) return null;
+  if (user) return <Navigate to="/driver" replace />;
+  return <>{children}</>;
+}
+
+/** Protected: driver only — uses the separate driver auth session */
 function DriverGuard() {
-  const { user, loading } = useAuth();
+  const { user, loading } = useDriverAuth();
   if (loading) return <Spinner />;
   if (!user) return <Navigate to="/driver/login" replace />;
-  if (user.role !== 'driver') return <Navigate to={getHomeForRole(user.role)} replace />;
+  if (user.role !== 'driver') return <Navigate to="/driver/login" replace />;
   return <DriverPortal />;
 }
 
@@ -92,7 +101,6 @@ function AppRoutes() {
       {/* Portal logins */}
       <Route path="/admin"         element={<PublicOnly><AdminLogin /></PublicOnly>} />
       <Route path="/dispatcher"    element={<PublicOnly><Login /></PublicOnly>} />
-      <Route path="/driver/login"  element={<PublicOnly><DriverLogin /></PublicOnly>} />
       <Route path="/login"         element={<Navigate to="/dispatcher" replace />} />
 
       {/* Registration — separate pages per role */}
@@ -101,8 +109,11 @@ function AppRoutes() {
       {/* Legacy shared register redirects to dispatcher */}
       <Route path="/register" element={<Navigate to="/dispatcher/register" replace />} />
 
-      {/* Driver portal */}
-      <Route path="/driver" element={<DriverGuard />} />
+      {/* Driver portal — wrapped in its own auth provider so sessions are independent from dispatch */}
+      <Route path="/driver/login" element={
+        <DriverAuthProvider><DriverPublicOnly><DriverLogin /></DriverPublicOnly></DriverAuthProvider>
+      } />
+      <Route path="/driver" element={<DriverAuthProvider><DriverGuard /></DriverAuthProvider>} />
 
       {/* Dispatcher + Admin shared layout */}
       <Route path="/" element={<DispatcherGuard />}>
