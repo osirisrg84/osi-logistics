@@ -16,6 +16,10 @@ function isIOS() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) && !('MSStream' in window);
 }
 
+function isDesktop() {
+  return !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
 /**
  * Chromium (Chrome/Edge/Samsung Internet) defines `onbeforeinstallprompt` on
  * `window` even before the event ever fires. Firefox and Safari don't define
@@ -102,5 +106,6 @@ export function useInstallPrompt() {
     /** True when Chrome/Edge supports install but beforeinstallprompt hasn't fired yet (e.g. cooldown after uninstall). */
     showManualFallback: !isInstalled && supportsNativePrompt() && event === null,
     isIOS: isIOS(),
+    isDesktop: isDesktop(),
   };
 }
