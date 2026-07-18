@@ -1,10 +1,3 @@
-/**
- * Swaps the document's <link rel="manifest"> so each portal installs as its
- * own PWA (distinct name/icon/start_url) instead of one generic app —
- * dispatch/admin get manifest-dispatch.webmanifest, drivers get
- * manifest-driver.webmanifest. index.html ships the dispatch one as the
- * default for pre-login pages.
- */
 export function setAppManifest(href: string) {
   let link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
   if (!link) {
@@ -17,5 +10,12 @@ export function setAppManifest(href: string) {
   }
 }
 
+export function setThemeColor(color: string) {
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  if (meta) meta.content = color;
+}
+
 export const DISPATCH_MANIFEST = '/manifest-dispatch.webmanifest';
-export const DRIVER_MANIFEST = '/manifest-driver.webmanifest';
+export const DRIVER_MANIFEST   = '/manifest-driver.webmanifest';
+export const DISPATCH_COLOR    = '#f97316';
+export const DRIVER_COLOR      = '#0f1e35';

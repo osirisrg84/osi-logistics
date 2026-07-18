@@ -12,7 +12,7 @@ import {
 import osiLogo from '../assets/osi-logo.jpeg';
 import InstallAppButton from '../components/InstallAppButton';
 import InstallAppBanner from '../components/InstallAppBanner';
-import { setAppManifest, DRIVER_MANIFEST, DISPATCH_MANIFEST } from '../utils/appManifest';
+import { setAppManifest, setThemeColor, DRIVER_MANIFEST, DISPATCH_MANIFEST, DRIVER_COLOR, DISPATCH_COLOR } from '../utils/appManifest';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { ordersApi, driversApi, billingApi, notificationsApi, userApi } from '../services/api';
@@ -192,7 +192,8 @@ export default function DriverPortal() {
 
   useEffect(() => {
     setAppManifest(DRIVER_MANIFEST);
-    return () => setAppManifest(DISPATCH_MANIFEST);
+    setThemeColor(DRIVER_COLOR);
+    return () => { setAppManifest(DISPATCH_MANIFEST); setThemeColor(DISPATCH_COLOR); };
   }, []);
 
   // ── Notifications ─────────────────────────────────────────
@@ -920,11 +921,11 @@ export default function DriverPortal() {
         </div>
 
         {/* Driver identity hero */}
-        <div className="px-4 pt-2 pb-4">
+        <div className="px-4 pt-2 pb-1">
           <div className="max-w-lg mx-auto">
 
             {/* ── Compact 3-Switch Row ──────────────────────── */}
-            <div className="space-y-2 mb-4">
+            <div className="space-y-2 mb-1">
               <div className="flex gap-1.5">
 
                 {/* Switch 1 — Go Online */}
@@ -1038,12 +1039,10 @@ export default function DriverPortal() {
 
       {/* Driver card + stats — scrollable */}
       <div className="bg-gradient-to-b from-[#132640] to-[#0a1628]">
-        <div className="px-4 pb-4">
+        <div className="px-4 pt-3 pb-4">
           <div className="max-w-lg mx-auto">
 
-            <div className="mb-3">
-              <InstallAppBanner dismissKey="osi_install_banner_dismissed_driver" variant="dark" />
-            </div>
+            <InstallAppBanner dismissKey="osi_install_banner_dismissed_driver" variant="dark" />
 
             {/* Driver card */}
             <div className="flex items-center gap-4 rounded-2xl px-4 py-3.5 bg-white/6 border border-white/10">

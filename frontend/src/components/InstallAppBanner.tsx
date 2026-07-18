@@ -25,8 +25,8 @@ export default function InstallAppBanner({ dismissKey, variant = 'light' }: Inst
     <div
       className={
         isDark
-          ? 'rounded-2xl px-4 py-3.5 bg-white/6 border border-white/10 flex items-start gap-3'
-          : 'card flex items-start gap-3'
+          ? 'mb-3 rounded-2xl px-4 py-3.5 bg-white/6 border border-white/10 flex items-start gap-3'
+          : 'mb-3 card flex items-start gap-3'
       }
     >
       <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${isDark ? 'bg-blue-500/20 text-blue-300' : 'bg-orange-100 text-orange-600'}`}>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Download, X, Smartphone } from 'lucide-react';
+import { Download, X, CloudDownload } from 'lucide-react';
 import { useInstallPrompt } from '../hooks/useInstallPrompt';
 
 interface InstallAppButtonProps {
@@ -40,7 +40,7 @@ export default function InstallAppButton({
     );
   }
 
-  // Manual install needed (Safari/Firefox, or Chrome cooldown after uninstall)
+  // Manual install needed (Safari/Firefox, or Chrome hasn't fired beforeinstallprompt yet)
   if (needsManualInstall || showManualFallback) {
     const instructions = isIOS
       ? 'Toca el botón Compartir (□↑) y luego "Agregar a pantalla de inicio".'
@@ -51,9 +51,10 @@ export default function InstallAppButton({
         <button
           onClick={() => setShowGuide(v => !v)}
           title="Instalar app"
-          className={className || 'p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors'}
+          className={className || 'flex items-center gap-1 px-2 py-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors text-xs font-medium'}
         >
-          <Smartphone className={iconClassName} />
+          <CloudDownload className={iconClassName} />
+          {variant === 'labeled' && <span>Install</span>}
         </button>
 
         {showGuide && (
@@ -65,11 +66,6 @@ export default function InstallAppButton({
               </button>
             </div>
             <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed">{instructions}</p>
-            {showManualFallback && (
-              <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-2">
-                Si acabas de desinstalar la app, Chrome puede tardar unos minutos en mostrar el botón de instalación automático.
-              </p>
-            )}
           </div>
         )}
       </div>
