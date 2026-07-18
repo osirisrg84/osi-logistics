@@ -60,7 +60,7 @@ function PublicOnly({ children }: { children: React.ReactNode }) {
 function DispatcherGuard() {
   const { user, loading } = useAuth();
   if (loading) return <Spinner />;
-  if (!user) return <Navigate to="/" replace />;
+  if (!user) return <Navigate to="/dispatcher" replace />;
   if (user.role === 'driver') return <Navigate to="/driver" replace />;
   return <Layout />;
 }

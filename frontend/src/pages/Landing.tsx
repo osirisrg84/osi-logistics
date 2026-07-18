@@ -1,9 +1,16 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Truck, ClipboardList, ArrowRight, MapPin } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
+import { setThemeColor, NEUTRAL_COLOR, DISPATCH_COLOR } from '../utils/appManifest';
 
 export default function Landing() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setThemeColor(NEUTRAL_COLOR);
+    return () => setThemeColor(DISPATCH_COLOR);
+  }, []);
 
   const portals = [
     {
