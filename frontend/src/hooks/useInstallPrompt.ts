@@ -61,11 +61,15 @@ if (typeof window !== 'undefined') {
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
     deferredEvent = event as BeforeInstallPromptEvent;
+    installed = false;   // a new prompt means this PWA scope isn't installed yet
     emitChange();
   });
   window.addEventListener('appinstalled', () => {
-    installed = true;
+    // Don't set installed=true globally — only mark installed when actually
+    // running in standalone mode. This prevents hiding the install button for
+    // the *other* portal (dispatch vs driver) after one of them is installed.
     deferredEvent = null;
+    if (isStandalone()) installed = true;
     emitChange();
   });
 }

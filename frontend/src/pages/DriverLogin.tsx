@@ -1,9 +1,16 @@
-﻿import { useState, FormEvent } from 'react';
+﻿import { useState, FormEvent, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Truck, Eye, EyeOff, AlertCircle, ArrowLeft, MapPin, Package, Star } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { setAppManifest, setThemeColor, DRIVER_MANIFEST, DISPATCH_MANIFEST, DRIVER_COLOR, DISPATCH_COLOR } from '../utils/appManifest';
 
 export default function DriverLogin() {
+  useEffect(() => {
+    setAppManifest(DRIVER_MANIFEST);
+    setThemeColor(DRIVER_COLOR);
+    return () => { setAppManifest(DISPATCH_MANIFEST); setThemeColor(DISPATCH_COLOR); };
+  }, []);
+
   const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');

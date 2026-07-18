@@ -16,9 +16,26 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    #pre-loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;z-index:99999;transition:opacity .25s}
+    #pre-loader.done{opacity:0;pointer-events:none}
+    .pre-spin{width:40px;height:40px;border:3px solid #e2e8f0;border-top-color:#3b82f6;border-radius:50%;animation:pspin .7s linear infinite}
+    @keyframes pspin{to{transform:rotate(360deg)}}
+  </style>
   </head>
   <body>
+    <div id="pre-loader"><div class="pre-spin"></div></div>
     <div id="root"></div>
+    <script>
+      new MutationObserver(function(_, obs){
+        var r=document.getElementById('root');
+        if(r && r.firstChild){
+          var l=document.getElementById('pre-loader');
+          if(l){l.classList.add('done');setTimeout(function(){l.remove()},300);}
+          obs.disconnect();
+        }
+      }).observe(document.getElementById('root'),{childList:true});
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
