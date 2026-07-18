@@ -5,6 +5,8 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+type WindowWithPrompt = Window & { __pwaPrompt?: BeforeInstallPromptEvent };
+
 function isStandalone() {
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
@@ -20,27 +22,17 @@ function isDesktop() {
   return !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
-/**
- * Chromium (Chrome/Edge/Samsung Internet) defines `onbeforeinstallprompt` on
- * `window` even before the event ever fires. Firefox and Safari don't define
- * it at all — that's the only reliable way to know up front whether the
- * native install prompt can ever appear, vs. just hasn't fired yet.
- */
 function supportsNativePrompt() {
   return typeof window !== 'undefined' && 'onbeforeinstallprompt' in window;
 }
 
-/**
- * `beforeinstallprompt` fires at most once per page load, whichever component
- * happens to be mounted at that moment. Dispatch and Driver Portal are
- * mutually-exclusive routes — if the event fires while one is mounted, a
- * per-component listener in the other would simply never see it. So the
- * listener is registered once at module scope (not inside a component effect)
- * and the captured event is shared through this tiny store; every component
- * using useInstallPrompt() reads the same state regardless of which one was
- * on screen when the browser actually fired the event.
- */
-let deferredEvent: BeforeInstallPromptEvent | null = null;
+// Read any event captured early in main.tsx before modules loaded
+function getEarlyPrompt(): BeforeInstallPromptEvent | null {
+  return (window as WindowWithPrompt).__pwaPrompt ?? null;
+}
+
+let deferredEvent: BeforeInstallPromptEvent | null =
+  typeof window !== 'undefined' ? getEarlyPrompt() : null;
 let installed = typeof window !== 'undefined' && isStandalone();
 const listeners = new Set<() => void>();
 
@@ -62,28 +54,30 @@ function getInstalledSnapshot() {
 }
 
 if (typeof window !== 'undefined') {
+  // Listen for the event dispatched by main.tsx's early capture
+  window.addEventListener('pwa-prompt-ready', () => {
+    deferredEvent = getEarlyPrompt();
+    installed = false;
+    emitChange();
+  });
+
+  // Also listen directly in case this module loads before the event fires
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
     deferredEvent = event as BeforeInstallPromptEvent;
-    installed = false;   // a new prompt means this PWA scope isn't installed yet
+    (window as WindowWithPrompt).__pwaPrompt = deferredEvent;
+    installed = false;
     emitChange();
   });
+
   window.addEventListener('appinstalled', () => {
-    // Don't set installed=true globally — only mark installed when actually
-    // running in standalone mode. This prevents hiding the install button for
-    // the *other* portal (dispatch vs driver) after one of them is installed.
     deferredEvent = null;
+    (window as WindowWithPrompt).__pwaPrompt = undefined;
     if (isStandalone()) installed = true;
     emitChange();
   });
 }
 
-/**
- * Exposes the shared `beforeinstallprompt` event so a custom "Install App"
- * button can trigger it on demand instead of relying on the browser's own
- * install UI. Safari/iOS never fires this event — there's no programmatic
- * install prompt there, only the manual "Add to Home Screen" flow.
- */
 export function useInstallPrompt() {
   const event = useSyncExternalStore(subscribe, getSnapshot);
   const isInstalled = useSyncExternalStore(subscribe, getInstalledSnapshot);
@@ -93,6 +87,7 @@ export function useInstallPrompt() {
     await deferredEvent.prompt();
     const { outcome } = await deferredEvent.userChoice;
     deferredEvent = null;
+    (window as WindowWithPrompt).__pwaPrompt = undefined;
     emitChange();
     return outcome === 'accepted';
   }, []);
@@ -101,9 +96,7 @@ export function useInstallPrompt() {
     canInstall: !isInstalled && event !== null,
     installed: isInstalled,
     promptInstall,
-    /** True once we know no native prompt will ever fire (Firefox, Safari) — show manual instructions instead. */
     needsManualInstall: !isInstalled && !supportsNativePrompt(),
-    /** True when Chrome/Edge supports install but beforeinstallprompt hasn't fired yet (e.g. cooldown after uninstall). */
     showManualFallback: !isInstalled && supportsNativePrompt() && event === null,
     isIOS: isIOS(),
     isDesktop: isDesktop(),
