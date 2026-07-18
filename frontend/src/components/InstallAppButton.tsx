@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Download, X, CloudDownload } from 'lucide-react';
+import { Download, X, DownloadCloud } from 'lucide-react';
 import { useInstallPrompt } from '../hooks/useInstallPrompt';
 
 interface InstallAppButtonProps {
@@ -53,7 +53,7 @@ export default function InstallAppButton({
           title="Instalar app"
           className={className || 'flex items-center gap-1 px-2 py-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors text-xs font-medium'}
         >
-          <CloudDownload className={iconClassName} />
+          <DownloadCloud className={iconClassName} />
           {variant === 'labeled' && <span>Install</span>}
         </button>
 
