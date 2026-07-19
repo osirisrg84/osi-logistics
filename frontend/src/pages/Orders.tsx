@@ -340,19 +340,17 @@ interface AssignModalProps {
   onSave: () => void;
 }
 
-function AssignModal({ order, drivers, trucks, onClose, onSave }: AssignModalProps) {
+function AssignModal({ order, drivers, onClose, onSave }: Omit<AssignModalProps, 'trucks'>) {
   const [driverId, setDriverId] = useState('');
-  const [truckId, setTruckId] = useState('');
   const [saving, setSaving] = useState(false);
 
   const availableDrivers = drivers.filter(d => d.status === 'available');
-  const availableTrucks = trucks.filter(t => t.status === 'active');
 
   const handleOffer = async () => {
-    if (!driverId || !truckId) return;
+    if (!driverId) return;
     setSaving(true);
     try {
-      await ordersApi.offer(order.id, { driver_id: driverId, truck_id: truckId });
+      await ordersApi.offer(order.id, { driver_id: driverId, truck_id: '' });
       onSave();
       onClose();
     } catch {
@@ -389,21 +387,9 @@ function AssignModal({ order, drivers, trucks, onClose, onSave }: AssignModalPro
             </select>
           </div>
 
-          <div>
-            <label className="label">Seleccionar Camión ({availableTrucks.length} activos)</label>
-            <select className="input" value={truckId} onChange={e => setTruckId(e.target.value)}>
-              <option value="">Elige un camión...</option>
-              {availableTrucks.map(t => (
-                <option key={t.id} value={t.id}>
-                  {t.plate_number} · {t.make} {t.model} · {t.capacity_kg}kg
-                </option>
-              ))}
-            </select>
-          </div>
-
           <div className="flex gap-3 pt-2">
             <button onClick={onClose} className="btn-secondary flex-1 justify-center">Cancelar</button>
-            <button onClick={handleOffer} disabled={!driverId || !truckId || saving} className="btn-primary flex-1 justify-center">
+            <button onClick={handleOffer} disabled={!driverId || saving} className="btn-primary flex-1 justify-center">
               <UserCheck className="w-4 h-4" />
               {saving ? 'Enviando...' : 'Enviar Oferta'}
             </button>
@@ -779,7 +765,7 @@ export default function Orders() {
 
       {/* Modals */}
       {showCreate && <CreateOrderModal onClose={() => setShowCreate(false)} onSave={() => { fetchOrders(); showToast('¡Orden creada exitosamente! 🚛'); playSuccessChime(); }} drivers={drivers} trucks={trucks} />}
-      {assignOrder && <AssignModal order={assignOrder} drivers={drivers} trucks={trucks} onClose={() => setAssignOrder(null)} onSave={fetchOrders} />}
+      {assignOrder && <AssignModal order={assignOrder} drivers={drivers} onClose={() => setAssignOrder(null)} onSave={fetchOrders} />}
       {detailOrder && <DetailModal order={detailOrder} onClose={() => setDetailOrder(null)} onRefresh={fetchOrders} />}
     </div>
   );

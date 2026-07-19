@@ -255,7 +255,7 @@ router.post('/:id/offer', async (req: Request, res: Response) => {
 
     await exec(`UPDATE orders SET status = 'offered', offered_to_driver_id = ?, offered_to_truck_id = ?, offered_at = ?,
       dispatcher_user_id = COALESCE(dispatcher_user_id, ?) WHERE id = ?`,
-      [driver_id, truck_id, now, authReq.user?.id || null, req.params.id]);
+      [driver_id, truck_id || null, now, authReq.user?.id || null, req.params.id]);
     await exec("INSERT INTO order_history (id, order_id, status, notes, created_by) VALUES (?, ?, 'offered', ?, 'dispatcher')",
       [uuidv4(), req.params.id, `Oferta enviada al conductor ${driver.name}`]);
 
