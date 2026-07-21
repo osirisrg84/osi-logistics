@@ -2,7 +2,7 @@
 import {
   Plus, Search, Filter, X, ChevronDown, Package,
   MapPin, User, Truck, Clock, DollarSign, Eye, Edit2, Trash2, UserCheck, CheckCircle,
-  Building2, Phone, Mail, Hash
+  Building2, Phone, Mail, Hash, FileText, Upload
 } from 'lucide-react';
 import { Order, Driver, Truck as TruckType, OrderStatus } from '../types';
 import { ordersApi, driversApi, trucksApi } from '../services/api';
@@ -291,6 +291,241 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
   );
 }
 
+interface EditOrderModalProps {
+  order: Order;
+  onClose: () => void;
+  onSave: () => void;
+}
+
+function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
+  const [form, setForm] = useState({
+    pickup_name: order.pickup_contact || '',
+    pickup_address: order.pickup_address || '',
+    delivery_name: order.delivery_contact || '',
+    delivery_address: order.delivery_address || '',
+    weight_kg: order.weight_kg ? String(Math.round(order.weight_kg * 2.20462)) : '',
+    commodity: order.description || '',
+    notes: order.notes || '',
+    price: order.price ? String(order.price) : '',
+    distance_mi: order.distance_km ? String(Math.round(order.distance_km * 0.621371 * 10) / 10) : '',
+    estimated_delivery: order.estimated_delivery ? order.estimated_delivery.slice(0, 16) : '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  // Rate Confirmation
+  const [rateCon, setRateCon] = useState<{ filename: string; uploaded_at: string; data: string } | null>(null);
+  const [loadingRateCon, setLoadingRateCon] = useState(true);
+  const [uploadingRateCon, setUploadingRateCon] = useState(false);
+  const [rateConError, setRateConError] = useState('');
+
+  useEffect(() => {
+    ordersApi.getRateCon(order.id)
+      .then(({ data }) => setRateCon(data))
+      .catch(() => setRateCon(null))
+      .finally(() => setLoadingRateCon(false));
+  }, [order.id]);
+
+  const handleRateConUpload = async (file: File) => {
+    setRateConError('');
+    if (file.size > 8 * 1024 * 1024) {
+      setRateConError('El archivo no puede superar 8MB');
+      return;
+    }
+    setUploadingRateCon(true);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      const { data } = await ordersApi.uploadRateCon(order.id, { filename: file.name, data: base64 });
+      setRateCon({ filename: data.filename, uploaded_at: data.uploaded_at, data: base64 });
+    } catch {
+      setRateConError('Error al subir el archivo');
+    } finally {
+      setUploadingRateCon(false);
+    }
+  };
+
+  const handleRateConDelete = async () => {
+    try {
+      await ordersApi.deleteRateCon(order.id);
+      setRateCon(null);
+    } catch {
+      setRateConError('Error al eliminar el archivo');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.pickup_address || !form.delivery_address) {
+      setError('Por favor completa los campos requeridos');
+      return;
+    }
+    setSaving(true);
+    try {
+      await ordersApi.update(order.id, {
+        pickup_address: form.pickup_address,
+        pickup_contact: form.pickup_name,
+        delivery_address: form.delivery_address,
+        delivery_contact: form.delivery_name,
+        weight_kg: Math.round(parseFloat(form.weight_kg || '0') * 0.453592 * 10) / 10,
+        description: form.commodity,
+        notes: form.notes,
+        price: parseFloat(form.price) || 0,
+        distance_km: Math.round(parseFloat(form.distance_mi || '0') * 1.60934 * 10) / 10,
+        estimated_delivery: form.estimated_delivery,
+      });
+      onSave();
+      onClose();
+    } catch {
+      setError('Error al guardar los cambios');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Edit Order · {order.order_number}</h2>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
+            <X className="w-5 h-5 text-gray-500 dark:text-slate-400" />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          {error && <div className="bg-red-50 text-red-700 text-sm px-3 py-2 rounded-lg border border-red-200">{error}</div>}
+
+          {/* Rate Confirmation */}
+          <div className="bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-indigo-500" /> Rate Confirmation
+            </h3>
+            {loadingRateCon ? (
+              <p className="text-xs text-gray-400">Cargando...</p>
+            ) : (
+              <div className="space-y-2">
+                {rateCon && (
+                  <div className="flex items-center justify-between gap-2 bg-white dark:bg-slate-700 rounded-lg px-3 py-2 border border-indigo-100 dark:border-indigo-800/30">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileText className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium text-gray-800 dark:text-slate-200 truncate">{rateCon.filename}</p>
+                        <p className="text-[10px] text-gray-400">Subido {format(new Date(rateCon.uploaded_at), 'MMM d, yyyy HH:mm')}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <a href={rateCon.data} download={rateCon.filename} target="_blank" rel="noreferrer"
+                        className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Ver</a>
+                      <button type="button" onClick={handleRateConDelete} className="text-xs font-semibold text-red-400 hover:text-red-500">
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                )}
+                <label className="flex items-center justify-center gap-2 cursor-pointer px-3 py-2 rounded-lg border-2 border-dashed border-indigo-300 dark:border-indigo-700 hover:border-indigo-400 transition-colors text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                  {uploadingRateCon ? <div className="w-3.5 h-3.5 border-2 border-indigo-300 border-t-indigo-600 rounded-full animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                  {rateCon ? 'Reemplazar archivo' : 'Subir Rate Con (PDF, JPG, PNG)'}
+                  <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" disabled={uploadingRateCon}
+                    onChange={e => { const f = e.target.files?.[0]; if (f) handleRateConUpload(f); e.target.value = ''; }} />
+                </label>
+                {rateConError && <p className="text-xs text-red-500">{rateConError}</p>}
+              </div>
+            )}
+          </div>
+
+          {/* Pickup */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-orange-500" /> Pickup Location
+            </h3>
+            <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30 rounded-xl p-3">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="label">City</label>
+                  <input className="input" value={form.pickup_name} onChange={e => setForm({...form, pickup_name: e.target.value})} placeholder="Ej: Miami" />
+                </div>
+                <div>
+                  <label className="label">State *</label>
+                  <select className="input" value={form.pickup_address} onChange={e => setForm({...form, pickup_address: e.target.value})} required>
+                    <option value="">— Select State —</option>
+                    {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Delivery */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-green-500" /> Delivery Location
+            </h3>
+            <div className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30 rounded-xl p-3">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="label">City</label>
+                  <input className="input" value={form.delivery_name} onChange={e => setForm({...form, delivery_name: e.target.value})} placeholder="Ej: Atlanta" />
+                </div>
+                <div>
+                  <label className="label">State *</label>
+                  <select className="input" value={form.delivery_address} onChange={e => setForm({...form, delivery_address: e.target.value})} required>
+                    <option value="">— Select State —</option>
+                    {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Shipment Details */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+              <Package className="w-4 h-4 text-orange-500" /> Shipment Details
+            </h3>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="label">Weight (lbs)</label>
+                <input className="input" type="number" value={form.weight_kg} onChange={e => setForm({...form, weight_kg: e.target.value})} placeholder="0" min="0" />
+              </div>
+              <div>
+                <label className="label">Rate ($)</label>
+                <input className="input" type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} placeholder="0.00" min="0" step="0.01" />
+              </div>
+              <div>
+                <label className="label">Distance (mi)</label>
+                <input className="input" type="number" value={form.distance_mi} onChange={e => setForm({...form, distance_mi: e.target.value})} placeholder="0" min="0" />
+              </div>
+              <div className="col-span-2">
+                <label className="label">End Delivery</label>
+                <input className="input" type="datetime-local" value={form.estimated_delivery} onChange={e => setForm({...form, estimated_delivery: e.target.value})} />
+              </div>
+              <div className="col-span-3">
+                <label className="label">Commodity</label>
+                <input className="input" value={form.commodity} onChange={e => setForm({...form, commodity: e.target.value})} placeholder="Ej: Fresh produce, Electronics, Automotive parts..." />
+              </div>
+              <div className="col-span-3">
+                <label className="label">Notes</label>
+                <textarea className="input resize-none" rows={2} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Special instructions..." />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">Cancel</button>
+            <button type="submit" disabled={saving} className="btn-primary flex-1 justify-center gap-2">
+              {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 interface AssignModalProps {
   order: Order;
   drivers: Driver[];
@@ -534,6 +769,7 @@ export default function Orders() {
   const [showCreate, setShowCreate] = useState(false);
   const [assignOrder, setAssignOrder] = useState<Order | null>(null);
   const [detailOrder, setDetailOrder] = useState<Order | null>(null);
+  const [editOrder, setEditOrder] = useState<Order | null>(null);
   const [total, setTotal] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -635,6 +871,9 @@ export default function Orders() {
                     <button onClick={() => setDetailOrder(order)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
                       <Eye className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                     </button>
+                    <button onClick={() => setEditOrder(order)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
+                      <Edit2 className="w-4 h-4 text-gray-500 dark:text-slate-400" />
+                    </button>
                     {order.status === 'pending' && (
                       <button onClick={() => setAssignOrder(order)} className="p-1.5 hover:bg-blue-50 rounded-lg">
                         <UserCheck className="w-4 h-4 text-blue-500" />
@@ -701,6 +940,9 @@ export default function Orders() {
                           <button onClick={() => setDetailOrder(order)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
                             <Eye className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
                           </button>
+                          <button onClick={() => setEditOrder(order)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg" title="Edit order">
+                            <Edit2 className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
+                          </button>
                           {['pending', 'offered'].includes(order.status) && (
                             <button onClick={() => setAssignOrder(order)} className="p-1.5 hover:bg-blue-50 rounded-lg" title="Enviar oferta">
                               <UserCheck className="w-3.5 h-3.5 text-blue-500" />
@@ -726,6 +968,7 @@ export default function Orders() {
       {showCreate && <CreateOrderModal onClose={() => setShowCreate(false)} onSave={() => { fetchOrders(); showToast('¡Orden creada exitosamente! 🚛'); playSuccessChime(); }} drivers={drivers} trucks={trucks} />}
       {assignOrder && <AssignModal order={assignOrder} drivers={drivers} onClose={() => setAssignOrder(null)} onSave={fetchOrders} />}
       {detailOrder && <DetailModal order={detailOrder} onClose={() => setDetailOrder(null)} onRefresh={fetchOrders} />}
+      {editOrder && <EditOrderModal order={editOrder} onClose={() => setEditOrder(null)} onSave={() => { fetchOrders(); showToast('¡Orden actualizada! ✅'); }} />}
     </div>
   );
 }

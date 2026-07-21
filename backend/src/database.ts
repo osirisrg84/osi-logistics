@@ -257,6 +257,15 @@ export async function initDatabase(): Promise<void> {
     used      INTEGER NOT NULL DEFAULT 0
   )`);
 
+  // Rate confirmation documents — kept in their own table (not a column on `orders`)
+  // so the base64 file data never gets pulled in by the `SELECT o.*` list/detail queries.
+  await exec(`CREATE TABLE IF NOT EXISTS order_rate_cons (
+    order_id    TEXT PRIMARY KEY,
+    filename    TEXT NOT NULL,
+    data        TEXT NOT NULL,
+    uploaded_at TEXT NOT NULL
+  )`);
+
   // Assign dispatcher_code to existing dispatchers that don't have one
   const genCode = async (): Promise<string> => {
     const code = String(Math.floor(10000000 + Math.random() * 90000000));

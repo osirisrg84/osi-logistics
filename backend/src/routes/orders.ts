@@ -123,6 +123,40 @@ router.post('/', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
+router.get('/:id/rate-con', async (req: Request, res: Response) => {
+  try {
+    const rateCon = await queryOne<{ filename: string; data: string; uploaded_at: string }>(
+      'SELECT filename, data, uploaded_at FROM order_rate_cons WHERE order_id = ?', [req.params.id]);
+    if (!rateCon) return res.status(404).json({ error: 'No rate confirmation uploaded' });
+    res.json(rateCon);
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.post('/:id/rate-con', async (req: Request, res: Response) => {
+  try {
+    const { filename, data } = req.body;
+    if (!filename || !data) return res.status(400).json({ error: 'filename and data are required' });
+    if (data.length > 12_000_000) return res.status(413).json({ error: 'File too large (max ~8MB)' });
+
+    const order = await queryOne('SELECT id FROM orders WHERE id = ?', [req.params.id]);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+
+    const uploadedAt = new Date().toISOString();
+    await exec(`INSERT INTO order_rate_cons (order_id, filename, data, uploaded_at) VALUES (?, ?, ?, ?)
+      ON CONFLICT(order_id) DO UPDATE SET filename = excluded.filename, data = excluded.data, uploaded_at = excluded.uploaded_at`,
+      [req.params.id, filename, data, uploadedAt]);
+
+    res.json({ filename, uploaded_at: uploadedAt });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.delete('/:id/rate-con', async (req: Request, res: Response) => {
+  try {
+    await exec('DELETE FROM order_rate_cons WHERE order_id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     const order = await queryOne('SELECT * FROM orders WHERE id = ?', [req.params.id]);
