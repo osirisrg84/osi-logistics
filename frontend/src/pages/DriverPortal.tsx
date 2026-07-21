@@ -854,6 +854,9 @@ export default function DriverPortal() {
 
   // ── Profile completion ─────────────────────────────────────
   const profileItems = [
+    { label: isDotEquip ? 'Company / DOT#' : 'Company / MC#',
+      done: !!(driver?.company_name && authorityNum) },
+    { label: 'Rate Con Email',   done: !!rateConEmail },
     { label: 'Truck Make',       done: !!localTruckMake },
     { label: 'Tipo de Equipo',   done: !!localEquipType },
     ...(!isDotEquip ? [
@@ -864,12 +867,9 @@ export default function DriverPortal() {
       { label: 'Dimensiones (pies)',        done: !!(equipLength && equipWidth) },
       { label: 'Capacidad de carga (lbs)',  done: !!loadCapacity },
     ] : []),
-    { label: 'Método de Pago',   done: !!payoutMethod },
-    { label: isDotEquip ? 'Company / DOT#' : 'Company / MC#',
-      done: !!(driver?.company_name && authorityNum) },
     { label: 'COI / Seguro',     done: !!coiFileName },
     { label: 'Factoring',        done: !!factoringCompany },
-    { label: 'Rate Con Email',   done: !!rateConEmail },
+    { label: 'Método de Pago',   done: !!payoutMethod },
   ];
   const profileScore = profileItems.filter(i => i.done).length;
 
