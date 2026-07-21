@@ -1673,6 +1673,18 @@ export default function DriverPortal() {
               <p className="font-extrabold text-gray-900 dark:text-white text-lg leading-tight mb-2">{driver.name}</p>
 
               <div className="space-y-1.5">
+                {/* Email row */}
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-500/15 flex items-center justify-center flex-shrink-0">
+                    <Send className="w-2.5 h-2.5 text-blue-500" />
+                  </div>
+                  <p className="text-xs text-blue-500 dark:text-blue-400 font-medium flex-1 truncate">{driver.email}</p>
+                  {emailVerified
+                    ? <span className="flex items-center gap-0.5 text-[9px] font-bold text-emerald-500 flex-shrink-0"><CheckCircle className="w-3 h-3" /> OK</span>
+                    : <button onClick={() => { setVerifying('email'); setCodeSent(false); setCodeInput(''); setVerifyMsg(''); }}
+                        className="text-[9px] font-bold text-orange-500 hover:text-orange-600 flex-shrink-0">Verificar</button>
+                  }
+                </div>
                 {/* Phone row */}
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-md bg-gray-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
@@ -1685,8 +1697,8 @@ export default function DriverPortal() {
                         className="text-[9px] font-bold text-orange-500 hover:text-orange-600 flex-shrink-0">Verificar</button>
                   }
                 </div>
-                {/* Verification panel (phone only — email verification moved to Company / Authority) */}
-                {verifying === 'phone' && verificationPanel}
+                {/* Verification panel (shared by email/phone) */}
+                {verifying && verificationPanel}
               </div>
             </div>
 
@@ -1756,18 +1768,6 @@ export default function DriverPortal() {
                   <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{driver.company_name}</span>
                 </div>
               )}
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500 dark:text-slate-400">Email</span>
-                <span className="flex items-center gap-1.5">
-                  <span className="text-sm font-medium text-gray-800 dark:text-slate-200 truncate max-w-[180px]">{driver.email}</span>
-                  {emailVerified
-                    ? <CheckCircle className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-                    : <button onClick={() => { setVerifying('email'); setCodeSent(false); setCodeInput(''); setVerifyMsg(''); }}
-                        className="text-[9px] font-bold text-orange-500 hover:text-orange-600 flex-shrink-0">Verificar</button>
-                  }
-                </span>
-              </div>
-              {verifying === 'email' && verificationPanel}
               {authorityNum && (
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-gray-500 dark:text-slate-400">{isDotEquip ? 'DOT#' : 'MC#'}</span>
