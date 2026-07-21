@@ -30,7 +30,6 @@ interface OrderModalProps {
 
 function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
   const [form, setForm] = useState({
-    customer_name: '', customer_phone: '', customer_email: '',
     pickup_name: '', pickup_address: '',
     delivery_name: '', delivery_address: '',
     weight_kg: '', commodity: '',
@@ -46,7 +45,7 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.customer_name || !form.pickup_address || !form.delivery_address) {
+    if (!form.pickup_address || !form.delivery_address) {
       setError('Por favor completa los campos requeridos');
       return;
     }
@@ -61,9 +60,6 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
         fullNotes += `\n[ENTREGAS ADICIONALES]\n${validDeliveries.map(a => `• ${a}`).join('\n')}`;
 
       const { data } = await ordersApi.create({
-        customer_name: form.customer_name,
-        customer_phone: form.customer_phone,
-        customer_email: form.customer_email,
         pickup_address: form.pickup_address,
         pickup_contact: form.pickup_name,
         pickup_lat: 25.7617, pickup_lng: -80.1918,
@@ -103,27 +99,6 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {error && <div className="bg-red-50 text-red-700 text-sm px-3 py-2 rounded-lg border border-red-200">{error}</div>}
-
-          {/* Customer */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-              <User className="w-4 h-4 text-orange-500" /> Información del Broker
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="label">Nombre *</label>
-                <input className="input" value={form.customer_name} onChange={e => setForm({...form, customer_name: e.target.value})} placeholder="Empresa o contacto" required />
-              </div>
-              <div>
-                <label className="label">Teléfono *</label>
-                <input className="input" value={form.customer_phone} onChange={e => setForm({...form, customer_phone: e.target.value})} placeholder="(305) 555-0000" required />
-              </div>
-              <div className="col-span-2">
-                <label className="label">Correo</label>
-                <input className="input" type="email" value={form.customer_email} onChange={e => setForm({...form, customer_email: e.target.value})} placeholder="correo@empresa.com" />
-              </div>
-            </div>
-          </div>
 
           {/* Pickup */}
           <div>

@@ -96,7 +96,7 @@ router.post('/', async (req: Request, res: Response) => {
     const countRow = await queryOne<{c:number}>('SELECT COUNT(*) as c FROM orders');
     const orderNumber = `OSI-${String(2024100 + (countRow?.c ?? 0) + 1).padStart(7, '0')}`;
     const {
-      customer_name, customer_phone, customer_email = '',
+      customer_name = '', customer_phone = '', customer_email = '',
       pickup_address, pickup_lat, pickup_lng, pickup_contact = '',
       delivery_address, delivery_lat, delivery_lng, delivery_contact = '',
       priority = 'normal', weight_kg = 0, volume_m3 = 0,
