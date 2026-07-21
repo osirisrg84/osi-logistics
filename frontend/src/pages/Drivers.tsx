@@ -43,6 +43,7 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
     mc_number: (driver?.mc_number || '').replace(/^(MC-|DOT-)/i, ''),
     dot_number: ((driver as unknown as Record<string,string>)?.dot_number || '').replace(/^(MC-|DOT-)/i, ''),
     authority_since: driver?.authority_since || '',
+    rate_con_email: (driver as unknown as Record<string,string>)?.rate_con_email || '',
   });
   const DOT_TYPES = ['Van', 'Box Truck', 'Hotshot'];
   const isDotType = DOT_TYPES.includes(form.equipment_type);
@@ -130,6 +131,12 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
             <div className="col-span-2">
               <label className="label">Autoridad MC/DOT desde</label>
               <input className="input" type="date" value={form.authority_since} onChange={e => setForm({...form, authority_since: e.target.value})} />
+            </div>
+            <div className="col-span-2">
+              <label className="label">Correo para Rate Confirmation</label>
+              <input className="input" type="email" placeholder="dispatch@tuempresa.com"
+                value={form.rate_con_email} onChange={e => setForm({...form, rate_con_email: e.target.value})} />
+              <p className="text-[10px] text-gray-400 mt-1">Los brokers enviarán el rate confirmation a este correo.</p>
             </div>
             {driver && (
               <div>
@@ -261,7 +268,7 @@ function DriverDetail({ driver, onClose }: DriverDetailProps) {
             const isDot = ['Van', 'Box Truck', 'Hotshot'].includes(driver.equipment_type || '');
             const stripPfx = (v: string) => v.replace(/^(MC-|DOT-)/i, '');
             const authNum = stripPfx(isDot ? (dr.dot_number || driver.mc_number || '') : (driver.mc_number || ''));
-            return (driver.company_name || authNum) ? (
+            return (driver.company_name || authNum || dr.rate_con_email) ? (
             <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
               <p className="text-xs font-semibold text-green-700 dark:text-green-400 flex items-center gap-2 mb-3">
                 <Building2 className="w-3 h-3" /> COMPANY / AUTHORITY
@@ -283,6 +290,12 @@ function DriverDetail({ driver, onClose }: DriverDetailProps) {
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> Tiempo con autoridad</span>
                     <span className="text-sm font-medium text-green-700 dark:text-green-400">{calcAuthority(driver.authority_since)}</span>
+                  </div>
+                )}
+                {dr.rate_con_email && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500 dark:text-slate-400">Correo Rate Confirmation</span>
+                    <a href={`mailto:${dr.rate_con_email}`} className="text-sm font-medium text-green-700 dark:text-green-400 hover:underline truncate max-w-[180px]">{dr.rate_con_email}</a>
                   </div>
                 )}
               </div>

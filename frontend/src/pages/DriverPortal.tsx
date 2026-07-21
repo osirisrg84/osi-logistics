@@ -358,6 +358,7 @@ export default function DriverPortal() {
       setFactoringPhone(d.factoring_phone || '');
       setFactoringEmail(d.factoring_email || '');
       setFactoringNoa(d.factoring_noa === '1' || d.factoring_noa === 'true');
+      setRateConEmail(d.rate_con_email || '');
     }
   }, [driver?.id]);
 
@@ -451,6 +452,11 @@ export default function DriverPortal() {
   const [factoringNoa,     setFactoringNoa]     = useState(false); // NOA active?
   const [editingFactoring, setEditingFactoring] = useState(false);
   const [savingFactoring,  setSavingFactoring]  = useState(false);
+
+  // Rate confirmation email (Company / Authority)
+  const [rateConEmail, setRateConEmail] = useState('');
+  const [editingRateConEmail, setEditingRateConEmail] = useState(false);
+  const [savingRateConEmail, setSavingRateConEmail] = useState(false);
 
   const fetchOrders = useCallback(async () => {
     if (!user?.driver_id) return;
@@ -881,6 +887,52 @@ export default function DriverPortal() {
     { icon: '🌟', label: 'Driver 5 Estrellas',     desc: 'Calificación de 4.8 o superior',      unlocked: drvRating >= 4.8, current: drvRating,                 target: 4.8,  showProgress: false },
   ];
   const unlockedCount = ACHIEVEMENTS.filter(a => a.unlocked).length;
+
+  const verificationPanel = verifying && (
+    <div className="mt-2 p-3 rounded-xl border border-orange-100 bg-orange-50 dark:bg-slate-700/60 dark:border-slate-600">
+      <p className="text-xs font-semibold text-gray-800 dark:text-white mb-2">
+        Verificar {verifying === 'email' ? 'correo' : 'teléfono'}
+      </p>
+      {!codeSent ? (
+        <button onClick={() => handleSendCode(verifying)} disabled={sendingCode}
+          className="w-full py-2 rounded-lg text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center gap-1.5">
+          {sendingCode && <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />}
+          Enviar código de 6 dígitos
+        </button>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-[10px] text-emerald-600 font-medium">✓ {verifyMsg}</p>
+          <input type="text" inputMode="numeric" maxLength={6} placeholder="000000"
+            value={codeInput}
+            onChange={e => setCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            className="w-full px-3 py-2 rounded-lg text-center text-lg font-bold tracking-widest border border-gray-200 dark:border-slate-500 outline-none focus:ring-2 focus:ring-orange-400/40 bg-white dark:bg-slate-600 text-gray-900 dark:text-white" />
+          <button onClick={handleVerifyCode} disabled={verifyingCode || codeInput.length < 6}
+            className="w-full py-2 rounded-lg text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 flex items-center justify-center gap-1.5">
+            {verifyingCode && <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />}
+            Confirmar código
+          </button>
+          {confirmationResult && verifying === 'phone' && (
+            <button onClick={async () => {
+              recaptchaRef.current?.clear(); recaptchaRef.current = null;
+              setConfirmationResult(null); setCodeSent(false); setCodeInput(''); setVerifyMsg('');
+              setSendingCode(true);
+              try {
+                await userApi.sendVerification('phone');
+                setCodeSent(true);
+                setVerifyMsg('Código enviado — revisa tu correo');
+              } catch { setVerifyMsg('Error al reenviar'); }
+              finally { setSendingCode(false); }
+            }} className="text-[10px] text-gray-400 underline w-full text-center">
+              ¿No llegó el SMS? Enviar al correo
+            </button>
+          )}
+        </div>
+      )}
+      {!codeSent && verifyMsg && <p className="text-[10px] text-red-500 mt-1">{verifyMsg}</p>}
+      {codeSent && verifyMsg && verifyMsg.includes('ncorrecto') && <p className="text-[10px] text-red-500 mt-1">{verifyMsg}</p>}
+      <button onClick={cancelVerify} className="mt-2 text-[10px] text-gray-400 hover:text-gray-600">Cancelar</button>
+    </div>
+  );
 
   return (
     <div className={`min-h-screen pb-16 ${driverStatus === 'offline' && tab === 'active' ? 'bg-[#0a1628]' : 'bg-gray-50 dark:bg-slate-900'}`}>
@@ -1621,18 +1673,6 @@ export default function DriverPortal() {
               <p className="font-extrabold text-gray-900 dark:text-white text-lg leading-tight mb-2">{driver.name}</p>
 
               <div className="space-y-1.5">
-                {/* Email row */}
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-500/15 flex items-center justify-center flex-shrink-0">
-                    <Send className="w-2.5 h-2.5 text-blue-500" />
-                  </div>
-                  <p className="text-xs text-blue-500 dark:text-blue-400 font-medium flex-1 truncate">{driver.email}</p>
-                  {emailVerified
-                    ? <span className="flex items-center gap-0.5 text-[9px] font-bold text-emerald-500 flex-shrink-0"><CheckCircle className="w-3 h-3" /> OK</span>
-                    : <button onClick={() => { setVerifying('email'); setCodeSent(false); setCodeInput(''); setVerifyMsg(''); }}
-                        className="text-[9px] font-bold text-orange-500 hover:text-orange-600 flex-shrink-0">Verificar</button>
-                  }
-                </div>
                 {/* Phone row */}
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-md bg-gray-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
@@ -1645,52 +1685,8 @@ export default function DriverPortal() {
                         className="text-[9px] font-bold text-orange-500 hover:text-orange-600 flex-shrink-0">Verificar</button>
                   }
                 </div>
-                {/* Verification panel */}
-                {verifying && (
-                  <div className="mt-2 p-3 rounded-xl border border-orange-100 bg-orange-50 dark:bg-slate-700/60 dark:border-slate-600">
-                    <p className="text-xs font-semibold text-gray-800 dark:text-white mb-2">
-                      Verificar {verifying === 'email' ? 'correo' : 'teléfono'}
-                    </p>
-                    {!codeSent ? (
-                      <button onClick={() => handleSendCode(verifying)} disabled={sendingCode}
-                        className="w-full py-2 rounded-lg text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center gap-1.5">
-                        {sendingCode && <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />}
-                        Enviar código de 6 dígitos
-                      </button>
-                    ) : (
-                      <div className="space-y-2">
-                        <p className="text-[10px] text-emerald-600 font-medium">✓ {verifyMsg}</p>
-                        <input type="text" inputMode="numeric" maxLength={6} placeholder="000000"
-                          value={codeInput}
-                          onChange={e => setCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                          className="w-full px-3 py-2 rounded-lg text-center text-lg font-bold tracking-widest border border-gray-200 dark:border-slate-500 outline-none focus:ring-2 focus:ring-orange-400/40 bg-white dark:bg-slate-600 text-gray-900 dark:text-white" />
-                        <button onClick={handleVerifyCode} disabled={verifyingCode || codeInput.length < 6}
-                          className="w-full py-2 rounded-lg text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 flex items-center justify-center gap-1.5">
-                          {verifyingCode && <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />}
-                          Confirmar código
-                        </button>
-                        {confirmationResult && verifying === 'phone' && (
-                          <button onClick={async () => {
-                            recaptchaRef.current?.clear(); recaptchaRef.current = null;
-                            setConfirmationResult(null); setCodeSent(false); setCodeInput(''); setVerifyMsg('');
-                            setSendingCode(true);
-                            try {
-                              await userApi.sendVerification('phone');
-                              setCodeSent(true);
-                              setVerifyMsg('Código enviado — revisa tu correo');
-                            } catch { setVerifyMsg('Error al reenviar'); }
-                            finally { setSendingCode(false); }
-                          }} className="text-[10px] text-gray-400 underline w-full text-center">
-                            ¿No llegó el SMS? Enviar al correo
-                          </button>
-                        )}
-                      </div>
-                    )}
-                    {!codeSent && verifyMsg && <p className="text-[10px] text-red-500 mt-1">{verifyMsg}</p>}
-                    {codeSent && verifyMsg && verifyMsg.includes('ncorrecto') && <p className="text-[10px] text-red-500 mt-1">{verifyMsg}</p>}
-                    <button onClick={cancelVerify} className="mt-2 text-[10px] text-gray-400 hover:text-gray-600">Cancelar</button>
-                  </div>
-                )}
+                {/* Verification panel (phone only — email verification moved to Company / Authority) */}
+                {verifying === 'phone' && verificationPanel}
               </div>
             </div>
 
@@ -1748,34 +1744,89 @@ export default function DriverPortal() {
           )}
 
           {/* Empresa / Autoridad */}
-          {(driver.company_name || authorityNum) && (
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Building2 className="w-4 h-4 text-green-500" />
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Company / Authority</h3>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Building2 className="w-4 h-4 text-green-500" />
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Company / Authority</h3>
+            </div>
+            <div className="space-y-2.5">
+              {driver.company_name && (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500 dark:text-slate-400">Company Name</span>
+                  <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{driver.company_name}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500 dark:text-slate-400">Email</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="text-sm font-medium text-gray-800 dark:text-slate-200 truncate max-w-[180px]">{driver.email}</span>
+                  {emailVerified
+                    ? <CheckCircle className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                    : <button onClick={() => { setVerifying('email'); setCodeSent(false); setCodeInput(''); setVerifyMsg(''); }}
+                        className="text-[9px] font-bold text-orange-500 hover:text-orange-600 flex-shrink-0">Verificar</button>
+                  }
+                </span>
               </div>
-              <div className="space-y-2.5">
-                {driver.company_name && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-slate-400">Company Name</span>
-                    <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{driver.company_name}</span>
-                  </div>
-                )}
-                {authorityNum && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-slate-400">{isDotEquip ? 'DOT#' : 'MC#'}</span>
-                    <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">{authorityNum}</span>
-                  </div>
-                )}
-                {driver.authority_since && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> Tiempo con autoridad</span>
-                    <span className="text-sm font-semibold text-green-600 dark:text-green-400">{calcAuthority(driver.authority_since)}</span>
+              {verifying === 'email' && verificationPanel}
+              {authorityNum && (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500 dark:text-slate-400">{isDotEquip ? 'DOT#' : 'MC#'}</span>
+                  <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">{authorityNum}</span>
+                </div>
+              )}
+              {driver.authority_since && (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> Tiempo con autoridad</span>
+                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">{calcAuthority(driver.authority_since)}</span>
+                </div>
+              )}
+
+              {/* Rate Confirmation Email */}
+              <div className="pt-1 border-t border-gray-100 dark:border-slate-700">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1"><Mail className="w-3 h-3" /> Rate Con Email</span>
+                  {!editingRateConEmail && (
+                    <button onClick={() => setEditingRateConEmail(true)}
+                      className="text-[9px] font-bold text-orange-500 hover:text-orange-600 flex-shrink-0">
+                      {rateConEmail ? 'Editar' : 'Agregar'}
+                    </button>
+                  )}
+                </div>
+                {!editingRateConEmail ? (
+                  <span className={`text-sm font-medium ${rateConEmail ? 'text-gray-800 dark:text-slate-200' : 'text-gray-300 dark:text-slate-600 italic'}`}>
+                    {rateConEmail || 'Not set'}
+                  </span>
+                ) : (
+                  <div className="space-y-2 mt-1">
+                    <input type="email" className="input text-sm w-full" value={rateConEmail}
+                      onChange={e => setRateConEmail(e.target.value)}
+                      placeholder="dispatch@tuempresa.com" />
+                    <p className="text-[10px] text-gray-400 dark:text-slate-500">Los brokers enviarán el rate confirmation a este correo.</p>
+                    <div className="flex gap-2">
+                      <button onClick={() => { setEditingRateConEmail(false); setRateConEmail(driverExtra?.rate_con_email || ''); }}
+                        className="flex-1 text-xs py-1.5 rounded-xl border border-gray-200 dark:border-slate-600 text-gray-500">
+                        Cancelar
+                      </button>
+                      <button
+                        disabled={savingRateConEmail}
+                        onClick={async () => {
+                          if (!driverId) return;
+                          setSavingRateConEmail(true);
+                          try {
+                            await driversApi.update(driverId, { rate_con_email: rateConEmail });
+                            setEditingRateConEmail(false);
+                          } catch {} finally { setSavingRateConEmail(false); }
+                        }}
+                        className="flex-1 text-xs py-1.5 rounded-xl bg-orange-500 text-white font-semibold hover:bg-orange-600 transition-colors flex items-center justify-center gap-1">
+                        {savingRateConEmail ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+                        Guardar
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
-          )}
+          </div>
 
           {/* ── My Equipment (editable) ───────────────────────── */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">

@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, Mail, Lock, Building2, Calendar, Hash, Clock } from 'lucide-react';
+import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, Mail, Lock, Building2, Calendar, Hash, Clock, Send } from 'lucide-react';
 import api from '../services/api';
 
 const EQUIPMENT_TYPES = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'];
@@ -25,6 +25,7 @@ export default function RegisterDriver() {
     name: '', phone: '', email: '', password: '', confirm: '',
     license_number: '', license_expiry: '',
     equipment_type: 'Dry Van', mc_number: '', dot_number: '', company_name: '', authority_since: '',
+    rate_con_email: '',
   });
   const [authorityType, setAuthorityType] = useState<'MC#' | 'DOT#'>('MC#');
   const [showPw, setShowPw] = useState(false);
@@ -64,6 +65,7 @@ export default function RegisterDriver() {
         dot_number:     form.dot_number,
         company_name:   form.company_name,
         authority_since: form.authority_since,
+        rate_con_email: form.rate_con_email,
       });
       setRegisteredName(form.name);
       setRegistered(true);
@@ -257,6 +259,15 @@ export default function RegisterDriver() {
             <Field label="Autoridad MC/DOT desde">
               <input className="input" type="date"
                 value={form.authority_since} onChange={set('authority_since')} />
+            </Field>
+
+            <Field label="Correo para Rate Confirmation">
+              <div className="relative">
+                <Send className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input className="input pl-9" type="email" placeholder="dispatch@tuempresa.com"
+                  value={form.rate_con_email} onChange={set('rate_con_email')} />
+              </div>
+              <p className="text-[10px] text-gray-400 mt-1">Los brokers enviarán el rate confirmation a este correo.</p>
             </Field>
           </div>
 

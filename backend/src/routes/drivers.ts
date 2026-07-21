@@ -71,20 +71,21 @@ router.post('/', async (req: Request, res: Response) => {
     const id = uuidv4();
     const {
       name, phone, email, license_number, license_expiry,
-      hire_date, current_lat = 25.7617, current_lng = -80.1918,
+      hire_date: hireDateInput, current_lat = 25.7617, current_lng = -80.1918,
       current_address = 'Miami, FL', equipment_type = 'Dry Van',
-      company_name = 'OSI Logistics LLC', mc_number = '', authority_since = '',
+      company_name = 'OSI Logistics LLC', mc_number = '', authority_since = '', rate_con_email = '',
     } = req.body;
+    const hire_date = hireDateInput || new Date().toISOString().split('T')[0];
     const initials = name.split(' ').map((n: string) => n[0]).join('');
     const code = String(Math.floor(10000000 + Math.random() * 90000000));
 
     await exec(`INSERT INTO drivers (id, name, phone, email, license_number, license_expiry,
       status, current_lat, current_lng, current_address, avatar, hire_date,
-      equipment_type, company_name, mc_number, authority_since, driver_code)
-      VALUES (?, ?, ?, ?, ?, ?, 'available', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      equipment_type, company_name, mc_number, authority_since, rate_con_email, driver_code)
+      VALUES (?, ?, ?, ?, ?, ?, 'available', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [id, name, phone, email, license_number, license_expiry,
        current_lat, current_lng, current_address, initials, hire_date,
-       equipment_type, company_name, mc_number, authority_since, code]);
+       equipment_type, company_name, mc_number, authority_since, rate_con_email, code]);
 
     await exec("INSERT INTO notifications (id, type, title, message, read, related_id) VALUES (?, 'driver', 'New Driver Added', ?, 0, ?)",
       [uuidv4(), `${name} has been added to the driver roster.`, id]);

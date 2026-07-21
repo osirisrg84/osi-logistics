@@ -114,19 +114,21 @@ export async function sendDeliveryEmail(to: string, recipientName: string, role:
           <p style="color:#6b7280;margin:0 0 20px;font-size:14px;">La entrega fue completada exitosamente.</p>
 
           <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;margin-bottom:20px;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-              <span style="font-size:24px;">📦</span>
-              <div>
-                <p style="margin:0;font-size:12px;font-weight:bold;color:#16a34a;text-transform:uppercase;letter-spacing:1px;">Entregado</p>
-                <p style="margin:0;font-size:16px;font-weight:bold;color:#111827;">Orden ${orderNumber}</p>
-              </div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#374151;">
-              <p style="margin:0;"><strong>Origen:</strong> ${pickup}</p>
-              <p style="margin:0;"><strong>Destino:</strong> ${delivery}</p>
-              <p style="margin:0;"><strong>Entregado:</strong> ${new Date(deliveredAt).toLocaleString('es-US', { dateStyle: 'medium', timeStyle: 'short' })}</p>
-              ${rate ? `<p style="margin:8px 0 0;font-size:16px;font-weight:bold;color:#10b981;">$${rate.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>` : ''}
-            </div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:14px;">
+              <tr>
+                <td style="width:32px;vertical-align:top;font-size:24px;">📦</td>
+                <td style="vertical-align:top;">
+                  <p style="margin:0;font-size:12px;font-weight:bold;color:#16a34a;text-transform:uppercase;letter-spacing:1px;">Entregado</p>
+                  <p style="margin:0;font-size:16px;font-weight:bold;color:#111827;">Orden ${orderNumber}</p>
+                </td>
+              </tr>
+            </table>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:13px;color:#374151;">
+              <tr><td style="padding:3px 0;"><strong>Origen:</strong> ${pickup}</td></tr>
+              <tr><td style="padding:3px 0;"><strong>Destino:</strong> ${delivery}</td></tr>
+              <tr><td style="padding:3px 0;"><strong>Entregado:</strong> ${new Date(deliveredAt).toLocaleString('es-US', { dateStyle: 'medium', timeStyle: 'short' })}</td></tr>
+              ${rate ? `<tr><td style="padding-top:10px;"><span style="display:inline-block;padding-top:8px;border-top:1px solid #bbf7d0;font-size:16px;font-weight:bold;color:#10b981;">$${rate.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></td></tr>` : ''}
+            </table>
           </div>
 
           <div style="text-align:center;">

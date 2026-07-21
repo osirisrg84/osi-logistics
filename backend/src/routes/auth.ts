@@ -151,7 +151,7 @@ router.post('/register-driver', async (req: Request, res: Response) => {
       license_number, license_expiry,
       hire_date = new Date().toISOString().split('T')[0],
       equipment_type = 'Dry Van', company_name = 'OSI Logistics LLC',
-      mc_number = '', dot_number = '', authority_since = '',
+      mc_number = '', dot_number = '', authority_since = '', rate_con_email = '',
     } = req.body;
 
     if (!name || !email || !password || !phone || !license_number || !license_expiry) {
@@ -179,11 +179,11 @@ router.post('/register-driver', async (req: Request, res: Response) => {
       (id, name, phone, email, license_number, license_expiry, status,
        current_lat, current_lng, current_address,
        rating, total_deliveries, on_time_rate, avatar, hire_date,
-       equipment_type, company_name, mc_number, dot_number, authority_since, driver_code)
+       equipment_type, company_name, mc_number, dot_number, authority_since, rate_con_email, driver_code)
       VALUES (?, ?, ?, ?, ?, ?, 'offline', 25.7617, -80.1918, 'Miami, FL',
-              5.0, 0, 100.0, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              5.0, 0, 100.0, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [driverId, name, phone, email.toLowerCase(), license_number, license_expiry,
-       initials, hire_date, equipment_type, company_name, mc_number, dot_number, authority_since, driver_code]);
+       initials, hire_date, equipment_type, company_name, mc_number, dot_number, authority_since, rate_con_email, driver_code]);
 
     const salt = randomBytes(16).toString('hex');
     const passwordHash = hashPassword(password, salt);

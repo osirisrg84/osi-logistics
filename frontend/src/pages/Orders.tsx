@@ -28,7 +28,7 @@ interface OrderModalProps {
   trucks: TruckType[];
 }
 
-function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps) {
+function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
   const [form, setForm] = useState({
     customer_name: '', customer_phone: '', customer_email: '',
     pickup_name: '', pickup_address: '',
@@ -39,12 +39,10 @@ function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps)
   const [extraPickups, setExtraPickups] = useState<string[]>([]);
   const [extraDeliveries, setExtraDeliveries] = useState<string[]>([]);
   const [assignDriverId, setAssignDriverId] = useState('');
-  const [assignTruckId, setAssignTruckId] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   const availableDrivers = drivers.filter(d => d.status === 'available');
-  const availableTrucks = trucks.filter(t => t.status === 'active');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,8 +79,8 @@ function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps)
         estimated_delivery: form.estimated_delivery,
       });
 
-      if (assignDriverId && assignTruckId && data?.id) {
-        await ordersApi.offer(data.id, { driver_id: assignDriverId, truck_id: assignTruckId });
+      if (assignDriverId && data?.id) {
+        await ordersApi.offer(data.id, { driver_id: assignDriverId, truck_id: '' });
       }
 
       onSave();
@@ -109,7 +107,7 @@ function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps)
           {/* Customer */}
           <div>
             <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-              <User className="w-4 h-4 text-orange-500" /> Información del Cliente
+              <User className="w-4 h-4 text-orange-500" /> Información del Broker
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -260,11 +258,11 @@ function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps)
                       </span>
                     </div>
                     <div className="grid grid-cols-3 gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-slate-400">
-                      <div className="flex items-center gap-1 col-span-1">
+                      <div className="flex items-center gap-1 col-span-3">
                         <Phone className="w-3 h-3 flex-shrink-0 text-blue-400" />
-                        <span className="truncate">{sel.phone || '—'}</span>
+                        <span>{sel.phone || '—'}</span>
                       </div>
-                      <div className="flex items-center gap-1 col-span-2">
+                      <div className="flex items-center gap-1 col-span-3">
                         <Mail className="w-3 h-3 flex-shrink-0 text-blue-400" />
                         <span className="truncate">{sel.email || '—'}</span>
                       </div>
@@ -291,7 +289,7 @@ function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps)
 
               <div>
                 <label className="label">Conductor ({availableDrivers.length} disponibles)</label>
-                <select className="input" value={assignDriverId} onChange={e => { setAssignDriverId(e.target.value); setAssignTruckId(''); }}>
+                <select className="input" value={assignDriverId} onChange={e => setAssignDriverId(e.target.value)}>
                   <option value="">Sin asignar — asignar después</option>
                   {availableDrivers.map(d => (
                     <option key={d.id} value={d.id}>{d.name} · ★{d.rating.toFixed(1)} · {d.total_deliveries} viajes</option>
@@ -299,20 +297,6 @@ function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps)
                 </select>
               </div>
               {assignDriverId && (
-                <div>
-                  <label className="label">Camión ({availableTrucks.length} activos)</label>
-                  <select className="input" value={assignTruckId} onChange={e => setAssignTruckId(e.target.value)}>
-                    <option value="">Selecciona un camión...</option>
-                    {availableTrucks.map(t => (
-                      <option key={t.id} value={t.id}>{t.plate_number} · {t.make} {t.model}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              {assignDriverId && !assignTruckId && (
-                <p className="text-xs text-amber-600 dark:text-amber-400">Selecciona un camión para enviar la oferta al conductor.</p>
-              )}
-              {assignDriverId && assignTruckId && (
                 <p className="text-xs text-blue-600 dark:text-blue-400">La oferta se enviará al conductor en tiempo real al crear la orden.</p>
               )}
             </div>
@@ -323,7 +307,7 @@ function CreateOrderModal({ onClose, onSave, drivers, trucks }: OrderModalProps)
             <button type="submit" disabled={saving} className="btn-primary flex-1 justify-center gap-2">
               {saving
                 ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                : assignDriverId && assignTruckId ? <><UserCheck className="w-4 h-4" /> Crear y Asignar</> : 'Create Order'}
+                : assignDriverId ? <><UserCheck className="w-4 h-4" /> Crear y Asignar</> : 'Create Order'}
             </button>
           </div>
         </form>

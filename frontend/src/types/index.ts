@@ -35,6 +35,7 @@ export interface Driver {
   factoring_email?: string;
   factoring_noa?: string;
   authority_since?: string;
+  rate_con_email?: string;
   payment_method?: string;
   payment_details?: string;
   truck_number?: string;
