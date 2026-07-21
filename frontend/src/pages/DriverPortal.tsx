@@ -869,6 +869,7 @@ export default function DriverPortal() {
       done: !!(driver?.company_name && authorityNum) },
     { label: 'COI / Seguro',     done: !!coiFileName },
     { label: 'Factoring',        done: !!factoringCompany },
+    { label: 'Rate Con Email',   done: !!rateConEmail },
   ];
   const profileScore = profileItems.filter(i => i.done).length;
 
@@ -877,7 +878,7 @@ export default function DriverPortal() {
   const onTimeRt  = driver?.on_time_rate || 0;
   const drvRating = driver?.rating || 0;
   const ACHIEVEMENTS = [
-    { icon: '✅', label: 'Perfil Completo',         desc: 'Todas las secciones del perfil llenas', unlocked: profileScore >= 8, current: profileScore,           target: 8,    showProgress: true  },
+    { icon: '✅', label: 'Perfil Completo',         desc: 'Todas las secciones del perfil llenas', unlocked: profileScore >= profileItems.length, current: profileScore, target: profileItems.length, showProgress: true  },
     { icon: '🚀', label: 'Primera Milla',          desc: 'Completa tu primera entrega',         unlocked: totalDel  >= 1,   current: Math.min(totalDel, 1),    target: 1,    showProgress: false },
     { icon: '📦', label: 'Arrancando',             desc: '10 entregas completadas',             unlocked: totalDel  >= 10,  current: Math.min(totalDel, 10),   target: 10,   showProgress: true  },
     { icon: '⭐', label: 'Estrella en Ascenso',    desc: '25 entregas completadas',             unlocked: totalDel  >= 25,  current: Math.min(totalDel, 25),   target: 25,   showProgress: true  },
