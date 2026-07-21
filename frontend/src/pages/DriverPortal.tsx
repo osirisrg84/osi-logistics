@@ -37,7 +37,7 @@ function calcAuthority(since: string): string {
 
 const STATUS_FLOW: Record<string, { next: string; label: string; color: string }> = {
   assigned:  { next: 'picked_up', label: 'Confirm Pickup',    color: 'bg-blue-500 hover:bg-blue-600'   },
-  picked_up: { next: 'in_transit', label: 'Start Delivery',   color: 'bg-purple-500 hover:bg-purple-600' },
+  picked_up: { next: 'in_transit', label: 'Start Rolling',    color: 'bg-purple-500 hover:bg-purple-600' },
   in_transit:{ next: 'delivered',  label: 'Mark Delivered ✓', color: 'bg-green-500 hover:bg-green-600'  },
 };
 
