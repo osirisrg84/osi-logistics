@@ -91,6 +91,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 router.post('/', async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
     const id = uuidv4();
     const countRow = await queryOne<{c:number}>('SELECT COUNT(*) as c FROM orders');
@@ -108,13 +109,13 @@ router.post('/', async (req: Request, res: Response) => {
       pickup_address, pickup_lat, pickup_lng, pickup_contact,
       delivery_address, delivery_lat, delivery_lng, delivery_contact,
       status, priority, weight_kg, volume_m3, description, notes,
-      price, distance_km, estimated_delivery, equipment_type, temperature)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      price, distance_km, estimated_delivery, equipment_type, temperature, dispatcher_user_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [id, orderNumber, customer_name, customer_phone, customer_email,
        pickup_address, pickup_lat, pickup_lng, pickup_contact,
        delivery_address, delivery_lat, delivery_lng, delivery_contact,
        priority, weight_kg, volume_m3, description, notes, price, distance_km, estimated_delivery,
-       equipment_type, temperature]);
+       equipment_type, temperature, authReq.user?.id || null]);
 
     await exec("INSERT INTO order_history (id, order_id, status, notes, created_by) VALUES (?, ?, 'pending', 'Order created', 'dispatcher')", [uuidv4(), id]);
     await exec("INSERT INTO notifications (id, type, title, message, read, related_id) VALUES (?, 'order', 'New Order Created', ?, 0, ?)",
@@ -159,9 +160,14 @@ router.delete('/:id/rate-con', async (req: Request, res: Response) => {
 });
 
 router.put('/:id', async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
-    const order = await queryOne('SELECT * FROM orders WHERE id = ?', [req.params.id]);
+    const order = await queryOne<{ dispatcher_user_id: string | null }>('SELECT * FROM orders WHERE id = ?', [req.params.id]);
     if (!order) return res.status(404).json({ error: 'Order not found' });
+    const isOwner = !order.dispatcher_user_id || order.dispatcher_user_id === authReq.user?.id;
+    if (authReq.user?.role !== 'admin' && !isOwner) {
+      return res.status(403).json({ error: 'Solo el dispatcher que creó esta orden puede editarla' });
+    }
     const updates = req.body;
     const fields = Object.keys(updates).filter(k => !['id', 'order_number', 'created_at'].includes(k));
     if (fields.length === 0) return res.status(400).json({ error: 'No fields to update' });

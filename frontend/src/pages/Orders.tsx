@@ -12,6 +12,7 @@ import { getSocket } from '../services/socket';
 import { playSuccessChime } from '../utils/sounds';
 import { formatLocation } from '../utils/location';
 import { CITIES_BY_STATE } from '../data/usCities';
+import { useAuth } from '../context/AuthContext';
 
 const STATUS_OPTIONS: OrderStatus[] = ['pending', 'offered', 'assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled'];
 
@@ -805,6 +806,9 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
 }
 
 export default function Orders() {
+  const { user } = useAuth();
+  const canEditOrder = (order: Order) =>
+    user?.role === 'admin' || !order.dispatcher_user_id || order.dispatcher_user_id === user?.id;
   const [orders, setOrders] = useState<Order[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [trucks, setTrucks] = useState<TruckType[]>([]);
@@ -916,9 +920,11 @@ export default function Orders() {
                     <button onClick={() => setDetailOrder(order)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
                       <Eye className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                     </button>
-                    <button onClick={() => setEditOrder(order)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
-                      <Edit2 className="w-4 h-4 text-gray-500 dark:text-slate-400" />
-                    </button>
+                    {canEditOrder(order) && (
+                      <button onClick={() => setEditOrder(order)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
+                        <Edit2 className="w-4 h-4 text-gray-500 dark:text-slate-400" />
+                      </button>
+                    )}
                     {order.status === 'pending' && (
                       <button onClick={() => setAssignOrder(order)} className="p-1.5 hover:bg-blue-50 rounded-lg">
                         <UserCheck className="w-4 h-4 text-blue-500" />
@@ -985,9 +991,11 @@ export default function Orders() {
                           <button onClick={() => setDetailOrder(order)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
                             <Eye className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
                           </button>
-                          <button onClick={() => setEditOrder(order)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg" title="Edit order">
-                            <Edit2 className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
-                          </button>
+                          {canEditOrder(order) && (
+                            <button onClick={() => setEditOrder(order)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg" title="Edit order">
+                              <Edit2 className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
+                            </button>
+                          )}
                           {['pending', 'offered'].includes(order.status) && (
                             <button onClick={() => setAssignOrder(order)} className="p-1.5 hover:bg-blue-50 rounded-lg" title="Enviar oferta">
                               <UserCheck className="w-3.5 h-3.5 text-blue-500" />
