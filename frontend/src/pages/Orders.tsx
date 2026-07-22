@@ -668,14 +668,16 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
         </div>
         <div className="p-6 space-y-5">
           {/* Customer */}
-          <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-xl p-4 space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-              <User className="w-4 h-4 text-orange-500" /> Customer
+          {(order.customer_name || order.customer_phone || order.customer_email) && (
+            <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-xl p-4 space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <User className="w-4 h-4 text-orange-500" /> Customer
+              </div>
+              {order.customer_name && <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">Name:</span> <span className="text-gray-900 font-medium">{order.customer_name}</span></div>}
+              {order.customer_phone && <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">Phone:</span> <span className="text-gray-900 dark:text-slate-100">{order.customer_phone}</span></div>}
+              {order.customer_email && <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">Email:</span> <span className="text-gray-900 dark:text-slate-100">{order.customer_email}</span></div>}
             </div>
-            <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">Name:</span> <span className="text-gray-900 font-medium">{order.customer_name}</span></div>
-            <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">Phone:</span> <span className="text-gray-900 dark:text-slate-100">{order.customer_phone}</span></div>
-            {order.customer_email && <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">Email:</span> <span className="text-gray-900 dark:text-slate-100">{order.customer_email}</span></div>}
-          </div>
+          )}
 
           {/* Pickup & Delivery */}
           <div className="grid grid-cols-2 gap-3">
@@ -709,16 +711,16 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
           {/* Shipment Info */}
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
-              <p className="text-xs text-gray-500 dark:text-slate-400">Weight</p>
-              <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{(order.weight_kg * 2.20462).toFixed(0)} lbs</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Rate</p>
+              <p className="text-sm font-semibold text-green-600">${(Math.round(order.price / 100) * 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
             <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
               <p className="text-xs text-gray-500 dark:text-slate-400">Distance</p>
               <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{(order.distance_km * 0.621371).toFixed(1)} mi</p>
             </div>
             <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
-              <p className="text-xs text-gray-500 dark:text-slate-400">Rate</p>
-              <p className="text-sm font-semibold text-green-600">${(Math.round(order.price / 100) * 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Weight</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{(order.weight_kg * 2.20462).toFixed(0)} lbs</p>
             </div>
           </div>
 
