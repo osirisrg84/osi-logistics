@@ -596,7 +596,7 @@ function AssignModal({ order, drivers, onClose, onSave }: Omit<AssignModalProps,
         <div className="p-6 space-y-4">
           <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3">
             <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{order.order_number}</p>
-            <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name} · {formatLocation(order.delivery_address, order.delivery_contact)}</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">{[order.customer_name, formatLocation(order.delivery_address, order.delivery_contact)].filter(Boolean).join(' · ')}</p>
           </div>
           <p className="text-xs text-gray-500 dark:text-slate-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">
             El conductor recibirá la oferta en tiempo real y tendrá 60 segundos para aceptarla o ignorarla.
@@ -909,7 +909,7 @@ export default function Orders() {
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{order.order_number}</p>
-                    <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name}</p>
+                    {order.customer_name && <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name}</p>}
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold text-green-600">${(Math.round(order.price / 100) * 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
@@ -967,8 +967,9 @@ export default function Orders() {
                         <p className="text-xs text-gray-400 dark:text-slate-500">{(order.weight_kg * 2.20462).toFixed(0)}lbs · {(order.distance_km * 0.621371).toFixed(1)}mi</p>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{order.customer_name}</p>
-                        <p className="text-xs text-gray-400 dark:text-slate-500">{order.customer_phone}</p>
+                        {order.customer_name && <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{order.customer_name}</p>}
+                        {order.customer_phone && <p className="text-xs text-gray-400 dark:text-slate-500">{order.customer_phone}</p>}
+                        {!order.customer_name && !order.customer_phone && <p className="text-xs text-gray-300 dark:text-slate-600 italic">—</p>}
                       </td>
                       <td className="px-4 py-3">
                         <p className="text-xs text-gray-600 dark:text-slate-400 max-w-[160px] truncate">{formatLocation(order.pickup_address, order.pickup_contact)}</p>

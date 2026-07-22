@@ -307,9 +307,11 @@ export default function Dashboard() {
                     {' '}—{' '}
                     <OrderStatusBadge status={activity.status as never} />
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5 truncate">
-                    {activity.customer_name} · {activity.notes}
-                  </p>
+                  {(activity.customer_name || activity.notes) && (
+                    <p className="text-xs text-gray-500 mt-0.5 truncate">
+                      {[activity.customer_name, activity.notes].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
                   <p className="text-xs text-gray-400 dark:text-slate-500">
                     {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
                   </p>

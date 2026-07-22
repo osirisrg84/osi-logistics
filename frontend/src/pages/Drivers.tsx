@@ -427,7 +427,7 @@ function DriverDetail({ driver, onClose }: DriverDetailProps) {
                   <div key={order.id} className="flex items-center justify-between text-sm">
                     <div>
                       <span className="font-medium text-gray-900 dark:text-slate-100">{order.order_number}</span>
-                      <span className="text-gray-400 ml-2">{order.customer_name}</span>
+                      {order.customer_name && <span className="text-gray-400 ml-2">{order.customer_name}</span>}
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`badge text-xs ${order.status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
