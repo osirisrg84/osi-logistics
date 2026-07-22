@@ -69,12 +69,16 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
         </div>
       </div>
 
-      <div className="bg-gray-50 dark:bg-slate-700 rounded-xl p-3">
-        <p className="text-sm font-semibold text-gray-900 dark:text-white">{order.customer_name}</p>
-        <a href={`tel:${order.customer_phone}`} className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 mt-1 hover:text-blue-700 dark:hover:text-blue-300">
-          <Phone className="w-3 h-3" /> {order.customer_phone}
-        </a>
-      </div>
+      {(order.customer_name || order.customer_phone) && (
+        <div className="bg-gray-50 dark:bg-slate-700 rounded-xl p-3">
+          {order.customer_name && <p className="text-sm font-semibold text-gray-900 dark:text-white">{order.customer_name}</p>}
+          {order.customer_phone && (
+            <a href={`tel:${order.customer_phone}`} className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 mt-1 hover:text-blue-700 dark:hover:text-blue-300">
+              <Phone className="w-3 h-3" /> {order.customer_phone}
+            </a>
+          )}
+        </div>
+      )}
 
       <div className="space-y-2">
         <div className="flex items-start gap-3">
@@ -1498,7 +1502,7 @@ export default function DriverPortal() {
                   <div key={order.id} className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-4 flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">{order.order_number}</p>
-                      <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name}</p>
+                      {order.customer_name && <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name}</p>}
                       <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{formatLocation(order.delivery_address, order.delivery_contact)}</p>
                     </div>
                     <div className="text-right">
@@ -3588,17 +3592,23 @@ export default function DriverPortal() {
               )}
 
               {/* Customer + description */}
-              <div className="flex items-center gap-2 px-1 text-xs text-gray-500 dark:text-slate-400">
-                <User className="w-3.5 h-3.5 flex-shrink-0" />
-                <span>{pendingOffer.customer_name}</span>
-                {pendingOffer.description && (
-                  <>
-                    <span className="text-gray-300 dark:text-slate-600">·</span>
-                    <Package className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span className="truncate">{pendingOffer.description}</span>
-                  </>
-                )}
-              </div>
+              {(pendingOffer.customer_name || pendingOffer.description) && (
+                <div className="flex items-center gap-2 px-1 text-xs text-gray-500 dark:text-slate-400">
+                  {pendingOffer.customer_name && (
+                    <>
+                      <User className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>{pendingOffer.customer_name}</span>
+                    </>
+                  )}
+                  {pendingOffer.description && (
+                    <>
+                      {pendingOffer.customer_name && <span className="text-gray-300 dark:text-slate-600">·</span>}
+                      <Package className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span className="truncate">{pendingOffer.description}</span>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Action buttons */}
               <div className="flex gap-3 pt-1">
