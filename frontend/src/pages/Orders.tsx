@@ -10,6 +10,8 @@ import { OrderStatusBadge, DriverStatusBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
 import { getSocket } from '../services/socket';
 import { playSuccessChime } from '../utils/sounds';
+import { formatLocation } from '../utils/location';
+import { CITIES_BY_STATE } from '../data/usCities';
 
 const STATUS_OPTIONS: OrderStatus[] = ['pending', 'offered', 'assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled'];
 
@@ -26,6 +28,39 @@ interface OrderModalProps {
   onSave: () => void;
   drivers: Driver[];
   trucks: TruckType[];
+}
+
+interface CityStateFieldsProps {
+  state: string;
+  city: string;
+  onStateChange: (v: string) => void;
+  onCityChange: (v: string) => void;
+  listId: string;
+}
+
+// State first, then a city input that autosuggests (via <datalist>) once a state is picked —
+// makes it fast for dispatch to type a city without knowing it up front.
+function CityStateFields({ state, city, onStateChange, onCityChange, listId }: CityStateFieldsProps) {
+  const cityOptions = CITIES_BY_STATE[state] || [];
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      <div>
+        <label className="label">State *</label>
+        <select className="input" value={state} onChange={e => onStateChange(e.target.value)} required>
+          <option value="">— Select State —</option>
+          {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+      </div>
+      <div>
+        <label className="label">City</label>
+        <input className="input" list={listId} value={city} onChange={e => onCityChange(e.target.value)}
+          placeholder={state ? 'Escribe para buscar...' : 'Ej: Miami'} />
+        <datalist id={listId}>
+          {cityOptions.map(c => <option key={c} value={c} />)}
+        </datalist>
+      </div>
+    </div>
+  );
 }
 
 function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
@@ -108,19 +143,10 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
             <div className="space-y-3">
               <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30 rounded-xl p-3 space-y-2">
                 <p className="text-xs font-bold text-orange-600 dark:text-orange-400">Stop #1</p>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="label">City</label>
-                    <input className="input" value={form.pickup_name} onChange={e => setForm({...form, pickup_name: e.target.value})} placeholder="Ej: Miami" />
-                  </div>
-                  <div>
-                    <label className="label">State *</label>
-                    <select className="input" value={form.pickup_address} onChange={e => setForm({...form, pickup_address: e.target.value})} required>
-                      <option value="">— Select State —</option>
-                      {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </div>
-                </div>
+                <CityStateFields state={form.pickup_address} city={form.pickup_name}
+                  onStateChange={v => setForm({...form, pickup_address: v})}
+                  onCityChange={v => setForm({...form, pickup_name: v})}
+                  listId="create-pickup-cities" />
               </div>
               {extraPickups.map((addr, i) => (
                 <div key={i} className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30 rounded-xl p-3 space-y-2">
@@ -148,19 +174,10 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
             <div className="space-y-3">
               <div className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30 rounded-xl p-3 space-y-2">
                 <p className="text-xs font-bold text-green-600 dark:text-green-400">Stop #2</p>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="label">City</label>
-                    <input className="input" value={form.delivery_name} onChange={e => setForm({...form, delivery_name: e.target.value})} placeholder="Ej: Atlanta" />
-                  </div>
-                  <div>
-                    <label className="label">State *</label>
-                    <select className="input" value={form.delivery_address} onChange={e => setForm({...form, delivery_address: e.target.value})} required>
-                      <option value="">— Select State —</option>
-                      {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </div>
-                </div>
+                <CityStateFields state={form.delivery_address} city={form.delivery_name}
+                  onStateChange={v => setForm({...form, delivery_address: v})}
+                  onCityChange={v => setForm({...form, delivery_name: v})}
+                  listId="create-delivery-cities" />
               </div>
               {extraDeliveries.map((addr, i) => (
                 <div key={i} className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30 rounded-xl p-3 space-y-2">
@@ -443,19 +460,10 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
               <MapPin className="w-4 h-4 text-orange-500" /> Pickup Location
             </h3>
             <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30 rounded-xl p-3">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="label">City</label>
-                  <input className="input" value={form.pickup_name} onChange={e => setForm({...form, pickup_name: e.target.value})} placeholder="Ej: Miami" />
-                </div>
-                <div>
-                  <label className="label">State *</label>
-                  <select className="input" value={form.pickup_address} onChange={e => setForm({...form, pickup_address: e.target.value})} required>
-                    <option value="">— Select State —</option>
-                    {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-              </div>
+              <CityStateFields state={form.pickup_address} city={form.pickup_name}
+                onStateChange={v => setForm({...form, pickup_address: v})}
+                onCityChange={v => setForm({...form, pickup_name: v})}
+                listId="edit-pickup-cities" />
             </div>
           </div>
 
@@ -465,19 +473,10 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
               <MapPin className="w-4 h-4 text-green-500" /> Delivery Location
             </h3>
             <div className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30 rounded-xl p-3">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="label">City</label>
-                  <input className="input" value={form.delivery_name} onChange={e => setForm({...form, delivery_name: e.target.value})} placeholder="Ej: Atlanta" />
-                </div>
-                <div>
-                  <label className="label">State *</label>
-                  <select className="input" value={form.delivery_address} onChange={e => setForm({...form, delivery_address: e.target.value})} required>
-                    <option value="">— Select State —</option>
-                    {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-              </div>
+              <CityStateFields state={form.delivery_address} city={form.delivery_name}
+                onStateChange={v => setForm({...form, delivery_address: v})}
+                onCityChange={v => setForm({...form, delivery_name: v})}
+                listId="edit-delivery-cities" />
             </div>
           </div>
 
@@ -563,7 +562,7 @@ function AssignModal({ order, drivers, onClose, onSave }: Omit<AssignModalProps,
         <div className="p-6 space-y-4">
           <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3">
             <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{order.order_number}</p>
-            <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name} · {order.delivery_address}</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name} · {formatLocation(order.delivery_address, order.delivery_contact)}</p>
           </div>
           <p className="text-xs text-gray-500 dark:text-slate-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">
             El conductor recibirá la oferta en tiempo real y tendrá 60 segundos para aceptarla o ignorarla.
@@ -650,13 +649,13 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
               <div className="flex items-center gap-1 text-xs font-semibold text-orange-700 mb-2">
                 <MapPin className="w-3 h-3" /> PICKUP
               </div>
-              <p className="text-sm text-gray-700 dark:text-slate-300">{order.pickup_address}</p>
+              <p className="text-sm text-gray-700 dark:text-slate-300">{formatLocation(order.pickup_address, order.pickup_contact)}</p>
             </div>
             <div className="bg-green-50 rounded-xl p-3">
               <div className="flex items-center gap-1 text-xs font-semibold text-green-700 mb-2">
                 <MapPin className="w-3 h-3" /> DELIVERY
               </div>
-              <p className="text-sm text-gray-700 dark:text-slate-300">{order.delivery_address}</p>
+              <p className="text-sm text-gray-700 dark:text-slate-300">{formatLocation(order.delivery_address, order.delivery_contact)}</p>
             </div>
           </div>
 
@@ -865,7 +864,7 @@ export default function Orders() {
                     <OrderStatusBadge status={order.status} />
                   </div>
                 </div>
-                <p className="text-xs text-gray-500 truncate mb-2">{order.delivery_address}</p>
+                <p className="text-xs text-gray-500 truncate mb-2">{formatLocation(order.delivery_address, order.delivery_contact)}</p>
                 <div className="flex items-center justify-end">
                   <div className="flex gap-1">
                     <button onClick={() => setDetailOrder(order)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg">
@@ -918,10 +917,10 @@ export default function Orders() {
                         <p className="text-xs text-gray-400 dark:text-slate-500">{order.customer_phone}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-xs text-gray-600 dark:text-slate-400 max-w-[160px] truncate">{order.pickup_address}</p>
+                        <p className="text-xs text-gray-600 dark:text-slate-400 max-w-[160px] truncate">{formatLocation(order.pickup_address, order.pickup_contact)}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-xs text-gray-600 dark:text-slate-400 max-w-[160px] truncate">{order.delivery_address}</p>
+                        <p className="text-xs text-gray-600 dark:text-slate-400 max-w-[160px] truncate">{formatLocation(order.delivery_address, order.delivery_contact)}</p>
                       </td>
                       <td className="px-4 py-3"><OrderStatusBadge status={order.status} /></td>
                       <td className="px-4 py-3 hidden lg:table-cell">

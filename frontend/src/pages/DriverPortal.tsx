@@ -13,6 +13,7 @@ import osiLogo from '../assets/osi-logo.jpeg';
 import InstallAppButton from '../components/InstallAppButton';
 import InstallAppBanner from '../components/InstallAppBanner';
 import { setAppManifest, setThemeColor, DRIVER_MANIFEST, DISPATCH_MANIFEST, DRIVER_COLOR, DISPATCH_COLOR } from '../utils/appManifest';
+import { formatLocation } from '../utils/location';
 import { useDriverAuth } from '../context/DriverAuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { ordersApi, driversApi, billingApi, notificationsApi, userApi } from '../services/driverApi';
@@ -82,7 +83,7 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
           </div>
           <div>
             <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">Pickup</p>
-            <p className="text-sm text-gray-700 dark:text-slate-300">{order.pickup_address}</p>
+            <p className="text-sm text-gray-700 dark:text-slate-300">{formatLocation(order.pickup_address, order.pickup_contact)}</p>
           </div>
         </div>
         <div className="ml-3 w-0.5 h-4 bg-gray-200 dark:bg-slate-600" />
@@ -92,7 +93,7 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
           </div>
           <div>
             <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">Delivery</p>
-            <p className="text-sm text-gray-700 dark:text-slate-300">{order.delivery_address}</p>
+            <p className="text-sm text-gray-700 dark:text-slate-300">{formatLocation(order.delivery_address, order.delivery_contact)}</p>
           </div>
         </div>
       </div>
@@ -585,7 +586,7 @@ export default function DriverPortal() {
       // Browser push notification
       if ('Notification' in window) {
         const show = () => new Notification('🚛 Nueva oferta de carga', {
-          body: `Orden ${offer.order_number} · ${offer.pickup_address} → ${offer.delivery_address}`,
+          body: `Orden ${offer.order_number} · ${formatLocation(offer.pickup_address, offer.pickup_contact)} → ${formatLocation(offer.delivery_address, offer.delivery_contact)}`,
           icon: '/favicon.ico',
           requireInteraction: true,
         });
@@ -1486,7 +1487,7 @@ export default function DriverPortal() {
                     <div>
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">{order.order_number}</p>
                       <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name}</p>
-                      <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{order.delivery_address}</p>
+                      <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{formatLocation(order.delivery_address, order.delivery_contact)}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-bold text-green-600">${(Math.round(order.price / 100) * 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
@@ -1560,9 +1561,9 @@ export default function DriverPortal() {
               <div className="grid grid-cols-2 gap-2">
                 <a href={
                     activeOrders.length > 0 && activeOrders[0].status === 'assigned'
-                      ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(activeOrders[0].pickup_address)}`
+                      ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(formatLocation(activeOrders[0].pickup_address, activeOrders[0].pickup_contact))}`
                       : activeOrders.length > 0
-                        ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(activeOrders[0].delivery_address)}`
+                        ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(formatLocation(activeOrders[0].delivery_address, activeOrders[0].delivery_contact))}`
                         : 'https://maps.google.com'
                   }
                   target="_blank" rel="noopener noreferrer"
@@ -1592,7 +1593,7 @@ export default function DriverPortal() {
                     <Navigation className="w-3 h-3" /> Orden activa
                   </p>
                   {activeOrders[0].status === 'assigned' && (
-                    <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(activeOrders[0].pickup_address)}`}
+                    <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(formatLocation(activeOrders[0].pickup_address, activeOrders[0].pickup_contact))}`}
                        target="_blank" rel="noopener noreferrer"
                        className="flex items-center justify-between bg-white dark:bg-blue-900/30 rounded-xl px-3 py-2.5 hover:bg-blue-50 dark:hover:bg-blue-800/30 transition-colors">
                       <div className="flex items-center gap-2.5">
@@ -1601,14 +1602,14 @@ export default function DriverPortal() {
                         </div>
                         <div>
                           <p className="text-[9px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Ir al Pickup</p>
-                          <p className="text-xs font-semibold text-gray-800 dark:text-slate-200 truncate max-w-[200px]">{activeOrders[0].pickup_address}</p>
+                          <p className="text-xs font-semibold text-gray-800 dark:text-slate-200 truncate max-w-[200px]">{formatLocation(activeOrders[0].pickup_address, activeOrders[0].pickup_contact)}</p>
                         </div>
                       </div>
                       <Navigation className="w-4 h-4 text-blue-500 flex-shrink-0" />
                     </a>
                   )}
                   {['picked_up','in_transit'].includes(activeOrders[0].status) && (
-                    <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(activeOrders[0].delivery_address)}`}
+                    <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(formatLocation(activeOrders[0].delivery_address, activeOrders[0].delivery_contact))}`}
                        target="_blank" rel="noopener noreferrer"
                        className="flex items-center justify-between bg-white dark:bg-blue-900/30 rounded-xl px-3 py-2.5 hover:bg-blue-50 dark:hover:bg-blue-800/30 transition-colors">
                       <div className="flex items-center gap-2.5">
@@ -1617,7 +1618,7 @@ export default function DriverPortal() {
                         </div>
                         <div>
                           <p className="text-[9px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Ir al Delivery</p>
-                          <p className="text-xs font-semibold text-gray-800 dark:text-slate-200 truncate max-w-[200px]">{activeOrders[0].delivery_address}</p>
+                          <p className="text-xs font-semibold text-gray-800 dark:text-slate-200 truncate max-w-[200px]">{formatLocation(activeOrders[0].delivery_address, activeOrders[0].delivery_contact)}</p>
                         </div>
                       </div>
                       <Navigation className="w-4 h-4 text-blue-500 flex-shrink-0" />
@@ -3546,7 +3547,7 @@ export default function DriverPortal() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">Pickup</p>
-                  <p className="text-sm text-gray-800 dark:text-slate-200 leading-snug">{pendingOffer.pickup_address}</p>
+                  <p className="text-sm text-gray-800 dark:text-slate-200 leading-snug">{formatLocation(pendingOffer.pickup_address, pendingOffer.pickup_contact)}</p>
                 </div>
               </div>
 
@@ -3557,7 +3558,7 @@ export default function DriverPortal() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wide">Delivery</p>
-                  <p className="text-sm text-gray-800 dark:text-slate-200 leading-snug">{pendingOffer.delivery_address}</p>
+                  <p className="text-sm text-gray-800 dark:text-slate-200 leading-snug">{formatLocation(pendingOffer.delivery_address, pendingOffer.delivery_contact)}</p>
                 </div>
               </div>
 

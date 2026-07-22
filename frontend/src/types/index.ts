@@ -47,6 +47,7 @@ export interface Driver {
   order_number?: string;
   order_status?: string;
   delivery_address?: string;
+  delivery_contact?: string;
   estimated_delivery?: string;
 }
 

@@ -10,7 +10,7 @@ router.get('/live', async (_req: Request, res: Response) => {
              d.avatar, d.truck_id, d.rating, d.gps_active,
              d.equipment_type, d.total_deliveries, d.truck_make, d.truck_number,
              t.plate_number, t.make, t.model, t.type as truck_type,
-             o.id as order_id, o.order_number, o.delivery_address,
+             o.id as order_id, o.order_number, o.delivery_address, o.delivery_contact,
              o.status as order_status, o.estimated_delivery
       FROM drivers d
       LEFT JOIN trucks t ON d.truck_id = t.id

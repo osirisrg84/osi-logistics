@@ -7,6 +7,7 @@ import { Driver } from '../types';
 import { getSocket } from '../services/socket';
 import { DriverStatusBadge } from '../components/StatusBadge';
 import { formatDistanceToNow } from 'date-fns';
+import { formatLocation } from '../utils/location';
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -238,7 +239,7 @@ export default function Tracking() {
                   </p>
                 )}
                 {driver.delivery_address && driver.status !== 'available' && (
-                  <p className="text-xs text-gray-500 mt-0.5 pl-4">{driver.delivery_address}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 pl-4">{formatLocation(driver.delivery_address, driver.delivery_contact)}</p>
                 )}
                 <p className="text-xs text-gray-400 mt-2">★ {driver.rating.toFixed(1)} · {(driver as typeof driver & { total_deliveries?: number }).total_deliveries ?? 0} trips</p>
               </div>
@@ -389,7 +390,7 @@ export default function Tracking() {
                         <span className="text-[10px] font-semibold text-orange-500 uppercase tracking-wide">Destino · {driver.order_number}</span>
                       </div>
                       {driver.delivery_address && (
-                        <p className="text-xs text-gray-500 dark:text-slate-400 truncate pl-4">{driver.delivery_address}</p>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 truncate pl-4">{formatLocation(driver.delivery_address, driver.delivery_contact)}</p>
                       )}
                     </div>
                   )}
