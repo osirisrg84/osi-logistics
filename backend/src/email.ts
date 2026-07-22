@@ -1,7 +1,15 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const FROM = process.env.RESEND_FROM || 'OSI Logistics <onboarding@resend.dev>';
+
+async function sendEmail(payload: Parameters<Resend['emails']['send']>[0]) {
+  if (!resend) {
+    console.warn(`[email] RESEND_API_KEY not set — skipping email to ${payload.to}`);
+    return;
+  }
+  await resend.emails.send(payload);
+}
 
 export async function sendActivationEmail(to: string, name: string, role: string) {
   const isDriver     = role === 'driver';
@@ -13,7 +21,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
     ? `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/driver/login`
     : `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/dispatcher`;
 
-  await resend.emails.send({
+  await sendEmail({
     from: FROM,
     to,
     subject: '✅ Tu cuenta en OSI Logistics está activa',
@@ -46,7 +54,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
 }
 
 export async function sendOfferEmail(to: string, driverName: string, orderNumber: string, pickup: string, delivery: string, rate: number) {
-  await resend.emails.send({
+  await sendEmail({
     from: FROM,
     to,
     subject: `🚛 Nueva oferta de carga — ${orderNumber}`,
@@ -99,7 +107,7 @@ export async function sendDeliveryEmail(to: string, recipientName: string, role:
     ? `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/driver/login`
     : `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/dispatcher`;
 
-  await resend.emails.send({
+  await sendEmail({
     from: FROM,
     to,
     subject: `📦 Entrega completada — ${orderNumber}`,
@@ -144,7 +152,7 @@ export async function sendDeliveryEmail(to: string, recipientName: string, role:
 }
 
 export async function sendOfferAcceptedEmail(to: string, dispatcherName: string, driverName: string, orderNumber: string, pickup: string, delivery: string) {
-  await resend.emails.send({
+  await sendEmail({
     from: FROM,
     to,
     subject: `✅ Oferta aceptada — ${orderNumber}`,
@@ -187,7 +195,7 @@ export async function sendOfferAcceptedEmail(to: string, dispatcherName: string,
 export async function sendVerificationCode(to: string, name: string, code: string, type: 'email' | 'phone', role = 'driver') {
   const label = type === 'email' ? 'correo electrónico' : 'número de teléfono';
   const accent = role === 'admin' ? '#4f46e5' : role === 'dispatcher' ? '#f97316' : '#2563eb';
-  await resend.emails.send({
+  await sendEmail({
     from: FROM,
     to,
     subject: `Tu código de verificación OSI Logistics: ${code}`,

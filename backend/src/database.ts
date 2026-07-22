@@ -545,22 +545,22 @@ async function seedDatabase(): Promise<void> {
   }
 
   const pickups = [
-    { addr: '1200 NW 22nd Ave, Miami, FL 33125', lat: 25.7886, lng: -80.2284 },
-    { addr: '500 Brickell Ave, Miami, FL 33131',  lat: 25.7656, lng: -80.1935 },
-    { addr: '8888 NW 36th St, Doral, FL 33178',   lat: 25.8192, lng: -80.3602 },
-    { addr: '2601 S Bayshore Dr, Coconut Grove',   lat: 25.7272, lng: -80.2378 },
-    { addr: '11200 NW 25th St, Miami, FL 33172',  lat: 25.7917, lng: -80.3734 },
-    { addr: '3300 NE 1st Ave, Miami, FL 33137',   lat: 25.8061, lng: -80.1923 },
+    { addr: '1200 NW 22nd Ave, Miami, FL 33125', lat: 25.7886, lng: -80.2284, city: 'Miami' },
+    { addr: '500 Brickell Ave, Miami, FL 33131',  lat: 25.7656, lng: -80.1935, city: 'Miami' },
+    { addr: '8888 NW 36th St, Doral, FL 33178',   lat: 25.8192, lng: -80.3602, city: 'Doral' },
+    { addr: '2601 S Bayshore Dr, Coconut Grove',   lat: 25.7272, lng: -80.2378, city: 'Miami' },
+    { addr: '11200 NW 25th St, Miami, FL 33172',  lat: 25.7917, lng: -80.3734, city: 'Miami' },
+    { addr: '3300 NE 1st Ave, Miami, FL 33137',   lat: 25.8061, lng: -80.1923, city: 'Miami' },
   ];
   const deliveries = [
-    { addr: '401 Collins Ave, Miami Beach, FL',   lat: 25.7745, lng: -80.1349 },
-    { addr: '9055 SW 87th Ave, Miami, FL 33176',  lat: 25.6841, lng: -80.3282 },
-    { addr: '20001 E Country Club Dr, Aventura',  lat: 25.9590, lng: -80.1398 },
-    { addr: '7777 NW 74th Ave, Medley, FL 33166', lat: 25.8234, lng: -80.3234 },
-    { addr: '3251 Hollywood Blvd, Hollywood, FL', lat: 26.0112, lng: -80.1496 },
-    { addr: '1 Alhambra Plaza, Coral Gables, FL', lat: 25.7215, lng: -80.2684 },
-    { addr: '1601 Washington Ave, Miami Beach',    lat: 25.7907, lng: -80.1336 },
-    { addr: '10000 W Flagler St, Miami, FL',      lat: 25.7754, lng: -80.3368 },
+    { addr: '401 Collins Ave, Miami Beach, FL',   lat: 25.7745, lng: -80.1349, city: 'Miami Beach' },
+    { addr: '9055 SW 87th Ave, Miami, FL 33176',  lat: 25.6841, lng: -80.3282, city: 'Miami' },
+    { addr: '20001 E Country Club Dr, Aventura',  lat: 25.9590, lng: -80.1398, city: 'Aventura' },
+    { addr: '7777 NW 74th Ave, Medley, FL 33166', lat: 25.8234, lng: -80.3234, city: 'Medley' },
+    { addr: '3251 Hollywood Blvd, Hollywood, FL', lat: 26.0112, lng: -80.1496, city: 'Hollywood' },
+    { addr: '1 Alhambra Plaza, Coral Gables, FL', lat: 25.7215, lng: -80.2684, city: 'Coral Gables' },
+    { addr: '1601 Washington Ave, Miami Beach',    lat: 25.7907, lng: -80.1336, city: 'Miami Beach' },
+    { addr: '10000 W Flagler St, Miami, FL',      lat: 25.7754, lng: -80.3368, city: 'Miami' },
   ];
   const customers = [
     { name: 'TechCorp Solutions',    phone: '(305) 800-1001', email: 'logistics@techcorp.com' },
@@ -631,8 +631,8 @@ async function seedDatabase(): Promise<void> {
       estimated_delivery, price, distance_km)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [id, orderNum, cust.name, cust.phone, cust.email,
-       pu.addr, pu.lat, pu.lng, cust.phone,
-       del.addr, del.lat, del.lng, cust.phone,
+       pu.addr, pu.lat, pu.lng, pu.city,
+       del.addr, del.lat, del.lng, del.city,
        status, priority, weight, volume, descs[i % descs.length], '',
        driverId, truckId, createdDate.toISOString(),
        assigned, pickedUp, inTransit, delivered, estimated, price, dist]);
