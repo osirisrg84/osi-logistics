@@ -287,6 +287,8 @@ export async function initDatabase(): Promise<void> {
   await addColumnIfMissing('orders', 'offered_to_driver_id',  "TEXT");
   await addColumnIfMissing('orders', 'offered_to_truck_id',   "TEXT");
   await addColumnIfMissing('orders', 'offered_at',            "TEXT");
+  await addColumnIfMissing('orders', 'equipment_type',        "TEXT NOT NULL DEFAULT 'Dry Van'");
+  await addColumnIfMissing('orders', 'temperature',           "TEXT NOT NULL DEFAULT ''");
 
   // Migrations for drivers
   await addColumnIfMissing('drivers', 'equipment_type',  "TEXT NOT NULL DEFAULT 'Dry Van'");

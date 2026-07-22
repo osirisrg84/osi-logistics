@@ -98,6 +98,18 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
         </div>
       </div>
 
+      {order.equipment_type && (
+        <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl px-3 py-2">
+          <Truck className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" />
+          <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-400">{order.equipment_type}</span>
+          {order.equipment_type === 'Reefer' && order.temperature && (
+            <span className="text-xs font-medium text-indigo-500 dark:text-indigo-300 bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full ml-auto">
+              🌡️ {order.temperature}
+            </span>
+          )}
+        </div>
+      )}
+
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
           <p className="text-xs text-gray-400 dark:text-slate-500">Weight</p>
@@ -3561,6 +3573,19 @@ export default function DriverPortal() {
                   <p className="text-sm text-gray-800 dark:text-slate-200 leading-snug">{formatLocation(pendingOffer.delivery_address, pendingOffer.delivery_contact)}</p>
                 </div>
               </div>
+
+              {/* Equipment */}
+              {pendingOffer.equipment_type && (
+                <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-3">
+                  <Truck className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" />
+                  <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-400">{pendingOffer.equipment_type}</span>
+                  {pendingOffer.equipment_type === 'Reefer' && pendingOffer.temperature && (
+                    <span className="text-xs font-medium text-indigo-500 dark:text-indigo-300 bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full ml-auto">
+                      🌡️ {pendingOffer.temperature}
+                    </span>
+                  )}
+                </div>
+              )}
 
               {/* Customer + description */}
               <div className="flex items-center gap-2 px-1 text-xs text-gray-500 dark:text-slate-400">

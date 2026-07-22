@@ -23,6 +23,8 @@ const US_STATES = [
   'SD','TN','TX','UT','VT','VA','WA','WV','WI','WY',
 ];
 
+const EQUIPMENT_TYPES = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'];
+
 interface OrderModalProps {
   onClose: () => void;
   onSave: () => void;
@@ -69,6 +71,7 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
     delivery_name: '', delivery_address: '',
     weight_kg: '', commodity: '',
     notes: '', price: '', distance_mi: '', estimated_delivery: '',
+    equipment_type: 'Dry Van', temperature: '',
   });
   const [extraPickups, setExtraPickups] = useState<string[]>([]);
   const [extraDeliveries, setExtraDeliveries] = useState<string[]>([]);
@@ -108,6 +111,8 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
         price: parseFloat(form.price) || 0,
         distance_km: Math.round(parseFloat(form.distance_mi || '0') * 1.60934 * 10) / 10,
         estimated_delivery: form.estimated_delivery,
+        equipment_type: form.equipment_type,
+        temperature: form.equipment_type === 'Reefer' ? form.temperature : '',
       });
 
       if (assignDriverId && data?.id) {
@@ -215,6 +220,18 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
                 <label className="label">Distance (mi)</label>
                 <input className="input" type="number" value={form.distance_mi} onChange={e => setForm({...form, distance_mi: e.target.value})} placeholder="0" min="0" />
               </div>
+              <div className={form.equipment_type === 'Reefer' ? 'col-span-2' : 'col-span-3'}>
+                <label className="label">Tipo de Equipo</label>
+                <select className="input" value={form.equipment_type} onChange={e => setForm({...form, equipment_type: e.target.value})}>
+                  {EQUIPMENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              {form.equipment_type === 'Reefer' && (
+                <div>
+                  <label className="label">Temperatura</label>
+                  <input className="input" value={form.temperature} onChange={e => setForm({...form, temperature: e.target.value})} placeholder="Ej: 34°F" />
+                </div>
+              )}
               <div className="col-span-2">
                 <label className="label">End Delivery</label>
                 <input className="input" type="datetime-local" value={form.estimated_delivery} onChange={e => setForm({...form, estimated_delivery: e.target.value})} />
@@ -326,6 +343,8 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
     price: order.price ? String(order.price) : '',
     distance_mi: order.distance_km ? String(Math.round(order.distance_km * 0.621371 * 10) / 10) : '',
     estimated_delivery: order.estimated_delivery ? order.estimated_delivery.slice(0, 16) : '',
+    equipment_type: order.equipment_type || 'Dry Van',
+    temperature: order.temperature || '',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -394,6 +413,8 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
         price: parseFloat(form.price) || 0,
         distance_km: Math.round(parseFloat(form.distance_mi || '0') * 1.60934 * 10) / 10,
         estimated_delivery: form.estimated_delivery,
+        equipment_type: form.equipment_type,
+        temperature: form.equipment_type === 'Reefer' ? form.temperature : '',
       });
       onSave();
       onClose();
@@ -498,6 +519,18 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
                 <label className="label">Distance (mi)</label>
                 <input className="input" type="number" value={form.distance_mi} onChange={e => setForm({...form, distance_mi: e.target.value})} placeholder="0" min="0" />
               </div>
+              <div className={form.equipment_type === 'Reefer' ? 'col-span-2' : 'col-span-3'}>
+                <label className="label">Tipo de Equipo</label>
+                <select className="input" value={form.equipment_type} onChange={e => setForm({...form, equipment_type: e.target.value})}>
+                  {EQUIPMENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              {form.equipment_type === 'Reefer' && (
+                <div>
+                  <label className="label">Temperatura</label>
+                  <input className="input" value={form.temperature} onChange={e => setForm({...form, temperature: e.target.value})} placeholder="Ej: 34°F" />
+                </div>
+              )}
               <div className="col-span-2">
                 <label className="label">End Delivery</label>
                 <input className="input" type="datetime-local" value={form.estimated_delivery} onChange={e => setForm({...form, estimated_delivery: e.target.value})} />
@@ -658,6 +691,19 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
               <p className="text-sm text-gray-700 dark:text-slate-300">{formatLocation(order.delivery_address, order.delivery_contact)}</p>
             </div>
           </div>
+
+          {/* Equipment */}
+          {order.equipment_type && (
+            <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-3">
+              <Truck className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+              <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-400">{order.equipment_type}</span>
+              {order.equipment_type === 'Reefer' && order.temperature && (
+                <span className="text-xs font-medium text-indigo-500 dark:text-indigo-300 bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full ml-auto">
+                  🌡️ {order.temperature}
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Shipment Info */}
           <div className="grid grid-cols-3 gap-3">

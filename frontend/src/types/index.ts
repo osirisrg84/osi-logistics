@@ -93,6 +93,8 @@ export interface Order {
   volume_m3: number;
   description: string;
   notes: string;
+  equipment_type?: string;
+  temperature?: string;
   driver_id: string | null;
   truck_id: string | null;
   offered_to_driver_id?: string | null;

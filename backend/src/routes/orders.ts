@@ -101,19 +101,20 @@ router.post('/', async (req: Request, res: Response) => {
       delivery_address, delivery_lat, delivery_lng, delivery_contact = '',
       priority = 'normal', weight_kg = 0, volume_m3 = 0,
       description = '', notes = '', price = 0, distance_km = 0,
-      estimated_delivery = null,
+      estimated_delivery = null, equipment_type = 'Dry Van', temperature = '',
     } = req.body;
 
     await exec(`INSERT INTO orders (id, order_number, customer_name, customer_phone, customer_email,
       pickup_address, pickup_lat, pickup_lng, pickup_contact,
       delivery_address, delivery_lat, delivery_lng, delivery_contact,
       status, priority, weight_kg, volume_m3, description, notes,
-      price, distance_km, estimated_delivery)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)`,
+      price, distance_km, estimated_delivery, equipment_type, temperature)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [id, orderNumber, customer_name, customer_phone, customer_email,
        pickup_address, pickup_lat, pickup_lng, pickup_contact,
        delivery_address, delivery_lat, delivery_lng, delivery_contact,
-       priority, weight_kg, volume_m3, description, notes, price, distance_km, estimated_delivery]);
+       priority, weight_kg, volume_m3, description, notes, price, distance_km, estimated_delivery,
+       equipment_type, temperature]);
 
     await exec("INSERT INTO order_history (id, order_id, status, notes, created_by) VALUES (?, ?, 'pending', 'Order created', 'dispatcher')", [uuidv4(), id]);
     await exec("INSERT INTO notifications (id, type, title, message, read, related_id) VALUES (?, 'order', 'New Order Created', ?, 0, ?)",
