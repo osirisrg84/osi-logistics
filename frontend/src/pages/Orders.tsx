@@ -209,16 +209,16 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
             </h3>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="label">Weight (lbs)</label>
-                <input className="input" type="number" value={form.weight_kg} onChange={e => setForm({...form, weight_kg: e.target.value})} placeholder="0" min="0" />
-              </div>
-              <div>
                 <label className="label">Rate ($)</label>
                 <input className="input" type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} placeholder="0.00" min="0" step="0.01" />
               </div>
               <div>
                 <label className="label">Distance (mi)</label>
                 <input className="input" type="number" value={form.distance_mi} onChange={e => setForm({...form, distance_mi: e.target.value})} placeholder="0" min="0" />
+              </div>
+              <div>
+                <label className="label">Weight (lbs)</label>
+                <input className="input" type="number" value={form.weight_kg} onChange={e => setForm({...form, weight_kg: e.target.value})} placeholder="0" min="0" />
               </div>
               <div className={form.equipment_type === 'Reefer' ? 'col-span-2' : 'col-span-3'}>
                 <label className="label">Tipo de Equipo</label>
@@ -508,16 +508,16 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
             </h3>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="label">Weight (lbs)</label>
-                <input className="input" type="number" value={form.weight_kg} onChange={e => setForm({...form, weight_kg: e.target.value})} placeholder="0" min="0" />
-              </div>
-              <div>
                 <label className="label">Rate ($)</label>
                 <input className="input" type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} placeholder="0.00" min="0" step="0.01" />
               </div>
               <div>
                 <label className="label">Distance (mi)</label>
                 <input className="input" type="number" value={form.distance_mi} onChange={e => setForm({...form, distance_mi: e.target.value})} placeholder="0" min="0" />
+              </div>
+              <div>
+                <label className="label">Weight (lbs)</label>
+                <input className="input" type="number" value={form.weight_kg} onChange={e => setForm({...form, weight_kg: e.target.value})} placeholder="0" min="0" />
               </div>
               <div className={form.equipment_type === 'Reefer' ? 'col-span-2' : 'col-span-3'}>
                 <label className="label">Tipo de Equipo</label>
