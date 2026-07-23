@@ -58,10 +58,16 @@ function PublicOnly({ children }: { children: React.ReactNode }) {
 
 /** Protected: admin + dispatcher share the main layout */
 function DispatcherGuard() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   if (loading) return <Spinner />;
   if (!user) return <Navigate to="/dispatcher" replace />;
-  if (user.role === 'driver') return <Navigate to="/driver" replace />;
+  // Driver account in dispatch session = stale legacy token (pre-migration); purge it immediately
+  if (user.role === 'driver') {
+    localStorage.removeItem('osi_token');
+    localStorage.removeItem('osi_user');
+    logout();
+    return <Navigate to="/dispatcher" replace />;
+  }
   return <Layout />;
 }
 
