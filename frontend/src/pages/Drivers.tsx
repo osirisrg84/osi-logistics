@@ -68,7 +68,7 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">{driver ? 'Edit Driver' : 'Add New Driver'}</h2>
           <button onClick={onClose}><X className="w-5 h-5 text-gray-500 dark:text-slate-400" /></button>
@@ -239,7 +239,7 @@ function DriverDetail({ driver, onClose }: DriverDetailProps) {
           </div>
 
           {/* Equipment */}
-          {(driver.make || driver.equipment_type) && (
+          {(driver.make || driver.truck_make || driver.equipment_type) && (
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
               <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 flex items-center gap-2 mb-2">
                 <Truck className="w-3 h-3" /> EQUIPO
@@ -255,9 +255,11 @@ function DriverDetail({ driver, onClose }: DriverDetailProps) {
                     {driver.equipment_type}
                   </span>
                 )}
-                {driver.make && driver.model && (
+                {driver.make && driver.model ? (
                   <p className="text-sm font-medium text-gray-700 dark:text-slate-300">{driver.make} {driver.model}</p>
-                )}
+                ) : driver.truck_make ? (
+                  <p className="text-sm font-medium text-gray-700 dark:text-slate-300">{driver.truck_make}</p>
+                ) : null}
               </div>
             </div>
           )}
@@ -293,9 +295,9 @@ function DriverDetail({ driver, onClose }: DriverDetailProps) {
                   </div>
                 )}
                 {dr.rate_con_email && (
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-0.5">
                     <span className="text-xs text-gray-500 dark:text-slate-400">Correo Rate Confirmation</span>
-                    <a href={`mailto:${dr.rate_con_email}`} className="text-sm font-medium text-green-700 dark:text-green-400 hover:underline truncate max-w-[180px]">{dr.rate_con_email}</a>
+                    <a href={`mailto:${dr.rate_con_email}`} className="text-sm font-medium text-green-700 dark:text-green-400 hover:underline break-all">{dr.rate_con_email}</a>
                   </div>
                 )}
               </div>

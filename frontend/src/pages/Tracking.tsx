@@ -210,7 +210,7 @@ export default function Tracking() {
             eventHandlers={{ click: () => handleSelectDriver(driver) }}
           >
             <Popup>
-              <div className="min-w-[180px]">
+              <div className="min-w-[200px]">
                 <div className="flex items-center gap-2 mb-2">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${
                     driver.status === 'available' ? 'bg-green-500' :
@@ -221,17 +221,27 @@ export default function Tracking() {
                     <p className="text-xs text-gray-500 capitalize">{driver.status.replace('_', ' ')}</p>
                   </div>
                 </div>
+                {driver.phone && (
+                  <p className="text-xs text-gray-600 mb-1">
+                    <a href={`tel:${driver.phone}`} className="hover:underline">{driver.phone}</a>
+                  </p>
+                )}
                 {driver.current_address && (
                   <p className="text-xs text-green-600 font-medium mb-1 flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full inline-block" />
                     {driver.current_address}
                   </p>
                 )}
-                {(driver as typeof driver & { equipment_type?: string }).equipment_type && (
+                {(driver.equipment_type || driver.make || driver.truck_make) && (
                   <p className="text-xs font-medium text-blue-600 mb-1">
-                    {(driver as typeof driver & { equipment_type?: string }).equipment_type}
-                    {driver.make ? ` · ${driver.make}${driver.model ? ' ' + driver.model : ''}` : ''}
+                    {driver.equipment_type}
+                    {driver.make
+                      ? ` · ${driver.make}${driver.model ? ' ' + driver.model : ''}`
+                      : driver.truck_make ? ` · ${driver.truck_make}` : ''}
                   </p>
+                )}
+                {(driver.plate_number || driver.truck_number) && (
+                  <p className="text-xs text-gray-500 mb-1">Unidad {driver.plate_number || driver.truck_number}</p>
                 )}
                 {driver.order_number && driver.status !== 'available' && (
                   <p className="text-xs text-blue-600 font-medium flex items-center gap-1">
@@ -241,7 +251,13 @@ export default function Tracking() {
                 {driver.delivery_address && driver.status !== 'available' && (
                   <p className="text-xs text-gray-500 mt-0.5 pl-4">{formatLocation(driver.delivery_address, driver.delivery_contact)}</p>
                 )}
-                <p className="text-xs text-gray-400 mt-2">★ {driver.rating.toFixed(1)} · {(driver as typeof driver & { total_deliveries?: number }).total_deliveries ?? 0} trips</p>
+                {driver.estimated_delivery && driver.status !== 'available' && (
+                  <p className="text-xs text-gray-500 mt-0.5 pl-4">ETA {formatDistanceToNow(new Date(driver.estimated_delivery), { addSuffix: true })}</p>
+                )}
+                <p className="text-xs text-gray-400 mt-2">
+                  ★ {driver.rating.toFixed(1)} · {(driver as typeof driver & { total_deliveries?: number }).total_deliveries ?? 0} trips
+                  {driver.on_time_rate != null ? ` · ${driver.on_time_rate}% on-time` : ''}
+                </p>
               </div>
             </Popup>
           </Marker>

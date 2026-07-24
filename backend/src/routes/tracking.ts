@@ -7,14 +7,17 @@ router.get('/live', async (_req: Request, res: Response) => {
   try {
     const drivers = await query(`
       SELECT d.id, d.name, d.status, d.current_lat, d.current_lng, d.current_address,
-             d.avatar, d.truck_id, d.rating, d.gps_active,
+             d.avatar, d.truck_id, d.rating, d.gps_active, d.phone, d.on_time_rate,
              d.equipment_type, d.total_deliveries, d.truck_make, d.truck_number,
              t.plate_number, t.make, t.model, t.type as truck_type,
              o.id as order_id, o.order_number, o.delivery_address, o.delivery_contact,
              o.status as order_status, o.estimated_delivery
       FROM drivers d
       LEFT JOIN trucks t ON d.truck_id = t.id
-      LEFT JOIN orders o ON o.driver_id = d.id AND o.status IN ('assigned','picked_up','in_transit')
+      LEFT JOIN (
+        SELECT *, ROW_NUMBER() OVER (PARTITION BY driver_id ORDER BY assigned_at DESC) as rn
+        FROM orders WHERE status IN ('assigned','picked_up','in_transit')
+      ) o ON o.driver_id = d.id AND o.rn = 1
       WHERE d.gps_active = 1
     `);
     res.json(drivers);
