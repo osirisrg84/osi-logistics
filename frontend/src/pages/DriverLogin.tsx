@@ -48,7 +48,7 @@ export default function DriverLogin() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm mb-6 transition-colors">
+        <Link to="/app" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm mb-6 transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" /> Volver a selección de portal
         </Link>
         {/* Hero */}

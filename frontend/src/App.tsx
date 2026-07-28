@@ -44,8 +44,8 @@ function getHomeForRole(role: string) {
 function getLoginForRole(role: string) {
   if (role === 'admin') return '/admin';
   if (role === 'dispatcher') return '/dispatcher';
-  if (role === 'driver') return '/driver/login';
-  return '/';
+  if (role === 'driver') return '/driver';
+  return '/app';
 }
 
 /** Redirect to role-specific portal if already logged in */
@@ -80,74 +80,61 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-/** Redirect driver-portal public pages if driver is already logged in */
-function DriverPublicOnly({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useDriverAuth();
-  if (loading) return null;
-  if (user) return <Navigate to="/driver" replace />;
-  return <>{children}</>;
-}
-
-/** Protected: driver only — uses the separate driver auth session */
-function DriverGuard() {
+/**
+ * Single entry point for the driver section:
+ * - Not authenticated → shows DriverLogin
+ * - Authenticated as driver → shows DriverPortal
+ * Both live at /driver so the URL stays clean.
+ */
+function DriverRoot() {
   const { user, loading } = useDriverAuth();
   if (loading) return <Spinner />;
-  if (!user) return <Navigate to="/driver/login" replace />;
-  if (user.role !== 'driver') return <Navigate to="/driver/login" replace />;
+  if (!user || user.role !== 'driver') return <DriverLogin />;
   return <DriverPortal />;
 }
 
 function AppRoutes() {
   return (
     <Routes>
-      {/* Landing — portal selector */}
-      <Route path="/" element={<PublicOnly><Landing /></PublicOnly>} />
+      {/* Landing — portal selector (accessible at / and /app) */}
+      <Route path="/"    element={<PublicOnly><Landing /></PublicOnly>} />
+      <Route path="/app" element={<PublicOnly><Landing /></PublicOnly>} />
       <Route path="/setup-admin" element={<SetupAdmin />} />
 
       {/* Portal logins */}
-      <Route path="/admin"         element={<PublicOnly><AdminLogin /></PublicOnly>} />
-      <Route path="/dispatcher"    element={<PublicOnly><Login /></PublicOnly>} />
-      <Route path="/login"         element={<Navigate to="/dispatcher" replace />} />
+      <Route path="/admin"      element={<PublicOnly><AdminLogin /></PublicOnly>} />
+      <Route path="/dispatcher" element={<PublicOnly><Login /></PublicOnly>} />
+      <Route path="/login"      element={<Navigate to="/dispatcher" replace />} />
 
-      {/* Registration — separate pages per role */}
+      {/* Registration */}
       <Route path="/dispatcher/register" element={<PublicOnly><RegisterDispatcher /></PublicOnly>} />
       <Route path="/driver/register"     element={<PublicOnly><RegisterDriver /></PublicOnly>} />
-      {/* Legacy shared register redirects to dispatcher */}
-      <Route path="/register" element={<Navigate to="/dispatcher/register" replace />} />
+      <Route path="/register"            element={<Navigate to="/dispatcher/register" replace />} />
 
-      {/* Driver portal — wrapped in its own auth provider so sessions are independent from dispatch */}
-      <Route path="/driver/login" element={
-        <DriverAuthProvider><DriverPublicOnly><DriverLogin /></DriverPublicOnly></DriverAuthProvider>
-      } />
-      <Route path="/driver" element={<DriverAuthProvider><DriverGuard /></DriverAuthProvider>} />
+      {/* Driver — login + portal under the same clean URL /driver */}
+      <Route path="/driver"       element={<DriverAuthProvider><DriverRoot /></DriverAuthProvider>} />
+      <Route path="/driver/login" element={<Navigate to="/driver" replace />} />
 
       {/* Dispatcher + Admin shared layout */}
       <Route path="/" element={<DispatcherGuard />}>
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="orders"    element={<Orders />} />
-        <Route path="tracking"  element={<Tracking />} />
-        <Route path="drivers"   element={<Drivers />} />
-        <Route path="fleet"     element={<Fleet />} />
-        <Route path="reports"   element={<Reports />} />
-        <Route path="billing"        element={<Billing />} />
-        <Route path="commissions"    element={<DispatcherCommissions />} />
-        <Route path="hub"            element={<DispatcherHub />} />
-        <Route path="profile"        element={<DispatcherProfilePage />} />
-        <Route path="settings"  element={<Settings />} />
+        <Route path="dashboard"   element={<Dashboard />} />
+        <Route path="orders"      element={<Orders />} />
+        <Route path="tracking"    element={<Tracking />} />
+        <Route path="drivers"     element={<Drivers />} />
+        <Route path="fleet"       element={<Fleet />} />
+        <Route path="reports"     element={<Reports />} />
+        <Route path="billing"     element={<Billing />} />
+        <Route path="commissions" element={<DispatcherCommissions />} />
+        <Route path="hub"         element={<DispatcherHub />} />
+        <Route path="profile"     element={<DispatcherProfilePage />} />
+        <Route path="settings"    element={<Settings />} />
 
-        {/* Admin-only routes */}
-        <Route path="users" element={
-          <AdminGuard><UsersManagement /></AdminGuard>
-        } />
-        <Route path="dispatchers" element={
-          <AdminGuard><DispatcherProfiles /></AdminGuard>
-        } />
-        <Route path="verifications" element={
-          <AdminGuard><Verifications /></AdminGuard>
-        } />
+        <Route path="users"         element={<AdminGuard><UsersManagement /></AdminGuard>} />
+        <Route path="dispatchers"   element={<AdminGuard><DispatcherProfiles /></AdminGuard>} />
+        <Route path="verifications" element={<AdminGuard><Verifications /></AdminGuard>} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/app" replace />} />
     </Routes>
   );
 }

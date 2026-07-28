@@ -30,7 +30,7 @@ export default function Landing() {
       dot: 'bg-orange-400',
     },
     {
-      route: '/driver/login',
+      route: '/driver',
       icon: Truck,
       title: 'Driver Portal',
       subtitle: 'Mobile Access',
