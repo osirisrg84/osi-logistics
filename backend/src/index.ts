@@ -25,6 +25,7 @@ const allowedOrigins: string[] = [
   'http://localhost:3000',
   'https://osilogistics.com',
   'https://www.osilogistics.com',
+  'https://app.osilogistics.com',
 ];
 if (process.env.FRONTEND_URL) {
   process.env.FRONTEND_URL.split(',').forEach(u => allowedOrigins.push(u.trim()));
