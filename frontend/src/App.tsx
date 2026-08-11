@@ -88,7 +88,9 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
  */
 function RegisterRoot() {
   const host = window.location.hostname;
-  if (host === 'driver.osilogistics.com') return <RegisterDriver />;
+  const params = new URLSearchParams(window.location.search);
+  const portal = params.get('portal');
+  if (portal === 'driver' || host === 'driver.osilogistics.com') return <RegisterDriver />;
   return <RegisterDispatcher />;
 }
 
