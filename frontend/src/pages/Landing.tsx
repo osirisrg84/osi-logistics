@@ -8,9 +8,18 @@ export default function Landing() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const host = window.location.hostname;
+    if (host === 'dispatch.osilogistics.com') {
+      navigate('/dispatcher', { replace: true });
+      return;
+    }
+    if (host === 'driver.osilogistics.com') {
+      navigate('/driver', { replace: true });
+      return;
+    }
     setThemeColor(NEUTRAL_COLOR);
     return () => setThemeColor(DISPATCH_COLOR);
-  }, []);
+  }, [navigate]);
 
   const portals = [
     {
