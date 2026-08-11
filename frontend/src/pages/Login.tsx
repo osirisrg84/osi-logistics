@@ -212,7 +212,7 @@ export default function Login() {
 
           <p className="text-xs text-gray-400 text-center mt-4">
             ¿Eres nuevo dispatcher?{' '}
-            <Link to="/dispatcher/register" className="text-orange-500 hover:text-orange-600 font-medium">Crear cuenta</Link>
+            <Link to="/register" className="text-orange-500 hover:text-orange-600 font-medium">Crear cuenta</Link>
           </p>
         </div>
 

@@ -86,6 +86,12 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
  * - Authenticated as driver → shows DriverPortal
  * Both live at /driver so the URL stays clean.
  */
+function RegisterRoot() {
+  const host = window.location.hostname;
+  if (host === 'driver.osilogistics.com') return <RegisterDriver />;
+  return <RegisterDispatcher />;
+}
+
 function DriverRoot() {
   const { user, loading } = useDriverAuth();
   if (loading) return <Spinner />;
@@ -109,7 +115,7 @@ function AppRoutes() {
       {/* Registration */}
       <Route path="/dispatcher/register" element={<PublicOnly><RegisterDispatcher /></PublicOnly>} />
       <Route path="/driver/register"     element={<PublicOnly><RegisterDriver /></PublicOnly>} />
-      <Route path="/register"            element={<Navigate to="/dispatcher/register" replace />} />
+      <Route path="/register"            element={<PublicOnly><RegisterRoot /></PublicOnly>} />
 
       {/* Driver — login + portal under the same clean URL /driver */}
       <Route path="/driver"       element={<DriverAuthProvider><DriverRoot /></DriverAuthProvider>} />

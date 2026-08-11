@@ -146,7 +146,7 @@ export default function DriverLogin() {
 
           <p className="text-xs text-gray-400 text-center mt-4">
             ¿No tienes una cuenta?{' '}
-            <Link to="/driver/register" className="text-blue-500 hover:text-blue-600 font-medium">Regístrate aquí</Link>
+            <Link to="/register" className="text-blue-500 hover:text-blue-600 font-medium">Regístrate aquí</Link>
           </p>
         </div>
 
