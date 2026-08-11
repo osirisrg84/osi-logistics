@@ -17,7 +17,7 @@ import { formatLocation } from '../utils/location';
 import { useDriverAuth } from '../context/DriverAuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { ordersApi, driversApi, billingApi, notificationsApi, userApi } from '../services/driverApi';
-import { Order, Driver, DriverStatus } from '../types';
+import { Order, Driver, DriverStatus, OrderDocument, ORDER_DOCUMENT_TYPE_LABELS } from '../types';
 import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
 import { getSocket } from '../services/socket';
@@ -41,6 +41,105 @@ const STATUS_FLOW: Record<string, { next: string; label: string; color: string }
   picked_up: { next: 'in_transit', label: 'Start Rolling',    color: 'bg-purple-500 hover:bg-purple-600' },
   in_transit:{ next: 'delivered',  label: 'Mark Delivered ✓', color: 'bg-green-500 hover:bg-green-600'  },
 };
+
+const DOC_TYPES: { value: OrderDocument['type']; label: string }[] = [
+  { value: 'unsigned_bol',  label: ORDER_DOCUMENT_TYPE_LABELS.unsigned_bol },
+  { value: 'signed_bol',    label: ORDER_DOCUMENT_TYPE_LABELS.signed_bol },
+  { value: 'lumper',        label: ORDER_DOCUMENT_TYPE_LABELS.lumper },
+  { value: 'gate_pass',     label: ORDER_DOCUMENT_TYPE_LABELS.gate_pass },
+  { value: 'fuel_receipt',  label: ORDER_DOCUMENT_TYPE_LABELS.fuel_receipt },
+  { value: 'scale_receipt', label: ORDER_DOCUMENT_TYPE_LABELS.scale_receipt },
+  { value: 'other',         label: ORDER_DOCUMENT_TYPE_LABELS.other },
+];
+
+function OrderDocuments({ orderId }: { orderId: string }) {
+  const [docs, setDocs] = useState<OrderDocument[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [docType, setDocType] = useState<OrderDocument['type']>('signed_bol');
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+  const [sent, setSent] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    ordersApi.getDocuments(orderId)
+      .then(({ data }) => setDocs(data))
+      .catch(() => setDocs([]))
+      .finally(() => setLoading(false));
+  }, [orderId]);
+
+  const handleFile = async (file: File) => {
+    setError(''); setSent(false);
+    if (file.size > 8 * 1024 * 1024) { setError('El archivo no puede superar 8MB'); return; }
+    setUploading(true);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      const { data } = await ordersApi.uploadDocument(orderId, { type: docType, filename: file.name, data: base64 });
+      setDocs(prev => [{ id: data.id, type: docType, filename: data.filename, uploaded_at: data.uploaded_at }, ...prev]);
+      setSent(true);
+    } catch {
+      setError('Error al subir el documento');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleDelete = async (docId: string) => {
+    try {
+      await ordersApi.deleteDocument(orderId, docId);
+      setDocs(prev => prev.filter(d => d.id !== docId));
+      setSent(false);
+    } catch {
+      setError('Error al eliminar el documento');
+    }
+  };
+
+  return (
+    <div className="bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-xl p-3 space-y-2">
+      <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 flex items-center gap-1.5">
+        <FileText className="w-3.5 h-3.5 text-indigo-500" /> Documentos
+      </p>
+
+      {!loading && docs.length > 0 && (
+        <div className="space-y-1.5">
+          {docs.map(doc => (
+            <div key={doc.id} className="flex items-center justify-between gap-2 bg-white dark:bg-slate-700 rounded-lg px-2.5 py-1.5 border border-indigo-100 dark:border-indigo-800/30">
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-wide">{ORDER_DOCUMENT_TYPE_LABELS[doc.type]}</p>
+                <p className="text-xs text-gray-700 dark:text-slate-300 truncate">{doc.filename}</p>
+              </div>
+              <button onClick={() => handleDelete(doc.id)} className="text-[10px] font-semibold text-red-400 hover:text-red-500 flex-shrink-0">
+                Eliminar
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <select value={docType} onChange={e => setDocType(e.target.value as OrderDocument['type'])}
+          className="flex-1 text-xs rounded-lg border border-indigo-200 dark:border-indigo-800/40 bg-white dark:bg-slate-700 px-2 py-1.5 text-gray-700 dark:text-slate-200">
+          {DOC_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+        </select>
+        <label className="flex items-center justify-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-lg border-2 border-dashed border-indigo-300 dark:border-indigo-700 hover:border-indigo-400 transition-colors text-xs font-semibold text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+          {uploading ? <div className="w-3.5 h-3.5 border-2 border-indigo-300 border-t-indigo-600 rounded-full animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+          Subir
+          <input ref={fileInputRef} type="file" accept="image/*,application/pdf" className="hidden"
+            onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} disabled={uploading} />
+        </label>
+      </div>
+
+      {sent && <p className="text-[10px] text-green-600 dark:text-green-400">Documento enviado por correo a Rate Confirmation ✓</p>}
+      {error && <p className="text-[10px] text-red-500">{error}</p>}
+    </div>
+  );
+}
 
 function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (id: string, status: string) => void }) {
   const [updating, setUpdating] = useState(false);
@@ -163,6 +262,8 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
           </div>
         </div>
       )}
+
+      {order.status !== 'cancelled' && <OrderDocuments orderId={order.id} />}
 
       {flow && order.status !== 'delivered' && order.status !== 'cancelled' && (
         <button onClick={handleUpdate} disabled={updating}

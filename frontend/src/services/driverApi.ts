@@ -38,6 +38,10 @@ export const ordersApi = {
   ignore:       (id: string) => api.post(`/orders/${id}/ignore`),
   updateStatus: (id: string, data: { status: string; notes?: string; lat?: number; lng?: number }) =>
     api.post(`/orders/${id}/status`, data),
+  getDocuments:    (id: string) => api.get(`/orders/${id}/documents`),
+  uploadDocument:  (id: string, data: { type: string; filename: string; data: string }) =>
+    api.post(`/orders/${id}/documents`, data),
+  deleteDocument:  (id: string, docId: string) => api.delete(`/orders/${id}/documents/${docId}`),
 };
 
 export const driversApi = {

@@ -192,6 +192,37 @@ export async function sendOfferAcceptedEmail(to: string, dispatcherName: string,
   });
 }
 
+export async function sendDocumentEmail(to: string, driverName: string, orderNumber: string, docTypeLabel: string, filename: string, dataUrl: string) {
+  const base64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+  await sendEmail({
+    from: FROM,
+    to,
+    subject: `📄 ${docTypeLabel} — Orden ${orderNumber}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#f8f9fa;padding:32px;border-radius:16px;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <h1 style="color:#3b82f6;margin:0;font-size:28px;">OSI Logistics</h1>
+          <p style="color:#6b7280;margin:4px 0 0;">Driver Portal</p>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:24px;border:1px solid #e5e7eb;">
+          <h2 style="color:#111827;margin:0 0 4px;">Nuevo documento subido</h2>
+          <p style="color:#6b7280;margin:0 0 20px;font-size:14px;">${driverName} subió un documento para esta orden.</p>
+
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px;">
+            <p style="margin:0 0 8px;font-size:12px;font-weight:bold;color:#3b82f6;text-transform:uppercase;letter-spacing:1px;">Orden ${orderNumber}</p>
+            <p style="margin:0 0 4px;font-size:15px;font-weight:bold;color:#111827;">${docTypeLabel}</p>
+            <p style="margin:0;font-size:13px;color:#6b7280;">${filename}</p>
+          </div>
+
+          <p style="color:#9ca3af;font-size:12px;margin:20px 0 0;">El documento está adjunto a este correo.</p>
+        </div>
+        <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:16px;">© OSI Logistics · Miami, FL</p>
+      </div>
+    `,
+    attachments: [{ filename, content: base64 }],
+  });
+}
+
 export async function sendVerificationCode(to: string, name: string, code: string, type: 'email' | 'phone', role = 'driver') {
   const label = type === 'email' ? 'correo electrónico' : 'número de teléfono';
   const accent = role === 'admin' ? '#4f46e5' : role === 'dispatcher' ? '#f97316' : '#2563eb';

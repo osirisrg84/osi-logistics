@@ -120,6 +120,26 @@ export interface Order {
   dispatcher_code?: string | null;
 }
 
+export type OrderDocumentType = 'unsigned_bol' | 'signed_bol' | 'lumper' | 'gate_pass' | 'fuel_receipt' | 'scale_receipt' | 'other';
+
+export const ORDER_DOCUMENT_TYPE_LABELS: Record<OrderDocumentType, string> = {
+  unsigned_bol: 'Unsigned BOL',
+  signed_bol:   'Signed BOL',
+  lumper:       'Lumper',
+  gate_pass:    'Gate Pass',
+  fuel_receipt: 'Fuel Receipt',
+  scale_receipt:'Scale Receipt',
+  other:        'Other',
+};
+
+export interface OrderDocument {
+  id: string;
+  type: OrderDocumentType;
+  filename: string;
+  uploaded_at: string;
+  data?: string;
+}
+
 export interface OrderHistory {
   id: string;
   order_id: string;

@@ -26,6 +26,8 @@ const allowedOrigins: string[] = [
   'https://osilogistics.com',
   'https://www.osilogistics.com',
   'https://app.osilogistics.com',
+  'https://dispatch.osilogistics.com',
+  'https://driver.osilogistics.com',
 ];
 if (process.env.FRONTEND_URL) {
   process.env.FRONTEND_URL.split(',').forEach(u => allowedOrigins.push(u.trim()));

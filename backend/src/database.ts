@@ -266,6 +266,19 @@ export async function initDatabase(): Promise<void> {
     uploaded_at TEXT NOT NULL
   )`);
 
+  // Driver-uploaded paperwork (BOL, lumper, gate pass, receipts...) — one order can have
+  // many documents, each auto-emailed to the driver's rate_con_email on upload.
+  await exec(`CREATE TABLE IF NOT EXISTS order_documents (
+    id          TEXT PRIMARY KEY,
+    order_id    TEXT NOT NULL,
+    driver_id   TEXT,
+    type        TEXT NOT NULL,
+    filename    TEXT NOT NULL,
+    data        TEXT NOT NULL,
+    uploaded_at TEXT NOT NULL
+  )`);
+  await exec(`CREATE INDEX IF NOT EXISTS idx_order_documents_order_id ON order_documents(order_id)`);
+
   // Assign dispatcher_code to existing dispatchers that don't have one
   const genCode = async (): Promise<string> => {
     const code = String(Math.floor(10000000 + Math.random() * 90000000));

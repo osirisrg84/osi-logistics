@@ -7,6 +7,18 @@
       "has": [{ "type": "host", "value": "osilogistics.com" }],
       "destination": "https://www.osilogistics.com/$1",
       "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "dispatch.osilogistics.com" }],
+      "destination": "https://dispatch.osilogistics.com/dispatcher",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "driver.osilogistics.com" }],
+      "destination": "https://driver.osilogistics.com/driver",
+      "permanent": false
     }
   ],
   "rewrites": [

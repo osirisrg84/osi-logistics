@@ -2,11 +2,17 @@ import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne, createCommission } from '../database';
 import { appEvents } from '../events';
-import { sendOfferEmail, sendOfferAcceptedEmail, sendDeliveryEmail } from '../email';
+import { sendOfferEmail, sendOfferAcceptedEmail, sendDeliveryEmail, sendDocumentEmail } from '../email';
 
 type AuthRequest = Request & { user?: { id: string; name: string; role: string; driver_id?: string } };
 
 const router = Router();
+
+const DOCUMENT_TYPES = ['unsigned_bol', 'signed_bol', 'lumper', 'gate_pass', 'fuel_receipt', 'scale_receipt', 'other'];
+const DOCUMENT_TYPE_LABELS: Record<string, string> = {
+  unsigned_bol: 'Unsigned BOL', signed_bol: 'Signed BOL', lumper: 'Lumper',
+  gate_pass: 'Gate Pass', fuel_receipt: 'Fuel Receipt', scale_receipt: 'Scale Receipt', other: 'Other',
+};
 
 router.get('/', async (req: Request, res: Response) => {
   try {
@@ -155,6 +161,68 @@ router.post('/:id/rate-con', async (req: Request, res: Response) => {
 router.delete('/:id/rate-con', async (req: Request, res: Response) => {
   try {
     await exec('DELETE FROM order_rate_cons WHERE order_id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+// Driver-uploaded paperwork (Unsigned/Signed BOL, Lumper, Gate Pass, Fuel/Scale Receipt, Other).
+// List endpoint omits `data` so the base64 payload never gets pulled into the list view.
+router.get('/:id/documents', async (req: Request, res: Response) => {
+  try {
+    const docs = await query('SELECT id, type, filename, uploaded_at FROM order_documents WHERE order_id = ? ORDER BY uploaded_at DESC', [req.params.id]);
+    res.json(docs);
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.get('/:id/documents/:docId', async (req: Request, res: Response) => {
+  try {
+    const doc = await queryOne('SELECT id, type, filename, data, uploaded_at FROM order_documents WHERE id = ? AND order_id = ?', [req.params.docId, req.params.id]);
+    if (!doc) return res.status(404).json({ error: 'Document not found' });
+    res.json(doc);
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.post('/:id/documents', async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  try {
+    const { type, filename, data } = req.body;
+    if (!type || !DOCUMENT_TYPES.includes(type)) return res.status(400).json({ error: 'Invalid document type' });
+    if (!filename || !data) return res.status(400).json({ error: 'filename and data are required' });
+    if (data.length > 12_000_000) return res.status(413).json({ error: 'File too large (max ~8MB)' });
+
+    const order = await queryOne<Record<string, unknown>>('SELECT * FROM orders WHERE id = ?', [req.params.id]);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (authReq.user?.role === 'driver' && authReq.user.driver_id !== order.driver_id) {
+      return res.status(403).json({ error: 'No autorizado' });
+    }
+
+    const id = uuidv4();
+    const uploadedAt = new Date().toISOString();
+    await exec('INSERT INTO order_documents (id, order_id, driver_id, type, filename, data, uploaded_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [id, req.params.id, (order.driver_id as string | null) ?? null, type, filename, data, uploadedAt]);
+
+    // Envío automático al correo de Rate Confirmation de la compañía del driver
+    if (order.driver_id) {
+      const driver = await queryOne<{ name: string; rate_con_email: string }>('SELECT name, rate_con_email FROM drivers WHERE id = ?', [order.driver_id]);
+      if (driver?.rate_con_email) {
+        sendDocumentEmail(driver.rate_con_email, driver.name, order.order_number as string, DOCUMENT_TYPE_LABELS[type], filename, data)
+          .catch(e => console.error('[Email] Document email failed:', e));
+      }
+    }
+
+    res.status(201).json({ id, type, filename, uploaded_at: uploadedAt });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.delete('/:id/documents/:docId', async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  try {
+    const order = await queryOne<Record<string, unknown>>('SELECT driver_id FROM orders WHERE id = ?', [req.params.id]);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (authReq.user?.role === 'driver' && authReq.user.driver_id !== order.driver_id) {
+      return res.status(403).json({ error: 'No autorizado' });
+    }
+    await exec('DELETE FROM order_documents WHERE id = ? AND order_id = ?', [req.params.docId, req.params.id]);
     res.json({ success: true });
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
