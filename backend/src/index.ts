@@ -14,6 +14,7 @@ import notificationsRouter from './routes/notifications';
 import authRouter from './routes/auth';
 import adminRouter from './routes/admin';
 import billingRouter from './routes/billing';
+import stripeRouter from './routes/stripe';
 import pushRouter, { sendPushToAll } from './routes/push';
 import chatRouter from './routes/chat';
 import { authenticate } from './middleware/auth';
@@ -123,6 +124,7 @@ app.use('/api/analytics', authenticate, analyticsRouter);
 app.use('/api/notifications', authenticate, notificationsRouter);
 app.use('/api/admin', authenticate, adminRouter);
 app.use('/api/billing', authenticate, billingRouter);
+app.use('/api/stripe', stripeRouter);
 app.use('/api/push', pushRouter);
 
 io.on('connection', (socket) => {

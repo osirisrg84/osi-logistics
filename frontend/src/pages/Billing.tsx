@@ -4,6 +4,7 @@ import {
   Clock, RefreshCw, ChevronDown, Users, UserCog, FileText
 } from 'lucide-react';
 import { billingApi } from '../services/api';
+import api from '../services/api';
 import { format } from 'date-fns';
 
 interface Commission {
@@ -104,6 +105,20 @@ export default function Billing() {
     await billingApi.settleOne(id);
     await load();
     setSettling(null);
+  };
+
+  const payWithStripe = async (id: string, amount: number, description: string) => {
+    setSettling(id);
+    try {
+      const res = await api.post('/stripe/create-checkout', {
+        billing_id: id,
+        amount,
+        description,
+      });
+      if (res.data?.url) window.open(res.data.url, '_blank');
+    } finally {
+      setSettling(null);
+    }
   };
 
   const settleDriverAll = async (driverId: string) => {
@@ -256,13 +271,22 @@ export default function Billing() {
                     <td className="px-4 py-3 text-center"><StatusChip status={r.status} /></td>
                     <td className="px-4 py-3 text-right">
                       {r.status === 'pending' && (
-                        <button
-                          onClick={() => settleOne(r.id)}
-                          disabled={settling === r.id}
-                          className="text-xs font-medium text-orange-600 hover:text-orange-700 disabled:opacity-40 whitespace-nowrap"
-                        >
-                          {settling === r.id ? '...' : 'Liquidar'}
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => payWithStripe(r.id, r.driver_charge, `Comisión OSI - Orden ${r.order_number}`)}
+                            disabled={settling === r.id}
+                            className="text-xs font-medium text-purple-600 hover:text-purple-700 disabled:opacity-40 whitespace-nowrap"
+                          >
+                            {settling === r.id ? '...' : '💳 Stripe'}
+                          </button>
+                          <button
+                            onClick={() => settleOne(r.id)}
+                            disabled={settling === r.id}
+                            className="text-xs font-medium text-orange-600 hover:text-orange-700 disabled:opacity-40 whitespace-nowrap"
+                          >
+                            Liquidar
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
