@@ -2803,11 +2803,7 @@ export default function DriverPortal() {
                       <div className="bg-white dark:bg-slate-800 rounded-xl px-4 py-3 space-y-1.5">
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-500 dark:text-slate-400">Email</span>
-                          <span className="font-semibold text-gray-900 dark:text-white">pagos@osilogistics.com</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-500 dark:text-slate-400">Teléfono</span>
-                          <span className="font-semibold text-gray-900 dark:text-white">+1 (305) 000-0000</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">admin@osilogistics.com</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-500 dark:text-slate-400">A nombre de</span>
