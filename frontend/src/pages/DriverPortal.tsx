@@ -2823,15 +2823,15 @@ export default function DriverPortal() {
                       <div className="bg-white dark:bg-slate-800 rounded-xl px-4 py-3 space-y-1.5">
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-500 dark:text-slate-400">Banco</span>
-                          <span className="font-semibold text-gray-900 dark:text-white">Bank of America</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">Chase</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-500 dark:text-slate-400">Routing #</span>
-                          <span className="font-mono font-semibold text-gray-900 dark:text-white">026009593</span>
+                          <span className="font-mono font-semibold text-gray-900 dark:text-white">267084131</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-500 dark:text-slate-400">Account #</span>
-                          <span className="font-mono font-semibold text-gray-900 dark:text-white">••••••4821</span>
+                          <span className="font-mono font-semibold text-gray-900 dark:text-white">••••••1105</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-500 dark:text-slate-400">Beneficiario</span>
