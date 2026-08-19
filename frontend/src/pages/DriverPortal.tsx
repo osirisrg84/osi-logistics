@@ -16,7 +16,7 @@ import { setAppManifest, setThemeColor, DRIVER_MANIFEST, DISPATCH_MANIFEST, DRIV
 import { formatLocation } from '../utils/location';
 import { useDriverAuth } from '../context/DriverAuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { ordersApi, driversApi, billingApi, notificationsApi, userApi } from '../services/driverApi';
+import { ordersApi, driversApi, billingApi, notificationsApi, userApi, driverAxios } from '../services/driverApi';
 import { Order, Driver, DriverStatus, OrderDocument, ORDER_DOCUMENT_TYPE_LABELS } from '../types';
 import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -923,38 +923,40 @@ export default function DriverPortal() {
   };
 
   // ── Payment modal ─────────────────────────────────────
-  type PayTab = 'card' | 'zelle' | 'ach' | 'paypal';
+  type PayTab = 'card' | 'zelle' | 'ach';
   const [showPayModal, setShowPayModal] = useState(false);
   const [payTab, setPayTab] = useState<PayTab>('card');
   const [payAmount, setPayAmount] = useState('');
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardExpiry, setCardExpiry] = useState('');
-  const [cardCvc, setCardCvc] = useState('');
-  const [cardName, setCardName] = useState('');
   const [payProcessing, setPayProcessing] = useState(false);
   const [paySuccess, setPaySuccess] = useState(false);
 
   const openPayModal = () => {
     setPayAmount(billingSummary ? billingSummary.pending.toFixed(2) : '');
     setPayTab('card');
-    setCardNumber(''); setCardExpiry(''); setCardCvc(''); setCardName('');
     setPaySuccess(false);
     setShowPayModal(true);
   };
 
-  const formatCardNumber = (v: string) =>
-    v.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
-  const formatExpiry = (v: string) => {
-    const d = v.replace(/\D/g, '').slice(0, 4);
-    return d.length >= 3 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
-  };
-
   const handlePay = async () => {
+    if (!payAmount || parseFloat(payAmount) <= 0) return;
     setPayProcessing(true);
-    // TODO: replace with real Stripe PaymentIntent call
-    await new Promise(r => setTimeout(r, 1800));
-    setPayProcessing(false);
-    setPaySuccess(true);
+    try {
+      const { data } = await driverAxios.post('/stripe/create-checkout', {
+        amount: parseFloat(payAmount),
+        description: `Comisión OSI Logistics - Driver`,
+        billing_id: null,
+        success_url: window.location.origin + '/driver?paid=1',
+        cancel_url:  window.location.origin + '/driver',
+      });
+      if (data?.url) {
+        setShowPayModal(false);
+        window.open(data.url, '_blank');
+      }
+    } catch {
+      alert('Error al conectar con Stripe. Intenta de nuevo.');
+    } finally {
+      setPayProcessing(false);
+    }
   };
 
   const isBusy = activeOrders.some(o => ['picked_up', 'in_transit'].includes(o.status));
@@ -2752,13 +2754,12 @@ export default function DriverPortal() {
                   {/* Method tabs */}
                   <div>
                     <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Método de pago</label>
-                    <div className="grid grid-cols-4 gap-1.5 mt-1.5">
+                    <div className="grid grid-cols-3 gap-1.5 mt-1.5">
                       {([
-                        { id: 'card',   label: '💳 Tarjeta' },
-                        { id: 'zelle',  label: '📱 Zelle' },
-                        { id: 'ach',    label: '🏦 ACH' },
-                        { id: 'paypal', label: null },
-                      ] as { id: PayTab; label: string | null }[]).map(m => (
+                        { id: 'card',  label: '💳 Tarjeta' },
+                        { id: 'zelle', label: '📱 Zelle' },
+                        { id: 'ach',   label: '🏦 ACH' },
+                      ] as { id: PayTab; label: string }[]).map(m => (
                         <button
                           key={m.id}
                           onClick={() => setPayTab(m.id)}
@@ -2768,66 +2769,27 @@ export default function DriverPortal() {
                               : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700'
                           }`}
                         >
-                          {m.id === 'paypal' ? (
-                            <span className="flex items-center justify-center gap-0.5 leading-none">
-                              <span style={{ color: payTab === 'paypal' ? '#7EC8E3' : '#003087', fontWeight: 900, fontSize: 11 }}>Pay</span>
-                              <span style={{ color: payTab === 'paypal' ? '#b3d9f0' : '#009CDE', fontWeight: 900, fontSize: 11 }}>Pal</span>
-                            </span>
-                          ) : m.label}
+                          {m.label}
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Card form */}
+                  {/* Card — Stripe Checkout */}
                   {payTab === 'card' && (
-                    <div className="space-y-3">
-                      <div>
-                        <label className="label text-xs">Número de tarjeta</label>
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          placeholder="1234 5678 9012 3456"
-                          value={cardNumber}
-                          onChange={e => setCardNumber(formatCardNumber(e.target.value))}
-                          className="input font-mono tracking-widest"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="label text-xs">Vencimiento</label>
-                          <input
-                            type="text"
-                            inputMode="numeric"
-                            placeholder="MM/AA"
-                            value={cardExpiry}
-                            onChange={e => setCardExpiry(formatExpiry(e.target.value))}
-                            className="input font-mono"
-                          />
+                    <div className="bg-[#635bff]/5 border border-[#635bff]/20 rounded-2xl p-4 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-[#635bff] rounded-lg flex items-center justify-center">
+                          <CreditCard className="w-4 h-4 text-white" />
                         </div>
                         <div>
-                          <label className="label text-xs">CVV</label>
-                          <input
-                            type="text"
-                            inputMode="numeric"
-                            placeholder="123"
-                            maxLength={4}
-                            value={cardCvc}
-                            onChange={e => setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                            className="input font-mono"
-                          />
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white">Pago seguro con Stripe</p>
+                          <p className="text-xs text-gray-400 dark:text-slate-500">Visa, Mastercard, Amex · Cifrado SSL</p>
                         </div>
                       </div>
-                      <div>
-                        <label className="label text-xs">Nombre en la tarjeta</label>
-                        <input
-                          type="text"
-                          placeholder="CARLOS RODRIGUEZ"
-                          value={cardName}
-                          onChange={e => setCardName(e.target.value.toUpperCase())}
-                          className="input uppercase"
-                        />
-                      </div>
+                      <p className="text-xs text-gray-500 dark:text-slate-400">
+                        Al hacer clic serás redirigido al portal de pago seguro de Stripe para completar la transacción.
+                      </p>
                     </div>
                   )}
 
@@ -2884,23 +2846,6 @@ export default function DriverPortal() {
                     </div>
                   )}
 
-                  {/* PayPal */}
-                  {payTab === 'paypal' && (
-                    <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700/40 rounded-2xl p-4 space-y-2">
-                      <p className="text-sm font-semibold text-indigo-800 dark:text-indigo-300">PayPal</p>
-                      <div className="bg-white dark:bg-slate-800 rounded-xl px-4 py-3 space-y-1.5">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-500 dark:text-slate-400">PayPal.me</span>
-                          <span className="font-semibold text-indigo-600 dark:text-indigo-400">@OSILogistics</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-500 dark:text-slate-400">Email</span>
-                          <span className="font-semibold text-gray-900 dark:text-white">pagos@osilogistics.com</span>
-                        </div>
-                      </div>
-                      <p className="text-[11px] text-indigo-500 dark:text-indigo-400">Envía como "Familia y amigos" para evitar comisiones.</p>
-                    </div>
-                  )}
 
                   {/* Stripe security badge */}
                   {payTab === 'card' && (
@@ -2921,7 +2866,7 @@ export default function DriverPortal() {
                     {payTab === 'card' ? (
                       <button
                         onClick={handlePay}
-                        disabled={payProcessing || !payAmount || parseFloat(payAmount) <= 0 || !cardNumber || !cardExpiry || !cardCvc || !cardName}
+                        disabled={payProcessing || !payAmount || parseFloat(payAmount) <= 0}
                         className="flex-1 py-3 rounded-2xl text-sm font-bold text-white bg-green-500 hover:bg-green-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
                       >
                         {payProcessing

@@ -26,6 +26,8 @@ api.interceptors.response.use(
   }
 );
 
+export { api as driverAxios };
+
 export const authApi = {
   login:  (email: string, password: string) => api.post('/auth/login', { email, password }),
   me:     () => api.get('/auth/me'),

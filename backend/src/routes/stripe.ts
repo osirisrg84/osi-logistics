@@ -14,7 +14,7 @@ function getStripe() {
 router.post('/create-checkout', authenticate, async (req: Request, res: Response) => {
   try {
     const { amount, description, billing_id, success_url, cancel_url } = req.body;
-    if (!amount || !billing_id) return res.status(400).json({ error: 'amount and billing_id required' });
+    if (!amount) return res.status(400).json({ error: 'amount required' });
 
     const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
@@ -30,7 +30,7 @@ router.post('/create-checkout', authenticate, async (req: Request, res: Response
       mode: 'payment',
       success_url: success_url || 'https://app.osilogistics.com/billing?paid=1',
       cancel_url:  cancel_url  || 'https://app.osilogistics.com/billing',
-      metadata: { billing_id: String(billing_id) },
+      metadata: billing_id ? { billing_id: String(billing_id) } : {},
     });
 
     res.json({ url: session.url, session_id: session.id });
