@@ -69,6 +69,7 @@ export default function RegisterDriver() {
       });
       setRegisteredName(form.name);
       setRegistered(true);
+      (window as any).fbq?.('track', 'CompleteRegistration', { content_name: 'driver_registration' });
     } catch (err: unknown) {
       setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Registration failed. Please try again.');
     } finally {
