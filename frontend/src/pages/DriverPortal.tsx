@@ -17,6 +17,7 @@ import { formatLocation } from '../utils/location';
 import { useDriverAuth } from '../context/DriverAuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { ordersApi, driversApi, billingApi, notificationsApi, userApi, driverAxios } from '../services/driverApi';
+import { StripeCardPayment } from '../components/StripeCardPayment';
 import { Order, Driver, DriverStatus, OrderDocument, ORDER_DOCUMENT_TYPE_LABELS } from '../types';
 import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -2775,22 +2776,13 @@ export default function DriverPortal() {
                     </div>
                   </div>
 
-                  {/* Card — Stripe Checkout */}
+                  {/* Card — Stripe Elements (embedded card form) */}
                   {payTab === 'card' && (
-                    <div className="bg-[#635bff]/5 border border-[#635bff]/20 rounded-2xl p-4 space-y-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-[#635bff] rounded-lg flex items-center justify-center">
-                          <CreditCard className="w-4 h-4 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900 dark:text-white">Pago seguro con Stripe</p>
-                          <p className="text-xs text-gray-400 dark:text-slate-500">Visa, Mastercard, Amex · Cifrado SSL</p>
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-slate-400">
-                        Al hacer clic serás redirigido al portal de pago seguro de Stripe para completar la transacción.
-                      </p>
-                    </div>
+                    <StripeCardPayment
+                      amount={parseFloat(payAmount || '0')}
+                      onSuccess={() => setShowPayModal(false)}
+                      onCancel={() => setShowPayModal(false)}
+                    />
                   )}
 
                   {/* Zelle */}
@@ -2843,42 +2835,23 @@ export default function DriverPortal() {
                   )}
 
 
-                  {/* Stripe security badge */}
-                  {payTab === 'card' && (
-                    <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-400 dark:text-slate-500">
-                      <Lock className="w-3 h-3" />
-                      Pagos seguros con <span className="font-semibold text-[#635bff]">Stripe</span>
-                    </div>
-                  )}
-
-                  {/* Action buttons */}
-                  <div className="flex gap-3 pt-1">
-                    <button
-                      onClick={() => setShowPayModal(false)}
-                      className="flex-1 py-3 rounded-2xl text-sm font-semibold text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
-                    >
-                      Cancelar
-                    </button>
-                    {payTab === 'card' ? (
+                  {/* Action buttons — only for Zelle / ACH tabs */}
+                  {payTab !== 'card' && (
+                    <div className="flex gap-3 pt-1">
                       <button
-                        onClick={handlePay}
-                        disabled={payProcessing || !payAmount || parseFloat(payAmount) <= 0}
-                        className="flex-1 py-3 rounded-2xl text-sm font-bold text-white bg-green-500 hover:bg-green-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
+                        onClick={() => setShowPayModal(false)}
+                        className="flex-1 py-3 rounded-2xl text-sm font-semibold text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
                       >
-                        {payProcessing
-                          ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Procesando...</>
-                          : <><ShieldCheck className="w-4 h-4" /> Pagar ${parseFloat(payAmount || '0').toFixed(2)}</>
-                        }
+                        Cancelar
                       </button>
-                    ) : (
                       <button
                         onClick={() => setShowPayModal(false)}
                         className="flex-1 py-3 rounded-2xl text-sm font-bold text-white bg-green-500 hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
                       >
                         <CheckCircle className="w-4 h-4" /> Entendido
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </>
             )}

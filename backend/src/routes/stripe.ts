@@ -40,6 +40,27 @@ router.post('/create-checkout', authenticate, async (req: Request, res: Response
   }
 });
 
+// Create a PaymentIntent for Stripe Elements (direct card payment, no redirect)
+router.post('/create-payment-intent', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { amount, description, billing_id } = req.body;
+    if (!amount) return res.status(400).json({ error: 'amount required' });
+
+    const stripe = getStripe();
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100),
+      currency: 'usd',
+      description: description || 'OSI Logistics Commission',
+      metadata: billing_id ? { billing_id: String(billing_id) } : {},
+    });
+
+    res.json({ client_secret: paymentIntent.client_secret });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Stripe error';
+    res.status(500).json({ error: msg });
+  }
+});
+
 // Stripe webhook — mark billing settled on payment success
 router.post('/webhook', async (req: Request, res: Response) => {
   const sig = req.headers['stripe-signature'] as string;
