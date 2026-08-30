@@ -202,7 +202,7 @@ export default function Login() {
             <p className="text-xs text-gray-400 text-center mb-2 uppercase tracking-wide font-medium">Demo Credentials</p>
             <button
               type="button"
-              onClick={() => { setEmail('dispatcher@osilogistics.com'); setPassword('Dispatch123!'); }}
+              onClick={() => { setEmail('dispatcher@osilogistics.com'); setPassword('Mg#Osi7491!'); }}
               className="w-full text-sm font-medium py-2.5 px-4 rounded-xl bg-orange-50 text-orange-700 border border-orange-100 hover:bg-orange-100 transition-colors flex items-center gap-2"
             >
               <div className="w-7 h-7 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">DO</div>
