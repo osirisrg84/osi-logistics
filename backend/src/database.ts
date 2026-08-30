@@ -367,6 +367,98 @@ export async function initDatabase(): Promise<void> {
   await seedFavorites();
   await seedCommissions();
   await initCommissions();
+  await seedHistoricalOrders();
+}
+
+async function seedHistoricalOrders(): Promise<void> {
+  const existing = await queryOne<{ count: number }>(
+    "SELECT COUNT(*) as count FROM orders WHERE order_number LIKE 'OSI-H%'"
+  );
+  if ((existing?.count ?? 0) > 0) return;
+
+  const drivers = await query<{ id: string }>('SELECT id FROM drivers ORDER BY id LIMIT 5');
+  if (drivers.length === 0) return;
+
+  const customers = [
+    { name: 'TechCorp Solutions',       phone: '(305) 800-1001', email: 'logistics@techcorp.com'     },
+    { name: 'Fresh Market Foods',       phone: '(305) 800-1002', email: 'orders@freshmarket.com'     },
+    { name: 'BuildRight Construction',  phone: '(305) 800-1003', email: 'supply@buildright.com'      },
+    { name: 'MedSupply Inc',            phone: '(305) 800-1004', email: 'orders@medsupply.com'       },
+    { name: 'Auto Parts Direct',        phone: '(305) 800-1005', email: 'shipping@autoparts.com'     },
+    { name: 'Miami Fashion House',      phone: '(305) 800-1006', email: 'warehouse@miamifw.com'      },
+    { name: 'ElectroCom Retail',        phone: '(305) 800-1010', email: 'logistics@electrocom.com'   },
+  ];
+  const pickups = [
+    { addr: '1200 NW 22nd Ave, Miami, FL 33125',  lat: 25.7886, lng: -80.2284 },
+    { addr: '8888 NW 36th St, Doral, FL 33178',   lat: 25.8192, lng: -80.3602 },
+    { addr: '3300 NE 1st Ave, Miami, FL 33137',   lat: 25.8061, lng: -80.1923 },
+    { addr: '500 Brickell Ave, Miami, FL 33131',   lat: 25.7656, lng: -80.1935 },
+  ];
+  const deliveries = [
+    { addr: '401 Collins Ave, Miami Beach, FL',    lat: 25.7745, lng: -80.1349 },
+    { addr: '20001 E Country Club Dr, Aventura',   lat: 25.9590, lng: -80.1398 },
+    { addr: '1 Alhambra Plaza, Coral Gables, FL',  lat: 25.7215, lng: -80.2684 },
+    { addr: '3251 Hollywood Blvd, Hollywood, FL',  lat: 26.0112, lng: -80.1496 },
+  ];
+  const descs = [
+    'Componentes electrónicos y periféricos', 'Alimentos refrigerados',
+    'Materiales de construcción',             'Suministros médicos',
+    'Repuestos automotrices',                 'Mercancía textil',
+    'Electrodomésticos',                      'Productos frescos',
+  ];
+
+  let counter = 1;
+  for (let daysAgo = 28; daysAgo >= 1; daysAgo--) {
+    const base = new Date();
+    base.setDate(base.getDate() - daysAgo);
+    const dow = base.getDay();
+    // weekdays 3-5 orders, saturday 2, sunday 1
+    const ordersToday = dow === 0 ? 1 : dow === 6 ? 2 : 3 + Math.floor(Math.random() * 3);
+
+    for (let j = 0; j < ordersToday; j++) {
+      const id = uuidv4();
+      const orderNum = `OSI-H${String(counter).padStart(4, '0')}`;
+      counter++;
+
+      const cust     = customers[counter % customers.length];
+      const pu       = pickups[j % pickups.length];
+      const del      = deliveries[j % deliveries.length];
+      const driver   = drivers[j % drivers.length];
+      const price    = Math.round((1200 + Math.random() * 4300) / 100) * 100;
+      const dist     = Math.round((10 + Math.random() * 55) * 10) / 10;
+      const weight   = Math.round((400 + Math.random() * 4600) * 10) / 10;
+      const volume   = Math.round(weight / 280 * 10) / 10;
+
+      const createdAt   = new Date(base);
+      createdAt.setHours(6 + j * 2, Math.floor(Math.random() * 60));
+      const assignedAt  = new Date(createdAt.getTime() + 25 * 60000);
+      const pickedUpAt  = new Date(createdAt.getTime() + 85 * 60000);
+      const inTransitAt = new Date(createdAt.getTime() + 115 * 60000);
+      const deliveredAt = new Date(createdAt.getTime() + (3 + Math.random() * 3) * 3600000);
+      const estimatedAt = new Date(createdAt.getTime() + 4 * 3600000);
+
+      await exec(`INSERT INTO orders
+        (id, order_number, customer_name, customer_phone, customer_email,
+         pickup_address, pickup_lat, pickup_lng, pickup_contact,
+         delivery_address, delivery_lat, delivery_lng, delivery_contact,
+         status, priority, weight_kg, volume_m3, description, notes,
+         driver_id, truck_id, created_at, assigned_at, picked_up_at, in_transit_at,
+         delivered_at, estimated_delivery, price, distance_km)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        [id, orderNum, cust.name, cust.phone, cust.email,
+         pu.addr, pu.lat, pu.lng, 'Miami',
+         del.addr, del.lat, del.lng, 'Miami',
+         'delivered', 'normal', weight, volume, descs[counter % descs.length], '',
+         driver.id, null,
+         createdAt.toISOString(), assignedAt.toISOString(), pickedUpAt.toISOString(),
+         inTransitAt.toISOString(), deliveredAt.toISOString(), estimatedAt.toISOString(),
+         price, dist]);
+
+      await exec("INSERT INTO order_history (id,order_id,status,notes,created_by) VALUES (?,?,'delivered','Successfully delivered','driver')",
+        [uuidv4(), id]);
+    }
+  }
+  console.log(`✅ ${counter - 1} historical orders seeded for analytics`);
 }
 
 export async function createCommission(
