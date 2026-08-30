@@ -485,7 +485,7 @@ async function seedUsers(): Promise<void> {
   if ((realAdmin?.c ?? 0) === 0) {
     await upsert('Admin OSI', 'admin@osilogistics.com', 'Admin123!', 'admin', null);
   }
-  await upsert('Maria Gonzalez', 'dispatcher@osilogistics.com', 'Dispatch123!', 'dispatcher', null);
+  await upsert('Maria Gonzalez', 'dispatcher@osilogistics.com', 'Mg#Osi7491!', 'dispatcher', null);
 
   const carlos = await queryOne<{ id: string; name: string; email: string }>(
     "SELECT id, name, email FROM drivers WHERE email = 'carlos.r@osilogistics.com' LIMIT 1"
