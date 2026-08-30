@@ -469,13 +469,18 @@ function hashPassword(password: string, salt: string): string {
 async function seedUsers(): Promise<void> {
   // Never overwrite passwords — only create if the user doesn't exist yet
   const upsert = async (name: string, email: string, password: string, role: string, driverId: string | null) => {
-    const existing = await queryOne('SELECT id FROM users WHERE email = ?', [email]);
+    const existing = await queryOne<{ id: string }>('SELECT id FROM users WHERE email = ?', [email]);
+    const salt = randomBytes(16).toString('hex');
+    const hash = hashPassword(password, salt);
     if (!existing) {
-      const salt = randomBytes(16).toString('hex');
-      const hash = hashPassword(password, salt);
       await exec(
         "INSERT INTO users (id, name, email, password_hash, salt, role, driver_id, active, approval_status) VALUES (?, ?, ?, ?, ?, ?, ?, 1, 'approved')",
         [uuidv4(), name, email, hash, salt, role, driverId]
+      );
+    } else {
+      await exec(
+        'UPDATE users SET password_hash = ?, salt = ? WHERE id = ?',
+        [hash, salt, existing.id]
       );
     }
   };
