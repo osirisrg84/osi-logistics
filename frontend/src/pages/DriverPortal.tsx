@@ -962,6 +962,8 @@ export default function DriverPortal() {
 
   const isBusy = activeOrders.some(o => ['picked_up', 'in_transit'].includes(o.status));
   const todayRevenue = deliveredToday.reduce((sum, o) => sum + o.price, 0);
+  const isOsiDemo    = user?.email?.endsWith('@osilogistics.com') ?? false;
+  const displayRevenue = isOsiDemo ? 8500 : todayRevenue;
   const cfg = STATUS_CONFIG[driverStatus];
 
   // ── Company / Authority helpers ────────────────────────────
@@ -1275,9 +1277,9 @@ export default function DriverPortal() {
               className="rounded-2xl px-2 py-4 text-center active:scale-95 transition-transform w-full bg-white/6 border border-white/10">
               <p className="font-bold text-emerald-400 leading-tight"
                  style={{ fontSize: 'clamp(13px, 4vw, 18px)' }}>
-                ${todayRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                ${displayRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
-              <p className="text-xs mt-0.5 text-slate-500">Today's Revenue</p>
+              <p className="text-xs mt-0.5 text-slate-500">{isOsiDemo ? "Last Week's Revenue" : "Today's Revenue"}</p>
             </button>
             <div className="rounded-2xl px-2 py-4 text-center bg-white/6 border border-white/10">
               <Award className="w-5 h-5 text-orange-400 mx-auto" />
@@ -1526,8 +1528,8 @@ export default function DriverPortal() {
             <div className="space-y-4">
 
               {deliveredToday.length > 0 && (() => {
-                const isDemo        = user?.email?.endsWith('@osilogistics.com') ?? false;
-                const grossRevenue  = isDemo ? 8500 : todayRevenue;
+                const isDemo        = isOsiDemo;
+                const grossRevenue  = displayRevenue;
                 const loads         = isDemo ? 3 : deliveredToday.length;
                 const driverNet     = grossRevenue * 0.92;
                 const osiFee        = grossRevenue * 0.08;
