@@ -1526,13 +1526,15 @@ export default function DriverPortal() {
             <div className="space-y-4">
 
               {deliveredToday.length > 0 && (() => {
-                const grossRevenue  = todayRevenue;
+                const isDemo        = user?.email?.endsWith('@osilogistics.com') ?? false;
+                const grossRevenue  = isDemo ? 8500 : todayRevenue;
+                const loads         = isDemo ? 3 : deliveredToday.length;
                 const driverNet     = grossRevenue * 0.92;
                 const osiFee        = grossRevenue * 0.08;
-                const avgPerLoad    = grossRevenue / deliveredToday.length;
-                const bestLoad      = Math.max(...deliveredToday.map(o => o.price));
-                const totalMiles    = deliveredToday.reduce((s, o) => s + (o.distance_km || 0), 0) * 0.621371;
-                const ratePerMile   = totalMiles > 0 ? grossRevenue / totalMiles : 0;
+                const avgPerLoad    = grossRevenue / loads;
+                const bestLoad      = isDemo ? 4600 : Math.max(...deliveredToday.map(o => o.price));
+                const totalMiles    = isDemo ? 1641.0 : deliveredToday.reduce((s, o) => s + (o.distance_km || 0), 0) * 0.621371;
+                const ratePerMile   = isDemo ? 5.18 : (totalMiles > 0 ? grossRevenue / totalMiles : 0);
                 const fmt = (n: number, dec = 2) => n.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
 
                 return (
@@ -1543,9 +1545,9 @@ export default function DriverPortal() {
                       boxShadow: '0 8px 32px rgba(5,150,105,0.35), inset 0 1px 0 rgba(167,243,208,0.15)'
                     }}>
                       <div className="px-5 pt-5 pb-4">
-                        <p className="text-[10px] font-bold text-emerald-300/60 uppercase tracking-widest mb-1">Today's Revenue</p>
+                        <p className="text-[10px] font-bold text-emerald-300/60 uppercase tracking-widest mb-1">Last Week's Revenue</p>
                         <p className="text-4xl font-black text-white tracking-tight">${fmt(grossRevenue)}</p>
-                        <p className="text-xs text-emerald-200/50 mt-1">{deliveredToday.length} entrega{deliveredToday.length !== 1 ? 's' : ''} completada{deliveredToday.length !== 1 ? 's' : ''} esta semana</p>
+                        <p className="text-xs text-emerald-200/50 mt-1">{loads} load{loads !== 1 ? 's' : ''} completed last week</p>
                       </div>
                       <div className="grid grid-cols-2 border-t border-white/10">
                         <div className="px-5 py-3 border-r border-white/10">
@@ -1562,7 +1564,7 @@ export default function DriverPortal() {
                     {/* ── Quick Stats ─────────────────────────── */}
                     <div className="grid grid-cols-3 gap-2">
                       <div className="bg-white dark:bg-slate-800 rounded-2xl p-3 text-center border border-gray-100 dark:border-slate-700">
-                        <p className="text-2xl font-black text-gray-900 dark:text-white">{deliveredToday.length}</p>
+                        <p className="text-2xl font-black text-gray-900 dark:text-white">{loads}</p>
                         <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Loads</p>
                       </div>
                       <div className="bg-white dark:bg-slate-800 rounded-2xl p-3 text-center border border-gray-100 dark:border-slate-700">
