@@ -1605,6 +1605,28 @@ export default function DriverPortal() {
                   <CheckCircle className="w-12 h-12 text-gray-200 dark:text-slate-600 mx-auto mb-3" />
                   <p className="text-gray-500 dark:text-slate-400 font-medium">No deliveries yet today</p>
                 </div>
+              ) : isOsiDemo ? (
+                [
+                  { id: 'd1', order_number: 'OSI-2024131', customer_name: 'TechCorp Solutions',      delivery_address: '401 Collins Ave, Miami Beach, FL', price: 4600, delivered_at: '2026-08-29T14:22:00' },
+                  { id: 'd2', order_number: 'OSI-2024128', customer_name: 'BuildRight Construction', delivery_address: '20001 E Country Club Dr, Aventura, FL', price: 2400, delivered_at: '2026-08-27T10:45:00' },
+                  { id: 'd3', order_number: 'OSI-2024125', customer_name: 'MedSupply Inc',           delivery_address: '1 Alhambra Plaza, Coral Gables, FL', price: 1500, delivered_at: '2026-08-25T09:17:00' },
+                ].map(order => (
+                  <div key={order.id} className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{order.order_number}</p>
+                      <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name}</p>
+                      <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{order.delivery_address}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-green-600">${order.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                      <p className="text-xs text-gray-400 dark:text-slate-500">{format(new Date(order.delivered_at), 'MM/dd · HH:mm')}</p>
+                      <div className="flex items-center justify-end gap-1 mt-1">
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        <span className="text-xs text-green-600">Delivered</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
               ) : (
                 deliveredToday.map(order => (
                   <div key={order.id} className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-4 flex items-center justify-between">
