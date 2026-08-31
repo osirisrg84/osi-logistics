@@ -1570,11 +1570,11 @@ export default function DriverPortal() {
                         <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Loads</p>
                       </div>
                       <div className="bg-white dark:bg-slate-800 rounded-2xl p-3 text-center border border-gray-100 dark:border-slate-700">
-                        <p className="text-base font-black text-gray-900 dark:text-white">${fmt(avgPerLoad, 0)}</p>
+                        <p className="text-base font-black text-gray-900 dark:text-white">${fmt(avgPerLoad, 2)}</p>
                         <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Average</p>
                       </div>
                       <div className="bg-white dark:bg-slate-800 rounded-2xl p-3 text-center border border-gray-100 dark:border-slate-700">
-                        <p className="text-base font-black text-green-600">${fmt(bestLoad, 0)}</p>
+                        <p className="text-base font-black text-green-600">${fmt(bestLoad, 2)}</p>
                         <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Best</p>
                       </div>
                     </div>
