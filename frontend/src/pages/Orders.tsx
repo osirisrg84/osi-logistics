@@ -2,7 +2,7 @@
 import {
   Plus, Search, Filter, X, ChevronDown, Package,
   MapPin, User, Truck, Clock, DollarSign, Eye, Edit2, Trash2, UserCheck, CheckCircle,
-  Building2, Phone, Mail, Hash, FileText, Upload
+  Building2, Phone, Mail, Hash, FileText, Upload, Square, CheckSquare, MinusSquare
 } from 'lucide-react';
 import { Order, Driver, Truck as TruckType, OrderStatus } from '../types';
 import { ordersApi, driversApi, trucksApi } from '../services/api';
@@ -823,6 +823,15 @@ export default function Orders() {
   const [editOrder, setEditOrder] = useState<Order | null>(null);
   const [total, setTotal] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  const isAdmin = user?.role === 'admin';
+  const toggleSelect = (id: string) =>
+    setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const allSelected = orders.length > 0 && orders.every(o => selected.has(o.id));
+  const someSelected = !allSelected && orders.some(o => selected.has(o.id));
+  const toggleSelectAll = () =>
+    setSelected(allSelected ? new Set() : new Set(orders.map(o => o.id)));
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -864,7 +873,17 @@ export default function Orders() {
   const handleDelete = async (id: string, orderNumber: string) => {
     if (!confirm(`Delete order ${orderNumber}? This cannot be undone.`)) return;
     await ordersApi.delete(id);
+    setSelected(prev => { const n = new Set(prev); n.delete(id); return n; });
     fetchOrders();
+  };
+
+  const handleBulkDelete = async () => {
+    const count = selected.size;
+    if (!confirm(`Delete ${count} order${count !== 1 ? 's' : ''}? This cannot be undone.`)) return;
+    await Promise.all([...selected].map(id => ordersApi.delete(id)));
+    setSelected(new Set());
+    fetchOrders();
+    showToast(`${count} order${count !== 1 ? 's' : ''} deleted`);
   };
 
   return (
@@ -874,6 +893,27 @@ export default function Orders() {
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-green-600 text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-2xl shadow-green-600/30 animate-fade-in">
           <CheckCircle className="w-5 h-5 flex-shrink-0" />
           {toast}
+        </div>
+      )}
+
+      {/* Bulk action bar */}
+      {isAdmin && selected.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-gray-900 dark:bg-slate-700 text-white px-5 py-3 rounded-2xl shadow-2xl border border-white/10">
+          <span className="text-sm font-semibold">{selected.size} selected</span>
+          <div className="w-px h-4 bg-white/20" />
+          <button
+            onClick={handleBulkDelete}
+            className="flex items-center gap-1.5 text-sm font-semibold text-red-400 hover:text-red-300 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" /> Delete
+          </button>
+          <div className="w-px h-4 bg-white/20" />
+          <button
+            onClick={() => setSelected(new Set())}
+            className="text-sm text-white/50 hover:text-white/80 transition-colors"
+          >
+            Cancel
+          </button>
         </div>
       )}
 
@@ -905,11 +945,20 @@ export default function Orders() {
           {/* Mobile cards */}
           <div className="md:hidden space-y-2">
             {orders.map(order => (
-              <div key={order.id} className="card p-4">
+              <div key={order.id} className={`card p-4 transition-colors ${selected.has(order.id) ? 'ring-2 ring-orange-400 dark:ring-orange-500' : ''}`}>
                 <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{order.order_number}</p>
-                    {order.customer_name && <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name}</p>}
+                  <div className="flex items-start gap-2">
+                    {isAdmin && (
+                      <button onClick={() => toggleSelect(order.id)} className="mt-0.5 flex-shrink-0">
+                        {selected.has(order.id)
+                          ? <CheckSquare className="w-4 h-4 text-orange-500" />
+                          : <Square className="w-4 h-4 text-gray-300 dark:text-slate-600" />}
+                      </button>
+                    )}
+                    <div>
+                      <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{order.order_number}</p>
+                      {order.customer_name && <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name}</p>}
+                    </div>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold text-green-600">${(Math.round(order.price / 100) * 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
@@ -949,6 +998,17 @@ export default function Orders() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
+                    {isAdmin && (
+                      <th className="px-4 py-3 w-8">
+                        <button onClick={toggleSelectAll} className="flex items-center">
+                          {allSelected
+                            ? <CheckSquare className="w-4 h-4 text-orange-500" />
+                            : someSelected
+                              ? <MinusSquare className="w-4 h-4 text-orange-400" />
+                              : <Square className="w-4 h-4 text-gray-300 dark:text-slate-600" />}
+                        </button>
+                      </th>
+                    )}
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">ORDER</th>
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">CUSTOMER</th>
                     <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">PICKUP</th>
@@ -961,7 +1021,16 @@ export default function Orders() {
                 </thead>
                 <tbody>
                   {orders.map(order => (
-                    <tr key={order.id} className="table-row">
+                    <tr key={order.id} className={`table-row ${selected.has(order.id) ? 'bg-orange-50/60 dark:bg-orange-900/10' : ''}`}>
+                      {isAdmin && (
+                        <td className="px-4 py-3 w-8">
+                          <button onClick={() => toggleSelect(order.id)}>
+                            {selected.has(order.id)
+                              ? <CheckSquare className="w-4 h-4 text-orange-500" />
+                              : <Square className="w-4 h-4 text-gray-300 dark:text-slate-600" />}
+                          </button>
+                        </td>
+                      )}
                       <td className="px-4 py-3">
                         <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{order.order_number}</p>
                         <p className="text-xs text-gray-400 dark:text-slate-500">{(order.weight_kg * 2.20462).toFixed(0)}lbs · {(order.distance_km * 0.621371).toFixed(1)}mi</p>
