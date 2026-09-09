@@ -679,12 +679,12 @@ export default function DriverPortal() {
       driversApi.getFavorites(driverId)
         .then(r => setFavorites(r.data as Favorite[]))
         .catch(() => {});
-      billingApi.getRecords({ driver_id: driverId })
+      billingApi.getRecords({ driver_id: driverId, limit: 200 })
         .then(r => {
-          const rows = r.data as DriverBillingRow[];
+          const rows: DriverBillingRow[] = Array.isArray(r.data) ? r.data : (r.data.records ?? []);
           setBillingRows(rows.slice(0, 20));
-          const total = rows.reduce((s, r) => s + r.driver_charge, 0);
-          const settled = rows.filter(r => r.status === 'settled').reduce((s, r) => s + r.driver_charge, 0);
+          const total = rows.reduce((s, row) => s + row.driver_charge, 0);
+          const settled = rows.filter(row => row.status === 'settled').reduce((s, row) => s + row.driver_charge, 0);
           setBillingSummary({ total_charged: total, settled, pending: total - settled });
         })
         .catch(() => {});
