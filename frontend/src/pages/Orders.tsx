@@ -840,7 +840,7 @@ export default function Orders() {
 
   const fetchOrders = useCallback(async () => {
     try {
-      const params: Record<string, unknown> = {};
+      const params: Record<string, unknown> = { limit: 500 };
       if (statusFilter) params.status = statusFilter;
       if (search) params.search = search;
       const { data } = await ordersApi.getAll(params);
