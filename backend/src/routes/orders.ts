@@ -41,9 +41,19 @@ router.get('/', async (req: Request, res: Response) => {
     sql += ' ORDER BY o.created_at DESC LIMIT ? OFFSET ?';
     params.push(Number(limit), Number(offset));
 
+    let countSql = 'SELECT COUNT(*) as count FROM orders o WHERE 1=1';
+    const countParams: unknown[] = [];
+    if (status)    { countSql += ' AND o.status = ?'; countParams.push(status); }
+    if (priority)  { countSql += ' AND o.priority = ?'; countParams.push(priority); }
+    if (driver_id) { countSql += ' AND o.driver_id = ?'; countParams.push(driver_id); }
+    if (search) {
+      countSql += ' AND (o.order_number LIKE ? OR o.customer_name LIKE ? OR o.delivery_address LIKE ?)';
+      countParams.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
     const [orders, total] = await Promise.all([
       query(sql, params),
-      queryOne<{count:number}>('SELECT COUNT(*) as count FROM orders WHERE 1=1'),
+      queryOne<{count:number}>(countSql, countParams),
     ]);
     res.json({ orders, total: total?.count ?? 0 });
   } catch { res.status(500).json({ error: 'Failed' }); }

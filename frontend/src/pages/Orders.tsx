@@ -824,6 +824,8 @@ export default function Orders() {
   const [total, setTotal] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [pageSize, setPageSize] = useState(50);
+  const [page, setPage] = useState(1);
 
   const isAdmin = user?.role === 'admin';
   const toggleSelect = (id: string) =>
@@ -840,7 +842,7 @@ export default function Orders() {
 
   const fetchOrders = useCallback(async () => {
     try {
-      const params: Record<string, unknown> = { limit: 500 };
+      const params: Record<string, unknown> = { limit: pageSize, offset: (page - 1) * pageSize };
       if (statusFilter) params.status = statusFilter;
       if (search) params.search = search;
       const { data } = await ordersApi.getAll(params);
@@ -850,7 +852,7 @@ export default function Orders() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, search]);
+  }, [statusFilter, search, pageSize, page]);
 
   const fetchDriversAndTrucks = async () => {
     const [driversRes, trucksRes] = await Promise.all([
@@ -860,6 +862,9 @@ export default function Orders() {
     setDrivers(driversRes.data);
     setTrucks(trucksRes.data);
   };
+
+  // Reset to page 1 when filters change
+  useEffect(() => { setPage(1); setSelected(new Set()); }, [statusFilter, search, pageSize]);
 
   useEffect(() => {
     fetchOrders();
@@ -928,12 +933,57 @@ export default function Orders() {
             <option value="">All Status</option>
             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
           </select>
+          <select className="input w-full sm:w-24" value={pageSize} onChange={e => setPageSize(Number(e.target.value))}>
+            <option value={25}>25 / page</option>
+            <option value={50}>50 / page</option>
+            <option value={100}>100 / page</option>
+          </select>
         </div>
         <button onClick={() => setShowCreate(true)} className="btn-primary w-full sm:w-auto justify-center">
           <Plus className="w-4 h-4" /> New Order
         </button>
       </div>
-      <p className="text-xs text-gray-500 dark:text-slate-400">{total} orders total</p>
+
+      {/* Count + pagination info */}
+      {(() => {
+        const totalPages = Math.ceil(total / pageSize);
+        const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
+        const to = Math.min(page * pageSize, total);
+        return (
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-gray-500 dark:text-slate-400">
+              {total === 0 ? '0 orders' : `${from}–${to} of ${total} orders`}
+            </p>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-2.5 py-1 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                >← Prev</button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                  .reduce<(number | '…')[]>((acc, p, i, arr) => {
+                    if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push('…');
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((p, i) => p === '…'
+                    ? <span key={`e${i}`} className="px-1 text-xs text-gray-400">…</span>
+                    : <button key={p} onClick={() => setPage(p as number)}
+                        className={`w-7 h-7 text-xs font-medium rounded-lg transition-colors ${page === p ? 'bg-orange-500 text-white' : 'border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'}`}
+                      >{p}</button>
+                  )}
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="px-2.5 py-1 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                >Next →</button>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Orders — cards on mobile, table on desktop */}
       {loading ? (
