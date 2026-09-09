@@ -584,10 +584,15 @@ export default function DriverPortal() {
         ordersApi.getAll({ driver_id: user.driver_id, status: 'assigned' }),
         ordersApi.getAll({ driver_id: user.driver_id, status: 'picked_up' }),
         ordersApi.getAll({ driver_id: user.driver_id, status: 'in_transit' }),
-        ordersApi.getAll({ driver_id: user.driver_id, status: 'delivered' }),
+        ordersApi.getAll({ driver_id: user.driver_id, status: 'delivered', limit: 200 }),
       ]);
       setActiveOrders([...assignedRes.data.orders, ...pickedRes.data.orders, ...transitRes.data.orders]);
-      setDeliveredToday(delivRes.data.orders.slice(0, 10));
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 7);
+      const lastWeek = delivRes.data.orders.filter((o: Order) =>
+        o.delivered_at && new Date(o.delivered_at) >= cutoff
+      );
+      setDeliveredToday(lastWeek);
     } catch {
     } finally {
       setLoading(false);
