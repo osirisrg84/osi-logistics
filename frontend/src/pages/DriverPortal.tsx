@@ -1531,8 +1531,8 @@ export default function DriverPortal() {
                 const isDemo        = isOsiDemo;
                 const grossRevenue  = displayRevenue;
                 const loads         = isDemo ? 3 : deliveredToday.length;
-                const driverNet     = grossRevenue * 0.92;
-                const osiFee        = grossRevenue * 0.08;
+                const driverNet     = grossRevenue * 0.93;
+                const osiFee        = grossRevenue * 0.07;
                 const avgPerLoad    = grossRevenue / loads;
                 const bestLoad      = isDemo ? 4600 : Math.max(...deliveredToday.map(o => o.price));
                 const totalMiles    = isDemo ? 2751.0 : deliveredToday.reduce((s, o) => s + (o.distance_km || 0), 0) * 0.621371;
@@ -1553,11 +1553,11 @@ export default function DriverPortal() {
                       </div>
                       <div className="grid grid-cols-2 border-t border-white/10">
                         <div className="px-5 py-3 border-r border-white/10">
-                          <p className="text-[9px] text-emerald-300/50 uppercase tracking-widest mb-0.5">Tu ganancia (92%)</p>
+                          <p className="text-[9px] text-emerald-300/50 uppercase tracking-widest mb-0.5">Tu ganancia (93%)</p>
                           <p className="text-xl font-black text-emerald-300">${fmt(driverNet)}</p>
                         </div>
                         <div className="px-5 py-3">
-                          <p className="text-[9px] text-white/30 uppercase tracking-widest mb-0.5">OSI fee (8%)</p>
+                          <p className="text-[9px] text-white/30 uppercase tracking-widest mb-0.5">OSI fee (7%)</p>
                           <p className="text-xl font-bold text-white/50">${fmt(osiFee)}</p>
                         </div>
                       </div>
@@ -2542,7 +2542,7 @@ export default function DriverPortal() {
             }`}>
               <p className={`text-base font-semibold mb-1 ${dark ? 'text-slate-300' : 'text-slate-600'}`}>Balance pendiente</p>
               <p className={`text-3xl font-bold ${dark ? 'text-yellow-400' : 'text-orange-500'}`}>${billingSummary.pending.toFixed(2)}</p>
-              <p className={`text-xs mt-2 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Por cada carga entregada, OSI toma solo el <span className={`font-semibold ${dark ? 'text-slate-300' : 'text-slate-600'}`}>8%</span></p>
+              <p className={`text-xs mt-2 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Por cada carga entregada, OSI toma solo el <span className={`font-semibold ${dark ? 'text-slate-300' : 'text-slate-600'}`}>7%</span></p>
               <div className="mt-4 space-y-1.5">
                 <div className="flex justify-between text-xs">
                   <span className={dark ? 'text-slate-400' : 'text-slate-500'}>Progreso de pago</span>
@@ -2700,7 +2700,7 @@ export default function DriverPortal() {
                         <div>
                           <p className="text-sm font-semibold text-gray-900 dark:text-white">{r.order_number}</p>
                           <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-                            ${r.order_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} rate · 8% = <span className="font-semibold text-gray-600 dark:text-slate-300">${r.driver_charge.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            ${r.order_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} rate · 7% = <span className="font-semibold text-gray-600 dark:text-slate-300">${r.driver_charge.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                           </p>
                         </div>
                       </div>

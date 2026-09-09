@@ -135,8 +135,8 @@ export default function Billing() {
         <div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">Facturación & Comisiones</h1>
           <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-            Drivers pagan <span className="font-semibold text-red-600">8%</span> · Dispatch recibe{' '}
-            <span className="font-semibold text-blue-600">5%</span> · OSI neto{' '}
+            Drivers pagan <span className="font-semibold text-red-600">7%</span> · Dispatch recibe{' '}
+            <span className="font-semibold text-blue-600">4%</span> · OSI neto{' '}
             <span className="font-semibold text-green-600">3%</span>
           </p>
         </div>
@@ -156,7 +156,7 @@ export default function Billing() {
               <span className="text-xs text-gray-500 dark:text-slate-400">Cobrado a Drivers</span>
             </div>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{fmt(summary.total_driver_charges)}</p>
-            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">8% · {summary.total_orders} cargas</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">7% · {summary.total_orders} cargas</p>
           </div>
 
           <div className="card p-4">
@@ -167,7 +167,7 @@ export default function Billing() {
               <span className="text-xs text-gray-500 dark:text-slate-400">Por pagar a Dispatch</span>
             </div>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{fmt(summary.total_dispatcher_pay)}</p>
-            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">5% · {summary.total_orders} cargas</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">4% · {summary.total_orders} cargas</p>
           </div>
 
           <div className="card p-4">
@@ -241,8 +241,8 @@ export default function Billing() {
                   <th className="text-left px-4 py-3 font-semibold">Driver</th>
                   <th className="text-left px-4 py-3 font-semibold">Dispatcher</th>
                   <th className="text-right px-4 py-3 font-semibold">Precio</th>
-                  <th className="text-right px-4 py-3 font-semibold text-red-600">Driver 8%</th>
-                  <th className="text-right px-4 py-3 font-semibold text-blue-600">Dispatch 5%</th>
+                  <th className="text-right px-4 py-3 font-semibold text-red-600">Driver 7%</th>
+                  <th className="text-right px-4 py-3 font-semibold text-blue-600">Dispatch 4%</th>
                   <th className="text-right px-4 py-3 font-semibold text-green-600">OSI 3%</th>
                   <th className="text-left px-4 py-3 font-semibold">Fecha</th>
                   <th className="text-center px-4 py-3 font-semibold">Estado</th>
@@ -311,11 +311,11 @@ export default function Billing() {
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-2 text-center">
-                    <p className="text-red-400 mb-0.5">Driver 8%</p>
+                    <p className="text-red-400 mb-0.5">Driver 7%</p>
                     <p className="font-bold text-red-600">{fmt(r.driver_charge)}</p>
                   </div>
                   <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 text-center">
-                    <p className="text-blue-400 mb-0.5">Dispatch 5%</p>
+                    <p className="text-blue-400 mb-0.5">Dispatch 4%</p>
                     <p className="font-bold text-blue-600">{fmt(r.dispatcher_pay)}</p>
                   </div>
                   <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-2 text-center">
@@ -364,7 +364,7 @@ export default function Billing() {
               </div>
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-3 text-center">
-                  <p className="text-red-400 mb-1">Total cobrado (8%)</p>
+                  <p className="text-red-400 mb-1">Total cobrado (7%)</p>
                   <p className="text-lg font-bold text-red-600">{fmt(d.total_charged)}</p>
                 </div>
                 <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 text-center">
@@ -402,7 +402,7 @@ export default function Billing() {
               </div>
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 text-center">
-                  <p className="text-blue-400 mb-1">Por cobrar (5%)</p>
+                  <p className="text-blue-400 mb-1">Por cobrar (4%)</p>
                   <p className="text-lg font-bold text-blue-600">{fmt(d.total_earned)}</p>
                 </div>
                 <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 text-center">

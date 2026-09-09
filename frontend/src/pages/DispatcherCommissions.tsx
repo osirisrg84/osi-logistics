@@ -250,7 +250,7 @@ export default function DispatcherCommissions() {
         <div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">Mis Comisiones</h1>
           <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-            En OSI valoramos tu esfuerzo. Por eso te pagamos el <span className="font-semibold text-blue-600">5%</span> por cada carga gestionada.
+            En OSI valoramos tu esfuerzo. Por eso te pagamos el <span className="font-semibold text-blue-600">4%</span> por cada carga gestionada.
           </p>
         </div>
         <button onClick={load} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
@@ -268,7 +268,7 @@ export default function DispatcherCommissions() {
             <span className="text-xs text-gray-500 dark:text-slate-400">Total a cobrar</span>
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white">{fmt(total)}</p>
-          <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">5% · {rows.length} cargas</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">4% · {rows.length} cargas</p>
         </div>
         <div className="card p-4">
           <div className="flex items-center gap-2 mb-2">
@@ -567,7 +567,7 @@ export default function DispatcherCommissions() {
                 <th className="text-left px-4 py-3 font-semibold">Orden</th>
                 <th className="text-left px-4 py-3 font-semibold">Driver</th>
                 <th className="text-right px-4 py-3 font-semibold">Rate</th>
-                <th className="text-right px-4 py-3 font-semibold text-blue-600">Mi comisión (5%)</th>
+                <th className="text-right px-4 py-3 font-semibold text-blue-600">Mi comisión (4%)</th>
                 <th className="text-left px-4 py-3 font-semibold">Fecha</th>
                 <th className="text-center px-4 py-3 font-semibold">Estado</th>
               </tr>
@@ -619,7 +619,7 @@ export default function DispatcherCommissions() {
                 <p className="text-xs text-gray-400 dark:text-slate-500">{fmt(r.order_price)} carga</p>
               </div>
               <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 rounded-lg px-3 py-2">
-                <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">Mi comisión (5%)</span>
+                <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">Mi comisión (4%)</span>
                 <span className="text-sm font-bold text-blue-600">{fmt(r.dispatcher_pay)}</span>
               </div>
               {r.delivery_date && (

@@ -468,8 +468,8 @@ export async function createCommission(
 ): Promise<void> {
   const existing = await queryOne('SELECT id FROM commissions WHERE order_id = ?', [orderId]);
   if (existing) return;
-  const driverCharge  = Math.round(orderPrice * 0.08 * 100) / 100;
-  const dispatcherPay = Math.round(orderPrice * 0.05 * 100) / 100;
+  const driverCharge  = Math.round(orderPrice * 0.07 * 100) / 100;
+  const dispatcherPay = Math.round(orderPrice * 0.04 * 100) / 100;
   const netOsi        = Math.round((driverCharge - dispatcherPay) * 100) / 100;
   await exec(`
     INSERT INTO commissions
@@ -497,8 +497,8 @@ async function initCommissions(): Promise<void> {
   `);
 
   for (const o of delivered) {
-    const driverCharge = Math.round(o.price * 0.08 * 100) / 100;
-    const dispPay      = Math.round(o.price * 0.05 * 100) / 100;
+    const driverCharge = Math.round(o.price * 0.07 * 100) / 100;
+    const dispPay      = Math.round(o.price * 0.04 * 100) / 100;
     const netOsi       = Math.round((driverCharge - dispPay) * 100) / 100;
     await exec(`
       INSERT OR IGNORE INTO commissions
@@ -540,8 +540,8 @@ async function seedCommissions(): Promise<void> {
     [marcus.id, 'Marcus Johnson',   1800, '2026-06-05', 'pending', null],
     [sofia.id,  'Sofia Hernandez',  3100, '2026-06-07', 'pending', null],
   ] as [string, string, number, string, string, string | null][]) {
-    const dc = Math.round(price * 0.08 * 100) / 100;
-    const dp = Math.round(price * 0.05 * 100) / 100;
+    const dc = Math.round(price * 0.07 * 100) / 100;
+    const dp = Math.round(price * 0.04 * 100) / 100;
     const no = Math.round(price * 0.03 * 100) / 100;
     await exec(`INSERT OR IGNORE INTO commissions
       (id, order_id, order_number, driver_id, driver_name, dispatcher_user_id, dispatcher_name,

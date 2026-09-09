@@ -305,7 +305,7 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
 
           {/* ── Commissions ── */}
           <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4 space-y-3">
-            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Comisiones · 5% por carga</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Comisiones · 4% por carga</p>
             {[
               { label: 'Total generado', value: `$${dispatcher.total_earned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, cls: 'font-bold text-gray-900 dark:text-white' },
               { label: 'Liquidado',      value: `$${dispatcher.settled.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,      cls: 'font-semibold text-green-600 dark:text-green-400' },
