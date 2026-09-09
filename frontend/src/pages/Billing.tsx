@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   DollarSign, TrendingUp, TrendingDown, CheckCircle2,
-  Clock, RefreshCw, ChevronDown, Users, UserCog, FileText
+  Clock, RefreshCw, ChevronDown, Users, UserCog, FileText, Search, X
 } from 'lucide-react';
 import { billingApi } from '../services/api';
 import api from '../services/api';
@@ -77,6 +77,7 @@ export default function Billing() {
   const [byDispatcher, setByDispatcher] = useState<DispatcherSummary[]>([]);
   const [tab, setTab] = useState<'records' | 'drivers' | 'dispatchers'>('records');
   const [statusFilter, setStatusFilter] = useState('');
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [settling, setSettling] = useState<string | null>(null);
   const [pageSize, setPageSize] = useState(50);
@@ -86,13 +87,14 @@ export default function Billing() {
     id: string; label: string; amount: number; type: 'one' | 'driver_all';
   } | null>(null);
 
-  useEffect(() => { setPage(1); }, [statusFilter, pageSize]);
+  useEffect(() => { setPage(1); }, [statusFilter, pageSize, search]);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const params: Record<string, unknown> = { limit: pageSize, offset: (page - 1) * pageSize };
       if (statusFilter) params.status = statusFilter;
+      if (search)       params.search = search;
       const [summaryRes, recordsRes, driversRes, dispatchersRes] = await Promise.all([
         billingApi.getSummary(),
         billingApi.getRecords(params),
@@ -107,7 +109,7 @@ export default function Billing() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, pageSize, page]);
+  }, [statusFilter, search, pageSize, page]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -270,7 +272,23 @@ export default function Billing() {
         </div>
 
         {tab === 'records' && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Search input */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Buscar orden, driver..."
+                className="pl-9 pr-8 py-2 text-sm border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400/40 w-52"
+              />
+              {search && (
+                <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
             <div className="relative">
               <select
                 value={statusFilter}

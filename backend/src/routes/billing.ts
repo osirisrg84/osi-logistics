@@ -31,12 +31,17 @@ router.get('/summary', async (_req: Request, res: Response) => {
 
 router.get('/records', async (req: Request, res: Response) => {
   try {
-    const { driver_id, dispatcher_user_id, status, limit = 50, offset = 0 } = req.query;
+    const { driver_id, dispatcher_user_id, status, search, limit = 50, offset = 0 } = req.query;
     const filters: string[] = [];
     const p: unknown[] = [];
     if (driver_id)          { filters.push('driver_id = ?');          p.push(driver_id); }
     if (dispatcher_user_id) { filters.push('dispatcher_user_id = ?'); p.push(dispatcher_user_id); }
     if (status)             { filters.push('status = ?');              p.push(status); }
+    if (search) {
+      filters.push('(order_number LIKE ? OR driver_name LIKE ? OR dispatcher_name LIKE ?)');
+      const q = `%${search}%`;
+      p.push(q, q, q);
+    }
     const where = filters.length ? ' WHERE ' + filters.join(' AND ') : '';
     const countRow = await queryOne<{c:number}>(`SELECT COUNT(*) as c FROM commissions${where}`, p);
     const records = await query(
