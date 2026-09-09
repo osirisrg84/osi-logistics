@@ -1279,7 +1279,7 @@ export default function DriverPortal() {
                  style={{ fontSize: 'clamp(13px, 4vw, 18px)' }}>
                 ${displayRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
-              <p className="text-xs mt-0.5 text-slate-500">{isOsiDemo ? "Last Week's Revenue" : "Today's Revenue"}</p>
+              <p className="text-xs mt-0.5 text-slate-500">Last Week's Revenue</p>
             </button>
             <div className="rounded-2xl px-2 py-4 text-center bg-white/6 border border-white/10">
               <Award className="w-5 h-5 text-orange-400 mx-auto" />
