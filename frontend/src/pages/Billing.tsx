@@ -82,6 +82,9 @@ export default function Billing() {
   const [pageSize, setPageSize] = useState(50);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [confirmSettle, setConfirmSettle] = useState<{
+    id: string; label: string; amount: number; type: 'one' | 'driver_all';
+  } | null>(null);
 
   useEffect(() => { setPage(1); }, [statusFilter, pageSize]);
 
@@ -110,6 +113,7 @@ export default function Billing() {
 
   const settleOne = async (id: string) => {
     setSettling(id);
+    setConfirmSettle(null);
     await billingApi.settleOne(id);
     await load();
     setSettling(null);
@@ -131,6 +135,7 @@ export default function Billing() {
 
   const settleDriverAll = async (driverId: string) => {
     setSettling(driverId);
+    setConfirmSettle(null);
     await billingApi.settleDriverAll(driverId);
     await load();
     setSettling(null);
@@ -138,6 +143,49 @@ export default function Billing() {
 
   return (
     <div className="space-y-5 fade-in">
+
+      {/* ── Confirm Settle Modal ─────────────────────────── */}
+      {confirmSettle && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+                <CheckCircle2 className="w-5 h-5 text-orange-500" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">Confirmar liquidación</h3>
+                <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{confirmSettle.label}</p>
+              </div>
+            </div>
+            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 mb-5 text-center">
+              <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Monto a liquidar</p>
+              <p className="text-2xl font-black text-orange-600">{fmt(confirmSettle.amount)}</p>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-slate-400 text-center mb-5">
+              Esta acción marcará la comisión como <span className="font-semibold text-green-600">liquidada</span>. No se puede deshacer.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmSettle(null)}
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 text-sm font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() =>
+                  confirmSettle.type === 'one'
+                    ? settleOne(confirmSettle.id)
+                    : settleDriverAll(confirmSettle.id)
+                }
+                disabled={!!settling}
+                className="flex-1 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-sm font-bold text-white transition-colors"
+              >
+                {settling ? 'Procesando...' : 'Confirmar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -331,7 +379,7 @@ export default function Billing() {
                             {settling === r.id ? '...' : '💳 Stripe'}
                           </button>
                           <button
-                            onClick={() => settleOne(r.id)}
+                            onClick={() => setConfirmSettle({ id: r.id, label: `Orden ${r.order_number} · ${r.driver_name}`, amount: r.driver_charge, type: 'one' })}
                             disabled={settling === r.id}
                             className="text-xs font-medium text-orange-600 hover:text-orange-700 disabled:opacity-40 whitespace-nowrap"
                           >
@@ -375,7 +423,7 @@ export default function Billing() {
                   </div>
                 </div>
                 {r.status === 'pending' && (
-                  <button onClick={() => settleOne(r.id)} disabled={settling === r.id}
+                  <button onClick={() => setConfirmSettle({ id: r.id, label: `Orden ${r.order_number} · ${r.driver_name}`, amount: r.driver_charge, type: 'one' })} disabled={settling === r.id}
                     className="w-full py-2 rounded-xl text-sm font-semibold text-orange-600 border border-orange-200 dark:border-orange-800 hover:bg-orange-50 dark:hover:bg-orange-900/20 disabled:opacity-40 transition-colors">
                     {settling === r.id ? 'Procesando...' : 'Marcar como liquidado'}
                   </button>
@@ -405,7 +453,7 @@ export default function Billing() {
                 </div>
                 {d.pending > 0 && (
                   <button
-                    onClick={() => settleDriverAll(d.driver_id)}
+                    onClick={() => setConfirmSettle({ id: d.driver_id, label: `${d.driver_name} · todas las pendientes`, amount: d.pending, type: 'driver_all' })}
                     disabled={settling === d.driver_id}
                     className="text-xs font-semibold text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-40 px-3 py-1.5 rounded-lg transition-colors"
                   >
