@@ -861,8 +861,8 @@ export default function Orders() {
     return () => { socket.off('order_updated'); };
   }, [fetchOrders]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this order?')) return;
+  const handleDelete = async (id: string, orderNumber: string) => {
+    if (!confirm(`Delete order ${orderNumber}? This cannot be undone.`)) return;
     await ordersApi.delete(id);
     fetchOrders();
   };
@@ -932,8 +932,8 @@ export default function Orders() {
                         <UserCheck className="w-4 h-4 text-blue-500" />
                       </button>
                     )}
-                    {['pending', 'cancelled'].includes(order.status) && (
-                      <button onClick={() => handleDelete(order.id)} className="p-1.5 hover:bg-red-50 rounded-lg">
+                    {(user?.role === 'admin' || ['pending', 'cancelled'].includes(order.status)) && (
+                      <button onClick={() => handleDelete(order.id, order.order_number)} className="p-1.5 hover:bg-red-50 rounded-lg" title="Delete order">
                         <Trash2 className="w-4 h-4 text-red-400" />
                       </button>
                     )}
@@ -1004,8 +1004,8 @@ export default function Orders() {
                               <UserCheck className="w-3.5 h-3.5 text-blue-500" />
                             </button>
                           )}
-                          {['pending', 'cancelled'].includes(order.status) && (
-                            <button onClick={() => handleDelete(order.id)} className="p-1.5 hover:bg-red-50 rounded-lg">
+                          {(user?.role === 'admin' || ['pending', 'cancelled'].includes(order.status)) && (
+                            <button onClick={() => handleDelete(order.id, order.order_number)} className="p-1.5 hover:bg-red-50 rounded-lg" title="Delete order">
                               <Trash2 className="w-3.5 h-3.5 text-red-400" />
                             </button>
                           )}

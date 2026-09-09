@@ -463,12 +463,13 @@ router.post('/:id/ignore', async (_req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const order = await queryOne('SELECT * FROM orders WHERE id = ?', [req.params.id]);
     if (!order) return res.status(404).json({ error: 'Order not found' });
     await exec('DELETE FROM order_history WHERE order_id = ?', [req.params.id]);
     await exec('DELETE FROM tracking WHERE order_id = ?', [req.params.id]);
+    await exec('DELETE FROM commissions WHERE order_id = ?', [req.params.id]);
     await exec('DELETE FROM orders WHERE id = ?', [req.params.id]);
     res.json({ success: true });
   } catch { res.status(500).json({ error: 'Failed' }); }
