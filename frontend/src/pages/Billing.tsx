@@ -55,7 +55,7 @@ interface Summary {
   settled_count: number;
 }
 
-function fmt(n: number) { return `$${n.toFixed(2)}`; }
+function fmt(n: number) { return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }); }
 
 function StatusChip({ status }: { status: 'pending' | 'settled' }) {
   return (
