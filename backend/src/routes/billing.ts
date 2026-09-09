@@ -31,15 +31,19 @@ router.get('/summary', async (_req: Request, res: Response) => {
 
 router.get('/records', async (req: Request, res: Response) => {
   try {
-    const { driver_id, dispatcher_user_id, status, limit = 100, offset = 0 } = req.query;
-    let q = 'SELECT * FROM commissions WHERE 1=1';
+    const { driver_id, dispatcher_user_id, status, limit = 50, offset = 0 } = req.query;
+    const filters: string[] = [];
     const p: unknown[] = [];
-    if (driver_id)          { q += ' AND driver_id = ?';          p.push(driver_id); }
-    if (dispatcher_user_id) { q += ' AND dispatcher_user_id = ?'; p.push(dispatcher_user_id); }
-    if (status)             { q += ' AND status = ?';              p.push(status); }
-    q += ' ORDER BY delivery_date DESC, created_at DESC LIMIT ? OFFSET ?';
-    p.push(Number(limit), Number(offset));
-    res.json(await query(q, p));
+    if (driver_id)          { filters.push('driver_id = ?');          p.push(driver_id); }
+    if (dispatcher_user_id) { filters.push('dispatcher_user_id = ?'); p.push(dispatcher_user_id); }
+    if (status)             { filters.push('status = ?');              p.push(status); }
+    const where = filters.length ? ' WHERE ' + filters.join(' AND ') : '';
+    const countRow = await queryOne<{c:number}>(`SELECT COUNT(*) as c FROM commissions${where}`, p);
+    const records = await query(
+      `SELECT * FROM commissions${where} ORDER BY delivery_date DESC, created_at DESC LIMIT ? OFFSET ?`,
+      [...p, Number(limit), Number(offset)]
+    );
+    res.json({ records, total: countRow?.c ?? 0 });
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 

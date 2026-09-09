@@ -79,24 +79,32 @@ export default function Billing() {
   const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [settling, setSettling] = useState<string | null>(null);
+  const [pageSize, setPageSize] = useState(50);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => { setPage(1); }, [statusFilter, pageSize]);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
+      const params: Record<string, unknown> = { limit: pageSize, offset: (page - 1) * pageSize };
+      if (statusFilter) params.status = statusFilter;
       const [summaryRes, recordsRes, driversRes, dispatchersRes] = await Promise.all([
         billingApi.getSummary(),
-        billingApi.getRecords(statusFilter ? { status: statusFilter } : {}),
+        billingApi.getRecords(params),
         billingApi.getByDriver(),
         billingApi.getByDispatcher(),
       ]);
       setSummary(summaryRes.data);
-      setRecords(recordsRes.data);
+      setRecords(recordsRes.data.records ?? recordsRes.data);
+      setTotal(recordsRes.data.total ?? 0);
       setByDriver(driversRes.data);
       setByDispatcher(dispatchersRes.data);
     } finally {
       setLoading(false);
     }
-  }, [statusFilter]);
+  }, [statusFilter, pageSize, page]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -214,20 +222,63 @@ export default function Billing() {
         </div>
 
         {tab === 'records' && (
-          <div className="relative">
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="appearance-none pl-3 pr-8 py-2 text-sm border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400/40"
+              >
+                <option value="">Todos los estados</option>
+                <option value="pending">Pendientes</option>
+                <option value="settled">Liquidados</option>
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
             <select
-              value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
-              className="appearance-none pl-3 pr-8 py-2 text-sm border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400/40"
+              value={pageSize}
+              onChange={e => setPageSize(Number(e.target.value))}
+              className="pl-3 pr-2 py-2 text-sm border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400/40"
             >
-              <option value="">Todos los estados</option>
-              <option value="pending">Pendientes</option>
-              <option value="settled">Liquidados</option>
+              <option value={25}>25 / pág</option>
+              <option value={50}>50 / pág</option>
+              <option value={100}>100 / pág</option>
             </select>
-            <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
         )}
       </div>
+
+      {/* Pagination info + controls — only on records tab */}
+      {tab === 'records' && total > 0 && (() => {
+        const totalPages = Math.ceil(total / pageSize);
+        const from = (page - 1) * pageSize + 1;
+        const to = Math.min(page * pageSize, total);
+        return (
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-gray-500 dark:text-slate-400">{from}–{to} de {total} registros</p>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1">
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                  className="px-2.5 py-1 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">← Prev</button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                  .reduce<(number | '…')[]>((acc, p, i, arr) => {
+                    if (i > 0 && p - (arr[i-1] as number) > 1) acc.push('…');
+                    acc.push(p); return acc;
+                  }, [])
+                  .map((p, i) => p === '…'
+                    ? <span key={`e${i}`} className="px-1 text-xs text-gray-400">…</span>
+                    : <button key={p} onClick={() => setPage(p as number)}
+                        className={`w-7 h-7 text-xs font-medium rounded-lg transition-colors ${page === p ? 'bg-orange-500 text-white' : 'border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'}`}
+                      >{p}</button>
+                  )}
+                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                  className="px-2.5 py-1 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">Next →</button>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* ── Records tab ─────────────────────────────────── */}
       {tab === 'records' && (
