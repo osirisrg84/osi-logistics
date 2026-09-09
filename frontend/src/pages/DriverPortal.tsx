@@ -1535,7 +1535,7 @@ export default function DriverPortal() {
                 const osiFee        = grossRevenue * 0.08;
                 const avgPerLoad    = grossRevenue / loads;
                 const bestLoad      = isDemo ? 4600 : Math.max(...deliveredToday.map(o => o.price));
-                const totalMiles    = isDemo ? 2750.0 : deliveredToday.reduce((s, o) => s + (o.distance_km || 0), 0) * 0.621371;
+                const totalMiles    = isDemo ? 2751.0 : deliveredToday.reduce((s, o) => s + (o.distance_km || 0), 0) * 0.621371;
                 const ratePerMile   = isDemo ? 3.09 : (totalMiles > 0 ? grossRevenue / totalMiles : 0);
                 const fmt = (n: number, dec = 2) => n.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
 
