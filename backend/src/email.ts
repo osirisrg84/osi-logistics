@@ -223,6 +223,64 @@ export async function sendDocumentEmail(to: string, driverName: string, orderNum
   });
 }
 
+export async function sendNewDriverRegistrationEmail(driverName: string, driverEmail: string, driverPhone: string) {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+  const adminUrl = `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/admin/verifications`;
+  const now = new Date().toLocaleString('es-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' });
+  await sendEmail({
+    from: FROM,
+    to: adminEmail,
+    subject: `🚛 Nuevo driver registrado — ${driverName}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#f8f9fa;padding:32px;border-radius:16px;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <h1 style="color:#f97316;margin:0;font-size:28px;">OSI Logistics</h1>
+          <p style="color:#6b7280;margin:4px 0 0;">Admin Console</p>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:24px;border:1px solid #e5e7eb;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+            <div style="width:44px;height:44px;background:#fff7ed;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🚛</div>
+            <div>
+              <h2 style="color:#111827;margin:0;font-size:17px;">Nuevo driver pendiente de aprobación</h2>
+              <p style="color:#6b7280;margin:4px 0 0;font-size:13px;">${now}</p>
+            </div>
+          </div>
+
+          <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px;margin-bottom:20px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;font-size:14px;color:#374151;">
+              <tr>
+                <td style="padding:6px 0;font-weight:600;width:100px;">Nombre</td>
+                <td style="padding:6px 0;">${driverName}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;font-weight:600;">Email</td>
+                <td style="padding:6px 0;"><a href="mailto:${driverEmail}" style="color:#f97316;">${driverEmail}</a></td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;font-weight:600;">Teléfono</td>
+                <td style="padding:6px 0;">${driverPhone}</td>
+              </tr>
+            </table>
+          </div>
+
+          <p style="color:#374151;font-size:14px;margin:0 0 20px;">
+            El driver está esperando verificación de documentos y aprobación de cuenta. Revísalo en la sección de <strong>Verificaciones</strong> del Admin Console.
+          </p>
+
+          <div style="text-align:center;">
+            <a href="${adminUrl}"
+              style="background:#f97316;color:#fff;text-decoration:none;padding:14px 32px;border-radius:10px;font-weight:bold;font-size:15px;display:inline-block;">
+              Revisar en Admin Console →
+            </a>
+          </div>
+        </div>
+        <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:16px;">© OSI Logistics · Miami, FL</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendVerificationCode(to: string, name: string, code: string, type: 'email' | 'phone', role = 'driver') {
   const label = type === 'email' ? 'correo electrónico' : 'número de teléfono';
   const accent = role === 'admin' ? '#4f46e5' : role === 'dispatcher' ? '#f97316' : '#2563eb';

@@ -3,7 +3,7 @@ import { scryptSync, randomBytes, timingSafeEqual } from 'node:crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne } from '../database';
 import { appEvents } from '../events';
-import { sendVerificationCode } from '../email';
+import { sendVerificationCode, sendNewDriverRegistrationEmail } from '../email';
 import { sendSmsCode } from '../sms';
 import { getFirebaseAdmin } from '../firebase-admin';
 
@@ -194,6 +194,8 @@ router.post('/register-driver', async (req: Request, res: Response) => {
 
     await exec("INSERT INTO notifications (id, type, title, message, read) VALUES (?, 'driver', 'Nuevo Driver Pendiente de Aprobación', ?, 0)",
       [uuidv4(), `${name} se registró como conductor y está esperando aprobación.`]);
+
+    sendNewDriverRegistrationEmail(name, email.toLowerCase(), phone).catch(() => {});
 
     res.status(201).json({ pending: true, message: 'Tu cuenta fue creada exitosamente. Un administrador la revisará y activará pronto.' });
   } catch (err: unknown) {
