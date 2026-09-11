@@ -157,6 +157,15 @@ router.put('/users/:id/reject', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
+router.put('/users/:id/archive', async (req: Request, res: Response) => {
+  try {
+    const user = await queryOne<Record<string, unknown>>('SELECT id FROM users WHERE id = ?', [req.params.id]);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    await exec("UPDATE users SET active = 0, approval_status = 'archived' WHERE id = ?", [req.params.id]);
+    res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
 router.get('/dispatchers', async (_req: Request, res: Response) => {
   try {
     res.json(await query(`
