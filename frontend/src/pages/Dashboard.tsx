@@ -33,20 +33,20 @@ interface StatCardProps {
 function StatCard({ title, value, sub, icon: Icon, color, trend }: StatCardProps) {
   return (
     <div className="card">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-sm text-gray-500 font-medium">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</p>
-          {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs sm:text-sm text-gray-500 font-medium truncate">{title}</p>
+          <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white mt-1 leading-tight break-all">{value}</p>
+          {sub && <p className="text-xs text-gray-400 mt-1 truncate">{sub}</p>}
           {trend !== undefined && (
             <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${trend >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-              <TrendingUp className="w-3 h-3" />
+              <TrendingUp className="w-3 h-3 flex-shrink-0" />
               {trend >= 0 ? '+' : ''}{trend.toFixed(1)}% vs last week
             </div>
           )}
         </div>
-        <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${color}`}>
-          <Icon className="w-5 h-5" />
+        <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex-shrink-0 flex items-center justify-center ${color}`}>
+          <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
       </div>
     </div>
