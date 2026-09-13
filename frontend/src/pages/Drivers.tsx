@@ -126,7 +126,7 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
             </div>
             <div className="col-span-2">
               <label className="label">Company Name</label>
-              <input className="input" value={form.company_name} onChange={e => setForm({...form, company_name: e.target.value})} placeholder="OSI Logistics LLC" />
+              <input className="input" value={form.company_name} onChange={e => setForm({...form, company_name: e.target.value})} placeholder="OSI Logistics INC" />
             </div>
             <div className="col-span-2">
               <label className="label">Autoridad MC/DOT desde</label>

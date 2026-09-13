@@ -264,7 +264,7 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
                     <div className="flex items-center gap-2 mb-2">
                       <Building2 className="w-4 h-4 text-blue-500 flex-shrink-0" />
                       <span className="text-sm font-bold text-gray-800 dark:text-slate-100 truncate">
-                        {sel.company_name || 'OSI Logistics LLC'}
+                        {sel.company_name || 'OSI Logistics INC'}
                       </span>
                     </div>
                     <div className="grid grid-cols-3 gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-slate-400">

@@ -2,19 +2,24 @@ import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne } from '../database';
 import { appEvents } from '../events';
+import { sendDriverOnlineEmail } from '../email';
 
 const router = Router();
+
+const isDemo = (email?: string) => (email ?? '').endsWith('@osilogistics.com');
+const DEMO_FILTER = "AND d.email NOT LIKE '%@osilogistics.com'";
 
 router.get('/', async (req: Request, res: Response) => {
   try {
     const { status, search } = req.query;
+    const demo = isDemo(req.user?.email);
     let sql = `
       SELECT d.*,
              t.plate_number, t.make, t.model, t.type as truck_type,
              (SELECT COUNT(*) FROM orders WHERE driver_id = d.id AND status IN ('assigned','picked_up','in_transit')) as active_orders
       FROM drivers d
       LEFT JOIN trucks t ON d.truck_id = t.id
-      WHERE 1=1
+      WHERE 1=1 ${demo ? '' : DEMO_FILTER}
     `;
     const params: unknown[] = [];
     if (status) { sql += ' AND d.status = ?'; params.push(status); }
@@ -27,16 +32,18 @@ router.get('/', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
-router.get('/stats', async (_req: Request, res: Response) => {
+router.get('/stats', async (req: Request, res: Response) => {
   try {
+    const demo = isDemo(req.user?.email);
+    const f = demo ? '' : DEMO_FILTER;
     const [total, available, busy, on_break, offline, avg, top] = await Promise.all([
-      queryOne<{c:number}>('SELECT COUNT(*) as c FROM drivers'),
-      queryOne<{c:number}>("SELECT COUNT(*) as c FROM drivers WHERE status = 'available'"),
-      queryOne<{c:number}>("SELECT COUNT(*) as c FROM drivers WHERE status = 'busy'"),
-      queryOne<{c:number}>("SELECT COUNT(*) as c FROM drivers WHERE status = 'on_break'"),
-      queryOne<{c:number}>("SELECT COUNT(*) as c FROM drivers WHERE status = 'offline'"),
-      queryOne<{avg:number}>('SELECT AVG(rating) as avg FROM drivers'),
-      queryOne('SELECT name, total_deliveries, rating FROM drivers ORDER BY total_deliveries DESC LIMIT 1'),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d WHERE 1=1 ${f}`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d WHERE d.status = 'available' ${f}`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d WHERE d.status = 'busy' ${f}`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d WHERE d.status = 'on_break' ${f}`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d WHERE d.status = 'offline' ${f}`),
+      queryOne<{avg:number}>(`SELECT AVG(d.rating) as avg FROM drivers d WHERE 1=1 ${f}`),
+      queryOne(`SELECT d.name, d.total_deliveries, d.rating FROM drivers d WHERE 1=1 ${f} ORDER BY d.total_deliveries DESC LIMIT 1`),
     ]);
     res.json({
       total: total?.c ?? 0, available: available?.c ?? 0, busy: busy?.c ?? 0,
@@ -73,7 +80,7 @@ router.post('/', async (req: Request, res: Response) => {
       name, phone, email, license_number, license_expiry,
       hire_date: hireDateInput, current_lat = 25.7617, current_lng = -80.1918,
       current_address = 'Miami, FL', equipment_type = 'Dry Van',
-      company_name = 'OSI Logistics LLC', mc_number = '', authority_since = '', rate_con_email = '',
+      company_name = 'OSI Logistics INC', mc_number = '', authority_since = '', rate_con_email = '',
     } = req.body;
     const hire_date = hireDateInput || new Date().toISOString().split('T')[0];
     const initials = name.split(' ').map((n: string) => n[0]).join('');
@@ -113,6 +120,18 @@ router.put('/:id', async (req: Request, res: Response) => {
         id: req.params.id, name: updated.name, status: updated.status,
         lat: updated.current_lat, lng: updated.current_lng, avatar: updated.avatar,
       });
+      // Notify dispatchers when a REAL driver goes online
+      if (updates.status === 'available' && !isDemo(updated.email as string)) {
+        const dispatchers = await query<{ id: string; name: string; email: string }>(
+          "SELECT id, name, email FROM users WHERE role IN ('dispatcher','admin') AND active = 1 AND email NOT LIKE '%@osilogistics.com'"
+        );
+        for (const d of dispatchers) {
+          await exec("INSERT INTO notifications (id, type, title, message, read, related_id) VALUES (?, 'driver', ?, ?, 0, ?)",
+            [uuidv4(), `Driver disponible: ${updated.name}`, `${updated.name} está Online y disponible para cargas.`, req.params.id]);
+          sendDriverOnlineEmail(d.email, d.name, updated.name as string, updated.phone as string).catch(() => {});
+        }
+        appEvents.emit('driver:online_alert', { driver: updated });
+      }
     }
     if ('gps_active' in updates && updated) {
       appEvents.emit('driver:gps_changed', {

@@ -253,7 +253,7 @@ export default function RegisterDriver() {
             </Field>
 
             <Field label="Company Name">
-              <input className="input" type="text" placeholder="OSI Logistics LLC"
+              <input className="input" type="text" placeholder="OSI Logistics INC"
                 value={form.company_name} onChange={set('company_name')} />
             </Field>
 

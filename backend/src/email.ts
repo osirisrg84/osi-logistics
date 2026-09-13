@@ -175,7 +175,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
 
               <!-- FOOTER -->
               <tr><td style="background:#f9fafb;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 16px 16px;padding:20px 32px;text-align:center;">
-                <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:#374151;">OSI Logistics LLC</p>
+                <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:#374151;">OSI Logistics INC</p>
                 <p style="margin:0 0 12px;font-size:11px;color:#9ca3af;">Miami, FL · operations@osilogistics.com</p>
                 <p style="margin:0;font-size:11px;color:#d1d5db;">Si no solicitaste esta cuenta, ignora este mensaje.</p>
               </td></tr>

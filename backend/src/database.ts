@@ -68,7 +68,7 @@ export async function initDatabase(): Promise<void> {
       avatar TEXT NOT NULL DEFAULT '',
       hire_date TEXT NOT NULL,
       equipment_type TEXT NOT NULL DEFAULT 'Dry Van',
-      company_name TEXT NOT NULL DEFAULT 'OSI Logistics LLC',
+      company_name TEXT NOT NULL DEFAULT 'OSI Logistics INC',
       mc_number TEXT NOT NULL DEFAULT '',
       authority_since TEXT NOT NULL DEFAULT '',
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -305,7 +305,7 @@ export async function initDatabase(): Promise<void> {
 
   // Migrations for drivers
   await addColumnIfMissing('drivers', 'equipment_type',  "TEXT NOT NULL DEFAULT 'Dry Van'");
-  await addColumnIfMissing('drivers', 'company_name',    "TEXT NOT NULL DEFAULT 'OSI Logistics LLC'");
+  await addColumnIfMissing('drivers', 'company_name',    "TEXT NOT NULL DEFAULT 'OSI Logistics INC'");
   await addColumnIfMissing('drivers', 'mc_number',       "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('drivers', 'authority_since', "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('drivers', 'payment_method',  "TEXT NOT NULL DEFAULT ''");
@@ -694,14 +694,14 @@ async function seedDatabase(): Promise<void> {
   ];
 
   const driverData = [
-    { name: 'Carlos Rodriguez', phone: '(305) 555-0101', email: 'carlos.r@osilogistics.com', lic: 'FL-CDL-100234', exp: '2027-08-15', status: 'busy',     rating: 4.9, del: 47, ot: 97.2, hire: '2022-03-15', loc: locs[0], truck: truckList[0].id, eq: 'Dry Van',   co: 'OSI Logistics LLC',     mc: 'MC-892341',  auth: '2019-03-15' },
-    { name: 'Marcus Johnson',   phone: '(305) 555-0102', email: 'marcus.j@osilogistics.com', lic: 'FL-CDL-100456', exp: '2026-11-20', status: 'busy',     rating: 4.7, del: 38, ot: 94.8, hire: '2022-09-01', loc: locs[1], truck: truckList[1].id, eq: 'Reefer',    co: 'OSI Logistics LLC',     mc: 'MC-892341',  auth: '2019-03-15' },
+    { name: 'Carlos Rodriguez', phone: '(305) 555-0101', email: 'carlos.r@osilogistics.com', lic: 'FL-CDL-100234', exp: '2027-08-15', status: 'busy',     rating: 4.9, del: 47, ot: 97.2, hire: '2022-03-15', loc: locs[0], truck: truckList[0].id, eq: 'Dry Van',   co: 'OSI Logistics INC',     mc: 'MC-892341',  auth: '2019-03-15' },
+    { name: 'Marcus Johnson',   phone: '(305) 555-0102', email: 'marcus.j@osilogistics.com', lic: 'FL-CDL-100456', exp: '2026-11-20', status: 'busy',     rating: 4.7, del: 38, ot: 94.8, hire: '2022-09-01', loc: locs[1], truck: truckList[1].id, eq: 'Reefer',    co: 'OSI Logistics INC',     mc: 'MC-892341',  auth: '2019-03-15' },
     { name: 'Ana Martinez',     phone: '(305) 555-0103', email: 'ana.m@osilogistics.com',    lic: 'FL-CDL-100789', exp: '2027-03-10', status: 'available',rating: 4.95,del: 49, ot: 98.5, hire: '2021-01-10', loc: locs[2], truck: truckList[2].id, eq: 'Reefer',    co: 'Martinez Transport LLC',mc: 'MC-1045672', auth: '2017-06-01' },
     { name: 'David Thompson',   phone: '(305) 555-0104', email: 'david.t@osilogistics.com',  lic: 'FL-CDL-101011', exp: '2026-07-25', status: 'available',rating: 4.6, del: 28, ot: 92.1, hire: '2023-06-20', loc: locs[3], truck: truckList[3].id, eq: 'Flatbed',   co: 'Thompson Freight LLC',  mc: 'MC-1234589', auth: '2021-09-15' },
-    { name: 'Sofia Hernandez',  phone: '(305) 555-0105', email: 'sofia.h@osilogistics.com',  lic: 'FL-CDL-101234', exp: '2027-12-01', status: 'busy',     rating: 4.8, del: 43, ot: 96.3, hire: '2022-05-14', loc: locs[4], truck: truckList[4].id, eq: 'Dry Van',   co: 'OSI Logistics LLC',     mc: 'MC-892341',  auth: '2019-03-15' },
+    { name: 'Sofia Hernandez',  phone: '(305) 555-0105', email: 'sofia.h@osilogistics.com',  lic: 'FL-CDL-101234', exp: '2027-12-01', status: 'busy',     rating: 4.8, del: 43, ot: 96.3, hire: '2022-05-14', loc: locs[4], truck: truckList[4].id, eq: 'Dry Van',   co: 'OSI Logistics INC',     mc: 'MC-892341',  auth: '2019-03-15' },
     { name: 'James Wilson',     phone: '(305) 555-0106', email: 'james.w@osilogistics.com',  lic: 'FL-CDL-101567', exp: '2027-06-18', status: 'on_break', rating: 4.5, del: 22, ot: 91.0, hire: '2023-11-05', loc: locs[5], truck: truckList[5].id, eq: 'Box Truck', co: 'Wilson Hauling Co.',    mc: 'MC-987654',  auth: '2022-01-10' },
-    { name: 'Maria Garcia',     phone: '(305) 555-0107', email: 'maria.g@osilogistics.com',  lic: 'FL-CDL-101890', exp: '2026-09-30', status: 'offline',  rating: 4.85,del: 45, ot: 95.7, hire: '2021-08-22', loc: locs[6], truck: null,              eq: 'Flatbed',   co: 'OSI Logistics LLC',     mc: 'MC-892341',  auth: '2019-03-15' },
-    { name: 'Robert Davis',     phone: '(305) 555-0108', email: 'robert.d@osilogistics.com', lic: 'FL-CDL-102123', exp: '2027-02-14', status: 'available',rating: 4.75,del: 31, ot: 93.4, hire: '2023-02-28', loc: locs[7], truck: truckList[7].id, eq: 'Dry Van',   co: 'OSI Logistics LLC',     mc: 'MC-892341',  auth: '2019-03-15' },
+    { name: 'Maria Garcia',     phone: '(305) 555-0107', email: 'maria.g@osilogistics.com',  lic: 'FL-CDL-101890', exp: '2026-09-30', status: 'offline',  rating: 4.85,del: 45, ot: 95.7, hire: '2021-08-22', loc: locs[6], truck: null,              eq: 'Flatbed',   co: 'OSI Logistics INC',     mc: 'MC-892341',  auth: '2019-03-15' },
+    { name: 'Robert Davis',     phone: '(305) 555-0108', email: 'robert.d@osilogistics.com', lic: 'FL-CDL-102123', exp: '2027-02-14', status: 'available',rating: 4.75,del: 31, ot: 93.4, hire: '2023-02-28', loc: locs[7], truck: truckList[7].id, eq: 'Dry Van',   co: 'OSI Logistics INC',     mc: 'MC-892341',  auth: '2019-03-15' },
   ];
 
   const driverIds: string[] = [];

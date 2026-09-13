@@ -150,7 +150,7 @@ router.post('/register-driver', async (req: Request, res: Response) => {
       name, email, password, phone,
       license_number, license_expiry,
       hire_date = new Date().toISOString().split('T')[0],
-      equipment_type = 'Dry Van', company_name = 'OSI Logistics LLC',
+      equipment_type = 'Dry Van', company_name = 'OSI Logistics INC',
       mc_number = '', dot_number = '', authority_since = '', rate_con_email = '',
     } = req.body;
 
