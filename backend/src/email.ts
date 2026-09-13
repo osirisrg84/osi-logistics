@@ -12,15 +12,185 @@ async function sendEmail(payload: Parameters<Resend['emails']['send']>[0]) {
 }
 
 export async function sendActivationEmail(to: string, name: string, role: string) {
-  const isDriver     = role === 'driver';
-  const isAdmin      = role === 'admin';
-  const color        = isDriver ? '#3b82f6' : isAdmin ? '#6366f1' : '#f97316';
-  const subtitle     = isDriver ? 'Driver Portal' : isAdmin ? 'Admin Management' : 'Dispatch Management';
-  const portalLabel  = isDriver ? 'Driver Portal' : isAdmin ? 'Admin Console' : 'Dispatch Console';
-  const link         = isDriver
+  const isDriver = role === 'driver';
+  const isAdmin  = role === 'admin';
+  const color       = isDriver ? '#2563eb' : isAdmin ? '#6366f1' : '#f97316';
+  const subtitle    = isDriver ? 'Driver Portal' : isAdmin ? 'Admin Management' : 'Dispatch Management';
+  const portalLabel = isDriver ? 'Driver Portal' : isAdmin ? 'Admin Console' : 'Dispatch Console';
+  const link        = isDriver
     ? `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/driver/login`
     : `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/dispatcher`;
+  const tutorialUrl = process.env.DRIVER_TUTORIAL_URL || '';
 
+  if (isDriver) {
+    const videoSection = tutorialUrl ? `
+      <tr><td style="padding:0 0 24px;">
+        <p style="margin:0 0 12px;font-size:15px;font-weight:700;color:#111827;">📹 Video Tutorial — Primeros pasos</p>
+        <p style="margin:0 0 16px;font-size:13px;color:#6b7280;line-height:1.6;">
+          Mira este tutorial corto y aprende a configurar tu perfil, activar tu GPS y recibir tu primera carga en minutos.
+        </p>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="background:linear-gradient(135deg,#1e3a5f,#2563eb);border-radius:12px;padding:0;overflow:hidden;">
+              <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+                <tr>
+                  <td style="padding:28px 24px;text-align:center;">
+                    <div style="width:60px;height:60px;background:rgba(255,255,255,0.15);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;border:2px solid rgba(255,255,255,0.3);">
+                      <span style="font-size:28px;line-height:1;">▶</span>
+                    </div>
+                    <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:1px;">OSI Logistics</p>
+                    <p style="margin:0 0 20px;font-size:18px;font-weight:700;color:#fff;">Tutorial para Drivers</p>
+                    <a href="${tutorialUrl}"
+                      style="display:inline-block;background:#fff;color:#2563eb;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:700;font-size:14px;">
+                      ▶&nbsp; Ver tutorial ahora
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td></tr>` : '';
+
+    await sendEmail({
+      from: FROM,
+      to,
+      subject: '🎉 ¡Bienvenido a OSI Logistics! Tu cuenta de driver está activa',
+      html: `
+      <!DOCTYPE html>
+      <html lang="es">
+      <body style="margin:0;padding:0;background:#f0f4f8;">
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background:#f0f4f8;">
+          <tr><td style="padding:32px 16px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;border-collapse:collapse;">
+
+              <!-- HEADER -->
+              <tr><td style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);border-radius:16px 16px 0 0;padding:32px 32px 28px;text-align:center;">
+                <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:2px;">OSI Logistics · Driver Portal</p>
+                <h1 style="margin:0 0 8px;font-size:32px;font-weight:800;color:#fff;letter-spacing:-0.5px;">¡Bienvenido a bordo!</h1>
+                <p style="margin:0;font-size:15px;color:rgba(255,255,255,0.8);">Tu cuenta ha sido verificada y activada</p>
+                <div style="margin-top:20px;display:inline-block;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:100px;padding:6px 18px;">
+                  <span style="font-size:13px;font-weight:600;color:#fff;">✅ Cuenta Activa</span>
+                </div>
+              </td></tr>
+
+              <!-- BODY -->
+              <tr><td style="background:#fff;padding:32px;border-left:1px solid #e5e7eb;border-right:1px solid #e5e7eb;">
+                <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+
+                  <!-- Greeting -->
+                  <tr><td style="padding:0 0 24px;">
+                    <h2 style="margin:0 0 10px;font-size:20px;font-weight:700;color:#111827;">Hola, ${name} 👋</h2>
+                    <p style="margin:0;font-size:14px;color:#4b5563;line-height:1.7;">
+                      El equipo de <strong>OSI Logistics</strong> ha revisado y aprobado tu cuenta. A partir de ahora formas parte de nuestra red de conductores y ya puedes recibir cargas, gestionar tus entregas y administrar tus comisiones desde el <strong>Driver Portal</strong>.
+                    </p>
+                  </td></tr>
+
+                  <!-- CTA Login -->
+                  <tr><td style="padding:0 0 28px;text-align:center;">
+                    <a href="${link}"
+                      style="display:inline-block;background:#2563eb;color:#fff;text-decoration:none;padding:16px 40px;border-radius:10px;font-weight:700;font-size:16px;letter-spacing:0.2px;">
+                      Entrar al Driver Portal →
+                    </a>
+                    <p style="margin:10px 0 0;font-size:12px;color:#9ca3af;">${link}</p>
+                  </td></tr>
+
+                  <!-- Divider -->
+                  <tr><td style="padding:0 0 24px;"><div style="height:1px;background:#e5e7eb;"></div></td></tr>
+
+                  <!-- Steps -->
+                  <tr><td style="padding:0 0 24px;">
+                    <p style="margin:0 0 16px;font-size:15px;font-weight:700;color:#111827;">🚀 Pasos para empezar</p>
+                    <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+                      <tr>
+                        <td style="padding:10px 0;vertical-align:top;width:36px;">
+                          <div style="width:28px;height:28px;background:#eff6ff;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#2563eb;">1</div>
+                        </td>
+                        <td style="padding:10px 0 10px 8px;vertical-align:top;">
+                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Inicia sesión</p>
+                          <p style="margin:0;font-size:13px;color:#6b7280;">Usa tu email y la contraseña que registraste en el Driver Portal.</p>
+                        </td>
+                      </tr>
+                      <tr><td colspan="2" style="padding:0 0 2px 0;"><div style="height:1px;background:#f3f4f6;margin-left:36px;"></div></td></tr>
+                      <tr>
+                        <td style="padding:10px 0;vertical-align:top;width:36px;">
+                          <div style="width:28px;height:28px;background:#eff6ff;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#2563eb;">2</div>
+                        </td>
+                        <td style="padding:10px 0 10px 8px;vertical-align:top;">
+                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Verifica tu teléfono</p>
+                          <p style="margin:0;font-size:13px;color:#6b7280;">Confirma tu número de celular con el código de verificación que recibirás por SMS.</p>
+                        </td>
+                      </tr>
+                      <tr><td colspan="2" style="padding:0 0 2px 0;"><div style="height:1px;background:#f3f4f6;margin-left:36px;"></div></td></tr>
+                      <tr>
+                        <td style="padding:10px 0;vertical-align:top;width:36px;">
+                          <div style="width:28px;height:28px;background:#eff6ff;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#2563eb;">3</div>
+                        </td>
+                        <td style="padding:10px 0 10px 8px;vertical-align:top;">
+                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Completa tu perfil</p>
+                          <p style="margin:0;font-size:13px;color:#6b7280;">Agrega tu información de empresa, MC Number, tipo de equipo y datos de autoridad.</p>
+                        </td>
+                      </tr>
+                      <tr><td colspan="2" style="padding:0 0 2px 0;"><div style="height:1px;background:#f3f4f6;margin-left:36px;"></div></td></tr>
+                      <tr>
+                        <td style="padding:10px 0;vertical-align:top;width:36px;">
+                          <div style="width:28px;height:28px;background:#eff6ff;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#2563eb;">4</div>
+                        </td>
+                        <td style="padding:10px 0 10px 8px;vertical-align:top;">
+                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Configura tu método de pago</p>
+                          <p style="margin:0;font-size:13px;color:#6b7280;">Vincula tu cuenta bancaria o tarjeta para recibir el pago de tus comisiones.</p>
+                        </td>
+                      </tr>
+                      <tr><td colspan="2" style="padding:0 0 2px 0;"><div style="height:1px;background:#f3f4f6;margin-left:36px;"></div></td></tr>
+                      <tr>
+                        <td style="padding:10px 0;vertical-align:top;width:36px;">
+                          <div style="width:28px;height:28px;background:#dcfce7;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#16a34a;">5</div>
+                        </td>
+                        <td style="padding:10px 0 10px 8px;vertical-align:top;">
+                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Activa tu GPS y ponte Online</p>
+                          <p style="margin:0;font-size:13px;color:#6b7280;">Activa tu GPS y cambia tu estatus a <strong style="color:#16a34a;">Disponible</strong> para comenzar a recibir ofertas de carga del dispatcher.</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td></tr>
+
+                  <!-- Divider -->
+                  <tr><td style="padding:0 0 24px;"><div style="height:1px;background:#e5e7eb;"></div></td></tr>
+
+                  <!-- Video Tutorial -->
+                  ${videoSection}
+
+                  <!-- Support note -->
+                  <tr><td style="padding:0;">
+                    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px;">
+                      <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#374151;">¿Necesitas ayuda?</p>
+                      <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">
+                        Comunícate con nuestro equipo de dispatch a través de la sección <strong>Hub</strong> dentro del Driver Portal o responde a este correo.
+                      </p>
+                    </div>
+                  </td></tr>
+
+                </table>
+              </td></tr>
+
+              <!-- FOOTER -->
+              <tr><td style="background:#f9fafb;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 16px 16px;padding:20px 32px;text-align:center;">
+                <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:#374151;">OSI Logistics LLC</p>
+                <p style="margin:0 0 12px;font-size:11px;color:#9ca3af;">Miami, FL · operations@osilogistics.com</p>
+                <p style="margin:0;font-size:11px;color:#d1d5db;">Si no solicitaste esta cuenta, ignora este mensaje.</p>
+              </td></tr>
+
+            </table>
+          </td></tr>
+        </table>
+      </body>
+      </html>
+      `,
+    });
+    return;
+  }
+
+  // Dispatchers / Admins — email simple
   await sendEmail({
     from: FROM,
     to,
