@@ -394,24 +394,24 @@ export default function UsersManagement() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-1 items-start">
                         <button onClick={() => handleToggleActive(user)}
-                          className={`badge border cursor-pointer transition-colors ${user.active ? 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200' : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200'}`}>
+                          className={`badge border cursor-pointer transition-colors w-fit ${user.active ? 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200' : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200'}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${user.active ? 'bg-green-500' : 'bg-gray-400'}`} />
                           {user.active ? 'Active' : 'Inactive'}
                         </button>
                         {user.approval_status === 'pending' && (
-                          <span className="badge border bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700/50 text-[10px]">
+                          <span className="badge border w-fit bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700/50 text-[10px]">
                             ⏳ Pendiente verificación
                           </span>
                         )}
                         {user.approval_status === 'rejected' && (
-                          <span className="badge border bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-700/40 text-[10px]">
+                          <span className="badge border w-fit bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-700/40 text-[10px]">
                             ✕ Rechazado
                           </span>
                         )}
                         {user.approval_status === 'archived' && (
-                          <span className="badge border bg-gray-100 text-gray-500 border-gray-200 dark:bg-slate-700/50 dark:text-slate-400 dark:border-slate-600 text-[10px]">
+                          <span className="badge border w-fit bg-gray-100 text-gray-500 border-gray-200 dark:bg-slate-700/50 dark:text-slate-400 dark:border-slate-600 text-[10px]">
                             Archivado
                           </span>
                         )}
