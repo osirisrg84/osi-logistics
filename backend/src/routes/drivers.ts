@@ -16,7 +16,8 @@ router.get('/', async (req: Request, res: Response) => {
     let sql = `
       SELECT d.*,
              t.plate_number, t.make, t.model, t.type as truck_type,
-             (SELECT COUNT(*) FROM orders WHERE driver_id = d.id AND status IN ('assigned','picked_up','in_transit')) as active_orders
+             (SELECT COUNT(*) FROM orders WHERE driver_id = d.id AND status IN ('assigned','picked_up','in_transit')) as active_orders,
+             u.approval_status
       FROM drivers d
       LEFT JOIN trucks t ON d.truck_id = t.id
       LEFT JOIN users u ON u.driver_id = d.id
