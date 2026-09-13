@@ -402,7 +402,7 @@ export default function UsersManagement() {
                         </button>
                         {user.approval_status === 'pending' && (
                           <span className="badge border w-fit bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700/50 text-[10px]">
-                            ⏳ Pendiente verificación
+                            <Clock className="w-3 h-3" /> Pendiente verificación
                           </span>
                         )}
                         {user.approval_status === 'rejected' && (
