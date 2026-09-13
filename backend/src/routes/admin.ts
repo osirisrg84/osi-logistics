@@ -11,7 +11,7 @@ router.use(requireRole('admin'));
 router.get('/users', async (_req: Request, res: Response) => {
   try {
     res.json(await query(`
-      SELECT u.id, u.name, u.email, u.role, u.active, u.created_at,
+      SELECT u.id, u.name, u.email, u.role, u.active, u.approval_status, u.created_at,
              d.name as driver_name, d.status as driver_status, d.avatar as driver_avatar
       FROM users u
       LEFT JOIN drivers d ON u.driver_id = d.id
