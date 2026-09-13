@@ -118,6 +118,8 @@ export interface Order {
   dispatcher_name?: string | null;
   dispatcher_id?: string | null;
   dispatcher_code?: string | null;
+  dispatcher_phone?: string | null;
+  dispatcher_email?: string | null;
 }
 
 export type OrderDocumentType = 'unsigned_bol' | 'signed_bol' | 'lumper' | 'gate_pass' | 'fuel_receipt' | 'scale_receipt' | 'other';

@@ -53,7 +53,16 @@ export async function sendActivationEmail(to: string, name: string, role: string
   });
 }
 
-export async function sendOfferEmail(to: string, driverName: string, orderNumber: string, pickup: string, delivery: string, rate: number) {
+export async function sendOfferEmail(to: string, driverName: string, orderNumber: string, pickup: string, delivery: string, rate: number, dispatcherName?: string, dispatcherPhone?: string, dispatcherEmail?: string) {
+  const dispatcherSection = (dispatcherName || dispatcherPhone || dispatcherEmail) ? `
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px;margin-bottom:20px;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:bold;color:#f97316;text-transform:uppercase;letter-spacing:1px;">Contacto del Dispatcher</p>
+      ${dispatcherName ? `<p style="margin:0 0 6px;font-size:14px;font-weight:600;color:#111827;">${dispatcherName}</p>` : ''}
+      <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">
+        ${dispatcherPhone ? `<tr><td style="padding:3px 0;font-size:13px;color:#374151;">📞 <a href="tel:${dispatcherPhone}" style="color:#f97316;font-weight:600;">${dispatcherPhone}</a></td></tr>` : ''}
+        ${dispatcherEmail ? `<tr><td style="padding:3px 0;font-size:13px;color:#374151;">✉️ <a href="mailto:${dispatcherEmail}" style="color:#f97316;">${dispatcherEmail}</a></td></tr>` : ''}
+      </table>
+    </div>` : '';
   await sendEmail({
     from: FROM,
     to,
@@ -83,6 +92,8 @@ export async function sendOfferEmail(to: string, driverName: string, orderNumber
             </div>
             ${rate ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #bfdbfe;"><p style="margin:0;font-size:18px;font-weight:bold;color:#10b981;">$${rate.toLocaleString('en-US', {minimumFractionDigits:2})}</p><p style="margin:0;font-size:11px;color:#6b7280;">Tarifa de carga</p></div>` : ''}
           </div>
+
+          ${dispatcherSection}
 
           <p style="color:#6b7280;font-size:13px;margin:0 0 20px;">Inicia sesión en el Driver Portal para aceptar o rechazar la oferta.</p>
 
@@ -272,6 +283,44 @@ export async function sendNewDriverRegistrationEmail(driverName: string, driverE
             <a href="${adminUrl}"
               style="background:#f97316;color:#fff;text-decoration:none;padding:14px 32px;border-radius:10px;font-weight:bold;font-size:15px;display:inline-block;">
               Revisar en Admin Console →
+            </a>
+          </div>
+        </div>
+        <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:16px;">© OSI Logistics · Miami, FL</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendDriverOnlineEmail(to: string, dispatcherName: string, driverName: string, driverPhone: string) {
+  await sendEmail({
+    from: FROM,
+    to,
+    subject: `🟢 Driver disponible — ${driverName}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#f8f9fa;padding:32px;border-radius:16px;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <h1 style="color:#f97316;margin:0;font-size:28px;">OSI Logistics</h1>
+          <p style="color:#6b7280;margin:4px 0 0;">Dispatch Management</p>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:24px;border:1px solid #e5e7eb;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+            <div style="width:44px;height:44px;background:#f0fdf4;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🟢</div>
+            <div>
+              <h2 style="color:#111827;margin:0;font-size:17px;">Driver disponible para cargas</h2>
+              <p style="color:#6b7280;margin:4px 0 0;font-size:13px;">Hola, ${dispatcherName}</p>
+            </div>
+          </div>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;margin-bottom:20px;">
+            <p style="margin:0 0 6px;font-size:15px;font-weight:bold;color:#111827;">${driverName}</p>
+            ${driverPhone ? `<p style="margin:0 0 6px;font-size:14px;color:#374151;">📞 <a href="tel:${driverPhone}" style="color:#16a34a;">${driverPhone}</a></p>` : ''}
+            <p style="margin:0;font-size:12px;font-weight:600;color:#16a34a;">● Online — Disponible</p>
+          </div>
+          <p style="color:#374151;font-size:14px;margin:0 0 20px;">El driver está listo para recibir una carga. Envíale una oferta desde el Dispatch Console.</p>
+          <div style="text-align:center;">
+            <a href="${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/dispatcher"
+              style="background:#f97316;color:#fff;text-decoration:none;padding:14px 32px;border-radius:10px;font-weight:bold;font-size:15px;display:inline-block;">
+              Ir a Dispatch Console →
             </a>
           </div>
         </div>

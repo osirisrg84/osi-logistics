@@ -3656,6 +3656,42 @@ export default function DriverPortal() {
                 </div>
               )}
 
+              {/* Dispatcher contact */}
+              {(pendingOffer.dispatcher_name || pendingOffer.dispatcher_phone || pendingOffer.dispatcher_email) && (
+                <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/40 rounded-xl p-3">
+                  <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wide mb-2">Dispatcher</p>
+                  {pendingOffer.dispatcher_name && (
+                    <p className="text-sm font-semibold text-gray-800 dark:text-slate-200 mb-2">{pendingOffer.dispatcher_name}</p>
+                  )}
+                  <div className="flex gap-2">
+                    {pendingOffer.dispatcher_phone && (
+                      <a
+                        href={`tel:${pendingOffer.dispatcher_phone}`}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-green-500 text-white text-xs font-semibold"
+                      >
+                        <Phone className="w-3.5 h-3.5" /> Llamar
+                      </a>
+                    )}
+                    {pendingOffer.dispatcher_phone && (
+                      <a
+                        href={`sms:${pendingOffer.dispatcher_phone}`}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-blue-500 text-white text-xs font-semibold"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" /> Mensaje
+                      </a>
+                    )}
+                    {pendingOffer.dispatcher_email && (
+                      <a
+                        href={`mailto:${pendingOffer.dispatcher_email}`}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-orange-500 text-white text-xs font-semibold"
+                      >
+                        <Mail className="w-3.5 h-3.5" /> Email
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Action buttons */}
               <div className="flex gap-3 pt-1">
                 <button

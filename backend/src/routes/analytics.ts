@@ -3,27 +3,38 @@ import { query, queryOne } from '../database';
 
 const router = Router();
 
-router.get('/dashboard', async (_req: Request, res: Response) => {
+const isDemo = (email?: string) => (email ?? '').endsWith('@osilogistics.com');
+const DEMO_ORDER_FILTER = `(o.order_number LIKE 'OSI-H%' OR o.dispatcher_user_id IN (SELECT id FROM users WHERE email LIKE '%@osilogistics.com'))`;
+const REAL_ORDER_FILTER = `o.order_number NOT LIKE 'OSI-H%' AND (o.dispatcher_user_id IS NULL OR o.dispatcher_user_id NOT IN (SELECT id FROM users WHERE email LIKE '%@osilogistics.com'))`;
+const DEMO_DRIVER_FILTER = `d.email LIKE '%@osilogistics.com'`;
+const REAL_DRIVER_FILTER = `d.email NOT LIKE '%@osilogistics.com'`;
+
+router.get('/dashboard', async (req: Request, res: Response) => {
   try {
+    const demo = isDemo(req.user?.email);
+    const of = demo ? DEMO_ORDER_FILTER : REAL_ORDER_FILTER;
+    const df = demo ? DEMO_DRIVER_FILTER : REAL_DRIVER_FILTER;
     const [ordersByStatus, dailyRevenue, topDrivers, deliveryByHour, ordersByPriority, recentActivity,
            totalRevRow, monthRevRow, avgValRow, onTimeRow, avgHrRow] = await Promise.all([
-      query("SELECT status, COUNT(*) as count FROM orders GROUP BY status"),
-      query("SELECT date(COALESCE(delivered_at, created_at)) as date, SUM(CASE WHEN status='delivered' THEN price ELSE 0 END) as revenue, COUNT(*) as orders FROM orders WHERE COALESCE(delivered_at, created_at) >= date('now', '-30 days') GROUP BY date(COALESCE(delivered_at, created_at)) ORDER BY date ASC"),
+      query(`SELECT o.status, COUNT(*) as count FROM orders o WHERE ${of} GROUP BY o.status`),
+      query(`SELECT date(COALESCE(o.delivered_at, o.created_at)) as date, SUM(CASE WHEN o.status='delivered' THEN o.price ELSE 0 END) as revenue, COUNT(*) as orders FROM orders o WHERE COALESCE(o.delivered_at, o.created_at) >= date('now', '-30 days') AND ${of} GROUP BY date(COALESCE(o.delivered_at, o.created_at)) ORDER BY date ASC`),
       query(`SELECT d.name, d.rating, d.total_deliveries, d.on_time_rate, d.avatar,
                COUNT(o.id) as recent_deliveries, SUM(o.price) as revenue
              FROM drivers d LEFT JOIN orders o ON o.driver_id = d.id AND o.status = 'delivered'
                AND o.delivered_at >= date('now', '-30 days')
+             WHERE ${df}
              GROUP BY d.id ORDER BY d.total_deliveries DESC LIMIT 5`),
-      query("SELECT strftime('%H', delivered_at) as hour, COUNT(*) as count FROM orders WHERE delivered_at IS NOT NULL GROUP BY hour ORDER BY hour ASC"),
-      query("SELECT priority, COUNT(*) as count FROM orders GROUP BY priority"),
+      query(`SELECT strftime('%H', o.delivered_at) as hour, COUNT(*) as count FROM orders o WHERE o.delivered_at IS NOT NULL AND ${of} GROUP BY hour ORDER BY hour ASC`),
+      query(`SELECT o.priority, COUNT(*) as count FROM orders o WHERE ${of} GROUP BY o.priority`),
       query(`SELECT oh.status, oh.timestamp, oh.notes, o.order_number, o.customer_name, d.name as driver_name
              FROM order_history oh JOIN orders o ON oh.order_id = o.id LEFT JOIN drivers d ON o.driver_id = d.id
+             WHERE ${of}
              ORDER BY oh.timestamp DESC LIMIT 10`),
-      queryOne<{r:number}>("SELECT COALESCE(SUM(price),0) as r FROM orders WHERE status='delivered'"),
-      queryOne<{r:number}>("SELECT COALESCE(SUM(price),0) as r FROM orders WHERE status='delivered' AND delivered_at >= date('now', 'start of month')"),
-      queryOne<{a:number}>("SELECT COALESCE(AVG(price),0) as a FROM orders WHERE status='delivered'"),
-      queryOne<{r:number}>("SELECT COALESCE(AVG(CASE WHEN delivered_at <= estimated_delivery THEN 100.0 ELSE 0 END),0) as r FROM orders WHERE status='delivered' AND estimated_delivery IS NOT NULL"),
-      queryOne<{avg:number|null}>("SELECT AVG((julianday(delivered_at) - julianday(picked_up_at)) * 24) as avg FROM orders WHERE delivered_at IS NOT NULL AND picked_up_at IS NOT NULL"),
+      queryOne<{r:number}>(`SELECT COALESCE(SUM(o.price),0) as r FROM orders o WHERE o.status='delivered' AND ${of}`),
+      queryOne<{r:number}>(`SELECT COALESCE(SUM(o.price),0) as r FROM orders o WHERE o.status='delivered' AND o.delivered_at >= date('now', 'start of month') AND ${of}`),
+      queryOne<{a:number}>(`SELECT COALESCE(AVG(o.price),0) as a FROM orders o WHERE o.status='delivered' AND ${of}`),
+      queryOne<{r:number}>(`SELECT COALESCE(AVG(CASE WHEN o.delivered_at <= o.estimated_delivery THEN 100.0 ELSE 0 END),0) as r FROM orders o WHERE o.status='delivered' AND o.estimated_delivery IS NOT NULL AND ${of}`),
+      queryOne<{avg:number|null}>(`SELECT AVG((julianday(o.delivered_at) - julianday(o.picked_up_at)) * 24) as avg FROM orders o WHERE o.delivered_at IS NOT NULL AND o.picked_up_at IS NOT NULL AND ${of}`),
     ]);
 
     res.json({

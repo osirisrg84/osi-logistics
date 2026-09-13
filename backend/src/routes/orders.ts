@@ -4,9 +4,13 @@ import { exec, query, queryOne, createCommission } from '../database';
 import { appEvents } from '../events';
 import { sendOfferEmail, sendOfferAcceptedEmail, sendDeliveryEmail, sendDocumentEmail } from '../email';
 
-type AuthRequest = Request & { user?: { id: string; name: string; role: string; driver_id?: string } };
+type AuthRequest = Request & { user?: { id: string; name: string; email?: string; phone?: string; role: string; driver_id?: string } };
 
 const router = Router();
+
+const isDemo = (email?: string) => (email ?? '').endsWith('@osilogistics.com');
+const DEMO_ORDER_FILTER = `AND (o.order_number LIKE 'OSI-H%' OR o.dispatcher_user_id IN (SELECT id FROM users WHERE email LIKE '%@osilogistics.com'))`;
+const REAL_ORDER_FILTER = `AND o.order_number NOT LIKE 'OSI-H%' AND (o.dispatcher_user_id IS NULL OR o.dispatcher_user_id NOT IN (SELECT id FROM users WHERE email LIKE '%@osilogistics.com'))`;
 
 const DOCUMENT_TYPES = ['unsigned_bol', 'signed_bol', 'lumper', 'gate_pass', 'fuel_receipt', 'scale_receipt', 'other'];
 const DOCUMENT_TYPE_LABELS: Record<string, string> = {
@@ -17,6 +21,8 @@ const DOCUMENT_TYPE_LABELS: Record<string, string> = {
 router.get('/', async (req: Request, res: Response) => {
   try {
     const { status, priority, driver_id, search, limit = 50, offset = 0 } = req.query;
+    const demo = isDemo(req.user?.email);
+    const demoFilter = demo ? DEMO_ORDER_FILTER : REAL_ORDER_FILTER;
     let sql = `
       SELECT o.*,
              d.name as driver_name, d.phone as driver_phone,
@@ -28,7 +34,7 @@ router.get('/', async (req: Request, res: Response) => {
       LEFT JOIN trucks t ON o.truck_id = t.id
       LEFT JOIN drivers od ON o.offered_to_driver_id = od.id
       LEFT JOIN users u ON o.dispatcher_user_id = u.id
-      WHERE 1=1
+      WHERE 1=1 ${demoFilter}
     `;
     const params: unknown[] = [];
     if (status)    { sql += ' AND o.status = ?'; params.push(status); }
@@ -41,7 +47,7 @@ router.get('/', async (req: Request, res: Response) => {
     sql += ' ORDER BY o.created_at DESC LIMIT ? OFFSET ?';
     params.push(Number(limit), Number(offset));
 
-    let countSql = 'SELECT COUNT(*) as count FROM orders o WHERE 1=1';
+    let countSql = `SELECT COUNT(*) as count FROM orders o WHERE 1=1 ${demoFilter}`;
     const countParams: unknown[] = [];
     if (status)    { countSql += ' AND o.status = ?'; countParams.push(status); }
     if (priority)  { countSql += ' AND o.priority = ?'; countParams.push(priority); }
@@ -59,18 +65,20 @@ router.get('/', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
-router.get('/stats', async (_req: Request, res: Response) => {
+router.get('/stats', async (req: Request, res: Response) => {
   try {
+    const demo = isDemo(req.user?.email);
+    const f = demo ? DEMO_ORDER_FILTER : REAL_ORDER_FILTER;
     const [total, pending, assigned, in_transit, delivered, cancelled, today, revenue, avgRow] = await Promise.all([
-      queryOne<{c:number}>('SELECT COUNT(*) as c FROM orders'),
-      queryOne<{c:number}>("SELECT COUNT(*) as c FROM orders WHERE status = 'pending'"),
-      queryOne<{c:number}>("SELECT COUNT(*) as c FROM orders WHERE status = 'assigned'"),
-      queryOne<{c:number}>("SELECT COUNT(*) as c FROM orders WHERE status IN ('picked_up','in_transit')"),
-      queryOne<{c:number}>("SELECT COUNT(*) as c FROM orders WHERE status = 'delivered'"),
-      queryOne<{c:number}>("SELECT COUNT(*) as c FROM orders WHERE status = 'cancelled'"),
-      queryOne<{c:number}>("SELECT COUNT(*) as c FROM orders WHERE date(created_at) = date('now')"),
-      queryOne<{r:number}>("SELECT COALESCE(SUM(price),0) as r FROM orders WHERE status = 'delivered'"),
-      queryOne<{avg:number|null}>(`SELECT AVG((julianday(delivered_at) - julianday(picked_up_at)) * 24) as avg FROM orders WHERE delivered_at IS NOT NULL AND picked_up_at IS NOT NULL`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE 1=1 ${f}`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE o.status = 'pending' ${f}`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE o.status = 'assigned' ${f}`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE o.status IN ('picked_up','in_transit') ${f}`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE o.status = 'delivered' ${f}`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE o.status = 'cancelled' ${f}`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE date(o.created_at) = date('now') ${f}`),
+      queryOne<{r:number}>(`SELECT COALESCE(SUM(o.price),0) as r FROM orders o WHERE o.status = 'delivered' ${f}`),
+      queryOne<{avg:number|null}>(`SELECT AVG((julianday(o.delivered_at) - julianday(o.picked_up_at)) * 24) as avg FROM orders o WHERE o.delivered_at IS NOT NULL AND o.picked_up_at IS NOT NULL ${f}`),
     ]);
     res.json({
       total: total?.c ?? 0, pending: pending?.c ?? 0, assigned: assigned?.c ?? 0,
@@ -388,7 +396,13 @@ router.post('/:id/offer', async (req: Request, res: Response) => {
       LEFT JOIN drivers od ON o.offered_to_driver_id = od.id WHERE o.id = ?
     `, [req.params.id]);
 
-    appEvents.emit('driver:offer', { driverId: driver_id, offer: updated });
+    const dispPhone = authReq.user?.phone || '';
+    const dispEmail = authReq.user?.email || '';
+    const dispName  = authReq.user?.name  || '';
+    appEvents.emit('driver:offer', {
+      driverId: driver_id,
+      offer: { ...updated, dispatcher_phone: dispPhone, dispatcher_email: dispEmail, dispatcher_name: dispName },
+    });
     appEvents.emit('order:status_changed', { id: req.params.id, order_number: order.order_number, status: 'offered' });
 
     // Email al driver
@@ -403,6 +417,9 @@ router.post('/:id/offer', async (req: Request, res: Response) => {
         order.pickup_address as string,
         order.delivery_address as string,
         (order.rate as number) || 0,
+        dispName,
+        dispPhone,
+        dispEmail,
       ).catch(e => console.error('[Email] Offer email failed:', e));
     }
 
