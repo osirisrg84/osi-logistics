@@ -20,7 +20,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
   const link        = isDriver
     ? `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/driver/login`
     : `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/dispatcher`;
-  const tutorialUrl = process.env.DRIVER_TUTORIAL_URL || '';
+  const tutorialUrl = process.env.DRIVER_TUTORIAL_URL || 'https://drive.google.com/file/d/1Kge1Z_ZQNAaHuYApUEJT_lY01-vP-BSJ/view?usp=sharing';
 
   if (isDriver) {
     const videoSection = tutorialUrl ? `
