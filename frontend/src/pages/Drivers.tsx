@@ -488,12 +488,25 @@ export default function Drivers() {
   useEffect(() => { fetchDrivers(); }, [statusFilter, search]);
 
   const handleDelete = async (driver: Driver) => {
-    if (!confirm(`Delete ${driver.name}? This cannot be undone.`)) return;
+    if (!confirm(`¿Eliminar a ${driver.name}? Esta acción no se puede deshacer.`)) return;
     try {
       await driversApi.delete(driver.id);
       fetchDrivers();
     } catch (e: unknown) {
-      alert((e as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Cannot delete driver');
+      const err = e as { response?: { data?: { error?: string; activeOrders?: number } } };
+      const activeOrders = err.response?.data?.activeOrders;
+      if (activeOrders && activeOrders > 0) {
+        const force = confirm(
+          `${driver.name} tiene ${activeOrders} orden${activeOrders !== 1 ? 'es' : ''} activa${activeOrders !== 1 ? 's' : ''}.\n\n` +
+          `Si continúas, esas órdenes quedarán sin asignar (estado Pendiente).\n\n` +
+          `¿Eliminar de todas formas?`
+        );
+        if (!force) return;
+        await driversApi.deleteForce(driver.id);
+        fetchDrivers();
+      } else {
+        alert(err.response?.data?.error || 'No se pudo eliminar el driver');
+      }
     }
   };
 
