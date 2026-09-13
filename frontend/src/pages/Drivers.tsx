@@ -578,12 +578,14 @@ export default function Drivers() {
                         : driver.equipment_type}
                     </p>
                   )}
-                  <DriverStatusBadge status={driver.status} className="mt-0.5" />
-                  {driver.approval_status === 'pending' && (
-                    <span className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700/50">
-                      <Clock className="w-3 h-3" /> Pendiente aprobación
-                    </span>
-                  )}
+                  <div className="flex flex-col items-start gap-1.5 mt-0.5">
+                    <DriverStatusBadge status={driver.status} />
+                    {driver.approval_status === 'pending' && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700/50">
+                        <Clock className="w-3 h-3" /> Pendiente aprobación
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-1">
