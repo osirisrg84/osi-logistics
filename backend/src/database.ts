@@ -366,8 +366,9 @@ export async function initDatabase(): Promise<void> {
   await seedUsers();
   await seedFavorites();
   await seedCommissions();
-  await initCommissions();
   await seedHistoricalOrders();
+  await initCommissions();
+  await refreshDemoData();
 }
 
 async function seedHistoricalOrders(): Promise<void> {
@@ -459,6 +460,70 @@ async function seedHistoricalOrders(): Promise<void> {
     }
   }
   console.log(`✅ ${counter - 1} historical orders seeded for analytics`);
+}
+
+async function refreshDemoData(): Promise<void> {
+  const orders = await query<{ id: string }>(
+    "SELECT id FROM orders WHERE order_number LIKE 'OSI-H%' ORDER BY order_number ASC"
+  );
+  if (orders.length === 0) return;
+
+  const mgUser = await queryOne<{ id: string }>(
+    "SELECT id FROM users WHERE email = 'dispatcher@osilogistics.com'"
+  );
+  const now = new Date();
+  const total = orders.length;
+  const DELIVERED_COUNT = 38;
+
+  for (let i = 0; i < total; i++) {
+    const isDelivered = i < DELIVERED_COUNT;
+    // Delivered orders spread across last 28 days; active orders within last 3 days
+    const daysAgo = isDelivered
+      ? Math.max(1, Math.ceil(28 - (i / (DELIVERED_COUNT - 1)) * 27))
+      : Math.floor((i % 3));
+
+    const base = new Date(now);
+    base.setDate(base.getDate() - daysAgo);
+    base.setHours(6 + (i % 10), (i * 7) % 60);
+
+    if (isDelivered) {
+      const deliveredAt = new Date(base.getTime() + (3 + (i % 4)) * 3600000);
+      await exec(`UPDATE orders SET
+        status='delivered', created_at=?, assigned_at=?, picked_up_at=?, in_transit_at=?,
+        delivered_at=?, dispatcher_user_id=?
+        WHERE id=?`, [
+        base.toISOString(),
+        new Date(base.getTime() + 25 * 60000).toISOString(),
+        new Date(base.getTime() + 85 * 60000).toISOString(),
+        new Date(base.getTime() + 115 * 60000).toISOString(),
+        deliveredAt.toISOString(),
+        mgUser?.id ?? null,
+        orders[i].id,
+      ]);
+      if (mgUser) {
+        await exec(`UPDATE commissions SET delivery_date=?, dispatcher_user_id=?, dispatcher_name='Maria Gonzalez'
+          WHERE order_id=?`,
+          [deliveredAt.toISOString().split('T')[0], mgUser.id, orders[i].id]);
+      }
+    } else {
+      const statuses = ['pending', 'assigned', 'in_transit', 'picked_up', 'pending', 'assigned'];
+      const status = statuses[i % statuses.length];
+      await exec(`UPDATE orders SET
+        status=?, created_at=?, assigned_at=?, picked_up_at=?, in_transit_at=?,
+        delivered_at=NULL, dispatcher_user_id=?
+        WHERE id=?`, [
+        status,
+        base.toISOString(),
+        status !== 'pending' ? new Date(base.getTime() + 25 * 60000).toISOString() : null,
+        ['picked_up', 'in_transit'].includes(status) ? new Date(base.getTime() + 85 * 60000).toISOString() : null,
+        status === 'in_transit' ? new Date(base.getTime() + 115 * 60000).toISOString() : null,
+        mgUser?.id ?? null,
+        orders[i].id,
+      ]);
+      await exec("DELETE FROM commissions WHERE order_id=? AND status != 'settled'", [orders[i].id]);
+    }
+  }
+  console.log(`✅ Demo refreshed: ${DELIVERED_COUNT} delivered, ${total - DELIVERED_COUNT} active orders`);
 }
 
 export async function createCommission(
