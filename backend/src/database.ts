@@ -642,11 +642,10 @@ async function seedUsers(): Promise<void> {
     }
   };
 
-  // Only seed the demo admin if no real admin exists yet
-  const realAdmin = await queryOne<{c:number}>("SELECT COUNT(*) as c FROM users WHERE role='admin' AND email != 'admin@osilogistics.com'");
-  if ((realAdmin?.c ?? 0) === 0) {
-    await upsert('Admin OSI', 'admin@osilogistics.com', 'Admin123!', 'admin', null);
-  }
+  // Always ensure demo admin exists and password is current (uses ADMIN_PASSWORD env var if set)
+  await upsert('Admin OSI', 'admin@osilogistics.com', process.env.ADMIN_PASSWORD || 'Admin123!', 'admin', null);
+  // Always ensure account is active
+  await exec("UPDATE users SET active = 1, approval_status = 'approved' WHERE email = 'admin@osilogistics.com'");
   await upsert('Maria Gonzalez', 'dispatcher@osilogistics.com', 'Mg#Osi7491!', 'dispatcher', null);
 
   const carlos = await queryOne<{ id: string; name: string; email: string }>(

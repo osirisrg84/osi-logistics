@@ -125,26 +125,15 @@ export default function AdminLogin() {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-gray-100">
-            <p className="text-xs text-gray-400 text-center mb-3 font-medium uppercase tracking-wide">Demo Access</p>
-            <button
-              type="button"
-              onClick={() => { setEmail('admin@osilogistics.com'); setPassword('Admin123!'); }}
-              className="w-full text-sm font-medium py-2.5 px-4 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition-colors flex items-center gap-2"
-            >
-              <div className="w-7 h-7 flex-shrink-0 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">AO</div>
-              Admin OSI · admin@osilogistics.com
-            </button>
-            <div className="mt-3 flex flex-col gap-1 text-center">
-              <p className="text-xs text-gray-400">
-                Dispatcher?{' '}
-                <Link to="/dispatcher" className="text-orange-500 hover:text-orange-600 font-medium">Dispatcher Portal →</Link>
-              </p>
-              <p className="text-xs text-gray-400">
-                Driver?{' '}
-                <Link to="/driver/login" className="text-blue-500 hover:text-blue-600 font-medium">Driver Portal →</Link>
-              </p>
-            </div>
+          <div className="mt-5 pt-4 border-t border-gray-100 flex flex-col gap-1 text-center">
+            <p className="text-xs text-gray-400">
+              Dispatcher?{' '}
+              <Link to="/dispatcher" className="text-orange-500 hover:text-orange-600 font-medium">Dispatcher Portal →</Link>
+            </p>
+            <p className="text-xs text-gray-400">
+              Driver?{' '}
+              <Link to="/driver/login" className="text-blue-500 hover:text-blue-600 font-medium">Driver Portal →</Link>
+            </p>
           </div>
         </div>
       </div>
