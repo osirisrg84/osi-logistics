@@ -567,7 +567,7 @@ export default function Drivers() {
                   )}
                   <DriverStatusBadge status={driver.status} className="mt-0.5" />
                   {driver.approval_status === 'pending' && (
-                    <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700/50">
+                    <span className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700/50">
                       ⏳ Pendiente aprobación
                     </span>
                   )}
