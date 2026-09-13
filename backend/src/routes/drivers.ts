@@ -19,7 +19,9 @@ router.get('/', async (req: Request, res: Response) => {
              (SELECT COUNT(*) FROM orders WHERE driver_id = d.id AND status IN ('assigned','picked_up','in_transit')) as active_orders
       FROM drivers d
       LEFT JOIN trucks t ON d.truck_id = t.id
+      LEFT JOIN users u ON u.driver_id = d.id
       WHERE 1=1 ${demo ? '' : DEMO_FILTER}
+        AND (u.id IS NULL OR u.approval_status NOT IN ('rejected', 'archived'))
     `;
     const params: unknown[] = [];
     if (status) { sql += ' AND d.status = ?'; params.push(status); }
@@ -36,14 +38,15 @@ router.get('/stats', async (req: Request, res: Response) => {
   try {
     const demo = isDemo(req.user?.email);
     const f = demo ? '' : DEMO_FILTER;
+    const activeF = `AND (u.id IS NULL OR u.approval_status NOT IN ('rejected', 'archived'))`;
     const [total, available, busy, on_break, offline, avg, top] = await Promise.all([
-      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d WHERE 1=1 ${f}`),
-      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d WHERE d.status = 'available' ${f}`),
-      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d WHERE d.status = 'busy' ${f}`),
-      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d WHERE d.status = 'on_break' ${f}`),
-      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d WHERE d.status = 'offline' ${f}`),
-      queryOne<{avg:number}>(`SELECT AVG(d.rating) as avg FROM drivers d WHERE 1=1 ${f}`),
-      queryOne(`SELECT d.name, d.total_deliveries, d.rating FROM drivers d WHERE 1=1 ${f} ORDER BY d.total_deliveries DESC LIMIT 1`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d LEFT JOIN users u ON u.driver_id = d.id WHERE 1=1 ${f} ${activeF}`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d LEFT JOIN users u ON u.driver_id = d.id WHERE d.status = 'available' ${f} ${activeF}`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d LEFT JOIN users u ON u.driver_id = d.id WHERE d.status = 'busy' ${f} ${activeF}`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d LEFT JOIN users u ON u.driver_id = d.id WHERE d.status = 'on_break' ${f} ${activeF}`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d LEFT JOIN users u ON u.driver_id = d.id WHERE d.status = 'offline' ${f} ${activeF}`),
+      queryOne<{avg:number}>(`SELECT AVG(d.rating) as avg FROM drivers d LEFT JOIN users u ON u.driver_id = d.id WHERE 1=1 ${f} ${activeF}`),
+      queryOne(`SELECT d.name, d.total_deliveries, d.rating FROM drivers d LEFT JOIN users u ON u.driver_id = d.id WHERE 1=1 ${f} ${activeF} ORDER BY d.total_deliveries DESC LIMIT 1`),
     ]);
     res.json({
       total: total?.c ?? 0, available: available?.c ?? 0, busy: busy?.c ?? 0,
