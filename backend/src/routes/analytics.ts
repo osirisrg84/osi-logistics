@@ -9,10 +9,16 @@ const REAL_ORDER_FILTER = `o.order_number NOT LIKE 'OSI-H%' AND (o.dispatcher_us
 const DEMO_DRIVER_FILTER = `d.email LIKE '%@osilogistics.com'`;
 const REAL_DRIVER_FILTER = `d.email NOT LIKE '%@osilogistics.com'`;
 
+const getOrderFilter = (email?: string, role?: string, userId?: string): string => {
+  if (isDemo(email)) return DEMO_ORDER_FILTER;
+  if (role === 'admin') return REAL_ORDER_FILTER;
+  return userId ? `${REAL_ORDER_FILTER} AND o.dispatcher_user_id = '${userId}'` : `${REAL_ORDER_FILTER} AND 1=0`;
+};
+
 router.get('/dashboard', async (req: Request, res: Response) => {
   try {
     const demo = isDemo(req.user?.email);
-    const of = demo ? DEMO_ORDER_FILTER : REAL_ORDER_FILTER;
+    const of = getOrderFilter(req.user?.email, req.user?.role, (req.user as { id?: string })?.id);
     const df = demo ? DEMO_DRIVER_FILTER : REAL_DRIVER_FILTER;
     const [ordersByStatus, dailyRevenue, topDrivers, deliveryByHour, ordersByPriority, recentActivity,
            totalRevRow, monthRevRow, avgValRow, onTimeRow, avgHrRow] = await Promise.all([

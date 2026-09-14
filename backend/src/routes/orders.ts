@@ -12,6 +12,13 @@ const isDemo = (email?: string) => (email ?? '').endsWith('@osilogistics.com');
 const DEMO_ORDER_FILTER = `AND (o.order_number LIKE 'OSI-H%' OR o.dispatcher_user_id IN (SELECT id FROM users WHERE email LIKE '%@osilogistics.com'))`;
 const REAL_ORDER_FILTER = `AND o.order_number NOT LIKE 'OSI-H%' AND (o.dispatcher_user_id IS NULL OR o.dispatcher_user_id NOT IN (SELECT id FROM users WHERE email LIKE '%@osilogistics.com'))`;
 
+// Demo users see all demo orders; admin sees all real orders; real dispatcher sees only their own
+const getOrderFilter = (email?: string, role?: string, userId?: string): string => {
+  if (isDemo(email)) return DEMO_ORDER_FILTER;
+  if (role === 'admin') return REAL_ORDER_FILTER;
+  return userId ? `${REAL_ORDER_FILTER} AND o.dispatcher_user_id = '${userId}'` : `${REAL_ORDER_FILTER} AND 1=0`;
+};
+
 const DOCUMENT_TYPES = ['unsigned_bol', 'signed_bol', 'lumper', 'gate_pass', 'fuel_receipt', 'scale_receipt', 'other'];
 const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   unsigned_bol: 'Unsigned BOL', signed_bol: 'Signed BOL', lumper: 'Lumper',
@@ -21,8 +28,8 @@ const DOCUMENT_TYPE_LABELS: Record<string, string> = {
 router.get('/', async (req: Request, res: Response) => {
   try {
     const { status, priority, driver_id, search, limit = 50, offset = 0 } = req.query;
-    const demo = isDemo(req.user?.email);
-    const demoFilter = demo ? DEMO_ORDER_FILTER : REAL_ORDER_FILTER;
+    const authReq0 = req as AuthRequest;
+    const demoFilter = getOrderFilter(authReq0.user?.email, authReq0.user?.role, authReq0.user?.id);
     let sql = `
       SELECT o.*,
              d.name as driver_name, d.phone as driver_phone,
@@ -67,8 +74,8 @@ router.get('/', async (req: Request, res: Response) => {
 
 router.get('/stats', async (req: Request, res: Response) => {
   try {
-    const demo = isDemo(req.user?.email);
-    const f = demo ? DEMO_ORDER_FILTER : REAL_ORDER_FILTER;
+    const authReqS = req as AuthRequest;
+    const f = getOrderFilter(authReqS.user?.email, authReqS.user?.role, authReqS.user?.id);
     const [total, pending, assigned, in_transit, delivered, cancelled, today, revenue, avgRow] = await Promise.all([
       queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE 1=1 ${f}`),
       queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE o.status = 'pending' ${f}`),
