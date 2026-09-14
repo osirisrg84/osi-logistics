@@ -8,7 +8,8 @@ import {
   AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
-import { analyticsApi, ordersApi, driversApi } from '../services/api';
+import { analyticsApi, ordersApi, driversApi, billingApi } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { DashboardStats } from '../types';
 import { OrderStatusBadge } from '../components/StatusBadge';
 import { formatDistanceToNow, format } from 'date-fns';
@@ -57,11 +58,14 @@ function StatCard({ title, value, sub, icon: Icon, color, trend, onClick }: Stat
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [orderStats, setOrderStats] = useState<Record<string, number>>({});
   const [driverStats, setDriverStats] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [chartDays, setChartDays] = useState<7 | 14 | 28>(7);
+  const [commissionTotal, setCommissionTotal] = useState(0);
+  const [commissionMonth, setCommissionMonth] = useState(0);
 
   useEffect(() => {
     async function load() {
@@ -84,6 +88,23 @@ export default function Dashboard() {
     const interval = setInterval(load, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  // Load dispatcher's own commission totals
+  useEffect(() => {
+    if (!user?.id || user?.role === 'admin') return;
+    billingApi.getRecords({ dispatcher_user_id: user.id, limit: 1000 })
+      .then(({ data }) => {
+        const records: { dispatcher_pay: number; delivery_date: string | null }[] = data.records ?? [];
+        const total = records.reduce((s, r) => s + (r.dispatcher_pay || 0), 0);
+        const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10);
+        const month = records
+          .filter(r => r.delivery_date && r.delivery_date >= monthStart)
+          .reduce((s, r) => s + (r.dispatcher_pay || 0), 0);
+        setCommissionTotal(total);
+        setCommissionMonth(month);
+      })
+      .catch(() => {});
+  }, [user?.id, user?.role]);
 
   if (loading) {
     return (
@@ -139,12 +160,11 @@ export default function Dashboard() {
           trend={2.1}
         />
         <StatCard
-          title="Revenue (Total)"
-          value={`$${((stats?.kpis.total_revenue || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-          sub={`$${((stats?.kpis.monthly_revenue || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} this month`}
+          title="Mis Comisiones"
+          value={`$${commissionTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          sub={`$${commissionMonth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} este mes`}
           icon={DollarSign}
           color="bg-orange-100 text-orange-600"
-          trend={12.5}
           onClick={() => navigate('/commissions')}
         />
       </div>
