@@ -3,8 +3,14 @@ import { query, queryOne } from '../database';
 
 const router = Router();
 
-router.get('/live', async (_req: Request, res: Response) => {
+const isDemo = (email?: string) => (email ?? '').endsWith('@osilogistics.com');
+
+router.get('/live', async (req: Request, res: Response) => {
   try {
+    const demo = isDemo(req.user?.email);
+    const driverFilter = demo
+      ? `AND d.email LIKE '%@osilogistics.com'`
+      : `AND (d.email IS NULL OR d.email NOT LIKE '%@osilogistics.com')`;
     const drivers = await query(`
       SELECT d.id, d.name, d.status, d.current_lat, d.current_lng, d.current_address,
              d.avatar, d.truck_id, d.rating, d.gps_active, d.phone, d.on_time_rate,
@@ -18,7 +24,7 @@ router.get('/live', async (_req: Request, res: Response) => {
         SELECT *, ROW_NUMBER() OVER (PARTITION BY driver_id ORDER BY assigned_at DESC) as rn
         FROM orders WHERE status IN ('assigned','picked_up','in_transit')
       ) o ON o.driver_id = d.id AND o.rn = 1
-      WHERE d.gps_active = 1
+      WHERE d.gps_active = 1 ${driverFilter}
     `);
     res.json(drivers);
   } catch { res.status(500).json({ error: 'Failed' }); }
