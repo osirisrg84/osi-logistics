@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Package, Users, Truck, TrendingUp, DollarSign,
   Clock, CheckCircle, AlertTriangle, Activity,
@@ -28,11 +29,12 @@ interface StatCardProps {
   icon: React.ComponentType<{ className?: string }>;
   color: string;
   trend?: number;
+  onClick?: () => void;
 }
 
-function StatCard({ title, value, sub, icon: Icon, color, trend }: StatCardProps) {
+function StatCard({ title, value, sub, icon: Icon, color, trend, onClick }: StatCardProps) {
   return (
-    <div className="card">
+    <div className={`card${onClick ? ' cursor-pointer hover:ring-2 hover:ring-orange-400/50 transition-all active:scale-[0.98]' : ''}`} onClick={onClick}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-xs sm:text-sm text-gray-500 font-medium truncate">{title}</p>
@@ -54,6 +56,7 @@ function StatCard({ title, value, sub, icon: Icon, color, trend }: StatCardProps
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [orderStats, setOrderStats] = useState<Record<string, number>>({});
   const [driverStats, setDriverStats] = useState<Record<string, number>>({});
@@ -142,6 +145,7 @@ export default function Dashboard() {
           icon={DollarSign}
           color="bg-orange-100 text-orange-600"
           trend={12.5}
+          onClick={() => navigate('/commissions')}
         />
       </div>
 
