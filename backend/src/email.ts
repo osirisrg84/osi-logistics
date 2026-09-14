@@ -92,7 +92,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
                       style="display:inline-block;background:#2563eb;color:#fff;text-decoration:none;padding:16px 40px;border-radius:10px;font-weight:700;font-size:16px;letter-spacing:0.2px;">
                       Entrar al Driver Portal →
                     </a>
-                    <p style="margin:10px 0 0;font-size:12px;color:#9ca3af;">${link}</p>
+                    <p style="margin:10px 0 0;font-size:12px;color:#9ca3af;">https://driver.osilogistics.com/driver</p>
                   </td></tr>
 
                   <!-- Divider -->
@@ -117,16 +117,6 @@ export async function sendActivationEmail(to: string, name: string, role: string
                           <div style="width:28px;height:28px;background:#eff6ff;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#2563eb;">2</div>
                         </td>
                         <td style="padding:10px 0 10px 8px;vertical-align:top;">
-                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Verifica tu teléfono</p>
-                          <p style="margin:0;font-size:13px;color:#6b7280;">Confirma tu número de celular con el código de verificación que recibirás por SMS.</p>
-                        </td>
-                      </tr>
-                      <tr><td colspan="2" style="padding:0 0 2px 0;"><div style="height:1px;background:#f3f4f6;margin-left:36px;"></div></td></tr>
-                      <tr>
-                        <td style="padding:10px 0;vertical-align:top;width:36px;">
-                          <div style="width:28px;height:28px;background:#eff6ff;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#2563eb;">3</div>
-                        </td>
-                        <td style="padding:10px 0 10px 8px;vertical-align:top;">
                           <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Completa tu perfil</p>
                           <p style="margin:0;font-size:13px;color:#6b7280;">Agrega tu información de empresa, MC Number, tipo de equipo y datos de autoridad.</p>
                         </td>
@@ -134,17 +124,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
                       <tr><td colspan="2" style="padding:0 0 2px 0;"><div style="height:1px;background:#f3f4f6;margin-left:36px;"></div></td></tr>
                       <tr>
                         <td style="padding:10px 0;vertical-align:top;width:36px;">
-                          <div style="width:28px;height:28px;background:#eff6ff;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#2563eb;">4</div>
-                        </td>
-                        <td style="padding:10px 0 10px 8px;vertical-align:top;">
-                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Configura tu método de pago</p>
-                          <p style="margin:0;font-size:13px;color:#6b7280;">Vincula tu cuenta bancaria o tarjeta para recibir el pago de tus comisiones.</p>
-                        </td>
-                      </tr>
-                      <tr><td colspan="2" style="padding:0 0 2px 0;"><div style="height:1px;background:#f3f4f6;margin-left:36px;"></div></td></tr>
-                      <tr>
-                        <td style="padding:10px 0;vertical-align:top;width:36px;">
-                          <div style="width:28px;height:28px;background:#dcfce7;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#16a34a;">5</div>
+                          <div style="width:28px;height:28px;background:#dcfce7;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#16a34a;">3</div>
                         </td>
                         <td style="padding:10px 0 10px 8px;vertical-align:top;">
                           <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Activa tu GPS y ponte Online</p>
