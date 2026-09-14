@@ -173,7 +173,7 @@ export default function DispatcherCommissions() {
       const params: Record<string, string> = { dispatcher_user_id: user.id };
       if (statusFilter) params.status = statusFilter;
       const { data } = await billingApi.getRecords(params);
-      setRows(data as CommissionRow[]);
+      setRows((data.records ?? []) as CommissionRow[]);
     } finally {
       setLoading(false);
     }
