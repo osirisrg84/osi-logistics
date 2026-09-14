@@ -34,6 +34,16 @@ function KpiCard({ title, value, sub, icon: Icon, color }: KpiCardProps) {
   );
 }
 
+function EmptyChart({ label }: { label: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-[200px] gap-2">
+      <TrendingUp className="w-8 h-8 text-gray-300 dark:text-slate-600" />
+      <p className="text-sm text-gray-400 dark:text-slate-500">{label}</p>
+      <p className="text-xs text-gray-300 dark:text-slate-600">Los datos aparecerán cuando haya actividad</p>
+    </div>
+  );
+}
+
 export default function Reports() {
   const [dashData, setDashData] = useState<Record<string, unknown> | null>(null);
   const [ordersReport, setOrdersReport] = useState<unknown[]>([]);
@@ -125,63 +135,71 @@ export default function Reports() {
             {/* Revenue trend */}
             <div className="card">
               <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Revenue Trend (7 days)</h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={((dashData as Record<string, unknown>)?.dailyRevenue as unknown[]) || []}>
-                  <defs>
-                    <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f97316" stopOpacity={0.15} />
-                      <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={d => format(new Date(d + 'T00:00:00'), 'MM/dd')} />
-                  <YAxis tick={{ fontSize: 10 }} />
-                  <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
-                  <Area type="monotone" dataKey="revenue" stroke="#f97316" strokeWidth={2} fill="url(#grad1)" name="Revenue ($)" />
-                </AreaChart>
-              </ResponsiveContainer>
+              {(((dashData as Record<string, unknown>)?.dailyRevenue as unknown[]) || []).length > 0 ? (
+                <ResponsiveContainer width="100%" height={200}>
+                  <AreaChart data={((dashData as Record<string, unknown>)?.dailyRevenue as unknown[]) || []}>
+                    <defs>
+                      <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.15} />
+                        <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={d => format(new Date(d + 'T00:00:00'), 'MM/dd')} />
+                    <YAxis tick={{ fontSize: 10 }} />
+                    <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
+                    <Area type="monotone" dataKey="revenue" stroke="#f97316" strokeWidth={2} fill="url(#grad1)" name="Revenue ($)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : <EmptyChart label="Sin datos de revenue aún" />}
             </div>
 
             {/* Deliveries by hour */}
             <div className="card">
               <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Deliveries by Hour</h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={byHour}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="hour" tick={{ fontSize: 10 }} tickFormatter={h => `${h}:00`} />
-                  <YAxis tick={{ fontSize: 10 }} />
-                  <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
-                  <Bar dataKey="count" fill="#f97316" radius={[4, 4, 0, 0]} name="Deliveries" />
-                </BarChart>
-              </ResponsiveContainer>
+              {byHour.length > 0 ? (
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={byHour}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="hour" tick={{ fontSize: 10 }} tickFormatter={h => `${h}:00`} />
+                    <YAxis tick={{ fontSize: 10 }} />
+                    <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
+                    <Bar dataKey="count" fill="#f97316" radius={[4, 4, 0, 0]} name="Deliveries" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : <EmptyChart label="Sin entregas registradas aún" />}
             </div>
 
             {/* Orders by priority */}
             <div className="card">
               <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Orders by Priority</h3>
-              <ResponsiveContainer width="100%" height={220}>
-                <PieChart>
-                  <Pie data={byPriority} cx="50%" cy="50%" outerRadius={85} dataKey="count" nameKey="priority" labelLine={false}>
-                    {byPriority.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} formatter={(value, name) => [value, name]} />
-                  <Legend iconType="circle" iconSize={8} formatter={(value) => <span style={{ fontSize: 12 }}>{value}</span>} />
-                </PieChart>
-              </ResponsiveContainer>
+              {byPriority.length > 0 ? (
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie data={byPriority} cx="50%" cy="50%" outerRadius={85} dataKey="count" nameKey="priority" labelLine={false}>
+                      {byPriority.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} formatter={(value, name) => [value, name]} />
+                    <Legend iconType="circle" iconSize={8} formatter={(value) => <span style={{ fontSize: 12 }}>{value}</span>} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : <EmptyChart label="Sin órdenes aún" />}
             </div>
 
             {/* Top drivers */}
             <div className="card">
               <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Top Driver Performance</h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={((dashData as Record<string, unknown>)?.topDrivers as unknown[] || []).slice(0, 5)} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 10 }} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={80} />
-                  <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
-                  <Bar dataKey="total_deliveries" fill="#3b82f6" radius={[0, 4, 4, 0]} name="Total Deliveries" />
-                </BarChart>
-              </ResponsiveContainer>
+              {(((dashData as Record<string, unknown>)?.topDrivers as unknown[] || []).length > 0) ? (
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={((dashData as Record<string, unknown>)?.topDrivers as unknown[] || []).slice(0, 5)} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
+                    <XAxis type="number" tick={{ fontSize: 10 }} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={80} />
+                    <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
+                    <Bar dataKey="total_deliveries" fill="#3b82f6" radius={[0, 4, 4, 0]} name="Total Deliveries" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : <EmptyChart label="Sin datos de drivers aún" />}
             </div>
           </div>
         </>
