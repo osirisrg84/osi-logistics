@@ -23,7 +23,7 @@ function KpiCard({ title, value, sub, icon: Icon, color }: KpiCardProps) {
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <p className="text-xs text-gray-500 font-medium truncate">{title}</p>
-          <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mt-1 leading-tight break-all">{value}</p>
+          <p className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white mt-1 leading-tight truncate">{value}</p>
           <p className="text-xs text-gray-400 mt-1 truncate">{sub}</p>
         </div>
         <div className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center ${color}`}>
