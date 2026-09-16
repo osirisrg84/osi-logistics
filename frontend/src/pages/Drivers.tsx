@@ -192,6 +192,9 @@ function DriverDetail({ driver, onClose }: DriverDetailProps) {
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-slate-100">{driver.name}</h3>
+                {driver.email?.endsWith('@osilogistics.com') && (
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600/50 tracking-wide">demo</span>
+                )}
                 {(driver as Driver & { driver_code?: string }).driver_code && (
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 tracking-widest border border-orange-200 dark:border-orange-700/40">
                     ID #{(driver as Driver & { driver_code?: string }).driver_code}
@@ -570,7 +573,12 @@ export default function Drivers() {
                   {driver.avatar}
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">{driver.name}</h3>
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">{driver.name}</h3>
+                    {driver.email?.endsWith('@osilogistics.com') && (
+                      <span className="text-[9px] font-semibold px-1 py-0.5 rounded text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600/50 tracking-wide leading-none">demo</span>
+                    )}
+                  </div>
                   {(driver.truck_make || driver.equipment_type) && (
                     <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5 leading-none">
                       {driver.truck_make
