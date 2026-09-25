@@ -292,6 +292,9 @@ export async function initDatabase(): Promise<void> {
   )`);
   await exec(`CREATE INDEX IF NOT EXISTS idx_push_subscriptions_driver_id ON push_subscriptions(driver_id)`);
 
+  // Key-value store for boot-time flags (e.g. demo refresh throttle)
+  await exec(`CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
+
   // Assign dispatcher_code to existing dispatchers that don't have one
   const genCode = async (): Promise<string> => {
     const code = String(Math.floor(10000000 + Math.random() * 90000000));
@@ -476,6 +479,10 @@ async function seedHistoricalOrders(): Promise<void> {
 }
 
 async function refreshDemoData(): Promise<void> {
+  const today = new Date().toISOString().slice(0, 10);
+  const last = await queryOne<{ value: string }>("SELECT value FROM meta WHERE key = 'demo_refreshed_at'");
+  if (last?.value === today) { console.log('✅ Demo data already refreshed today, skipping'); return; }
+
   const orders = await query<{ id: string }>(
     "SELECT id FROM orders WHERE order_number LIKE 'OSI-H%' ORDER BY order_number ASC"
   );
@@ -536,6 +543,7 @@ async function refreshDemoData(): Promise<void> {
       await exec("DELETE FROM commissions WHERE order_id=? AND status != 'settled'", [orders[i].id]);
     }
   }
+  await exec("INSERT OR REPLACE INTO meta (key, value) VALUES ('demo_refreshed_at', ?)", [today]);
   console.log(`✅ Demo refreshed: ${DELIVERED_COUNT} delivered, ${total - DELIVERED_COUNT} active orders`);
 }
 
