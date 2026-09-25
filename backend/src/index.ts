@@ -125,7 +125,7 @@ app.use('/api/notifications', authenticate, notificationsRouter);
 app.use('/api/admin', authenticate, adminRouter);
 app.use('/api/billing', authenticate, billingRouter);
 app.use('/api/stripe', stripeRouter);
-app.use('/api/push', pushRouter);
+app.use('/api/push', authenticate, pushRouter);
 
 io.on('connection', (socket) => {
   console.log(`Client connected: ${socket.id}`);
@@ -248,7 +248,7 @@ async function startSimulation(): Promise<void> {
         title: '🟢 Driver Online',
         body: `${event.name} está disponible y listo para entregas`,
         driverId: event.id,
-      });
+      }).catch(e => console.error('[Push] Driver online broadcast failed:', e));
     }
 
     if (event.status !== 'offline') {

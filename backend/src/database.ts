@@ -279,6 +279,19 @@ export async function initDatabase(): Promise<void> {
   )`);
   await exec(`CREATE INDEX IF NOT EXISTS idx_order_documents_order_id ON order_documents(order_id)`);
 
+  // Web Push subscriptions. driver_id is set when a driver subscribes (so we can push a
+  // specific offer straight to them); NULL when a dispatcher subscribes for broadcast-only
+  // alerts like "driver online". Persisted (not in-memory) so subscriptions survive restarts.
+  await exec(`CREATE TABLE IF NOT EXISTS push_subscriptions (
+    id         TEXT PRIMARY KEY,
+    driver_id  TEXT,
+    endpoint   TEXT NOT NULL UNIQUE,
+    p256dh     TEXT NOT NULL,
+    auth       TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+  await exec(`CREATE INDEX IF NOT EXISTS idx_push_subscriptions_driver_id ON push_subscriptions(driver_id)`);
+
   // Assign dispatcher_code to existing dispatchers that don't have one
   const genCode = async (): Promise<string> => {
     const code = String(Math.floor(10000000 + Math.random() * 90000000));

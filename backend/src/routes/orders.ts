@@ -2,7 +2,8 @@ import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne, createCommission } from '../database';
 import { appEvents } from '../events';
-import { sendOfferEmail, sendOfferAcceptedEmail, sendDeliveryEmail, sendDocumentEmail } from '../email';
+import { sendOfferEmail, sendOfferAcceptedEmail, sendOrderAssignedEmail, sendDeliveryEmail, sendDocumentEmail } from '../email';
+import { sendPushToDriver } from './push';
 
 type AuthRequest = Request & { user?: { id: string; name: string; email?: string; phone?: string; role: string; driver_id?: string } };
 
@@ -12,10 +13,13 @@ const isDemo = (email?: string) => (email ?? '').endsWith('@osilogistics.com');
 const DEMO_ORDER_FILTER = `AND (o.order_number LIKE 'OSI-H%' OR o.dispatcher_user_id IN (SELECT id FROM users WHERE email LIKE '%@osilogistics.com'))`;
 const REAL_ORDER_FILTER = `AND o.order_number NOT LIKE 'OSI-H%' AND (o.dispatcher_user_id IS NULL OR o.dispatcher_user_id NOT IN (SELECT id FROM users WHERE email LIKE '%@osilogistics.com'))`;
 
-// Demo users see all demo orders; admin sees all real orders; real dispatcher sees only their own
-const getOrderFilter = (email?: string, role?: string, userId?: string): string => {
+// Demo users see all demo orders; admin sees all real orders; drivers see only orders assigned
+// to their own driver_id (enforced here server-side, not just via the query param); real
+// dispatcher sees only orders they created.
+const getOrderFilter = (email?: string, role?: string, userId?: string, driverId?: string): string => {
   if (isDemo(email)) return DEMO_ORDER_FILTER;
   if (role === 'admin') return REAL_ORDER_FILTER;
+  if (role === 'driver') return driverId ? `${REAL_ORDER_FILTER} AND o.driver_id = '${driverId}'` : `${REAL_ORDER_FILTER} AND 1=0`;
   return userId ? `${REAL_ORDER_FILTER} AND o.dispatcher_user_id = '${userId}'` : `${REAL_ORDER_FILTER} AND 1=0`;
 };
 
@@ -29,7 +33,7 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const { status, priority, driver_id, search, limit = 50, offset = 0 } = req.query;
     const authReq0 = req as AuthRequest;
-    const demoFilter = getOrderFilter(authReq0.user?.email, authReq0.user?.role, authReq0.user?.id);
+    const demoFilter = getOrderFilter(authReq0.user?.email, authReq0.user?.role, authReq0.user?.id, authReq0.user?.driver_id);
     let sql = `
       SELECT o.*,
              d.name as driver_name, d.phone as driver_phone,
@@ -75,7 +79,7 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/stats', async (req: Request, res: Response) => {
   try {
     const authReqS = req as AuthRequest;
-    const f = getOrderFilter(authReqS.user?.email, authReqS.user?.role, authReqS.user?.id);
+    const f = getOrderFilter(authReqS.user?.email, authReqS.user?.role, authReqS.user?.id, authReqS.user?.driver_id);
     const [total, pending, assigned, in_transit, delivered, cancelled, today, revenue, avgRow] = await Promise.all([
       queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE 1=1 ${f}`),
       queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE o.status = 'pending' ${f}`),
@@ -424,11 +428,20 @@ router.post('/:id/offer', async (req: Request, res: Response) => {
         order.pickup_address as string,
         order.delivery_address as string,
         (order.rate as number) || 0,
-        dispName,
-        dispPhone,
-        dispEmail,
       ).catch(e => console.error('[Email] Offer email failed:', e));
     }
+
+    // Push real al conductor (funciona con el telefono bloqueado o la app cerrada,
+    // a diferencia del socket + Notification() del navegador, que solo alcanza con la
+    // pestaña abierta y activa).
+    sendPushToDriver(driver_id, {
+      title: '🚛 Nueva oferta de carga',
+      body: `Orden ${order.order_number as string} · ${order.pickup_address as string} → ${order.delivery_address as string}`,
+      url: '/driver',
+      tag: 'offer-' + (req.params.id),
+      requireInteraction: true,
+      driverId: driver_id,
+    }).catch(e => console.error('[Push] Offer push failed:', e));
 
     res.json(updated);
   } catch { res.status(500).json({ error: 'Failed' }); }
@@ -458,11 +471,12 @@ router.post('/:id/accept', async (req: Request, res: Response) => {
     appEvents.emit('order:status_changed', { id: req.params.id, order_number: order.order_number, status: 'assigned' });
 
     // Email al dispatcher
+    const driver = await queryOne<{ name: string }>('SELECT name FROM drivers WHERE id = ?', [driverId]);
+    let dispatcher: { email: string; name: string; phone: string } | null = null;
     if (order.dispatcher_user_id) {
-      const dispatcher = await queryOne<{ email: string; name: string }>(
-        'SELECT email, name FROM users WHERE id = ? AND active = 1', [order.dispatcher_user_id]
-      );
-      const driver = await queryOne<{ name: string }>('SELECT name FROM drivers WHERE id = ?', [driverId]);
+      dispatcher = (await queryOne<{ email: string; name: string; phone: string }>(
+        'SELECT email, name, phone FROM users WHERE id = ? AND active = 1', [order.dispatcher_user_id]
+      )) ?? null;
       if (dispatcher?.email) {
         sendOfferAcceptedEmail(
           dispatcher.email,
@@ -473,6 +487,23 @@ router.post('/:id/accept', async (req: Request, res: Response) => {
           order.delivery_address as string,
         ).catch(e => console.error('[Email] Accept email failed:', e));
       }
+    }
+
+    // Email al driver con el contacto del dispatch (solo aqui, ya que se confirmo la orden)
+    const driverUser = await queryOne<{ email: string; name: string }>(
+      'SELECT u.email, u.name FROM users u WHERE u.driver_id = ? AND u.active = 1 LIMIT 1', [driverId]
+    );
+    if (driverUser?.email) {
+      sendOrderAssignedEmail(
+        driverUser.email,
+        driverUser.name || driver?.name || 'Conductor',
+        order.order_number as string,
+        order.pickup_address as string,
+        order.delivery_address as string,
+        dispatcher?.name,
+        dispatcher?.phone,
+        dispatcher?.email,
+      ).catch(e => console.error('[Email] Order assigned email failed:', e));
     }
 
     res.json(await queryOne(`

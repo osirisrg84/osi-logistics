@@ -24,6 +24,37 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { getSocket } from '../services/socket';
 import Map3D from '../components/Map3D';
 
+function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(base64);
+  const arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr.buffer as ArrayBuffer;
+}
+
+// Registra push notifications reales (Web Push) para este conductor -- a diferencia del
+// socket + Notification() del navegador, esto SI llega con el telefono bloqueado o la
+// app cerrada, porque el backend le pega directo al endpoint push del navegador/SO.
+async function registerDriverPush(): Promise<void> {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try {
+    const reg = await navigator.serviceWorker.register('/sw.js');
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+
+    const { data } = await driverAxios.get('/push/vapid-public-key');
+    const existing = await reg.pushManager.getSubscription();
+    const sub = existing || await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(data.key),
+    });
+    await driverAxios.post('/push/subscribe', sub.toJSON());
+  } catch {
+    // Push not supported or denied — silent fail, el aviso por socket sigue funcionando de respaldo
+  }
+}
+
 function calcAuthority(since: string): string {
   if (!since) return '';
   const start = new Date(since);
@@ -697,7 +728,10 @@ export default function DriverPortal() {
 
     const socket = getSocket();
     socket.emit('subscribe_orders');
-    if (driverId) socket.emit('driver:subscribe', driverId);
+    if (driverId) {
+      socket.emit('driver:subscribe', driverId);
+      registerDriverPush();
+    }
     socket.on('order_updated', () => fetchOrders());
     socket.on('driver:notification', (notif: DriverNotif) => {
       setDriverNotifs(prev => [notif, ...prev]);

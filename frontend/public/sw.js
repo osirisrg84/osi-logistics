@@ -35,9 +35,10 @@ self.addEventListener('push', (event) => {
       body: data.body || '',
       icon: '/icons/icon-192.png',
       badge: '/icons/icon-192.png',
-      tag: 'driver-online-' + (data.driverId || Date.now()),
+      tag: data.tag || ('driver-online-' + (data.driverId || Date.now())),
       renotify: true,
-      data: { url: '/tracking' },
+      requireInteraction: !!data.requireInteraction,
+      data: { url: data.url || '/tracking' },
     })
   );
 });
