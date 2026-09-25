@@ -17,8 +17,8 @@ const REAL_ORDER_FILTER = `AND o.order_number NOT LIKE 'OSI-H%' AND (o.dispatche
 // to their own driver_id (enforced here server-side, not just via the query param); real
 // dispatcher sees only orders they created.
 const getOrderFilter = (email?: string, role?: string, userId?: string, driverId?: string): string => {
-  if (isDemo(email)) return DEMO_ORDER_FILTER;
   if (role === 'admin') return REAL_ORDER_FILTER;
+  if (isDemo(email)) return DEMO_ORDER_FILTER;
   if (role === 'driver') return driverId ? `${REAL_ORDER_FILTER} AND o.driver_id = '${driverId}'` : `${REAL_ORDER_FILTER} AND 1=0`;
   return userId ? `${REAL_ORDER_FILTER} AND o.dispatcher_user_id = '${userId}'` : `${REAL_ORDER_FILTER} AND 1=0`;
 };

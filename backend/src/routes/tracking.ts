@@ -7,7 +7,7 @@ const isDemo = (email?: string) => (email ?? '').endsWith('@osilogistics.com');
 
 router.get('/live', async (req: Request, res: Response) => {
   try {
-    const demo = isDemo(req.user?.email);
+    const demo = req.user?.role !== 'admin' && isDemo(req.user?.email);
     const driverFilter = demo
       ? `AND d.email LIKE '%@osilogistics.com'`
       : `AND (d.email IS NULL OR d.email NOT LIKE '%@osilogistics.com')`;
