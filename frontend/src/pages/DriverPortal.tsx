@@ -746,6 +746,22 @@ export default function DriverPortal() {
       notificationsApi.getDriverNotifs(driverId)
         .then(r => setDriverNotifs(r.data.notifications as DriverNotif[]))
         .catch(() => {});
+      // Si el conductor cerro la app (o se le apago el telefono) mientras
+      // tenia una oferta pendiente sin responder, el evento de socket que la
+      // mostro ya paso y no se repite solo -- al volver a abrir la app hay
+      // que recuperarla a mano, si no la oferta "desaparece" para el
+      // conductor aunque siga activa y esperando respuesta en el servidor.
+      ordersApi.getAll({ offered_to_driver_id: driverId, status: 'offered' })
+        .then(r => {
+          const active = (r.data.orders as Order[])[0];
+          if (!active) return;
+          setPendingOffer(active);
+          const offeredAtMs = active.offered_at ? new Date(active.offered_at).getTime() : Date.now();
+          const elapsedSecs = Math.floor((Date.now() - offeredAtMs) / 1000);
+          setOfferCountdown(Math.max(0, 7200 - elapsedSecs));
+          startAlarm();
+        })
+        .catch(() => {});
     }
 
     const socket = getSocket();
@@ -762,10 +778,13 @@ export default function DriverPortal() {
       setPendingOffer(offer);
       setOfferCountdown(7200);
       startAlarm();
-      // Browser push notification
+      // Browser push notification -- misma info que la notificacion push
+      // real (tarifa y millas ademas de la ruta), para cuando la app esta
+      // abierta en primer plano y esta es la que se ve.
       if ('Notification' in window) {
+        const miles = Math.round((offer.distance_km || 0) * 0.621371);
         const show = () => new Notification('🚛 Nueva oferta de carga', {
-          body: `Orden ${offer.order_number} · ${formatLocation(offer.pickup_address, offer.pickup_contact)} → ${formatLocation(offer.delivery_address, offer.delivery_contact)}`,
+          body: `${offer.order_number} · $${Math.round(offer.price).toLocaleString('en-US')}${miles ? ' · ' + miles + ' mi' : ''}\n${formatLocation(offer.pickup_address, offer.pickup_contact)} → ${formatLocation(offer.delivery_address, offer.delivery_contact)}`,
           icon: '/favicon.ico',
           requireInteraction: true,
         });

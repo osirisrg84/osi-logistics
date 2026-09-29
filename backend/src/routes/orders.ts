@@ -31,7 +31,7 @@ const DOCUMENT_TYPE_LABELS: Record<string, string> = {
 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const { status, priority, driver_id, search, limit = 50, offset = 0 } = req.query;
+    const { status, priority, driver_id, offered_to_driver_id, search, limit = 50, offset = 0 } = req.query;
     const authReq0 = req as AuthRequest;
     const demoFilter = getOrderFilter(authReq0.user?.email, authReq0.user?.role, authReq0.user?.id, authReq0.user?.driver_id);
     let sql = `
@@ -51,6 +51,11 @@ router.get('/', async (req: Request, res: Response) => {
     if (status)    { sql += ' AND o.status = ?'; params.push(status); }
     if (priority)  { sql += ' AND o.priority = ?'; params.push(priority); }
     if (driver_id) { sql += ' AND o.driver_id = ?'; params.push(driver_id); }
+    // offered_to_driver_id: a la hora de ofrecer, o.driver_id todavia es NULL
+    // (recien se pone al aceptar) -- sin este filtro no hay forma de que el
+    // conductor recupere una oferta activa al volver a abrir la app (celular
+    // apagado/app cerrada mientras la oferta seguia pendiente).
+    if (offered_to_driver_id) { sql += ' AND o.offered_to_driver_id = ?'; params.push(offered_to_driver_id); }
     if (search) {
       sql += ' AND (o.order_number LIKE ? OR o.customer_name LIKE ? OR o.delivery_address LIKE ?)';
       params.push(`%${search}%`, `%${search}%`, `%${search}%`);
@@ -63,6 +68,7 @@ router.get('/', async (req: Request, res: Response) => {
     if (status)    { countSql += ' AND o.status = ?'; countParams.push(status); }
     if (priority)  { countSql += ' AND o.priority = ?'; countParams.push(priority); }
     if (driver_id) { countSql += ' AND o.driver_id = ?'; countParams.push(driver_id); }
+    if (offered_to_driver_id) { countSql += ' AND o.offered_to_driver_id = ?'; countParams.push(offered_to_driver_id); }
     if (search) {
       countSql += ' AND (o.order_number LIKE ? OR o.customer_name LIKE ? OR o.delivery_address LIKE ?)';
       countParams.push(`%${search}%`, `%${search}%`, `%${search}%`);
@@ -427,16 +433,21 @@ router.post('/:id/offer', async (req: Request, res: Response) => {
         order.order_number as string,
         order.pickup_address as string,
         order.delivery_address as string,
-        (order.rate as number) || 0,
+        // Era `order.rate`, una columna que no existe en `orders` (la real es
+        // `price`) -- siempre mandaba $0 en el correo de oferta.
+        (order.price as number) || 0,
       ).catch(e => console.error('[Email] Offer email failed:', e));
     }
 
     // Push real al conductor (funciona con el telefono bloqueado o la app cerrada,
     // a diferencia del socket + Notification() del navegador, que solo alcanza con la
-    // pestaña abierta y activa).
+    // pestaña abierta y activa). El cuerpo lleva la tarifa y las millas ademas
+    // de la ruta -- antes solo traia la ruta, sin con cuanto paga ni que tan lejos es.
+    const offerMiles = Math.round(((order.distance_km as number) || 0) * 0.621371);
+    const offerPrice = Math.round((order.price as number) || 0);
     sendPushToDriver(driver_id, {
       title: '🚛 Nueva oferta de carga',
-      body: `Orden ${order.order_number as string} · ${order.pickup_address as string} → ${order.delivery_address as string}`,
+      body: `${order.order_number as string} · $${offerPrice.toLocaleString('en-US')}${offerMiles ? ' · ' + offerMiles + ' mi' : ''}\n${order.pickup_address as string} → ${order.delivery_address as string}`,
       url: '/driver',
       tag: 'offer-' + (req.params.id),
       requireInteraction: true,
