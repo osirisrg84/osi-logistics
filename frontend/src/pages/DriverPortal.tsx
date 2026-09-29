@@ -33,6 +33,28 @@ function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
   return arr.buffer as ArrayBuffer;
 }
 
+// Un solo AudioContext compartido para toda la pagina (no uno nuevo por
+// sonido) -- los navegadores solo dejan que un AudioContext realmente suene
+// si se crea/reanuda como resultado DIRECTO de un gesto del usuario. La
+// alarma de "nueva oferta" la dispara un evento de socket asincrono (nadie
+// tocó la pantalla justo en ese instante), asi que un `new AudioContext()`
+// ahi nace "suspended" y no suena, sin lanzar ningun error -- exactamente el
+// bug reportado ("no le suena el telefono al conductor"). Se desbloquea una
+// sola vez con el primer toque en cualquier parte de la pagina, y de ahi en
+// adelante todos los sonidos (oferta, aceptar, entregado, etc.) reusan ese
+// mismo contexto ya activo en vez de crear uno nuevo suspendido cada vez.
+let sharedAudioCtx: AudioContext | null = null;
+function getSharedAudioContext(): AudioContext {
+  if (!sharedAudioCtx) sharedAudioCtx = new AudioContext();
+  if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume().catch(() => {});
+  return sharedAudioCtx;
+}
+if (typeof window !== 'undefined') {
+  const unlockSharedAudioContext = () => { getSharedAudioContext(); };
+  window.addEventListener('pointerdown', unlockSharedAudioContext, { once: true });
+  window.addEventListener('touchstart', unlockSharedAudioContext, { once: true, passive: true });
+}
+
 // Registra push notifications reales (Web Push) para este conductor -- a diferencia del
 // socket + Notification() del navegador, esto SI llega con el telefono bloqueado o la
 // app cerrada, porque el backend le pega directo al endpoint push del navegador/SO.
@@ -636,7 +658,7 @@ export default function DriverPortal() {
 
   const playOfferSound = () => {
     try {
-      const ctx = new AudioContext();
+      const ctx = getSharedAudioContext();
       // Alarma potente: patrón urgente de 3 pulsos dobles
       const pattern = [880, 1174.66, 880, 1174.66, 880, 1174.66, 1318.51, 1568];
       pattern.forEach((freq, i) => {
@@ -672,7 +694,7 @@ export default function DriverPortal() {
 
   const playAcceptSound = () => {
     try {
-      const ctx = new AudioContext();
+      const ctx = getSharedAudioContext();
       [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -689,7 +711,7 @@ export default function DriverPortal() {
 
   const playDeliveredSound = () => {
     try {
-      const ctx = new AudioContext();
+      const ctx = getSharedAudioContext();
       [523.25, 659.25, 783.99, 1046.50, 1318.51, 1046.50, 1318.51].forEach((freq, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -796,7 +818,7 @@ export default function DriverPortal() {
 
   const playBreakSound = () => {
     try {
-      const ctx = new AudioContext();
+      const ctx = getSharedAudioContext();
       const t = ctx.currentTime;
       // Tono suave descendente — C5 → A4 → F4 (relajante)
       [523.25, 440, 349.23].forEach((freq, i) => {
@@ -816,7 +838,7 @@ export default function DriverPortal() {
 
   const playRetakeSound = () => {
     try {
-      const ctx = new AudioContext();
+      const ctx = getSharedAudioContext();
       const t = ctx.currentTime;
       // Tono ascendente energético — F4 → A4 → C5 → E5 (volviendo a la acción)
       [349.23, 440, 523.25, 659.25].forEach((freq, i) => {
@@ -836,7 +858,7 @@ export default function DriverPortal() {
 
   const playOfflineSound = () => {
     try {
-      const ctx = new AudioContext();
+      const ctx = getSharedAudioContext();
       const notes = [783.99, 659.25, 523.25]; // G5 E5 C5 — acorde descendente
       notes.forEach((freq, i) => {
         const osc = ctx.createOscillator();
@@ -3404,7 +3426,7 @@ export default function DriverPortal() {
                             try {
                               const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                               try {
-                                const ctx = new AudioContext();
+                                const ctx = getSharedAudioContext();
                                 const buf = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate);
                                 const d = buf.getChannelData(0);
                                 for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
@@ -3430,7 +3452,7 @@ export default function DriverPortal() {
                                 };
                                 reader.readAsDataURL(blob);
                                 try {
-                                  const ctx = new AudioContext();
+                                  const ctx = getSharedAudioContext();
                                   const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
                                   const d = buf.getChannelData(0);
                                   for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length) * 0.6;
