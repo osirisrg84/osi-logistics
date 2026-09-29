@@ -39,10 +39,11 @@ function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
 // alarma de "nueva oferta" la dispara un evento de socket asincrono (nadie
 // tocó la pantalla justo en ese instante), asi que un `new AudioContext()`
 // ahi nace "suspended" y no suena, sin lanzar ningun error -- exactamente el
-// bug reportado ("no le suena el telefono al conductor"). Se desbloquea una
-// sola vez con el primer toque en cualquier parte de la pagina, y de ahi en
-// adelante todos los sonidos (oferta, aceptar, entregado, etc.) reusan ese
-// mismo contexto ya activo en vez de crear uno nuevo suspendido cada vez.
+// bug reportado ("no le suena el telefono al conductor"). Se desbloquea/
+// reanuda con CUALQUIER toque en cualquier parte de la pagina (no solo el
+// primero -- ver nota abajo), y de ahi en adelante todos los sonidos (oferta,
+// aceptar, entregado, etc.) reusan ese mismo contexto ya activo en vez de
+// crear uno nuevo suspendido cada vez.
 let sharedAudioCtx: AudioContext | null = null;
 function getSharedAudioContext(): AudioContext {
   if (!sharedAudioCtx) sharedAudioCtx = new AudioContext();
@@ -51,8 +52,18 @@ function getSharedAudioContext(): AudioContext {
 }
 if (typeof window !== 'undefined') {
   const unlockSharedAudioContext = () => { getSharedAudioContext(); };
-  window.addEventListener('pointerdown', unlockSharedAudioContext, { once: true });
-  window.addEventListener('touchstart', unlockSharedAudioContext, { once: true, passive: true });
+  // SIN {once:true} a proposito -- Chrome/Android puede volver a "suspender"
+  // un AudioContext que llevaba rato sin sonar (pantalla apagada, pestaña en
+  // segundo plano un buen rato), y un conductor que solo dejo la app
+  // "En linea" sin volver a tocar nada nunca disparaba el desbloqueo de
+  // primera vez si la oferta llegaba antes de su primer toque en esa
+  // recarga. Reanudarlo en CADA toque es practicamente gratis (si ya esta
+  // "running" no hace nada) y cubre ambos casos.
+  window.addEventListener('pointerdown', unlockSharedAudioContext);
+  window.addEventListener('touchstart', unlockSharedAudioContext, { passive: true });
+  window.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') unlockSharedAudioContext();
+  });
 }
 
 // Registra push notifications reales (Web Push) para este conductor -- a diferencia del
