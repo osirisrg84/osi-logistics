@@ -1,4 +1,5 @@
 {
+  "id": "/dashboard",
   "name": "OSI Dispatch Center",
   "short_name": "OSI Dispatch",
   "description": "Admin and dispatcher console for OSI Logistics — orders, live tracking, fleet, and billing.",

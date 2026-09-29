@@ -1,4 +1,5 @@
 {
+  "id": "/driver",
   "name": "OSI Driver Portal",
   "short_name": "OSI Driver",
   "description": "Driver app for OSI Logistics — assigned orders, delivery status, and live navigation.",
