@@ -746,11 +746,18 @@ export default function DriverPortal() {
       notificationsApi.getDriverNotifs(driverId)
         .then(r => setDriverNotifs(r.data.notifications as DriverNotif[]))
         .catch(() => {});
-      // Si el conductor cerro la app (o se le apago el telefono) mientras
-      // tenia una oferta pendiente sin responder, el evento de socket que la
-      // mostro ya paso y no se repite solo -- al volver a abrir la app hay
-      // que recuperarla a mano, si no la oferta "desaparece" para el
-      // conductor aunque siga activa y esperando respuesta en el servidor.
+    }
+
+    // Si el conductor cerro la app (o se le apago el telefono, o se quedo
+    // sin señal un rato) mientras tenia una oferta pendiente sin responder,
+    // el evento de socket que la mostro ya paso y no se repite solo -- hay
+    // que recuperarla a mano, si no la oferta "desaparece" para el conductor
+    // aunque siga activa y esperando respuesta en el servidor. Se llama al
+    // montar Y en cada reconexion del socket (ver subscribeAll abajo), no
+    // solo una vez, para cubrir tambien el caso de "la oferta llego justo
+    // durante un corte de conexion".
+    const checkActiveOffer = () => {
+      if (!driverId) return;
       ordersApi.getAll({ offered_to_driver_id: driverId, status: 'offered' })
         .then(r => {
           const active = (r.data.orders as Order[])[0];
@@ -762,14 +769,30 @@ export default function DriverPortal() {
           startAlarm();
         })
         .catch(() => {});
-    }
+    };
 
     const socket = getSocket();
-    socket.emit('subscribe_orders');
-    if (driverId) {
-      socket.emit('driver:subscribe', driverId);
-      registerDriverPush();
-    }
+    // Unirse a las salas (subscribe_orders/driver:subscribe/radio:join) solo
+    // pasaba UNA vez al montar -- si el socket se reconecta por cualquier
+    // motivo (el backend se reinicia/redeploya, el celular pierde señal un
+    // momento, Render duerme el server gratis), el servidor ve una conexion
+    // nueva sin ninguna sala unida, y como nada vuelve a pedir la
+    // suscripcion, el conductor deja de recibir "driver:offer" (y las demas
+    // salas) para siempre hasta que recargue la app a mano -- exactamente lo
+    // que paso: el redeploy del backend tiro la conexion y nunca se
+    // resuscribio sola. Ahora se re-suscribe en CADA conexion, no solo la
+    // primera (socket.io ya reconecta solo, esto solo le faltaba avisarle
+    // al servidor de nuevo que salas le interesan) -- y de paso revisa si se
+    // perdio alguna oferta durante el corte.
+    const subscribeAll = () => {
+      socket.emit('subscribe_orders');
+      if (driverId) socket.emit('driver:subscribe', driverId);
+      socket.emit('radio:join');
+      checkActiveOffer();
+    };
+    subscribeAll();
+    socket.on('connect', subscribeAll);
+    if (driverId) registerDriverPush();
     socket.on('order_updated', () => fetchOrders());
     socket.on('driver:notification', (notif: DriverNotif) => {
       setDriverNotifs(prev => [notif, ...prev]);
@@ -792,7 +815,6 @@ export default function DriverPortal() {
         else if (Notification.permission !== 'denied') Notification.requestPermission().then(p => { if (p === 'granted') show(); });
       }
     });
-    socket.emit('radio:join');
     socket.on('radio:msg', (data: {name:string; msg:string; ts:string}) => {
       setRadioMsgs(prev => [...prev.slice(-49), { id: Date.now().toString(), type: 'text' as const, ...data }]);
     });
@@ -800,6 +822,7 @@ export default function DriverPortal() {
       setRadioMsgs(prev => [...prev.slice(-49), { id: Date.now().toString(), type: 'voice' as const, msg: '', ...data }]);
     });
     return () => {
+      socket.off('connect', subscribeAll);
       socket.off('order_updated');
       socket.off('driver:notification');
       socket.off('driver:offer');
