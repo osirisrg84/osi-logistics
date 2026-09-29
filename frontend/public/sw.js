@@ -1,4 +1,4 @@
-const CACHE = 'osi-v2';
+const CACHE = 'osi-v3';
 const PRECACHE = ['/', '/index.html', '/icons/icon-192.png', '/icons/icon-512.png'];
 
 self.addEventListener('install', (event) => {
@@ -15,7 +15,16 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Required for Chrome to recognize PWA as installable
+// Required for Chrome to recognize PWA as installable.
+//
+// Network-first, not cache-first: esta era la causa real de que el celular
+// del conductor siguiera corriendo JS viejo despues de cada deploy, sin
+// importar cuantas veces cerrara y volviera a abrir la app -- con
+// cache-first, la primera vez que el navegador guarda index.html + el
+// bundle, se queda sirviendo ESA version para siempre (el archivo sw.js no
+// habia cambiado de bytes, asi que el navegador nunca detectaba que habia
+// una version nueva que instalar). Ahora siempre intenta la red primero, y
+// solo cae al cache guardado si de plano no hay conexion.
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests for same-origin or cached assets
   if (event.request.method !== 'GET') return;
@@ -23,7 +32,13 @@ self.addEventListener('fetch', (event) => {
   // Let API calls go straight to network
   if (url.pathname.startsWith('/api/')) return;
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request))
+    fetch(event.request)
+      .then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(event.request, copy)).catch(() => {});
+        return res;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
 
