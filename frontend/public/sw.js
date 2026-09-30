@@ -1,4 +1,4 @@
-const CACHE = 'osi-v3';
+const CACHE = 'osi-v4';
 const PRECACHE = ['/', '/index.html', '/icons/icon-192.png', '/icons/icon-512.png'];
 
 self.addEventListener('install', (event) => {
@@ -53,6 +53,17 @@ self.addEventListener('push', (event) => {
       tag: data.tag || ('driver-online-' + (data.driverId || Date.now())),
       renotify: true,
       requireInteraction: !!data.requireInteraction,
+      // Vibracion explicita -- no estaba puesta antes. El SONIDO en si no lo
+      // puede forzar el codigo: Android lo decide por el "canal de
+      // notificaciones" que Chrome crea una vez para este sitio, y si el
+      // conductor cerro/deslizo muchas notificaciones de prueba sin tocarlas,
+      // Android puede haber bajado ese canal a silencioso solo (es un
+      // comportamiento automatico del sistema, no algo que el sitio pida).
+      // Se arregla a mano: Ajustes de Android -> Apps -> Chrome ->
+      // Notificaciones -> buscar el canal de este sitio -> subir importancia
+      // y reactivar sonido.
+      silent: false,
+      vibrate: data.requireInteraction ? [400, 150, 400, 150, 600, 300, 400] : [300, 100, 300],
       data: { url: data.url || '/tracking' },
     })
   );
