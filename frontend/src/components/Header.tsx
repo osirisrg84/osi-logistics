@@ -387,7 +387,16 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 <p className="text-xs text-gray-400 dark:text-slate-500 truncate">{user?.email}</p>
                 <span className={`badge mt-1 capitalize ${user?.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300' : 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300'}`}>{user?.role}</span>
               </div>
-              <button onClick={() => { setShowUserMenu(false); logout(); }}
+              <button onClick={() => {
+                  setShowUserMenu(false);
+                  // Igual que en Driver Portal: no dejar cerrar sesion
+                  // estando "en turno" -- primero hay que ponerse "Libre".
+                  if (isDispatcher && dispActive) {
+                    alert('Debes ponerte "Libre" (Activo apagado) antes de cerrar sesión.');
+                    return;
+                  }
+                  logout();
+                }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
                 <LogOut className="w-4 h-4" />
                 Sign Out

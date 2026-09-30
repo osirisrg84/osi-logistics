@@ -1031,6 +1031,19 @@ export default function DriverPortal() {
     }
   };
 
+  // No dejar cerrar sesion estando "en linea" -- si el conductor esta
+  // available/busy/on_break, cerrar sesion lo saca de la app pero el
+  // servidor lo sigue mostrando como si pudiera recibir ofertas, y ya vimos
+  // en esta misma conversacion cuanto cuesta que una oferta le vuelva a
+  // llegar si no tiene la app abierta. Se le pide primero ponerse "Offline".
+  const handleLogoutClick = () => {
+    if (driverStatus !== 'offline') {
+      alert('Debes ponerte "Offline" antes de cerrar sesión.');
+      return;
+    }
+    logout();
+  };
+
   const handleStatusUpdate = async (orderId: string, status: string) => {
     await ordersApi.updateStatus(orderId, { status });
     if (status === 'delivered') playDeliveredSound();
@@ -1203,7 +1216,7 @@ export default function DriverPortal() {
                   </span>
                 )}
               </button>
-              <button onClick={logout} className="p-2 rounded-xl hover:bg-white/10 transition-colors">
+              <button onClick={handleLogoutClick} className="p-2 rounded-xl hover:bg-white/10 transition-colors">
                 <LogOut className="w-4 h-4 text-slate-400" />
               </button>
             </div>
