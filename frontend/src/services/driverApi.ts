@@ -58,6 +58,7 @@ export const driversApi = {
 
 export const billingApi = {
   getRecords: (params?: Record<string, unknown>) => api.get('/billing/records', { params }),
+  settleAll:  (driverId: string) => api.put(`/billing/driver/${driverId}/settle-all`),
 };
 
 export const notificationsApi = {

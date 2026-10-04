@@ -206,7 +206,7 @@ function OrderDocuments({ orderId }: { orderId: string }) {
   );
 }
 
-function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (id: string, status: string) => void }) {
+function OrderCard({ order, onStatusUpdate, highlighted }: { order: Order; onStatusUpdate: (id: string, status: string) => void; highlighted?: boolean }) {
   const [updating, setUpdating] = useState(false);
   const flow = STATUS_FLOW[order.status];
 
@@ -218,7 +218,9 @@ function OrderCard({ order, onStatusUpdate }: { order: Order; onStatusUpdate: (i
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm p-5 space-y-4">
+    <div id={`order-${order.id}`} className={`bg-white dark:bg-slate-800 rounded-2xl border shadow-sm p-5 space-y-4 transition-shadow ${
+      highlighted ? 'border-blue-500 ring-4 ring-blue-500/30' : 'border-gray-100 dark:border-slate-700'
+    }`}>
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -360,6 +362,43 @@ const STATUS_CONFIG: Record<DriverStatus, { label: string; dot: string; bg: stri
 };
 
 type Tab = 'active' | 'delivered' | 'map' | 'profile' | 'payments' | 'hub';
+
+// Avisa cuando el driver bloqueo el permiso de notificaciones del navegador. A
+// diferencia de InstallAppBanner, esto NO se puede descartar -- registerDriverPush()
+// falla en silencio cuando el permiso es 'denied' (Notification.requestPermission() no
+// vuelve a preguntar una vez negado), asi que sin este aviso el driver nunca se entera
+// de que dejo de recibir ofertas de carga.
+function NotificationBlockedBanner() {
+  const supported = typeof window !== 'undefined' && 'Notification' in window;
+  const [permission, setPermission] = useState<NotificationPermission | null>(
+    supported ? Notification.permission : null
+  );
+
+  useEffect(() => {
+    if (!supported) return;
+    const check = () => setPermission(Notification.permission);
+    document.addEventListener('visibilitychange', check);
+    const interval = setInterval(check, 5000);
+    return () => { document.removeEventListener('visibilitychange', check); clearInterval(interval); };
+  }, [supported]);
+
+  if (permission !== 'denied') return null;
+
+  return (
+    <div className="mb-3 rounded-2xl px-4 py-3.5 bg-red-500/10 border border-red-500/25 flex items-start gap-3">
+      <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-red-500/20 text-red-300">
+        <BellOff className="w-4 h-4" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-white">Notificaciones bloqueadas</p>
+        <p className="text-xs mt-0.5 text-slate-300">
+          No vas a recibir avisos de nuevas ofertas de carga. Ve a los ajustes de tu navegador o teléfono,
+          busca las notificaciones de este sitio y actívalas.
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function DriverPortal() {
   const { user, driverProfile, logout } = useDriverAuth();
@@ -663,6 +702,32 @@ export default function DriverPortal() {
     }
   }, [user?.driver_id]);
 
+  // Deep link desde el correo ("Ver orden") o desde una notificacion push: si la URL
+  // trae ?order=<id>, salta al tab correcto y resalta esa orden especifica -- antes el
+  // link solo abria el portal pero nunca mostraba la orden en si (el driver se quedaba
+  // viendo la pantalla general sin saber cual orden era la nueva).
+  const [highlightOrderId, setHighlightOrderId] = useState<string | null>(null);
+  useEffect(() => {
+    if (loading) return;
+    const params = new URLSearchParams(window.location.search);
+    const targetId = params.get('order');
+    if (!targetId) return;
+    const inActive = activeOrders.some(o => o.id === targetId);
+    const inDelivered = deliveredToday.some(o => o.id === targetId);
+    if (!inActive && !inDelivered) return;
+    setTab(inActive ? 'active' : 'delivered');
+    setHighlightOrderId(targetId);
+    // Limpia el parametro para que no se vuelva a disparar en cada re-render/poll
+    params.delete('order');
+    const rest = params.toString();
+    window.history.replaceState({}, '', window.location.pathname + (rest ? '?' + rest : ''));
+    setTimeout(() => {
+      document.getElementById(`order-${targetId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+    const t = setTimeout(() => setHighlightOrderId(null), 6000);
+    return () => clearTimeout(t);
+  }, [loading, activeOrders, deliveredToday]);
+
   useEffect(() => {
     if (driver?.status) setDriverStatus(driver.status as DriverStatus);
   }, [driver?.status]);
@@ -737,21 +802,26 @@ export default function DriverPortal() {
     } catch {}
   };
 
+  const fetchBilling = useCallback(() => {
+    if (!driverId) return;
+    return billingApi.getRecords({ driver_id: driverId, limit: 200 })
+      .then(r => {
+        const rows: DriverBillingRow[] = Array.isArray(r.data) ? r.data : (r.data.records ?? []);
+        setBillingRows(rows.slice(0, 20));
+        const total = rows.reduce((s, row) => s + row.driver_charge, 0);
+        const settled = rows.filter(row => row.status === 'settled').reduce((s, row) => s + row.driver_charge, 0);
+        setBillingSummary({ total_charged: total, settled, pending: total - settled });
+      })
+      .catch(() => {});
+  }, [driverId]);
+
   useEffect(() => {
     fetchOrders();
     if (driverId) {
       driversApi.getFavorites(driverId)
         .then(r => setFavorites(r.data as Favorite[]))
         .catch(() => {});
-      billingApi.getRecords({ driver_id: driverId, limit: 200 })
-        .then(r => {
-          const rows: DriverBillingRow[] = Array.isArray(r.data) ? r.data : (r.data.records ?? []);
-          setBillingRows(rows.slice(0, 20));
-          const total = rows.reduce((s, row) => s + row.driver_charge, 0);
-          const settled = rows.filter(row => row.status === 'settled').reduce((s, row) => s + row.driver_charge, 0);
-          setBillingSummary({ total_charged: total, settled, pending: total - settled });
-        })
-        .catch(() => {});
+      fetchBilling();
     }
     if (driverId) {
       notificationsApi.getDriverNotifs(driverId)
@@ -840,7 +910,7 @@ export default function DriverPortal() {
       socket.off('radio:msg');
       socket.off('radio:voice');
     };
-  }, [fetchOrders, user?.driver_id, driverId]);
+  }, [fetchOrders, fetchBilling, user?.driver_id, driverId]);
 
   useEffect(() => {
     if (!pendingOffer) return;
@@ -1345,6 +1415,7 @@ export default function DriverPortal() {
         <div className="px-4 pt-3 pb-4">
           <div className="max-w-lg mx-auto">
 
+            <NotificationBlockedBanner />
             <InstallAppBanner dismissKey="osi_install_banner_dismissed_driver" variant="dark" />
 
             {/* Driver card */}
@@ -1645,7 +1716,7 @@ export default function DriverPortal() {
                 </div>
               ) : (
                 activeOrders.map(order => (
-                  <OrderCard key={order.id} order={order} onStatusUpdate={handleStatusUpdate} />
+                  <OrderCard key={order.id} order={order} onStatusUpdate={handleStatusUpdate} highlighted={order.id === highlightOrderId} />
                 ))
               )}
             </div>
@@ -1756,7 +1827,9 @@ export default function DriverPortal() {
                 ))
               ) : (
                 deliveredToday.map(order => (
-                  <div key={order.id} className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-4 flex items-center justify-between">
+                  <div key={order.id} id={`order-${order.id}`} className={`bg-white dark:bg-slate-800 rounded-xl border p-4 flex items-center justify-between transition-shadow ${
+                    order.id === highlightOrderId ? 'border-blue-500 ring-4 ring-blue-500/30' : 'border-gray-100 dark:border-slate-700'
+                  }`}>
                     <div>
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">{order.order_number}</p>
                       {order.customer_name && <p className="text-xs text-gray-500 dark:text-slate-400">{order.customer_name}</p>}
@@ -2862,7 +2935,9 @@ export default function DriverPortal() {
                 <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">
                   <span className="font-semibold text-green-600">${parseFloat(payAmount || '0').toFixed(2)}</span> procesado correctamente
                 </p>
-                <p className="text-xs text-gray-400 dark:text-slate-500 mb-6">OSI Logistics recibirá la confirmación en breve.</p>
+                <p className="text-xs text-gray-400 dark:text-slate-500 mb-6">
+                  {payTab === 'card' ? 'Tu balance quedó al día.' : 'OSI Logistics recibirá la confirmación en breve.'}
+                </p>
                 <button
                   onClick={() => setShowPayModal(false)}
                   className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-2xl transition-colors"
@@ -2933,7 +3008,14 @@ export default function DriverPortal() {
                   {payTab === 'card' && (
                     <StripeCardPayment
                       amount={parseFloat(payAmount || '0')}
-                      onSuccess={() => setShowPayModal(false)}
+                      onSuccess={() => {
+                        // El cobro con tarjeta es instantaneo (a diferencia de Zelle/ACH,
+                        // que requieren confirmacion manual) -- liquida el balance del
+                        // driver de una vez y refresca la pantalla para que el "Balance
+                        // pendiente" baje a $0 sin que el conductor tenga que recargar.
+                        if (driverId) billingApi.settleAll(driverId).catch(() => {}).finally(() => fetchBilling());
+                        setPaySuccess(true);
+                      }}
                       onCancel={() => setShowPayModal(false)}
                     />
                   )}

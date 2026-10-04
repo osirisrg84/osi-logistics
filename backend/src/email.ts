@@ -203,7 +203,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
   });
 }
 
-export async function sendOfferEmail(to: string, driverName: string, orderNumber: string, pickup: string, delivery: string, rate: number) {
+export async function sendOfferEmail(to: string, driverName: string, orderNumber: string, pickup: string, delivery: string, rate: number, orderId: string) {
   await sendEmail({
     from: FROM,
     to,
@@ -237,7 +237,7 @@ export async function sendOfferEmail(to: string, driverName: string, orderNumber
           <p style="color:#6b7280;font-size:13px;margin:0 0 20px;">Inicia sesión en el Driver Portal para aceptar o rechazar la oferta.</p>
 
           <div style="text-align:center;">
-            <a href="${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/driver/login"
+            <a href="${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/driver?order=${orderId}"
               style="background:#3b82f6;color:#fff;text-decoration:none;padding:14px 32px;border-radius:10px;font-weight:bold;font-size:15px;display:inline-block;">
               Ver oferta →
             </a>
@@ -249,12 +249,12 @@ export async function sendOfferEmail(to: string, driverName: string, orderNumber
   });
 }
 
-export async function sendDeliveryEmail(to: string, recipientName: string, role: 'driver' | 'dispatcher', orderNumber: string, pickup: string, delivery: string, deliveredAt: string, rate: number) {
+export async function sendDeliveryEmail(to: string, recipientName: string, role: 'driver' | 'dispatcher', orderNumber: string, pickup: string, delivery: string, deliveredAt: string, rate: number, orderId: string) {
   const isDriver = role === 'driver';
   const color    = isDriver ? '#3b82f6' : '#f97316';
   const subtitle = isDriver ? 'Driver Portal' : 'Dispatch Management';
   const link     = isDriver
-    ? `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/driver/login`
+    ? `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/driver?order=${orderId}`
     : `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/dispatcher`;
 
   await sendEmail({
@@ -301,7 +301,7 @@ export async function sendDeliveryEmail(to: string, recipientName: string, role:
   });
 }
 
-export async function sendOrderAssignedEmail(to: string, driverName: string, orderNumber: string, pickup: string, delivery: string, dispatcherName?: string, dispatcherPhone?: string, dispatcherEmail?: string) {
+export async function sendOrderAssignedEmail(to: string, driverName: string, orderNumber: string, pickup: string, delivery: string, orderId: string, dispatcherName?: string, dispatcherPhone?: string, dispatcherEmail?: string) {
   const dispatcherSection = (dispatcherName || dispatcherPhone || dispatcherEmail) ? `
     <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px;margin-bottom:20px;">
       <p style="margin:0 0 8px;font-size:12px;font-weight:bold;color:#f97316;text-transform:uppercase;letter-spacing:1px;">Contacto del Dispatcher</p>
@@ -343,7 +343,7 @@ export async function sendOrderAssignedEmail(to: string, driverName: string, ord
           ${dispatcherSection}
 
           <div style="text-align:center;">
-            <a href="${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/driver/login"
+            <a href="${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/driver?order=${orderId}"
               style="background:#3b82f6;color:#fff;text-decoration:none;padding:14px 32px;border-radius:10px;font-weight:bold;font-size:15px;display:inline-block;">
               Ver orden →
             </a>

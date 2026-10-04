@@ -1,8 +1,11 @@
 import { Router, Request, Response } from 'express';
 import Stripe from 'stripe';
 import { authenticate } from '../middleware/auth';
+import { exec } from '../database';
 
 const router = Router();
+
+type AuthRequest = Request & { user?: { id: string; name: string; email?: string; phone?: string; role: string; driver_id?: string } };
 
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -46,12 +49,19 @@ router.post('/create-payment-intent', authenticate, async (req: Request, res: Re
     const { amount, description, billing_id } = req.body;
     if (!amount) return res.status(400).json({ error: 'amount required' });
 
+    // driver_id va en metadata para que el webhook sepa a quien liquidarle el
+    // balance cuando el pago se confirme (ver 'payment_intent.succeeded' abajo).
+    const driverId = (req as AuthRequest).user?.driver_id;
+
     const stripe = getStripe();
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100),
       currency: 'usd',
       description: description || 'OSI Logistics Commission',
-      metadata: billing_id ? { billing_id: String(billing_id) } : {},
+      metadata: {
+        ...(billing_id ? { billing_id: String(billing_id) } : {}),
+        ...(driverId ? { driver_id: driverId } : {}),
+      },
     });
 
     res.json({ client_secret: paymentIntent.client_secret });
@@ -82,10 +92,26 @@ router.post('/webhook', async (req: Request, res: Response) => {
     const session = event.data.object as Stripe.Checkout.Session;
     const billingId = session.metadata?.billing_id;
     if (billingId) {
-      const { exec } = await import('../database');
       await exec(
         "UPDATE commissions SET status='settled', settled_at=? WHERE id=?",
         [new Date().toISOString(), billingId]
+      );
+    }
+  }
+
+  // El pago con tarjeta desde el Driver Portal (Stripe Elements) usa PaymentIntents
+  // directo, no Checkout -- nunca disparaba 'checkout.session.completed', asi que el
+  // balance del driver nunca se marcaba como pagado aunque la tarjeta si se cobrara.
+  // Esto es la red de seguridad del lado del servidor (la llamada que hace el frontend
+  // justo despues de confirmCardPayment es la via principal; esto cubre el caso de que
+  // el navegador se cierre o pierda conexion justo despues de cobrar).
+  if (event.type === 'payment_intent.succeeded') {
+    const intent = event.data.object as Stripe.PaymentIntent;
+    const driverId = intent.metadata?.driver_id;
+    if (driverId) {
+      await exec(
+        "UPDATE commissions SET status='settled', settled_at=? WHERE driver_id=? AND status='pending'",
+        [new Date().toISOString(), driverId]
       );
     }
   }

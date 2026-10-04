@@ -36,7 +36,11 @@ export default function DriverLogin() {
           return;
         }
       }
-      navigate('/driver');
+      // Preserva el ?order=<id> si el driver llego aqui desde el link de un correo
+      // (ej. "Ver orden") -- sin esto, el login lo mandaba siempre a la pantalla
+      // general y perdia la orden especifica a la que queria ir.
+      const search = window.location.search;
+      navigate(search ? `/driver${search}` : '/driver');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setError(msg || 'Invalid email or password.');

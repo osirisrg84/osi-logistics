@@ -9,13 +9,19 @@ interface InstallAppBannerProps {
 
 export default function InstallAppBanner({ dismissKey, variant = 'light' }: InstallAppBannerProps) {
   const { canInstall, promptInstall, showManualFallback, needsManualInstall, isIOS, isDesktop } = useInstallPrompt();
-  const [dismissed, setDismissed] = useState(() => localStorage.getItem(dismissKey) === '1');
+  // En iOS, instalar la app NO es cosmetico: sin eso, Apple bloquea las notificaciones
+  // push por completo y no hay forma de arreglarlo desde el codigo. Por eso ahi el
+  // descarte solo dura la sesion actual (sessionStorage) -- vuelve a aparecer la
+  // proxima vez que abran la app hasta que la instalen de verdad. En Android/desktop
+  // el push SI funciona sin instalar, asi que ahi el descarte permanente esta bien.
+  const dismissStorage = isIOS ? sessionStorage : localStorage;
+  const [dismissed, setDismissed] = useState(() => dismissStorage.getItem(dismissKey) === '1');
 
   const visible = canInstall || showManualFallback || needsManualInstall;
   if (!visible || dismissed) return null;
 
   const dismiss = () => {
-    localStorage.setItem(dismissKey, '1');
+    dismissStorage.setItem(dismissKey, '1');
     setDismissed(true);
   };
 
@@ -56,7 +62,7 @@ export default function InstallAppBanner({ dismissKey, variant = 'light' }: Inst
 
   // Chrome hasn't fired beforeinstallprompt yet — show manual guide
   const instructions = isIOS
-    ? <p className={`text-xs mt-0.5 ${body}`}>Toca <Share className="w-3 h-3 inline -mt-0.5" /> Compartir y elige "Agregar a inicio".</p>
+    ? <p className={`text-xs mt-0.5 ${body}`}>Necesario para recibir notificaciones de nuevas cargas: toca <Share className="w-3 h-3 inline -mt-0.5" /> Compartir y elige "Agregar a inicio".</p>
     : isDesktop
       ? <p className={`text-xs mt-0.5 ${body}`}>Haz clic en el ícono <strong>⊕</strong> de la barra de dirección de Chrome para instalar.</p>
       : <p className={`text-xs mt-0.5 ${body}`}>Toca el menú <MoreVertical className="w-3 h-3 inline -mt-0.5" /> del navegador y elige "Instalar" o "Agregar a pantalla de inicio".</p>;

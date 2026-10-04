@@ -375,6 +375,7 @@ router.post('/:id/status', async (req: Request, res: Response) => {
         order.delivery_address as string,
         now,
         (order.price as number) || 0,
+        req.params.id,
       ] as const;
       if (driverUser?.email)     sendDeliveryEmail(driverUser.email,     driverUser.name,     'driver',      ...args).catch(e => console.error('[Email] Delivery driver:', e));
       if (dispatcherUser?.email) sendDeliveryEmail(dispatcherUser.email, dispatcherUser.name, 'dispatcher',  ...args).catch(e => console.error('[Email] Delivery dispatcher:', e));
@@ -436,6 +437,7 @@ router.post('/:id/offer', async (req: Request, res: Response) => {
         // Era `order.rate`, una columna que no existe en `orders` (la real es
         // `price`) -- siempre mandaba $0 en el correo de oferta.
         (order.price as number) || 0,
+        req.params.id,
       ).catch(e => console.error('[Email] Offer email failed:', e));
     }
 
@@ -511,6 +513,7 @@ router.post('/:id/accept', async (req: Request, res: Response) => {
         order.order_number as string,
         order.pickup_address as string,
         order.delivery_address as string,
+        req.params.id,
         dispatcher?.name,
         dispatcher?.phone,
         dispatcher?.email,
