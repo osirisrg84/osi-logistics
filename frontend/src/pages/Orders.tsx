@@ -438,6 +438,19 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {error && <div className="bg-red-50 text-red-700 text-sm px-3 py-2 rounded-lg border border-red-200">{error}</div>}
 
+          {/* Driver (read-only -- igual que en el modal de detalle: mientras la
+              oferta no se acepta, driver_name esta vacio a proposito) */}
+          {(order.driver_name || (order.status === 'offered' && order.offered_driver_name)) && (
+            <div className={`rounded-xl p-3 ${order.driver_name ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-orange-50 dark:bg-orange-900/20'}`}>
+              <div className={`flex items-center gap-2 text-xs font-semibold mb-1 ${order.driver_name ? 'text-blue-700 dark:text-blue-400' : 'text-orange-700 dark:text-orange-400'}`}>
+                <User className="w-3 h-3" /> {order.driver_name ? 'ASSIGNED DRIVER' : 'OFERTA ENVIADA A'}
+              </div>
+              <span className="text-sm font-medium text-gray-900 dark:text-slate-100">
+                {order.driver_name || `⏳ ${order.offered_driver_name}`}
+              </span>
+            </div>
+          )}
+
           {/* Rate Confirmation */}
           <div className="bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-xl p-4">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
