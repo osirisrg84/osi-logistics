@@ -3275,10 +3275,10 @@ export default function DriverPortal() {
           {/* Sub-section pill tabs */}
           <div className="flex gap-1.5 px-4 pt-4 pb-3 sticky top-0 z-10 bg-gray-50 dark:bg-slate-900">
             {([
-              { id: 'community' as const,   icon: Users,     label: 'Comunidad' },
-              { id: 'leaderboard' as const, icon: Trophy,    label: 'Top' },
-              { id: 'support'   as const,   icon: PhoneCall, label: 'Support' },
-              { id: 'radio'     as const,   icon: Radio,     label: 'OSI Radio' },
+              { id: 'community' as const,   icon: Users,     label: t('hub.tabCommunity') },
+              { id: 'leaderboard' as const, icon: Trophy,    label: t('hub.tabTop') },
+              { id: 'support'   as const,   icon: PhoneCall, label: t('hub.tabSupport') },
+              { id: 'radio'     as const,   icon: Radio,     label: t('driverPortal.tabRadio') },
             ]).map(s => (
               <button key={s.id} onClick={() => setHubSection(s.id)}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
@@ -3306,7 +3306,7 @@ export default function DriverPortal() {
                     <textarea
                       value={postText}
                       onChange={e => setPostText(e.target.value)}
-                      placeholder="Comparte algo con la comunidad OSI..."
+                      placeholder={t('hub.composerPlaceholder')}
                       className="w-full text-sm bg-gray-50 dark:bg-slate-700 rounded-xl p-3 resize-none border-0 outline-none text-gray-800 dark:text-slate-200 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                       rows={2}
                       maxLength={280}
@@ -3317,7 +3317,7 @@ export default function DriverPortal() {
                         onClick={publishCommunityPost}
                         disabled={!postText.trim() || posting}
                         className="px-4 py-1.5 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-400 active:scale-95 disabled:opacity-40 text-white transition-all">
-                        {posting ? 'Publicando...' : 'Publicar'}
+                        {posting ? t('hub.publishing') : t('hub.publish')}
                       </button>
                     </div>
                   </div>
@@ -3326,11 +3326,11 @@ export default function DriverPortal() {
 
               {/* Posts feed */}
               {communityLoading ? (
-                <div className="text-center py-10 text-sm text-gray-400 dark:text-slate-500">Cargando...</div>
+                <div className="text-center py-10 text-sm text-gray-400 dark:text-slate-500">{t('hub.loading')}</div>
               ) : communityPosts.length === 0 ? (
                 <div className="text-center py-10 fade-in">
                   <Users className="w-10 h-10 text-gray-200 dark:text-slate-600 mx-auto mb-2" />
-                  <p className="text-sm text-gray-400 dark:text-slate-500">Nadie ha publicado todavía. ¡Sé el primero!</p>
+                  <p className="text-sm text-gray-400 dark:text-slate-500">{t('hub.emptyFeed')}</p>
                 </div>
               ) : communityPosts.map(post => (
                 <div key={post.id} className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 shadow-sm fade-in">
@@ -3340,10 +3340,10 @@ export default function DriverPortal() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{post.author_name}</p>
-                      <p className="text-[11px] text-gray-400 dark:text-slate-500">{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })} · OSI Fleet</p>
+                      <p className="text-[11px] text-gray-400 dark:text-slate-500">{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })} · {t('hub.osiTeam')}</p>
                     </div>
                     <span className="text-[10px] font-bold text-orange-400 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded-full flex-shrink-0 capitalize">
-                      {post.author_role === 'driver' ? 'Driver' : post.author_role === 'admin' ? 'Admin' : 'Dispatcher'}
+                      {post.author_role === 'driver' ? t('hub.roleDriver') : post.author_role === 'admin' ? t('hub.roleAdmin') : t('hub.roleDispatcher')}
                     </span>
                   </div>
                   <p className="text-sm text-gray-700 dark:text-slate-300 leading-relaxed mb-3">{post.message}</p>
@@ -3356,7 +3356,7 @@ export default function DriverPortal() {
                     </button>
                     <span className="flex items-center gap-1.5 text-xs text-gray-300 dark:text-slate-600">
                       <MessageSquare className="w-3.5 h-3.5" />
-                      OSI Fleet
+                      {t('hub.osiFleet')}
                     </span>
                   </div>
                 </div>
@@ -3369,12 +3369,12 @@ export default function DriverPortal() {
             <div className="px-4 pb-5 space-y-3 fade-in">
               <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2 text-gray-500 dark:text-slate-400">
-                  <Package className="w-3.5 h-3.5 text-orange-500" /> Top Drivers · últimos 30 días
+                  <Package className="w-3.5 h-3.5 text-orange-500" /> {t('hub.topDrivers30')}
                 </p>
                 {leaderboardLoading ? (
-                  <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Cargando...</p>
+                  <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">{t('hub.loading')}</p>
                 ) : topDrivers.length === 0 ? (
-                  <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Sin datos todavía</p>
+                  <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">{t('hub.noDataYet')}</p>
                 ) : (
                   <div className="space-y-2">
                     {topDrivers.map((d, i) => (
@@ -3384,7 +3384,7 @@ export default function DriverPortal() {
                           {d.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold truncate text-gray-800 dark:text-slate-200">{d.name}{d.id === driver?.id ? ' (tú)' : ''}</p>
+                          <p className="text-sm font-semibold truncate text-gray-800 dark:text-slate-200">{d.name}{d.id === driver?.id ? t('driverPortal.youSuffix') : ''}</p>
                           <p className="text-[11px] text-gray-400 dark:text-slate-500">★ {d.rating?.toFixed(1) ?? '—'}</p>
                         </div>
                         <span className="text-sm font-bold text-gray-900 dark:text-white">{d.deliveries_30d}</span>
@@ -3396,12 +3396,12 @@ export default function DriverPortal() {
 
               <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2 text-gray-500 dark:text-slate-400">
-                  <DollarSign className="w-3.5 h-3.5 text-orange-500" /> Top Dispatchers · últimos 30 días
+                  <DollarSign className="w-3.5 h-3.5 text-orange-500" /> {t('hub.topDispatchers30')}
                 </p>
                 {leaderboardLoading ? (
-                  <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Cargando...</p>
+                  <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">{t('hub.loading')}</p>
                 ) : topDispatchers.length === 0 ? (
-                  <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Sin datos todavía</p>
+                  <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">{t('hub.noDataYet')}</p>
                 ) : (
                   <div className="space-y-2">
                     {topDispatchers.map((d, i) => (
@@ -3409,7 +3409,7 @@ export default function DriverPortal() {
                         <span className="w-6 text-center font-bold text-sm" style={{ color: i === 0 ? '#eab308' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : '#f97316' }}>#{i + 1}</span>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold truncate text-gray-800 dark:text-slate-200">{d.name}</p>
-                          <p className="text-[11px] text-gray-400 dark:text-slate-500">{d.loads_30d} cargas</p>
+                          <p className="text-[11px] text-gray-400 dark:text-slate-500">{d.loads_30d} {t('hub.deliveriesWord')}</p>
                         </div>
                         <span className="text-sm font-bold text-gray-900 dark:text-white">${d.earned_30d.toFixed(0)}</span>
                       </div>

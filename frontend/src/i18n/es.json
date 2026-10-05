@@ -545,7 +545,9 @@
     "complianceDesc": "DOT · FMCSA · Licencias activas",
     "directEmails": "Emails directos",
     "dispatchOperations": "Dispatch Operations",
-    "billingPayments": "Billing / Payments"
+    "billingPayments": "Billing / Payments",
+    "tabRadio": "OSI Radio",
+    "youSuffix": " (tú)"
   },
   "driverLogin": {
     "backToPortalSelect": "Volver a selección de portal",
