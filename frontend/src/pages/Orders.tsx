@@ -725,7 +725,7 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
           </div>
 
           {/* Driver */}
-          {order.driver_name && (
+          {order.driver_name ? (
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">
                 <User className="w-3 h-3" /> ASSIGNED DRIVER
@@ -736,6 +736,17 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
                   <span className="text-xs bg-white dark:bg-slate-700 text-gray-600 dark:text-slate-300 px-2 py-0.5 rounded-lg border border-blue-200 dark:border-blue-700">{order.plate_number}</span>
                 )}
               </div>
+            </div>
+          ) : order.status === 'offered' && order.offered_driver_name && (
+            // Mientras el conductor no acepta, driver_name sigue vacio (no esta
+            // "asignado" de verdad todavia) -- sin esto, el modal se quedaba sin
+            // mostrar a quien se le mando la oferta, aunque la tabla de ordenes
+            // si lo mostraba.
+            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3">
+              <div className="flex items-center gap-2 text-xs font-semibold text-orange-700 dark:text-orange-400 mb-2">
+                <User className="w-3 h-3" /> OFERTA ENVIADA A
+              </div>
+              <span className="text-sm font-medium text-gray-900 dark:text-slate-100">⏳ {order.offered_driver_name}</span>
             </div>
           )}
 
