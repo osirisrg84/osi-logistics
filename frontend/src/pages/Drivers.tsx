@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin, Building2, Clock, Wallet, ShieldCheck, FileText, Calendar, AlertCircle, CheckCircle, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Driver, DriverStatus } from '../types';
@@ -486,6 +487,7 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
 }
 
 export default function Drivers() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -523,7 +525,7 @@ export default function Drivers() {
   useEffect(() => { fetchDrivers(); }, [statusFilter, search]);
 
   const handleDelete = async (driver: Driver) => {
-    if (!confirm(`¿Eliminar a ${driver.name}? Esta acción no se puede deshacer.`)) return;
+    if (!confirm(t('drivers.confirmDelete', { name: driver.name }))) return;
     try {
       await driversApi.delete(driver.id);
       fetchDrivers();
@@ -540,7 +542,7 @@ export default function Drivers() {
         await driversApi.deleteForce(driver.id);
         fetchDrivers();
       } else {
-        alert(err.response?.data?.error || 'No se pudo eliminar el driver');
+        alert(err.response?.data?.error || t('drivers.deleteFailed'));
       }
     }
   };
@@ -558,10 +560,10 @@ export default function Drivers() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total Drivers', value: stats.total || 0, color: 'text-gray-900', bg: 'bg-gray-50' },
-          { label: 'Available', value: stats.available || 0, color: 'text-green-600', bg: 'bg-green-50' },
-          { label: 'On Delivery', value: stats.busy || 0, color: 'text-orange-600', bg: 'bg-orange-50' },
-          { label: 'Offline', value: stats.offline || 0, color: 'text-gray-500', bg: 'bg-gray-50' },
+          { label: t('drivers.statTotal'), value: stats.total || 0, color: 'text-gray-900', bg: 'bg-gray-50' },
+          { label: t('drivers.statAvailable'), value: stats.available || 0, color: 'text-green-600', bg: 'bg-green-50' },
+          { label: t('drivers.statOnDelivery'), value: stats.busy || 0, color: 'text-orange-600', bg: 'bg-orange-50' },
+          { label: t('drivers.statOffline'), value: stats.offline || 0, color: 'text-gray-500', bg: 'bg-gray-50' },
         ].map((s, i) => (
           <div key={i} className={`card ${s.bg} p-4`}>
             <p className="text-xs text-gray-500 dark:text-slate-400">{s.label}</p>
@@ -575,24 +577,24 @@ export default function Drivers() {
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
-            <input className="input pl-9 w-48" placeholder="Search drivers..." value={search} onChange={e => setSearch(e.target.value)} />
+            <input className="input pl-9 w-48" placeholder={t('drivers.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <select className="input w-36" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-            <option value="">All Status</option>
-            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
+            <option value="">{t('drivers.allStatus')}</option>
+            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{t(`drivers.status.${s}`)}</option>)}
           </select>
         </div>
         <button onClick={() => setShowForm(true)} className="btn-primary">
-          <Plus className="w-4 h-4" /> Add Driver
+          <Plus className="w-4 h-4" /> {t('drivers.addDriver')}
         </button>
       </div>
 
       {/* Drivers Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {loading ? (
-          <div className="col-span-3 text-center py-12 text-gray-400 dark:text-slate-500">Loading...</div>
+          <div className="col-span-3 text-center py-12 text-gray-400 dark:text-slate-500">{t('drivers.loading')}</div>
         ) : drivers.length === 0 ? (
-          <div className="col-span-3"><EmptyState icon={Truck} title="No se encontraron conductores" hint="Prueba a cambiar los filtros o agrega uno nuevo" /></div>
+          <div className="col-span-3"><EmptyState icon={Truck} title={t('drivers.emptyTitle')} hint={t('drivers.emptyHint')} /></div>
         ) : drivers.map(driver => (
           <div key={driver.id} className="card hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-3">

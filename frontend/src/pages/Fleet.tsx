@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Search, X, Edit2, Trash2, Fuel, Wrench, AlertTriangle, Eye, CheckCircle, Truck as TruckIcon } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Truck } from '../types';
@@ -153,6 +154,7 @@ function TruckForm({ truck, onClose, onSave }: TruckFormProps) {
 }
 
 export default function Fleet() {
+  const { t } = useTranslation();
   const [trucks, setTrucks] = useState<Truck[]>([]);
   const [stats, setStats] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -187,18 +189,18 @@ export default function Fleet() {
   useEffect(() => { fetchTrucks(); }, [statusFilter, search]);
 
   const handleDelete = async (truck: Truck) => {
-    if (!confirm(`Remove ${truck.plate_number} from fleet?`)) return;
+    if (!confirm(t('fleet.confirmDelete', { plate: truck.plate_number }))) return;
     try {
       await trucksApi.delete(truck.id);
       fetchTrucks();
     } catch (e: unknown) {
-      alert((e as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Cannot delete truck');
+      alert((e as { response?: { data?: { error?: string } } })?.response?.data?.error || t('fleet.deleteFailed'));
     }
   };
 
   const getMaintenanceStatus = (nextMaint: string) => {
     const days = differenceInDays(new Date(nextMaint), new Date());
-    if (days < 0) return { label: 'Overdue', color: 'text-red-600 bg-red-50' };
+    if (days < 0) return { label: t('fleet.overdue'), color: 'text-red-600 bg-red-50' };
     if (days <= 30) return { label: `${days}d`, color: 'text-yellow-600 bg-yellow-50' };
     return { label: `${days}d`, color: 'text-green-600 bg-green-50' };
   };
@@ -216,10 +218,10 @@ export default function Fleet() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total Trucks', value: stats.total || 0, color: 'text-gray-900 dark:text-white', bg: 'bg-gray-50 dark:bg-slate-800' },
-          { label: 'Active', value: stats.active || 0, color: 'text-green-600', bg: 'bg-green-50' },
-          { label: 'In Maintenance', value: stats.maintenance || 0, color: 'text-yellow-600', bg: 'bg-yellow-50' },
-          { label: 'Maintenance Due', value: stats.maintenance_due || 0, color: 'text-red-500', bg: 'bg-red-50' },
+          { label: t('fleet.statTotal'), value: stats.total || 0, color: 'text-gray-900 dark:text-white', bg: 'bg-gray-50 dark:bg-slate-800' },
+          { label: t('fleet.statActive'), value: stats.active || 0, color: 'text-green-600', bg: 'bg-green-50' },
+          { label: t('fleet.statMaintenance'), value: stats.maintenance || 0, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+          { label: t('fleet.statMaintenanceDue'), value: stats.maintenance_due || 0, color: 'text-red-500', bg: 'bg-red-50' },
         ].map((s, i) => (
           <div key={i} className={`card ${s.bg} p-4`}>
             <p className="text-xs text-gray-500 dark:text-slate-400">{s.label}</p>
@@ -231,7 +233,7 @@ export default function Fleet() {
       {/* Status breakdown chart */}
       {trucks.length > 0 && (
         <div className="card p-4">
-          <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">Distribución de la flota</p>
+          <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('fleet.distribution')}</p>
           <div className="flex items-center">
             <ResponsiveContainer width="100%" height={160}>
               <PieChart>
@@ -246,7 +248,7 @@ export default function Fleet() {
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend formatter={(v: string) => v === 'active' ? 'Activo' : v === 'maintenance' ? 'Mantenimiento' : 'Inactivo'} />
+                <Legend formatter={(v: string) => t(`fleet.status.${v}`)} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -258,26 +260,26 @@ export default function Fleet() {
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
-            <input className="input pl-9 w-48" placeholder="Search trucks..." value={search} onChange={e => setSearch(e.target.value)} />
+            <input className="input pl-9 w-48" placeholder={t('fleet.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <select className="input w-36" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="maintenance">Maintenance</option>
-            <option value="inactive">Inactive</option>
+            <option value="">{t('fleet.allStatus')}</option>
+            <option value="active">{t('fleet.status.active')}</option>
+            <option value="maintenance">{t('fleet.status.maintenance')}</option>
+            <option value="inactive">{t('fleet.status.inactive')}</option>
           </select>
         </div>
         <button onClick={() => setShowForm(true)} className="btn-primary">
-          <Plus className="w-4 h-4" /> Add Truck
+          <Plus className="w-4 h-4" /> {t('fleet.addTruck')}
         </button>
       </div>
 
       {/* Trucks Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {loading ? (
-          <div className="col-span-3 text-center py-12 text-gray-400 dark:text-slate-500">Loading fleet...</div>
+          <div className="col-span-3 text-center py-12 text-gray-400 dark:text-slate-500">{t('fleet.loading')}</div>
         ) : trucks.length === 0 ? (
-          <div className="col-span-3"><EmptyState icon={TruckIcon} title="No se encontraron camiones" hint="Prueba a cambiar los filtros o agrega uno nuevo" /></div>
+          <div className="col-span-3"><EmptyState icon={TruckIcon} title={t('fleet.emptyTitle')} hint={t('fleet.emptyHint')} /></div>
         ) : trucks.map(truck => {
           const maintStatus = getMaintenanceStatus(truck.next_maintenance);
           return (

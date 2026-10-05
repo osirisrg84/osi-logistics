@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell
@@ -35,16 +36,18 @@ function KpiCard({ title, value, sub, icon: Icon, color }: KpiCardProps) {
 }
 
 function EmptyChart({ label }: { label: string }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center h-[200px] gap-2">
       <TrendingUp className="w-8 h-8 text-gray-300 dark:text-slate-600" />
       <p className="text-sm text-gray-400 dark:text-slate-500">{label}</p>
-      <p className="text-xs text-gray-300 dark:text-slate-600">Los datos aparecerán cuando haya actividad</p>
+      <p className="text-xs text-gray-300 dark:text-slate-600">{t('reports.emptyHint')}</p>
     </div>
   );
 }
 
 export default function Reports() {
+  const { t } = useTranslation();
   const [dashData, setDashData] = useState<Record<string, unknown> | null>(null);
   const [ordersReport, setOrdersReport] = useState<unknown[]>([]);
   const [driversReport, setDriversReport] = useState<unknown[]>([]);
@@ -114,7 +117,7 @@ export default function Reports() {
               activeTab === tab ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            {tab}
+            {t(`reports.tabs.${tab}`)}
           </button>
         ))}
       </div>
@@ -123,18 +126,18 @@ export default function Reports() {
         <>
           {/* KPI Cards */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            <KpiCard title="Total Revenue" value={`$${((kpis?.total_revenue || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub={`$${((kpis?.monthly_revenue || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} this month`} icon={DollarSign} color="bg-green-100 text-green-600" />
-            <KpiCard title="Avg Order Value" value={`$${((kpis?.avg_order_value || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub="Per completed order" icon={Package} color="bg-blue-100 text-blue-600" />
-            <KpiCard title="On-Time Rate" value={`${((kpis?.on_time_rate || 0)).toFixed(1)}%`} sub="Overall performance" icon={TrendingUp} color="bg-orange-100 text-orange-600" />
-            <KpiCard title="Avg Delivery" value={`${((kpis?.avg_delivery_hours || 0)).toFixed(1)}h`} sub="Pickup to delivery" icon={Clock} color="bg-purple-100 text-purple-600" />
-            <KpiCard title="Customer Rating" value={`★ ${kpis?.customer_satisfaction?.toFixed(1) || '4.7'}`} sub="Average satisfaction" icon={Star} color="bg-yellow-100 text-yellow-600" />
+            <KpiCard title={t('reports.totalRevenue')} value={`$${((kpis?.total_revenue || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub={t('reports.thisMonth', { value: `$${((kpis?.monthly_revenue || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` })} icon={DollarSign} color="bg-green-100 text-green-600" />
+            <KpiCard title={t('reports.avgOrderValue')} value={`$${((kpis?.avg_order_value || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub={t('reports.perCompletedOrder')} icon={Package} color="bg-blue-100 text-blue-600" />
+            <KpiCard title={t('reports.onTimeRate')} value={`${((kpis?.on_time_rate || 0)).toFixed(1)}%`} sub={t('reports.overallPerformance')} icon={TrendingUp} color="bg-orange-100 text-orange-600" />
+            <KpiCard title={t('reports.avgDelivery')} value={`${((kpis?.avg_delivery_hours || 0)).toFixed(1)}h`} sub={t('reports.pickupToDelivery')} icon={Clock} color="bg-purple-100 text-purple-600" />
+            <KpiCard title={t('reports.customerRating')} value={`★ ${kpis?.customer_satisfaction?.toFixed(1) || '4.7'}`} sub={t('reports.avgSatisfaction')} icon={Star} color="bg-yellow-100 text-yellow-600" />
           </div>
 
           {/* Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* Revenue trend */}
             <div className="card">
-              <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Revenue Trend (7 days)</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">{t('reports.revenueTrend')}</h3>
               {(((dashData as Record<string, unknown>)?.dailyRevenue as unknown[]) || []).length > 0 ? (
                 <ResponsiveContainer width="100%" height={200}>
                   <AreaChart data={((dashData as Record<string, unknown>)?.dailyRevenue as unknown[]) || []}>
@@ -151,12 +154,12 @@ export default function Reports() {
                     <Area type="monotone" dataKey="revenue" stroke="#f97316" strokeWidth={2} fill="url(#grad1)" name="Revenue ($)" />
                   </AreaChart>
                 </ResponsiveContainer>
-              ) : <EmptyChart label="Sin datos de revenue aún" />}
+              ) : <EmptyChart label={t('reports.emptyRevenue')} />}
             </div>
 
             {/* Deliveries by hour */}
             <div className="card">
-              <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Deliveries by Hour</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">{t('reports.deliveriesByHour')}</h3>
               {byHour.length > 0 ? (
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={byHour}>
@@ -164,15 +167,15 @@ export default function Reports() {
                     <XAxis dataKey="hour" tick={{ fontSize: 10 }} tickFormatter={h => `${h}:00`} />
                     <YAxis tick={{ fontSize: 10 }} />
                     <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
-                    <Bar dataKey="count" fill="#f97316" radius={[4, 4, 0, 0]} name="Deliveries" />
+                    <Bar dataKey="count" fill="#f97316" radius={[4, 4, 0, 0]} name={t('reports.deliveries')} />
                   </BarChart>
                 </ResponsiveContainer>
-              ) : <EmptyChart label="Sin entregas registradas aún" />}
+              ) : <EmptyChart label={t('reports.emptyDeliveries')} />}
             </div>
 
             {/* Orders by priority */}
             <div className="card">
-              <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Orders by Priority</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">{t('reports.ordersByPriority')}</h3>
               {byPriority.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
@@ -183,12 +186,12 @@ export default function Reports() {
                     <Legend iconType="circle" iconSize={8} formatter={(value) => <span style={{ fontSize: 12 }}>{value}</span>} />
                   </PieChart>
                 </ResponsiveContainer>
-              ) : <EmptyChart label="Sin órdenes aún" />}
+              ) : <EmptyChart label={t('reports.emptyOrders')} />}
             </div>
 
             {/* Top drivers */}
             <div className="card">
-              <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Top Driver Performance</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">{t('reports.topDriverPerformance')}</h3>
               {(((dashData as Record<string, unknown>)?.topDrivers as unknown[] || []).length > 0) ? (
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={((dashData as Record<string, unknown>)?.topDrivers as unknown[] || []).slice(0, 5)} layout="vertical">
@@ -196,10 +199,10 @@ export default function Reports() {
                     <XAxis type="number" tick={{ fontSize: 10 }} />
                     <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={80} />
                     <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
-                    <Bar dataKey="total_deliveries" fill="#3b82f6" radius={[0, 4, 4, 0]} name="Total Deliveries" />
+                    <Bar dataKey="total_deliveries" fill="#3b82f6" radius={[0, 4, 4, 0]} name={t('reports.totalDeliveries')} />
                   </BarChart>
                 </ResponsiveContainer>
-              ) : <EmptyChart label="Sin datos de drivers aún" />}
+              ) : <EmptyChart label={t('reports.emptyDrivers')} />}
             </div>
           </div>
         </>
@@ -208,9 +211,9 @@ export default function Reports() {
       {activeTab === 'orders' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="font-semibold text-gray-900 dark:text-slate-100">Orders Report</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-slate-100">{t('reports.ordersReportTitle')}</h3>
             <button onClick={() => exportCSV(ordersReport, 'orders-report')} className="btn-secondary">
-              <Download className="w-4 h-4" /> Export CSV
+              <Download className="w-4 h-4" /> {t('reports.exportCsv')}
             </button>
           </div>
           <div className="card p-0 overflow-hidden">
@@ -218,7 +221,7 @@ export default function Reports() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
-                    {['Period', 'Total Orders', 'Delivered', 'Cancelled', 'Revenue', 'Avg Distance (mi)'].map(h => (
+                    {(t('reports.ordersHeaders', { returnObjects: true }) as string[]).map(h => (
                       <th key={h} className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{h}</th>
                     ))}
                   </tr>
@@ -244,9 +247,9 @@ export default function Reports() {
       {activeTab === 'drivers' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="font-semibold text-gray-900 dark:text-slate-100">Driver Performance Report</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-slate-100">{t('reports.driversReportTitle')}</h3>
             <button onClick={() => exportCSV(driversReport, 'drivers-report')} className="btn-secondary">
-              <Download className="w-4 h-4" /> Export CSV
+              <Download className="w-4 h-4" /> {t('reports.exportCsv')}
             </button>
           </div>
           <div className="card p-0 overflow-hidden">
@@ -254,7 +257,7 @@ export default function Reports() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
-                    {['Driver', 'Status', 'Total Trips', 'This Month', 'On Time %', 'Rating', 'Revenue (Month)', 'Avg Time (min)'].map(h => (
+                    {(t('reports.driversHeaders', { returnObjects: true }) as string[]).map(h => (
                       <th key={h} className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{h}</th>
                     ))}
                   </tr>
@@ -286,9 +289,9 @@ export default function Reports() {
       {activeTab === 'fleet' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="font-semibold text-gray-900 dark:text-slate-100">Fleet Utilization Report</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-slate-100">{t('reports.fleetReportTitle')}</h3>
             <button onClick={() => exportCSV(fleetReport, 'fleet-report')} className="btn-secondary">
-              <Download className="w-4 h-4" /> Export CSV
+              <Download className="w-4 h-4" /> {t('reports.exportCsv')}
             </button>
           </div>
           <div className="card p-0 overflow-hidden">
@@ -296,7 +299,7 @@ export default function Reports() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
-                    {['Truck', 'Type', 'Status', 'Mileage', 'Total Trips', 'Total mi', 'Revenue', 'Fuel %', 'Driver'].map(h => (
+                    {(t('reports.fleetHeaders', { returnObjects: true }) as string[]).map(h => (
                       <th key={h} className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{h}</th>
                     ))}
                   </tr>
