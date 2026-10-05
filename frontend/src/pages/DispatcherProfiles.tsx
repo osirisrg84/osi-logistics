@@ -400,6 +400,21 @@ export default function DispatcherProfiles() {
     } catch {}
   }
 
+  const [payingOut, setPayingOut] = useState<string | null>(null);
+  async function handlePayDispatcher(d: DispatcherProfile) {
+    if (!confirm(`¿Confirmas que ya le pagaste a ${d.name} sus $${d.pending.toFixed(2)} pendientes?`)) return;
+    setPayingOut(d.id);
+    try {
+      await api.put(`/billing/dispatcher/${d.id}/settle-all`);
+      setDispatchers(prev => prev.map(x => x.id === d.id ? { ...x, settled: x.settled + x.pending, pending: 0 } : x));
+      setSelected(prev => prev?.id === d.id ? { ...prev, settled: prev.settled + prev.pending, pending: 0 } : prev);
+    } catch {
+      alert('No se pudo registrar el pago. Intenta de nuevo.');
+    } finally {
+      setPayingOut(null);
+    }
+  }
+
   function handleSaved(id: string, updated: Partial<DispatcherProfile>) {
     setDispatchers(prev => prev.map(d => d.id === id ? { ...d, ...updated } : d));
     setSelected(prev => prev?.id === id ? { ...prev, ...updated } : prev);
@@ -535,7 +550,16 @@ export default function DispatcherProfiles() {
                       <div className="h-full bg-green-500 rounded-full" style={{ width: `${(d.settled / d.total_earned) * 100}%` }} />
                     </div>
                     {d.pending > 0 && (
-                      <p className="text-[10px] text-yellow-600 mt-1">${d.pending.toFixed(2)} pendiente</p>
+                      <div className="flex items-center justify-between mt-1">
+                        <p className="text-[10px] text-yellow-600">${d.pending.toFixed(2)} pendiente</p>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handlePayDispatcher(d); }}
+                          disabled={payingOut === d.id}
+                          className="text-[10px] font-semibold text-green-600 hover:text-green-700 disabled:opacity-50"
+                        >
+                          {payingOut === d.id ? 'Guardando...' : 'Marcar pagado'}
+                        </button>
+                      </div>
                     )}
                   </div>
                 )}

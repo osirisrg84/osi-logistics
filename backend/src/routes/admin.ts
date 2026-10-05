@@ -176,8 +176,8 @@ router.get('/dispatchers', async (_req: Request, res: Response) => {
              u.previous_companies, u.languages,
              COUNT(DISTINCT c.order_id)                                                        AS total_orders,
              COALESCE(SUM(c.dispatcher_pay), 0)                                                AS total_earned,
-             COALESCE(SUM(CASE WHEN c.status='pending' THEN c.dispatcher_pay ELSE 0 END), 0)  AS pending,
-             COALESCE(SUM(CASE WHEN c.status='settled' THEN c.dispatcher_pay ELSE 0 END), 0)  AS settled,
+             COALESCE(SUM(CASE WHEN c.dispatcher_status='pending' THEN c.dispatcher_pay ELSE 0 END), 0)  AS pending,
+             COALESCE(SUM(CASE WHEN c.dispatcher_status='settled' THEN c.dispatcher_pay ELSE 0 END), 0)  AS settled,
              COUNT(DISTINCT CASE WHEN o.status IN ('assigned','picked_up','in_transit') THEN o.id END) AS active_orders
       FROM users u
       LEFT JOIN commissions c ON u.id = c.dispatcher_user_id

@@ -31,12 +31,13 @@ router.get('/summary', async (_req: Request, res: Response) => {
 
 router.get('/records', async (req: Request, res: Response) => {
   try {
-    const { driver_id, dispatcher_user_id, status, search, limit = 50, offset = 0 } = req.query;
+    const { driver_id, dispatcher_user_id, status, dispatcher_status, search, limit = 50, offset = 0 } = req.query;
     const filters: string[] = [];
     const p: unknown[] = [];
     if (driver_id)          { filters.push('driver_id = ?');          p.push(driver_id); }
     if (dispatcher_user_id) { filters.push('dispatcher_user_id = ?'); p.push(dispatcher_user_id); }
     if (status)             { filters.push('status = ?');              p.push(status); }
+    if (dispatcher_status)  { filters.push('dispatcher_status = ?');   p.push(dispatcher_status); }
     if (search) {
       filters.push('(order_number LIKE ? OR driver_name LIKE ? OR dispatcher_name LIKE ?)');
       const q = `%${search}%`;
@@ -76,8 +77,8 @@ router.get('/by-dispatcher', async (_req: Request, res: Response) => {
              COUNT(*) as total_orders,
              ROUND(SUM(order_price),2) as total_order_value,
              ROUND(SUM(dispatcher_pay),2) as total_earned,
-             ROUND(SUM(CASE WHEN status='settled' THEN dispatcher_pay ELSE 0 END),2) as settled,
-             ROUND(SUM(CASE WHEN status='pending' THEN dispatcher_pay ELSE 0 END),2) as pending
+             ROUND(SUM(CASE WHEN dispatcher_status='settled' THEN dispatcher_pay ELSE 0 END),2) as settled,
+             ROUND(SUM(CASE WHEN dispatcher_status='pending' THEN dispatcher_pay ELSE 0 END),2) as pending
       FROM commissions
       GROUP BY dispatcher_user_id, dispatcher_name
       ORDER BY total_earned DESC
@@ -99,6 +100,30 @@ router.put('/driver/:driverId/settle-all', async (req: Request, res: Response) =
   try {
     await exec("UPDATE commissions SET status='settled', settled_at=? WHERE driver_id=? AND status='pending'",
       [new Date().toISOString(), req.params.driverId]);
+    res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+// Marca que OSI ya le pago al dispatcher su 4% -- independiente de si el
+// driver de esa misma orden ya pago su 7% o no (son dos pagos distintos que
+// antes compartian un solo campo `status`, dando numeros erroneos en "Mis
+// Comisiones" del dispatcher). Solo admin paga dispatchers.
+router.put('/:id/settle-dispatcher', async (req: Request, res: Response) => {
+  try {
+    if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Solo un administrador puede marcar esto como pagado' });
+    const row = await queryOne('SELECT id FROM commissions WHERE id = ?', [req.params.id]);
+    if (!row) return res.status(404).json({ error: 'Commission not found' });
+    await exec("UPDATE commissions SET dispatcher_status='settled', dispatcher_settled_at=? WHERE id=?",
+      [new Date().toISOString(), req.params.id]);
+    res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.put('/dispatcher/:dispatcherUserId/settle-all', async (req: Request, res: Response) => {
+  try {
+    if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Solo un administrador puede marcar esto como pagado' });
+    await exec("UPDATE commissions SET dispatcher_status='settled', dispatcher_settled_at=? WHERE dispatcher_user_id=? AND dispatcher_status='pending'",
+      [new Date().toISOString(), req.params.dispatcherUserId]);
     res.json({ success: true });
   } catch { res.status(500).json({ error: 'Failed' }); }
 });

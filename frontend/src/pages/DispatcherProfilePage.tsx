@@ -33,6 +33,7 @@ interface CommissionRow {
   dispatcher_pay: number;
   order_price: number;
   status: 'pending' | 'settled';
+  dispatcher_status: 'pending' | 'settled';
   delivery_date: string | null;
 }
 
@@ -147,7 +148,8 @@ export default function DispatcherProfilePage() {
         years_experience:     p.years_experience != null ? String(p.years_experience) : '',
         equipment_experience: p.equipment_experience || '',
       });
-      setCommRows(Array.isArray(commRes.data) ? commRes.data : []);
+      const commData = commRes.data as { records?: CommissionRow[] } | CommissionRow[];
+      setCommRows(Array.isArray(commData) ? commData : (commData.records ?? []));
     }).finally(() => setLoading(false));
   }, [user?.id]);
 
@@ -191,8 +193,8 @@ export default function DispatcherProfilePage() {
 
   // ── Computed stats ──────────────────────────────────────
   const totalLoads    = commRows.length;
-  const totalEarned   = commRows.filter(r => r.status === 'settled').reduce((s, r) => s + r.dispatcher_pay, 0);
-  const pendingEarned = commRows.filter(r => r.status === 'pending').reduce((s, r) => s + r.dispatcher_pay, 0);
+  const totalEarned   = commRows.filter(r => r.dispatcher_status === 'settled').reduce((s, r) => s + r.dispatcher_pay, 0);
+  const pendingEarned = commRows.filter(r => r.dispatcher_status === 'pending').reduce((s, r) => s + r.dispatcher_pay, 0);
 
   const now = new Date();
   const monthLoads = commRows.filter(r => {

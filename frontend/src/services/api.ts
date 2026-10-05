@@ -100,6 +100,8 @@ export const billingApi = {
   getByDispatcher:   ()              => api.get('/billing/by-dispatcher'),
   settleOne:         (id: string)    => api.put(`/billing/${id}/settle`),
   settleDriverAll:   (driverId: string) => api.put(`/billing/driver/${driverId}/settle-all`),
+  settleDispatcherOne: (id: string)  => api.put(`/billing/${id}/settle-dispatcher`),
+  settleDispatcherAll: (dispatcherUserId: string) => api.put(`/billing/dispatcher/${dispatcherUserId}/settle-all`),
 };
 
 export const userApi = {

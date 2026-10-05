@@ -343,6 +343,14 @@ export async function initDatabase(): Promise<void> {
   await addColumnIfMissing('drivers', 'dot_number',        "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('drivers', 'rate_con_email',    "TEXT NOT NULL DEFAULT ''");
 
+  // Migrations for commissions -- `status` tracks whether the DRIVER paid
+  // their 7% to OSI; it was being reused on the dispatcher side too as if it
+  // meant "OSI paid the dispatcher their 4%", which is a completely separate
+  // event in practice (dispatchers can be owed money on orders whose driver
+  // already settled, and vice versa). Gets its own independent status.
+  await addColumnIfMissing('commissions', 'dispatcher_status',     "TEXT NOT NULL DEFAULT 'pending'");
+  await addColumnIfMissing('commissions', 'dispatcher_settled_at', "TEXT");
+
   // Assign driver_code to existing drivers without one
   const genDriverCode = async (): Promise<string> => {
     const code = String(Math.floor(10000000 + Math.random() * 90000000));

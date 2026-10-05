@@ -18,6 +18,10 @@ interface CommissionRow {
   delivery_date: string | null;
   status: 'pending' | 'settled';
   settled_at: string | null;
+  // Si OSI ya le pago al dispatcher su 4% -- independiente de `status`, que
+  // es si el DRIVER ya pago su 7% (dos pagos distintos, misma orden).
+  dispatcher_status: 'pending' | 'settled';
+  dispatcher_settled_at: string | null;
 }
 
 type PayoutDetails = Record<string, string>;
@@ -171,7 +175,7 @@ export default function DispatcherCommissions() {
     setLoading(true);
     try {
       const params: Record<string, string> = { dispatcher_user_id: user.id };
-      if (statusFilter) params.status = statusFilter;
+      if (statusFilter) params.dispatcher_status = statusFilter;
       const { data } = await billingApi.getRecords(params);
       setRows((data.records ?? []) as CommissionRow[]);
     } finally {
@@ -239,8 +243,8 @@ export default function DispatcherCommissions() {
   };
 
   const total   = rows.reduce((s, r) => s + r.dispatcher_pay, 0);
-  const settled = rows.filter(r => r.status === 'settled').reduce((s, r) => s + r.dispatcher_pay, 0);
-  const pending = rows.filter(r => r.status === 'pending').reduce((s, r) => s + r.dispatcher_pay, 0);
+  const settled = rows.filter(r => r.dispatcher_status === 'settled').reduce((s, r) => s + r.dispatcher_pay, 0);
+  const pending = rows.filter(r => r.dispatcher_status === 'pending').reduce((s, r) => s + r.dispatcher_pay, 0);
 
   return (
     <div className="space-y-5 fade-in">
@@ -278,7 +282,7 @@ export default function DispatcherCommissions() {
             <span className="text-xs text-gray-500 dark:text-slate-400">Cobrado</span>
           </div>
           <p className="text-2xl font-bold text-green-600">{fmt(settled)}</p>
-          <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{rows.filter(r => r.status === 'settled').length} liquidadas</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{rows.filter(r => r.dispatcher_status === 'settled').length} liquidadas</p>
         </div>
         <div className="card p-4">
           <div className="flex items-center gap-2 mb-2">
@@ -288,7 +292,7 @@ export default function DispatcherCommissions() {
             <span className="text-xs text-gray-500 dark:text-slate-400">Pendiente</span>
           </div>
           <p className="text-2xl font-bold text-yellow-600">{fmt(pending)}</p>
-          <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{rows.filter(r => r.status === 'pending').length} por cobrar</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{rows.filter(r => r.dispatcher_status === 'pending').length} por cobrar</p>
         </div>
         <div className="card p-4">
           <div className="flex items-center gap-2 mb-2">
@@ -592,7 +596,7 @@ export default function DispatcherCommissions() {
                   <td className="px-4 py-3 text-xs text-gray-400 dark:text-slate-500">
                     {r.delivery_date ? format(new Date(r.delivery_date), 'MMM d, yyyy') : '—'}
                   </td>
-                  <td className="px-4 py-3 text-center"><StatusChip status={r.status} /></td>
+                  <td className="px-4 py-3 text-center"><StatusChip status={r.dispatcher_status} /></td>
                 </tr>
               ))}
             </tbody>
@@ -612,7 +616,7 @@ export default function DispatcherCommissions() {
             <div key={r.id} className="p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs font-bold text-gray-900 dark:text-white">{r.order_number}</span>
-                <StatusChip status={r.status} />
+                <StatusChip status={r.dispatcher_status} />
               </div>
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-600 dark:text-slate-400">{r.driver_name}</p>
