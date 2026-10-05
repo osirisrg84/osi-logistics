@@ -512,10 +512,10 @@ export default function DriverPortal() {
   // ── Favorites ────────────────────────────────────────────
   interface Favorite { id: string; name: string; address: string; type: 'home' | 'work' | 'frequent' | 'other'; }
   const FAV_PRESETS = [
-    { type: 'home'     as const, label: 'Casa',            icon: '🏠' },
-    { type: 'work'     as const, label: 'Zona de trabajo', icon: '🏢' },
-    { type: 'frequent' as const, label: 'Lugar frecuente', icon: '⭐' },
-    { type: 'other'    as const, label: 'Otro',            icon: '📍' },
+    { type: 'home'     as const, label: t('driverPortal.favHome'),     icon: '🏠' },
+    { type: 'work'     as const, label: t('driverPortal.favWork'),     icon: '🏢' },
+    { type: 'frequent' as const, label: t('driverPortal.favFrequent'), icon: '⭐' },
+    { type: 'other'    as const, label: t('driverPortal.favOther'),    icon: '📍' },
   ];
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [showAddFav, setShowAddFav] = useState(false);
@@ -1325,22 +1325,22 @@ export default function DriverPortal() {
 
   // ── Profile completion ─────────────────────────────────────
   const profileItems = [
-    { label: isDotEquip ? 'Company / DOT#' : 'Company / MC#',
+    { label: isDotEquip ? t('driverPortal.itemCompanyDot') : t('driverPortal.itemCompanyMc'),
       done: !!(driver?.company_name && authorityNum) },
-    { label: 'Rate Con Email',   done: !!rateConEmail },
-    { label: 'Truck Make',       done: !!localTruckMake },
-    { label: 'Tipo de Equipo',   done: !!localEquipType },
+    { label: t('driverPortal.itemRateConEmail'),   done: !!rateConEmail },
+    { label: t('driverPortal.itemTruckMake'),       done: !!localTruckMake },
+    { label: t('driverPortal.itemEquipType'),   done: !!localEquipType },
     ...(!isDotEquip ? [
-      { label: 'Truck #',        done: !!truckNum },
-      { label: 'Trailer #',      done: !!trailerNum },
+      { label: t('driverPortal.itemTruckNum'),        done: !!truckNum },
+      { label: t('driverPortal.itemTrailerNum'),      done: !!trailerNum },
     ] : []),
     ...(isDotEquip ? [
-      { label: 'Dimensiones (pies)',        done: !!(equipLength && equipWidth) },
-      { label: 'Capacidad de carga (lbs)',  done: !!loadCapacity },
+      { label: t('driverPortal.itemDimensions'),        done: !!(equipLength && equipWidth) },
+      { label: t('driverPortal.itemLoadCapacity'),  done: !!loadCapacity },
     ] : []),
-    { label: 'COI / Seguro',     done: !!coiFileName },
-    { label: 'Factoring',        done: !!factoringCompany },
-    { label: 'Método de Pago',   done: !!payoutMethod },
+    { label: t('driverPortal.itemCoi'),     done: !!coiFileName },
+    { label: t('driverPortal.itemFactoring'),        done: !!factoringCompany },
+    { label: t('driverPortal.itemPayoutMethod'),   done: !!payoutMethod },
   ];
   const profileScore = profileItems.filter(i => i.done).length;
 
@@ -1349,14 +1349,14 @@ export default function DriverPortal() {
   const onTimeRt  = driver?.on_time_rate || 0;
   const drvRating = driver?.rating || 0;
   const ACHIEVEMENTS = [
-    { icon: '✅', label: 'Perfil Completo',         desc: 'Todas las secciones del perfil llenas', unlocked: profileScore >= profileItems.length, current: profileScore, target: profileItems.length, showProgress: true  },
-    { icon: '🚀', label: 'Primera Milla',          desc: 'Completa tu primera entrega',         unlocked: totalDel  >= 1,   current: Math.min(totalDel, 1),    target: 1,    showProgress: false },
-    { icon: '📦', label: 'Arrancando',             desc: '10 entregas completadas',             unlocked: totalDel  >= 10,  current: Math.min(totalDel, 10),   target: 10,   showProgress: true  },
-    { icon: '⭐', label: 'Estrella en Ascenso',    desc: '25 entregas completadas',             unlocked: totalDel  >= 25,  current: Math.min(totalDel, 25),   target: 25,   showProgress: true  },
-    { icon: '💪', label: 'Guerrero del Camino',    desc: '50 entregas completadas',             unlocked: totalDel  >= 50,  current: Math.min(totalDel, 50),   target: 50,   showProgress: true  },
-    { icon: '🏆', label: 'Driver Élite',           desc: '100 entregas completadas',            unlocked: totalDel  >= 100, current: Math.min(totalDel, 100),  target: 100,  showProgress: true  },
-    { icon: '⏰', label: 'Pro Puntualidad',         desc: '95%+ de entregas a tiempo',           unlocked: onTimeRt  >= 95,  current: Math.min(onTimeRt, 95),   target: 95,   showProgress: false },
-    { icon: '🌟', label: 'Driver 5 Estrellas',     desc: 'Calificación de 4.8 o superior',      unlocked: drvRating >= 4.8, current: drvRating,                 target: 4.8,  showProgress: false },
+    { icon: '✅', label: t('driverPortal.achCompleteProfile'), desc: t('driverPortal.achCompleteProfileDesc'), unlocked: profileScore >= profileItems.length, current: profileScore, target: profileItems.length, showProgress: true  },
+    { icon: '🚀', label: t('driverPortal.achFirstMile'),       desc: t('driverPortal.achFirstMileDesc'),       unlocked: totalDel  >= 1,   current: Math.min(totalDel, 1),    target: 1,    showProgress: false },
+    { icon: '📦', label: t('driverPortal.achGettingStarted'),  desc: t('driverPortal.achGettingStartedDesc'),  unlocked: totalDel  >= 10,  current: Math.min(totalDel, 10),   target: 10,   showProgress: true  },
+    { icon: '⭐', label: t('driverPortal.achRisingStar'),      desc: t('driverPortal.achRisingStarDesc'),      unlocked: totalDel  >= 25,  current: Math.min(totalDel, 25),   target: 25,   showProgress: true  },
+    { icon: '💪', label: t('driverPortal.achRoadWarrior'),     desc: t('driverPortal.achRoadWarriorDesc'),     unlocked: totalDel  >= 50,  current: Math.min(totalDel, 50),   target: 50,   showProgress: true  },
+    { icon: '🏆', label: t('driverPortal.achEliteDriver'),     desc: t('driverPortal.achEliteDriverDesc'),     unlocked: totalDel  >= 100, current: Math.min(totalDel, 100),  target: 100,  showProgress: true  },
+    { icon: '⏰', label: t('driverPortal.achPunctualityPro'),  desc: t('driverPortal.achPunctualityProDesc'),  unlocked: onTimeRt  >= 95,  current: Math.min(onTimeRt, 95),   target: 95,   showProgress: false },
+    { icon: '🌟', label: t('driverPortal.achFiveStarDriver'),  desc: t('driverPortal.achFiveStarDriverDesc'),  unlocked: drvRating >= 4.8, current: drvRating,                 target: 4.8,  showProgress: false },
   ];
   const unlockedCount = ACHIEVEMENTS.filter(a => a.unlocked).length;
 
@@ -2617,20 +2617,20 @@ export default function DriverPortal() {
                   <Building2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Factoring</h3>
-                  <p className="text-[10px] text-gray-400 dark:text-slate-500">Broker Check · NOA</p>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('driverPortal.factoring')}</h3>
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500">{t('driverPortal.factoringSubtitle')}</p>
                 </div>
               </div>
               <button onClick={() => setEditingFactoring(v => !v)}
                 className="flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-700 font-medium px-2 py-1 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">
-                <Edit3 className="w-3 h-3" /> {editingFactoring ? 'Cerrar' : 'Editar'}
+                <Edit3 className="w-3 h-3" /> {editingFactoring ? t('driverPortal.close') : t('driverPortal.edit')}
               </button>
             </div>
 
             {/* NOA badge */}
             <div className="flex items-center gap-2 mb-2">
               <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${factoringNoa ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400'}`}>
-                {factoringNoa ? '✓ NOA Activo' : 'Sin NOA'}
+                {factoringNoa ? t('driverPortal.noaActive') : t('driverPortal.noNoa')}
               </span>
               {factoringCompany && (
                 <span className="text-xs font-medium text-gray-700 dark:text-slate-300 truncate">{factoringCompany}</span>
@@ -2638,7 +2638,7 @@ export default function DriverPortal() {
             </div>
 
             {!factoringCompany && !editingFactoring && (
-              <p className="text-xs text-gray-400 dark:text-slate-500">Sin información de factoring</p>
+              <p className="text-xs text-gray-400 dark:text-slate-500">{t('driverPortal.noFactoringInfo')}</p>
             )}
 
             {factoringCompany && !editingFactoring && (
@@ -2651,20 +2651,20 @@ export default function DriverPortal() {
             {editingFactoring && (
               <div className="mt-3 space-y-2.5">
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Empresa de Factoring</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">{t('driverPortal.factoringCompany')}</p>
                   <input className="input text-sm w-full" value={factoringCompany}
                     onChange={e => setFactoringCompany(e.target.value)}
                     placeholder="Ej: OTR Solutions, RTS Financial..." />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Teléfono</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">{t('driverPortal.phone')}</p>
                     <input className="input text-sm w-full" value={factoringPhone}
                       onChange={e => setFactoringPhone(e.target.value)}
                       placeholder="(800) 000-0000" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Email</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">{t('driverPortal.email')}</p>
                     <input className="input text-sm w-full" value={factoringEmail}
                       onChange={e => setFactoringEmail(e.target.value)}
                       placeholder="noa@factor.com" />
@@ -2673,8 +2673,8 @@ export default function DriverPortal() {
                 {/* NOA toggle */}
                 <div className="flex items-center justify-between py-2 px-3 rounded-xl bg-gray-50 dark:bg-slate-700/50">
                   <div>
-                    <p className="text-xs font-semibold text-gray-700 dark:text-slate-300">NOA (Notice of Assignment)</p>
-                    <p className="text-[10px] text-gray-400 dark:text-slate-500">Brokers deben pagar a la empresa de factoring</p>
+                    <p className="text-xs font-semibold text-gray-700 dark:text-slate-300">{t('driverPortal.noaLabel')}</p>
+                    <p className="text-[10px] text-gray-400 dark:text-slate-500">{t('driverPortal.noaHint')}</p>
                   </div>
                   <button onClick={() => setFactoringNoa(v => !v)}
                     className="relative rounded-full flex-shrink-0 ml-3"
@@ -2686,7 +2686,7 @@ export default function DriverPortal() {
                 <div className="flex gap-2 pt-1">
                   <button onClick={() => setEditingFactoring(false)}
                     className="flex-1 text-xs py-1.5 rounded-xl border border-gray-200 dark:border-slate-600 text-gray-500">
-                    Cancelar
+                    {t('driverPortal.cancel')}
                   </button>
                   <button
                     disabled={savingFactoring}
@@ -2705,7 +2705,7 @@ export default function DriverPortal() {
                     }}
                     className="flex-1 text-xs py-1.5 rounded-xl bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors flex items-center justify-center gap-1">
                     {savingFactoring ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <CheckCircle className="w-3 h-3" />}
-                    Guardar
+                    {t('driverPortal.save')}
                   </button>
                 </div>
               </div>
@@ -2722,13 +2722,13 @@ export default function DriverPortal() {
                 <Wallet className="w-4 h-4 text-orange-600 dark:text-orange-400" />
               </div>
               <div className="text-left">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">Mis Pagos a OSI</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">{t('driverPortal.myPaymentsToOsi')}</p>
                 {billingSummary && billingSummary.pending > 0 ? (
                   <p className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">
-                    ${billingSummary.pending.toFixed(2)} pendiente
+                    {t('driverPortal.pendingAmount', { amount: `$${billingSummary.pending.toFixed(2)}` })}
                   </p>
                 ) : (
-                  <p className="text-xs text-gray-400 dark:text-slate-500">Ver historial de pagos</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500">{t('driverPortal.viewPaymentHistory')}</p>
                 )}
               </div>
             </div>
@@ -2740,12 +2740,12 @@ export default function DriverPortal() {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-orange-500" />
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Lugares favoritos</h3>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('driverPortal.favoritePlaces')}</h3>
               </div>
               {favorites.length < 5 && !showAddFav && (
                 <button onClick={() => setShowAddFav(true)}
                   className="flex items-center gap-1 text-xs text-orange-500 hover:text-orange-600 font-semibold transition-colors">
-                  <Plus className="w-3.5 h-3.5" /> Agregar
+                  <Plus className="w-3.5 h-3.5" /> {t('driverPortal.add')}
                 </button>
               )}
             </div>
@@ -2753,10 +2753,10 @@ export default function DriverPortal() {
             {favorites.length === 0 && !showAddFav && (
               <div className="text-center py-4">
                 <MapPin className="w-8 h-8 text-gray-200 dark:text-slate-700 mx-auto mb-2" />
-                <p className="text-xs text-gray-400 dark:text-slate-500">No hay lugares guardados</p>
+                <p className="text-xs text-gray-400 dark:text-slate-500">{t('driverPortal.noSavedPlaces')}</p>
                 <button onClick={() => setShowAddFav(true)}
                   className="mt-2 text-xs text-orange-500 hover:text-orange-600 font-medium">
-                  + Agregar un lugar
+                  {t('driverPortal.addPlace')}
                 </button>
               </div>
             )}
@@ -2785,7 +2785,7 @@ export default function DriverPortal() {
             {/* Add form */}
             {showAddFav && (
               <div className="border-t border-gray-100 dark:border-slate-700 pt-3 space-y-2.5">
-                <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Nuevo lugar</p>
+                <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">{t('driverPortal.newPlace')}</p>
                 {/* Type selector */}
                 <div className="grid grid-cols-4 gap-1.5">
                   {FAV_PRESETS.map(p => (
@@ -2802,14 +2802,14 @@ export default function DriverPortal() {
                 </div>
                 <input
                   type="text"
-                  placeholder="Nombre del lugar"
+                  placeholder={t('driverPortal.placeName')}
                   value={newFav.name}
                   onChange={e => setNewFav(f => ({ ...f, name: e.target.value }))}
                   className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-400/40"
                 />
                 <input
                   type="text"
-                  placeholder="Dirección"
+                  placeholder={t('driverPortal.address')}
                   value={newFav.address}
                   onChange={e => setNewFav(f => ({ ...f, address: e.target.value }))}
                   className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-400/40"
@@ -2820,13 +2820,13 @@ export default function DriverPortal() {
                 <div className="flex gap-2">
                   <button onClick={() => { setShowAddFav(false); setFavError(''); setNewFav({ name: '', address: '', type: 'home' }); }}
                     className="flex-1 py-2 rounded-xl text-sm text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">
-                    Cancelar
+                    {t('driverPortal.cancel')}
                   </button>
                   <button onClick={addFavorite} disabled={!newFav.name.trim() || !newFav.address.trim() || savingFav}
                     className="flex-1 py-2 rounded-xl text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5">
                     {savingFav
                       ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      : <><Plus className="w-4 h-4" /> Guardar</>
+                      : <><Plus className="w-4 h-4" /> {t('driverPortal.save')}</>
                     }
                   </button>
                 </div>
@@ -2841,13 +2841,13 @@ export default function DriverPortal() {
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
                   <Award className="w-4 h-4 text-amber-500" />
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Logros</h3>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('driverPortal.achievements')}</h3>
                 </div>
                 <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full">
                   {unlockedCount} / {ACHIEVEMENTS.length}
                 </span>
               </div>
-              <p className="text-xs text-gray-400 dark:text-slate-500">Sigue entregando para desbloquear más logros</p>
+              <p className="text-xs text-gray-400 dark:text-slate-500">{t('driverPortal.achievementsSubtitle')}</p>
               {/* Overall progress */}
               <div className="mt-3 h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-amber-400 to-yellow-300 rounded-full transition-all"
@@ -2875,7 +2875,7 @@ export default function DriverPortal() {
                       </p>
                       {a.unlocked ? (
                         <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded-full flex-shrink-0 uppercase tracking-wide">
-                          Unlocked
+                          {t('driverPortal.unlocked')}
                         </span>
                       ) : (
                         <Lock className="w-3.5 h-3.5 text-gray-300 dark:text-slate-600 flex-shrink-0" />
