@@ -16,9 +16,10 @@ import { setAppManifest, setThemeColor, DRIVER_MANIFEST, DISPATCH_MANIFEST, DRIV
 import { formatLocation } from '../utils/location';
 import { useDriverAuth } from '../context/DriverAuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { ordersApi, driversApi, billingApi, notificationsApi, userApi, driverAxios, communityApi, analyticsApi, incidentsApi } from '../services/driverApi';
+import { ordersApi, driversApi, billingApi, notificationsApi, userApi, driverAxios, communityApi, analyticsApi, incidentsApi, assistantApi } from '../services/driverApi';
 import { StripeCardPayment } from '../components/StripeCardPayment';
 import { IncidentReportModal } from '../components/IncidentReportModal';
+import { AiAssistantPanel } from '../components/AiAssistantPanel';
 import { Order, Driver, DriverStatus, OrderDocument, ORDER_DOCUMENT_TYPE_LABELS } from '../types';
 import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -4139,6 +4140,13 @@ export default function DriverPortal() {
       )}
 
       {showIncidentModal && <IncidentReportModal onClose={() => setShowIncidentModal(false)} createIncident={incidentsApi.create} />}
+
+      <AiAssistantPanel
+        chat={assistantApi.chat}
+        title="Asistente del Driver"
+        greeting="Pregúntame por tus órdenes o tus ganancias."
+        buttonClassName="fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+      />
 
       <div id="recaptcha-container" />
     </div>

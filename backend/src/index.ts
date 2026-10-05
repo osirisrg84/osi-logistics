@@ -19,6 +19,7 @@ import pushRouter, { sendPushToAll } from './routes/push';
 import chatRouter from './routes/chat';
 import communityRouter from './routes/community';
 import incidentsRouter from './routes/incidents';
+import assistantRouter from './routes/assistant';
 import { authenticate } from './middleware/auth';
 
 const PORT = process.env.PORT || 3001;
@@ -130,6 +131,7 @@ app.use('/api/stripe', stripeRouter);
 app.use('/api/push', authenticate, pushRouter);
 app.use('/api/community', authenticate, communityRouter);
 app.use('/api/incidents', authenticate, incidentsRouter);
+app.use('/api/assistant', authenticate, assistantRouter);
 
 io.on('connection', (socket) => {
   console.log(`Client connected: ${socket.id}`);

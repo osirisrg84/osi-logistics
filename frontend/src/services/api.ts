@@ -104,6 +104,11 @@ export const incidentsApi = {
   create: (data: { category: string; description: string; order_number?: string }) => api.post('/incidents', data),
 };
 
+export const assistantApi = {
+  chat: (message: string, history?: Array<{ role: 'user' | 'assistant'; content: string }>) =>
+    api.post('/assistant/chat', { message, history }),
+};
+
 export const billingApi = {
   getSummary:        ()              => api.get('/billing/summary'),
   getRecords:        (params?: Record<string, unknown>) => api.get('/billing/records', { params }),

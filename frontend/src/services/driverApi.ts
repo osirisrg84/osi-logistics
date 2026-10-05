@@ -80,6 +80,11 @@ export const incidentsApi = {
   create: (data: { category: string; description: string; order_number?: string }) => api.post('/incidents', data),
 };
 
+export const assistantApi = {
+  chat: (message: string, history?: Array<{ role: 'user' | 'assistant'; content: string }>) =>
+    api.post('/assistant/chat', { message, history }),
+};
+
 export const notificationsApi = {
   markRead:         (id: string)         => api.put(`/notifications/${id}/read`),
   getDriverNotifs:  (driverId: string)   => api.get(`/notifications/driver/${driverId}`),
