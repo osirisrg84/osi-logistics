@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   TrendingUp, CheckCircle2, Clock, RefreshCw,
   ChevronDown, DollarSign, Package,
@@ -113,6 +114,7 @@ function Field({ label, required, children }: { label: string; required?: boolea
 }
 
 function StatusChip({ status }: { status: 'pending' | 'settled' }) {
+  const { t } = useTranslation();
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
       status === 'settled'
@@ -120,7 +122,7 @@ function StatusChip({ status }: { status: 'pending' | 'settled' }) {
         : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
     }`}>
       {status === 'settled' ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-      {status === 'settled' ? 'Pagado' : 'Pendiente'}
+      {status === 'settled' ? t('commissions.statusPaid') : t('commissions.statusPending')}
     </span>
   );
 }
@@ -148,6 +150,7 @@ function PayoutDisplay({ method, details }: { method: string; details: PayoutDet
 }
 
 export default function DispatcherCommissions() {
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   // Commissions
@@ -252,9 +255,9 @@ export default function DispatcherCommissions() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Mis Comisiones</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t('commissions.title')}</h1>
           <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-            En OSI valoramos tu esfuerzo. Por eso te pagamos el <span className="font-semibold text-blue-600">4%</span> por cada carga gestionada.
+            {t('commissions.subtitlePrefix')} <span className="font-semibold text-blue-600">4%</span> {t('commissions.subtitleSuffix')}
           </p>
         </div>
         <button onClick={load} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
@@ -269,40 +272,40 @@ export default function DispatcherCommissions() {
             <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
               <TrendingUp className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </div>
-            <span className="text-xs text-gray-500 dark:text-slate-400">Total a cobrar</span>
+            <span className="text-xs text-gray-500 dark:text-slate-400">{t('commissions.statTotal')}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white">{fmt(total)}</p>
-          <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">4% · {rows.length} cargas</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{t('commissions.statLoadsSuffix', { count: rows.length })}</p>
         </div>
         <div className="card p-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
               <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
             </div>
-            <span className="text-xs text-gray-500 dark:text-slate-400">Cobrado</span>
+            <span className="text-xs text-gray-500 dark:text-slate-400">{t('commissions.statCollected')}</span>
           </div>
           <p className="text-2xl font-bold text-green-600">{fmt(settled)}</p>
-          <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{rows.filter(r => r.dispatcher_status === 'settled').length} liquidadas</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{t('commissions.statSettledSuffix', { count: rows.filter(r => r.dispatcher_status === 'settled').length })}</p>
         </div>
         <div className="card p-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
               <Clock className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
             </div>
-            <span className="text-xs text-gray-500 dark:text-slate-400">Pendiente</span>
+            <span className="text-xs text-gray-500 dark:text-slate-400">{t('commissions.statPending')}</span>
           </div>
           <p className="text-2xl font-bold text-yellow-600">{fmt(pending)}</p>
-          <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{rows.filter(r => r.dispatcher_status === 'pending').length} por cobrar</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{t('commissions.statPendingSuffix', { count: rows.filter(r => r.dispatcher_status === 'pending').length })}</p>
         </div>
         <div className="card p-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
               <Package className="w-4 h-4 text-orange-600 dark:text-orange-400" />
             </div>
-            <span className="text-xs text-gray-500 dark:text-slate-400">Cargas</span>
+            <span className="text-xs text-gray-500 dark:text-slate-400">{t('commissions.statLoads')}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white">{rows.length}</p>
-          <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">gestionadas</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{t('commissions.statManaged')}</p>
         </div>
       </div>
 
@@ -312,10 +315,10 @@ export default function DispatcherCommissions() {
         <div className="flex items-center gap-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/40 rounded-2xl px-4 py-3">
           <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
           <p className="text-xs text-yellow-700 dark:text-yellow-300 flex-1">
-            Tienes <strong>{fmt(pending)}</strong> pendientes. Configura tu método de pago para que OSI pueda enviarte el pago.
+            {t('commissions.pendingAlertPrefix')} <strong>{fmt(pending)}</strong> {t('commissions.pendingAlertSuffix')}
           </p>
           <button onClick={startEdit} className="text-xs font-bold text-yellow-700 dark:text-yellow-300 hover:underline flex-shrink-0">
-            Configurar
+            {t('commissions.configure')}
           </button>
         </div>
       )}
@@ -328,14 +331,14 @@ export default function DispatcherCommissions() {
               <Wallet className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-gray-900 dark:text-white">Método de pago</h2>
-              <p className="text-xs text-gray-400 dark:text-slate-500">Cómo OSI Logistics te envía tus pagos</p>
+              <h2 className="text-sm font-bold text-gray-900 dark:text-white">{t('commissions.payoutMethodTitle')}</h2>
+              <p className="text-xs text-gray-400 dark:text-slate-500">{t('commissions.payoutMethodSubtitle')}</p>
             </div>
           </div>
           {!editingPayout && payoutMethod && (
             <button onClick={startEdit}
               className="flex items-center gap-1.5 text-xs text-blue-500 hover:text-blue-600 font-semibold transition-colors">
-              <Pencil className="w-3.5 h-3.5" /> Editar
+              <Pencil className="w-3.5 h-3.5" /> {t('commissions.edit')}
             </button>
           )}
         </div>
@@ -444,13 +447,13 @@ export default function DispatcherCommissions() {
             <div className="flex gap-2 pt-1">
               <button onClick={cancelEdit}
                 className="flex-1 py-2.5 rounded-xl text-sm text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors font-medium">
-                Cancelar
+                {t('commissions.cancel')}
               </button>
               <button onClick={savePayout} disabled={savingPayout || !payoutMethod}
                 className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-blue-500 hover:bg-blue-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5">
                 {savingPayout
                   ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  : <><CheckCircle2 className="w-4 h-4" /> Guardar método</>
+                  : <><CheckCircle2 className="w-4 h-4" /> {t('commissions.saveMethod')}</>
                 }
               </button>
             </div>
@@ -462,13 +465,13 @@ export default function DispatcherCommissions() {
             <div className="w-12 h-12 bg-gray-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-3">
               <Wallet className="w-6 h-6 text-gray-400 dark:text-slate-500" />
             </div>
-            <p className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1">Sin método de pago configurado</p>
+            <p className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('commissions.noPayoutTitle')}</p>
             <p className="text-xs text-gray-400 dark:text-slate-500 mb-4">
-              Agrega tu método preferido para que OSI pueda enviarte tus comisiones
+              {t('commissions.noPayoutHint')}
             </p>
             <button onClick={startEdit}
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold rounded-xl transition-colors shadow-sm shadow-blue-500/20">
-              <PlusCircle className="w-3.5 h-3.5" /> Configurar método de pago
+              <PlusCircle className="w-3.5 h-3.5" /> {t('commissions.setupPayout')}
             </button>
           </div>
         )}
@@ -482,14 +485,14 @@ export default function DispatcherCommissions() {
               <Shield className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-gray-900 dark:text-white">Información Fiscal · 1099</h2>
-              <p className="text-xs text-gray-400 dark:text-slate-500">Requerido para reportes de impuestos</p>
+              <h2 className="text-sm font-bold text-gray-900 dark:text-white">{t('commissions.taxTitle')}</h2>
+              <p className="text-xs text-gray-400 dark:text-slate-500">{t('commissions.taxSubtitle')}</p>
             </div>
           </div>
           {!editingSsn && ssn && (
             <button onClick={() => { setSsnInput(ssn); setEditingSsn(true); }}
               className="flex items-center gap-1.5 text-xs text-purple-500 hover:text-purple-600 font-semibold transition-colors">
-              <Pencil className="w-3.5 h-3.5" /> Editar
+              <Pencil className="w-3.5 h-3.5" /> {t('commissions.edit')}
             </button>
           )}
         </div>
@@ -509,13 +512,13 @@ export default function DispatcherCommissions() {
             <div className="flex gap-2">
               <button onClick={() => setEditingSsn(false)}
                 className="flex-1 py-2.5 rounded-xl text-sm text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors font-medium">
-                Cancelar
+                {t('commissions.cancel')}
               </button>
               <button onClick={saveSsn} disabled={savingSsn || !ssnInput.trim()}
                 className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-purple-500 hover:bg-purple-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5">
                 {savingSsn
                   ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  : <><CheckCircle2 className="w-4 h-4" /> Guardar SSN</>}
+                  : <><CheckCircle2 className="w-4 h-4" /> {t('commissions.saveSsn')}</>}
               </button>
             </div>
           </div>
@@ -523,7 +526,7 @@ export default function DispatcherCommissions() {
           <div className="flex items-center gap-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-700/30 rounded-xl px-4 py-3">
             <Shield className="w-4 h-4 text-purple-500 flex-shrink-0" />
             <div className="flex-1">
-              <p className="text-xs text-gray-400 dark:text-slate-500 mb-0.5">SSN registrado</p>
+              <p className="text-xs text-gray-400 dark:text-slate-500 mb-0.5">{t('commissions.ssnRegistered')}</p>
               <p className="text-sm font-mono font-bold text-gray-900 dark:text-white">{showSsn ? ssn : maskSSN(ssn)}</p>
             </div>
             <button onClick={() => setShowSsn(!showSsn)} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300">
@@ -535,11 +538,11 @@ export default function DispatcherCommissions() {
             <div className="w-10 h-10 bg-gray-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-2">
               <Shield className="w-5 h-5 text-gray-400 dark:text-slate-500" />
             </div>
-            <p className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1">Sin SSN configurado</p>
-            <p className="text-xs text-gray-400 dark:text-slate-500 mb-4">Necesario para tu formulario 1099 de impuestos</p>
+            <p className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('commissions.noSsnTitle')}</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mb-4">{t('commissions.noSsnHint')}</p>
             <button onClick={() => { setSsnInput(''); setEditingSsn(true); }}
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-500 hover:bg-purple-600 text-white text-xs font-bold rounded-xl transition-colors">
-              <PlusCircle className="w-3.5 h-3.5" /> Agregar SSN
+              <PlusCircle className="w-3.5 h-3.5" /> {t('commissions.addSsn')}
             </button>
           </div>
         )}
@@ -547,16 +550,16 @@ export default function DispatcherCommissions() {
 
       {/* Filter */}
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-gray-700 dark:text-slate-300">Historial de comisiones</h2>
+        <h2 className="text-sm font-semibold text-gray-700 dark:text-slate-300">{t('commissions.historyTitle')}</h2>
         <div className="relative">
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
             className="appearance-none pl-3 pr-8 py-2 text-sm border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400/40"
           >
-            <option value="">Todos</option>
-            <option value="pending">Pendientes</option>
-            <option value="settled">Cobrados</option>
+            <option value="">{t('commissions.filterAll')}</option>
+            <option value="pending">{t('commissions.filterPending')}</option>
+            <option value="settled">{t('commissions.filterSettled')}</option>
           </select>
           <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
@@ -568,23 +571,23 @@ export default function DispatcherCommissions() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 dark:border-slate-700 text-xs text-gray-500 dark:text-slate-400 uppercase">
-                <th className="text-left px-4 py-3 font-semibold">Orden</th>
-                <th className="text-left px-4 py-3 font-semibold">Driver</th>
-                <th className="text-right px-4 py-3 font-semibold">Rate</th>
-                <th className="text-right px-4 py-3 font-semibold text-blue-600">Mi comisión (4%)</th>
-                <th className="text-left px-4 py-3 font-semibold">Fecha</th>
-                <th className="text-center px-4 py-3 font-semibold">Estado</th>
+                <th className="text-left px-4 py-3 font-semibold">{t('commissions.tableOrder')}</th>
+                <th className="text-left px-4 py-3 font-semibold">{t('commissions.tableDriver')}</th>
+                <th className="text-right px-4 py-3 font-semibold">{t('commissions.tableRate')}</th>
+                <th className="text-right px-4 py-3 font-semibold text-blue-600">{t('commissions.tableMyCommission')}</th>
+                <th className="text-left px-4 py-3 font-semibold">{t('commissions.tableDate')}</th>
+                <th className="text-center px-4 py-3 font-semibold">{t('commissions.tableStatus')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 dark:divide-slate-700/50">
               {loading ? (
-                <tr><td colSpan={6} className="text-center py-8 text-gray-400">Cargando...</td></tr>
+                <tr><td colSpan={6} className="text-center py-8 text-gray-400">{t('commissions.loading')}</td></tr>
               ) : rows.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-12">
                     <DollarSign className="w-10 h-10 text-gray-200 dark:text-slate-700 mx-auto mb-2" />
-                    <p className="text-gray-400 text-sm">Sin comisiones registradas</p>
-                    <p className="text-gray-300 dark:text-slate-600 text-xs mt-1">Las comisiones aparecen cuando tus cargas se entregan</p>
+                    <p className="text-gray-400 text-sm">{t('commissions.emptyTitle')}</p>
+                    <p className="text-gray-300 dark:text-slate-600 text-xs mt-1">{t('commissions.emptyHint2')}</p>
                   </td>
                 </tr>
               ) : rows.map(r => (
@@ -606,11 +609,11 @@ export default function DispatcherCommissions() {
         {/* Mobile cards */}
         <div className="md:hidden divide-y divide-gray-100 dark:divide-slate-700">
           {loading ? (
-            <div className="py-8 text-center text-gray-400 text-sm">Cargando...</div>
+            <div className="py-8 text-center text-gray-400 text-sm">{t('commissions.loading')}</div>
           ) : rows.length === 0 ? (
             <div className="py-12 text-center">
               <DollarSign className="w-10 h-10 text-gray-200 dark:text-slate-700 mx-auto mb-2" />
-              <p className="text-gray-400 text-sm">Sin comisiones registradas</p>
+              <p className="text-gray-400 text-sm">{t('commissions.emptyTitle')}</p>
             </div>
           ) : rows.map(r => (
             <div key={r.id} className="p-4 space-y-2">
@@ -623,7 +626,7 @@ export default function DispatcherCommissions() {
                 <p className="text-xs text-gray-400 dark:text-slate-500">{fmt(r.order_price)} carga</p>
               </div>
               <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 rounded-lg px-3 py-2">
-                <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">Mi comisión (4%)</span>
+                <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">{t('commissions.tableMyCommission')}</span>
                 <span className="text-sm font-bold text-blue-600">{fmt(r.dispatcher_pay)}</span>
               </div>
               {r.delivery_date && (
