@@ -805,7 +805,16 @@
     "tapToStop": "● Toca para detener",
     "tapToRecord": "Toca para grabar",
     "secureChannel": "OSI Fleet · Canal Seguro",
-    "textToChannel": "Mensaje de texto al canal..."
+    "textToChannel": "Mensaje de texto al canal...",
+    "newOffer": "¡Nueva Oferta!",
+    "dispatcherLabel": "Dispatcher",
+    "call": "Llamar",
+    "message": "Mensaje",
+    "emailWord": "Email",
+    "ignore": "Ignorar",
+    "accept": "Aceptar",
+    "assistantTitle": "Asistente del Driver",
+    "assistantGreeting": "Pregúntame por tus órdenes o tus ganancias."
   },
   "driverNav": {
     "active": "Activas",

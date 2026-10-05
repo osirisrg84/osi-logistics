@@ -805,7 +805,16 @@
     "tapToStop": "● Tap to stop",
     "tapToRecord": "Tap to record",
     "secureChannel": "OSI Fleet · Secure Channel",
-    "textToChannel": "Text message to channel..."
+    "textToChannel": "Text message to channel...",
+    "newOffer": "New Offer!",
+    "dispatcherLabel": "Dispatcher",
+    "call": "Call",
+    "message": "Message",
+    "emailWord": "Email",
+    "ignore": "Ignore",
+    "accept": "Accept",
+    "assistantTitle": "Driver Assistant",
+    "assistantGreeting": "Ask me about your orders or earnings."
   },
   "driverNav": {
     "active": "Active",

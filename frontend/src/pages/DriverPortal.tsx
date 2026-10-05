@@ -3999,7 +3999,7 @@ export default function DriverPortal() {
             {/* Header */}
             <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-5 py-4 flex items-center justify-between">
               <div>
-                <p className="text-orange-100 text-xs font-bold uppercase tracking-widest">¡Nueva Oferta!</p>
+                <p className="text-orange-100 text-xs font-bold uppercase tracking-widest">{t('driverPortal.newOffer')}</p>
                 <p className="text-white font-bold text-xl">{pendingOffer.order_number}</p>
               </div>
               <div className={`w-16 h-16 rounded-full flex flex-col items-center justify-center border-4 transition-colors ${
@@ -4037,7 +4037,7 @@ export default function DriverPortal() {
                   <MapPin className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">Pickup</p>
+                  <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">{t('driverPortal.pickup')}</p>
                   <p className="text-sm text-gray-800 dark:text-slate-200 leading-snug">{formatLocation(pendingOffer.pickup_address, pendingOffer.pickup_contact)}</p>
                 </div>
               </div>
@@ -4048,7 +4048,7 @@ export default function DriverPortal() {
                   <Navigation className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wide">Delivery</p>
+                  <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wide">{t('driverPortal.deliveryWord')}</p>
                   <p className="text-sm text-gray-800 dark:text-slate-200 leading-snug">{formatLocation(pendingOffer.delivery_address, pendingOffer.delivery_contact)}</p>
                 </div>
               </div>
@@ -4088,7 +4088,7 @@ export default function DriverPortal() {
               {/* Dispatcher contact */}
               {(pendingOffer.dispatcher_name || pendingOffer.dispatcher_phone || pendingOffer.dispatcher_email) && (
                 <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/40 rounded-xl p-3">
-                  <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wide mb-2">Dispatcher</p>
+                  <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wide mb-2">{t('driverPortal.dispatcherLabel')}</p>
                   {pendingOffer.dispatcher_name && (
                     <p className="text-sm font-semibold text-gray-800 dark:text-slate-200 mb-2">{pendingOffer.dispatcher_name}</p>
                   )}
@@ -4098,7 +4098,7 @@ export default function DriverPortal() {
                         href={`tel:${pendingOffer.dispatcher_phone}`}
                         className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-green-500 text-white text-xs font-semibold"
                       >
-                        <Phone className="w-3.5 h-3.5" /> Llamar
+                        <Phone className="w-3.5 h-3.5" /> {t('driverPortal.call')}
                       </a>
                     )}
                     {pendingOffer.dispatcher_phone && (
@@ -4106,7 +4106,7 @@ export default function DriverPortal() {
                         href={`sms:${pendingOffer.dispatcher_phone}`}
                         className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-blue-500 text-white text-xs font-semibold"
                       >
-                        <MessageSquare className="w-3.5 h-3.5" /> Mensaje
+                        <MessageSquare className="w-3.5 h-3.5" /> {t('driverPortal.message')}
                       </a>
                     )}
                     {pendingOffer.dispatcher_email && (
@@ -4114,7 +4114,7 @@ export default function DriverPortal() {
                         href={`mailto:${pendingOffer.dispatcher_email}`}
                         className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-orange-500 text-white text-xs font-semibold"
                       >
-                        <Mail className="w-3.5 h-3.5" /> Email
+                        <Mail className="w-3.5 h-3.5" /> {t('driverPortal.emailWord')}
                       </a>
                     )}
                   </div>
@@ -4132,7 +4132,7 @@ export default function DriverPortal() {
                   }}
                   className="flex-1 py-3.5 rounded-xl bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold text-sm hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors flex items-center justify-center gap-2"
                 >
-                  <X className="w-4 h-4" /> Ignorar
+                  <X className="w-4 h-4" /> {t('driverPortal.ignore')}
                 </button>
                 <button
                   onClick={async () => {
@@ -4144,7 +4144,7 @@ export default function DriverPortal() {
                   }}
                   className="flex-1 py-3.5 rounded-xl bg-green-500 text-white font-bold text-sm hover:bg-green-600 active:bg-green-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-green-500/30"
                 >
-                  <CheckCircle className="w-4 h-4" /> Aceptar
+                  <CheckCircle className="w-4 h-4" /> {t('driverPortal.accept')}
                 </button>
               </div>
             </div>
@@ -4156,8 +4156,8 @@ export default function DriverPortal() {
 
       <AiAssistantPanel
         chat={assistantApi.chat}
-        title="Asistente del Driver"
-        greeting="Pregúntame por tus órdenes o tus ganancias."
+        title={t('driverPortal.assistantTitle')}
+        greeting={t('driverPortal.assistantGreeting')}
         buttonClassName="fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
       />
 
