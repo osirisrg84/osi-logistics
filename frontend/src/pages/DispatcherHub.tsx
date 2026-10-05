@@ -1,10 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  Users, PhoneCall, MessageSquare, Heart,
-  Briefcase, Shield, BookOpen, AlertTriangle, ChevronRight, X
+  Users, PhoneCall, MessageSquare, Heart, Trophy, Package, DollarSign,
+  Briefcase, Shield, BookOpen, AlertTriangle, ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { communityApi, analyticsApi, incidentsApi } from '../services/api';
+import { IncidentReportModal } from '../components/IncidentReportModal';
+import { formatDistanceToNow } from 'date-fns';
+
+interface Post {
+  id: string; author_name: string; author_role: string; message: string;
+  created_at: string; likes_count: number; liked: boolean;
+}
+interface LeaderDriver { id: string; name: string; avatar?: string; rating: number; deliveries_30d: number; revenue_30d: number; }
+interface LeaderDispatcher { id: string; name: string; loads_30d: number; earned_30d: number; }
 
 export default function DispatcherHub() {
   const { user } = useAuth();
@@ -12,35 +22,51 @@ export default function DispatcherHub() {
   const isAdmin = user?.role === 'admin';
   const accent = isAdmin ? '#a855f7' : '#f97316';
   const accentSoft = isAdmin ? 'rgba(168,85,247,0.12)' : 'rgba(249,115,22,0.12)';
-  const accentBorder = isAdmin ? 'rgba(168,85,247,0.3)' : 'rgba(249,115,22,0.3)';
 
-  // ── Hub sections ───────────────────────────────────────
-  const [section, setSection] = useState<'community' | 'support'>('community');
+  const [section, setSection] = useState<'community' | 'leaderboard' | 'support'>('community');
+  const [showIncidentModal, setShowIncidentModal] = useState(false);
 
-  // ── Community ──────────────────────────────────────────
-  const [posts, setPosts] = useState([
-    {
-      id: 'p1', avatar: 'MG', name: 'Maria Garcia', role: 'Dispatcher', time: '30m',
-      msg: '¡Nuevo record hoy! 15 cargas coordinadas sin un solo delay. El equipo OSI siempre al 100% 🚛💨 #OSILogistics',
-      likes: 9, liked: false,
-    },
-    {
-      id: 'p2', avatar: 'JL', name: 'Jose Lopez', role: 'Admin', time: '2h',
-      msg: 'Reminder: todos los drivers deben actualizar su paperwork antes del lunes. Envíen docs al dispatch@osilogistics.com 📋',
-      likes: 5, liked: false,
-    },
-    {
-      id: 'p3', avatar: 'AR', name: 'Ana Reyes', role: 'Dispatcher', time: '3h',
-      msg: 'Shoutout al driver Carlos R. — 5 cargas hoy, cero incidentes. Así se trabaja 🌟 Que sigan los buenos resultados',
-      likes: 12, liked: false,
-    },
-    {
-      id: 'p4', avatar: 'DM', name: 'Diego Martinez', role: 'Dispatcher', time: '5h',
-      msg: 'Tip: siempre confirmen el ETA con el warehouse 30 min antes. Ahorran tiempo en dock y mejoran nuestras métricas 💡',
-      likes: 7, liked: false,
-    },
-  ]);
+  // ── Community (real, shared with the driver app) ───────
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [postsLoading, setPostsLoading] = useState(true);
   const [postText, setPostText] = useState('');
+  const [posting, setPosting] = useState(false);
+
+  const loadPosts = () => {
+    communityApi.getPosts().then(r => setPosts(r.data)).catch(() => {}).finally(() => setPostsLoading(false));
+  };
+  useEffect(() => { loadPosts(); }, []);
+
+  const publish = async () => {
+    if (!postText.trim() || posting) return;
+    setPosting(true);
+    try {
+      const { data } = await communityApi.createPost(postText.trim());
+      setPosts(prev => [data, ...prev]);
+      setPostText('');
+    } catch {
+      alert('No se pudo publicar. Intenta de nuevo.');
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  const toggleLike = async (id: string) => {
+    setPosts(prev => prev.map(p => p.id === id ? { ...p, liked: !p.liked, likes_count: p.liked ? p.likes_count - 1 : p.likes_count + 1 } : p));
+    try { await communityApi.toggleLike(id); } catch { loadPosts(); }
+  };
+
+  // ── Leaderboard ──────────────────────────────────────────
+  const [topDrivers, setTopDrivers] = useState<LeaderDriver[]>([]);
+  const [topDispatchers, setTopDispatchers] = useState<LeaderDispatcher[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(true);
+  useEffect(() => {
+    if (section !== 'leaderboard') return;
+    analyticsApi.getLeaderboard()
+      .then(r => { setTopDrivers(r.data.topDrivers || []); setTopDispatchers(r.data.topDispatchers || []); })
+      .catch(() => {})
+      .finally(() => setLeaderboardLoading(false));
+  }, [section]);
 
   const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'D';
 
@@ -50,8 +76,9 @@ export default function DispatcherHub() {
       {/* ── Section Tabs ─────────────────────────────────── */}
       <div className="flex gap-2">
         {([
-          { id: 'community' as const, icon: Users,     label: 'Comunidad' },
-          { id: 'support'   as const, icon: PhoneCall, label: 'Support' },
+          { id: 'community' as const,   icon: Users,   label: 'Comunidad' },
+          { id: 'leaderboard' as const, icon: Trophy,  label: 'Top' },
+          { id: 'support' as const,     icon: PhoneCall, label: 'Support' },
         ]).map(s => (
           <button
             key={s.id}
@@ -76,12 +103,11 @@ export default function DispatcherHub() {
       {/*  COMUNIDAD                                        */}
       {/* ══════════════════════════════════════════════════ */}
       {section === 'community' && (
-        <div className="space-y-3">
+        <div className="space-y-3 fade-in">
 
           {/* Post composer */}
           <div className={`rounded-2xl p-4 shadow-sm ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-100'}`}>
             <div className="flex gap-3">
-              {/* Avatar */}
               <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-sm text-white"
                    style={{ background: `linear-gradient(135deg, ${accent}, ${isAdmin ? '#7c3aed' : '#ea580c'})` }}>
                 {initials}
@@ -98,24 +124,11 @@ export default function DispatcherHub() {
                 <div className="flex justify-between items-center mt-2">
                   <span className={`text-[10px] ${dark ? 'text-slate-600' : 'text-gray-300'}`}>{postText.length}/280</span>
                   <button
-                    disabled={!postText.trim()}
-                    onClick={() => {
-                      if (!postText.trim()) return;
-                      setPosts(prev => [{
-                        id: Date.now().toString(),
-                        avatar: initials,
-                        name: user?.name || 'Dispatcher',
-                        role: isAdmin ? 'Admin' : 'Dispatcher',
-                        time: 'ahora',
-                        msg: postText.trim(),
-                        likes: 0,
-                        liked: false,
-                      }, ...prev]);
-                      setPostText('');
-                    }}
+                    disabled={!postText.trim() || posting}
+                    onClick={publish}
                     className="px-4 py-1.5 rounded-xl text-xs font-bold text-white active:scale-95 disabled:opacity-40 transition-all"
                     style={{ background: `linear-gradient(135deg,${accent},${isAdmin ? '#7c3aed' : '#ea580c'})` }}>
-                    Publicar
+                    {posting ? 'Publicando...' : 'Publicar'}
                   </button>
                 </div>
               </div>
@@ -123,45 +136,47 @@ export default function DispatcherHub() {
           </div>
 
           {/* Posts feed */}
-          {posts.map(post => (
+          {postsLoading ? (
+            <div className="text-center py-10 text-sm text-gray-400 dark:text-slate-500">Cargando...</div>
+          ) : posts.length === 0 ? (
+            <div className="text-center py-10">
+              <Users className="w-10 h-10 text-gray-200 dark:text-slate-600 mx-auto mb-2" />
+              <p className="text-sm text-gray-400 dark:text-slate-500">Nadie ha publicado todavía. ¡Sé el primero!</p>
+            </div>
+          ) : posts.map(post => (
             <div key={post.id}
-                 className={`rounded-2xl p-4 shadow-sm transition-shadow hover:shadow-md ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-100'}`}>
+                 className={`rounded-2xl p-4 shadow-sm transition-shadow hover:shadow-md fade-in ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-100'}`}>
 
-              {/* Header */}
               <div className="flex items-start gap-3 mb-3">
                 <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-sm text-white"
                      style={{ background: 'linear-gradient(135deg,#3b82f6,#2563eb)' }}>
-                  {post.avatar}
+                  {post.author_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className={`text-sm font-bold truncate ${dark ? 'text-white' : 'text-gray-900'}`}>{post.name}</p>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
-                          style={{ background: post.role === 'Admin' ? 'rgba(168,85,247,0.15)' : 'rgba(249,115,22,0.12)', color: post.role === 'Admin' ? '#c084fc' : '#fb923c' }}>
-                      {post.role}
+                    <p className={`text-sm font-bold truncate ${dark ? 'text-white' : 'text-gray-900'}`}>{post.author_name}</p>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 capitalize"
+                          style={{ background: post.author_role === 'admin' ? 'rgba(168,85,247,0.15)' : 'rgba(249,115,22,0.12)', color: post.author_role === 'admin' ? '#c084fc' : '#fb923c' }}>
+                      {post.author_role === 'driver' ? 'Driver' : post.author_role === 'admin' ? 'Admin' : 'Dispatcher'}
                     </span>
                   </div>
-                  <p className={`text-[11px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{post.time} · OSI Team</p>
+                  <p className={`text-[11px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })} · OSI Team</p>
                 </div>
               </div>
 
-              {/* Body */}
-              <p className={`text-sm leading-relaxed mb-3 ${dark ? 'text-slate-300' : 'text-gray-700'}`}>{post.msg}</p>
+              <p className={`text-sm leading-relaxed mb-3 ${dark ? 'text-slate-300' : 'text-gray-700'}`}>{post.message}</p>
 
-              {/* Actions */}
               <div className={`flex items-center gap-4 pt-2.5 border-t ${dark ? 'border-slate-700/60' : 'border-gray-50'}`}>
                 <button
-                  onClick={() => setPosts(prev => prev.map(p =>
-                    p.id === post.id ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 } : p
-                  ))}
+                  onClick={() => toggleLike(post.id)}
                   className={`flex items-center gap-1.5 text-xs font-semibold transition-colors ${post.liked ? 'text-red-500' : dark ? 'text-slate-500 hover:text-red-400' : 'text-gray-400 hover:text-red-400'}`}>
                   <Heart className="w-3.5 h-3.5" style={{ fill: post.liked ? 'currentColor' : 'none' }} />
-                  {post.likes}
+                  {post.likes_count}
                 </button>
-                <button className={`flex items-center gap-1.5 text-xs transition-colors ${dark ? 'text-slate-500 hover:text-blue-400' : 'text-gray-400 hover:text-blue-500'}`}>
+                <span className={`flex items-center gap-1.5 text-xs ${dark ? 'text-slate-600' : 'text-gray-300'}`}>
                   <MessageSquare className="w-3.5 h-3.5" />
-                  Responder
-                </button>
+                  OSI Fleet
+                </span>
               </div>
             </div>
           ))}
@@ -169,10 +184,68 @@ export default function DispatcherHub() {
       )}
 
       {/* ══════════════════════════════════════════════════ */}
+      {/*  LEADERBOARD                                      */}
+      {/* ══════════════════════════════════════════════════ */}
+      {section === 'leaderboard' && (
+        <div className="space-y-3 fade-in">
+          <div className={`rounded-2xl p-4 shadow-sm ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-100'}`}>
+            <p className={`text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>
+              <Package className="w-3.5 h-3.5" style={{ color: accent }} /> Top Drivers · últimos 30 días
+            </p>
+            {leaderboardLoading ? (
+              <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Cargando...</p>
+            ) : topDrivers.length === 0 ? (
+              <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Sin datos todavía</p>
+            ) : (
+              <div className="space-y-2">
+                {topDrivers.map((d, i) => (
+                  <div key={d.id} className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-900/50' : 'bg-gray-50'}`}>
+                    <span className="w-6 text-center font-bold text-sm" style={{ color: i === 0 ? '#eab308' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : accent }}>#{i + 1}</span>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs text-white flex-shrink-0" style={{ background: accentSoft, color: accent }}>
+                      {d.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-semibold truncate ${dark ? 'text-slate-200' : 'text-gray-800'}`}>{d.name}</p>
+                      <p className={`text-[11px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>★ {d.rating?.toFixed(1) ?? '—'}</p>
+                    </div>
+                    <span className={`text-sm font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>{d.deliveries_30d}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className={`rounded-2xl p-4 shadow-sm ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-100'}`}>
+            <p className={`text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>
+              <DollarSign className="w-3.5 h-3.5" style={{ color: accent }} /> Top Dispatchers · últimos 30 días
+            </p>
+            {leaderboardLoading ? (
+              <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Cargando...</p>
+            ) : topDispatchers.length === 0 ? (
+              <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Sin datos todavía</p>
+            ) : (
+              <div className="space-y-2">
+                {topDispatchers.map((d, i) => (
+                  <div key={d.id} className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-900/50' : 'bg-gray-50'}`}>
+                    <span className="w-6 text-center font-bold text-sm" style={{ color: i === 0 ? '#eab308' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : accent }}>#{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-semibold truncate ${dark ? 'text-slate-200' : 'text-gray-800'}`}>{d.name}</p>
+                      <p className={`text-[11px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{d.loads_30d} cargas</p>
+                    </div>
+                    <span className={`text-sm font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>${d.earned_30d.toFixed(0)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════ */}
       {/*  SUPPORT                                          */}
       {/* ══════════════════════════════════════════════════ */}
       {section === 'support' && (
-        <div className="space-y-3">
+        <div className="space-y-3 fade-in">
 
           {/* OSI Contacts */}
           <div className={`rounded-2xl p-5 shadow-sm ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-100'}`}>
@@ -223,24 +296,26 @@ export default function DispatcherHub() {
             </div>
             <div className="space-y-2">
               {([
-                { icon: BookOpen,      label: 'Manual de Operaciones OSI',      desc: 'Procedimientos y políticas internas' },
-                { icon: AlertTriangle, label: 'Reportar Incidente',             desc: 'Accidentes · Robos · Daños a carga' },
-                { icon: Briefcase,     label: 'Asignación de Loads',            desc: 'Criterios de asignación dispatcher' },
-                { icon: Shield,        label: 'Compliance & Regulatory',        desc: 'DOT · FMCSA · Licencias activas' },
+                { icon: BookOpen,      label: 'Manual de Operaciones OSI',      desc: 'Procedimientos y políticas internas', action: undefined },
+                { icon: AlertTriangle, label: 'Reportar Incidente',             desc: 'Accidentes · Robos · Daños a carga',  action: () => setShowIncidentModal(true) },
+                { icon: Briefcase,     label: 'Asignación de Loads',            desc: 'Criterios de asignación dispatcher',  action: undefined },
+                { icon: Shield,        label: 'Compliance & Regulatory',        desc: 'DOT · FMCSA · Licencias activas',     action: undefined },
               ]).map(r => (
                 <button
                   key={r.label}
-                  className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-colors group ${dark ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}
+                  onClick={r.action}
+                  disabled={!r.action}
+                  className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-colors group ${r.action ? (dark ? 'hover:bg-white/5' : 'hover:bg-gray-50') : 'cursor-default opacity-70'}`}
                   style={{ border: `1px solid ${dark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'}` }}>
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                        style={{ background: dark ? 'rgba(59,130,246,0.12)' : '#eff6ff' }}>
                     <r.icon className="w-4 h-4 text-blue-500" />
                   </div>
                   <div className="flex-1">
-                    <p className={`text-sm font-semibold ${dark ? 'text-slate-200' : 'text-gray-800'} group-hover:text-blue-500 transition-colors`}>{r.label}</p>
+                    <p className={`text-sm font-semibold ${dark ? 'text-slate-200' : 'text-gray-800'} ${r.action ? 'group-hover:text-blue-500' : ''} transition-colors`}>{r.label}</p>
                     <p className={`text-[11px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{r.desc}</p>
                   </div>
-                  <ChevronRight className={`w-4 h-4 flex-shrink-0 ${dark ? 'text-slate-600' : 'text-gray-300'} group-hover:text-blue-400 transition-colors`} />
+                  {r.action && <ChevronRight className={`w-4 h-4 flex-shrink-0 ${dark ? 'text-slate-600' : 'text-gray-300'} group-hover:text-blue-400 transition-colors`} />}
                 </button>
               ))}
             </div>
@@ -267,6 +342,8 @@ export default function DispatcherHub() {
           </div>
         </div>
       )}
+
+      {showIncidentModal && <IncidentReportModal onClose={() => setShowIncidentModal(false)} createIncident={incidentsApi.create} />}
     </div>
   );
 }

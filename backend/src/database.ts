@@ -295,6 +295,46 @@ export async function initDatabase(): Promise<void> {
   // Key-value store for boot-time flags (e.g. demo refresh throttle)
   await exec(`CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
 
+  // Shared company feed -- replaces the two previously-fake, local-state-only
+  // "Comunidad" mock feeds that existed independently in DispatcherHub.tsx and
+  // DriverPortal.tsx (nothing persisted, dispatchers and drivers never saw
+  // each other's posts). is_demo tags which pool a post belongs to, following
+  // the same isDemo(email) convention already used for orders/drivers/tracking.
+  await exec(`CREATE TABLE IF NOT EXISTS community_posts (
+    id         TEXT PRIMARY KEY,
+    author_user_id   TEXT,
+    author_driver_id TEXT,
+    author_name      TEXT NOT NULL,
+    author_role      TEXT NOT NULL,
+    message    TEXT NOT NULL,
+    is_demo    INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+  await exec(`CREATE INDEX IF NOT EXISTS idx_community_posts_demo ON community_posts(is_demo, created_at)`);
+
+  await exec(`CREATE TABLE IF NOT EXISTS community_post_likes (
+    post_id       TEXT NOT NULL,
+    liker_key     TEXT NOT NULL,
+    created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (post_id, liker_key)
+  )`);
+
+  // Incident reports -- wires up what was previously a dead "Reportar Incidente"
+  // button in DispatcherHub.tsx's Support section.
+  await exec(`CREATE TABLE IF NOT EXISTS incident_reports (
+    id             TEXT PRIMARY KEY,
+    reporter_user_id   TEXT,
+    reporter_driver_id TEXT,
+    reporter_name      TEXT NOT NULL,
+    reporter_role      TEXT NOT NULL,
+    order_number   TEXT NOT NULL DEFAULT '',
+    category       TEXT NOT NULL,
+    description    TEXT NOT NULL,
+    status         TEXT NOT NULL DEFAULT 'open',
+    is_demo        INTEGER NOT NULL DEFAULT 0,
+    created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+
   // Assign dispatcher_code to existing dispatchers that don't have one
   const genCode = async (): Promise<string> => {
     const code = String(Math.floor(10000000 + Math.random() * 90000000));

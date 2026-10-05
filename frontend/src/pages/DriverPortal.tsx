@@ -6,7 +6,7 @@ import {
   Clock, Star, Navigation, LogOut, User, Activity,
   Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet, Building2, CreditCard,
   Lock, ShieldCheck, Send, Bell, BellOff, CheckCheck, Award, Edit3, Zap,
-  Headphones, Radio, Users, PhoneCall, MessageSquare, Heart,
+  Headphones, Radio, Users, PhoneCall, MessageSquare, Heart, Trophy, DollarSign,
   FileText, Upload, Calendar, AlertCircle, Mail
 } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
@@ -16,8 +16,9 @@ import { setAppManifest, setThemeColor, DRIVER_MANIFEST, DISPATCH_MANIFEST, DRIV
 import { formatLocation } from '../utils/location';
 import { useDriverAuth } from '../context/DriverAuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { ordersApi, driversApi, billingApi, notificationsApi, userApi, driverAxios } from '../services/driverApi';
+import { ordersApi, driversApi, billingApi, notificationsApi, userApi, driverAxios, communityApi, analyticsApi, incidentsApi } from '../services/driverApi';
 import { StripeCardPayment } from '../components/StripeCardPayment';
+import { IncidentReportModal } from '../components/IncidentReportModal';
 import { Order, Driver, DriverStatus, OrderDocument, ORDER_DOCUMENT_TYPE_LABELS } from '../types';
 import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -623,13 +624,53 @@ export default function DriverPortal() {
   const [playingMsgId, setPlayingMsgId] = useState<string | null>(null);
   const radioAudioRef = useRef<HTMLAudioElement | null>(null);
   const radioScrollRef = { current: null as HTMLDivElement | null };
-  const [communityPosts, setCommunityPosts] = useState([
-    { id:'cp1', avatar:'CM', name:'Carlos Mendez', time:'2h', msg:'Acabo de completar mi entrega #100 con OSI! 🎉 Gracias a todo el equipo dispatch. #OSILogistics', likes:7, liked:false },
-    { id:'cp2', avatar:'JW', name:'James Wilson', time:'4h', msg:'Best dispatch team in South Florida! Running smooth today 🚛💨', likes:4, liked:false },
-    { id:'cp3', avatar:'AR', name:'Ana Rodriguez', time:'5h', msg:'Tip pro: chequea siempre el dock antes de llegar. Ahorras tiempo y mueves más cargas 💡', likes:12, liked:false },
-  ]);
+  interface CommunityPost {
+    id: string; author_name: string; author_role: string; message: string;
+    created_at: string; likes_count: number; liked: boolean;
+  }
+  const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
+  const [communityLoading, setCommunityLoading] = useState(true);
+  const [posting, setPosting] = useState(false);
   const [postText, setPostText] = useState('');
-  const [hubSection, setHubSection] = useState<'community'|'support'|'radio'>('community');
+  const [hubSection, setHubSection] = useState<'community'|'leaderboard'|'support'|'radio'>('community');
+  const [showIncidentModal, setShowIncidentModal] = useState(false);
+
+  const loadCommunityPosts = useCallback(() => {
+    communityApi.getPosts().then(r => setCommunityPosts(r.data)).catch(() => {}).finally(() => setCommunityLoading(false));
+  }, []);
+  useEffect(() => { loadCommunityPosts(); }, [loadCommunityPosts]);
+
+  const publishCommunityPost = async () => {
+    if (!postText.trim() || posting) return;
+    setPosting(true);
+    try {
+      const { data } = await communityApi.createPost(postText.trim());
+      setCommunityPosts(prev => [data, ...prev]);
+      setPostText('');
+    } catch {
+      alert('No se pudo publicar. Intenta de nuevo.');
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  const toggleCommunityLike = async (id: string) => {
+    setCommunityPosts(prev => prev.map(p => p.id === id ? { ...p, liked: !p.liked, likes_count: p.liked ? p.likes_count - 1 : p.likes_count + 1 } : p));
+    try { await communityApi.toggleLike(id); } catch { loadCommunityPosts(); }
+  };
+
+  interface LeaderDriver { id: string; name: string; rating: number; deliveries_30d: number; }
+  interface LeaderDispatcher { id: string; name: string; loads_30d: number; earned_30d: number; }
+  const [topDrivers, setTopDrivers] = useState<LeaderDriver[]>([]);
+  const [topDispatchers, setTopDispatchers] = useState<LeaderDispatcher[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(true);
+  useEffect(() => {
+    if (hubSection !== 'leaderboard') return;
+    analyticsApi.getLeaderboard()
+      .then(r => { setTopDrivers(r.data.topDrivers || []); setTopDispatchers(r.data.topDispatchers || []); })
+      .catch(() => {})
+      .finally(() => setLeaderboardLoading(false));
+  }, [hubSection]);
 
   useEffect(() => {
     if (driver) {
@@ -3220,9 +3261,10 @@ export default function DriverPortal() {
           {/* Sub-section pill tabs */}
           <div className="flex gap-1.5 px-4 pt-4 pb-3 sticky top-0 z-10 bg-gray-50 dark:bg-slate-900">
             {([
-              { id: 'community' as const, icon: Users,     label: 'Comunidad' },
-              { id: 'support'   as const, icon: PhoneCall, label: 'Support' },
-              { id: 'radio'     as const, icon: Radio,     label: 'OSI Radio' },
+              { id: 'community' as const,   icon: Users,     label: 'Comunidad' },
+              { id: 'leaderboard' as const, icon: Trophy,    label: 'Top' },
+              { id: 'support'   as const,   icon: PhoneCall, label: 'Support' },
+              { id: 'radio'     as const,   icon: Radio,     label: 'OSI Radio' },
             ]).map(s => (
               <button key={s.id} onClick={() => setHubSection(s.id)}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
@@ -3258,23 +3300,10 @@ export default function DriverPortal() {
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-[10px] text-gray-300 dark:text-slate-600">{postText.length}/280</span>
                       <button
-                        onClick={() => {
-                          if (!postText.trim()) return;
-                          const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'D';
-                          setCommunityPosts(prev => [{
-                            id: Date.now().toString(),
-                            avatar: initials,
-                            name: driver?.name || user?.name || 'Driver',
-                            time: 'ahora',
-                            msg: postText.trim(),
-                            likes: 0,
-                            liked: false,
-                          }, ...prev]);
-                          setPostText('');
-                        }}
-                        disabled={!postText.trim()}
+                        onClick={publishCommunityPost}
+                        disabled={!postText.trim() || posting}
                         className="px-4 py-1.5 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-400 active:scale-95 disabled:opacity-40 text-white transition-all">
-                        Publicar
+                        {posting ? 'Publicando...' : 'Publicar'}
                       </button>
                     </div>
                   </div>
@@ -3282,35 +3311,98 @@ export default function DriverPortal() {
               </div>
 
               {/* Posts feed */}
-              {communityPosts.map(post => (
-                <div key={post.id} className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 shadow-sm">
+              {communityLoading ? (
+                <div className="text-center py-10 text-sm text-gray-400 dark:text-slate-500">Cargando...</div>
+              ) : communityPosts.length === 0 ? (
+                <div className="text-center py-10 fade-in">
+                  <Users className="w-10 h-10 text-gray-200 dark:text-slate-600 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400 dark:text-slate-500">Nadie ha publicado todavía. ¡Sé el primero!</p>
+                </div>
+              ) : communityPosts.map(post => (
+                <div key={post.id} className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 shadow-sm fade-in">
                   <div className="flex items-start gap-3 mb-3">
                     <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-sm bg-gradient-to-br from-blue-500 to-blue-700 text-white">
-                      {post.avatar}
+                      {post.author_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{post.name}</p>
-                      <p className="text-[11px] text-gray-400 dark:text-slate-500">{post.time} · OSI Fleet</p>
+                      <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{post.author_name}</p>
+                      <p className="text-[11px] text-gray-400 dark:text-slate-500">{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })} · OSI Fleet</p>
                     </div>
-                    <span className="text-[10px] font-bold text-orange-400 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded-full flex-shrink-0">OSI</span>
+                    <span className="text-[10px] font-bold text-orange-400 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded-full flex-shrink-0 capitalize">
+                      {post.author_role === 'driver' ? 'Driver' : post.author_role === 'admin' ? 'Admin' : 'Dispatcher'}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-700 dark:text-slate-300 leading-relaxed mb-3">{post.msg}</p>
+                  <p className="text-sm text-gray-700 dark:text-slate-300 leading-relaxed mb-3">{post.message}</p>
                   <div className="flex items-center gap-4 pt-2.5 border-t border-gray-50 dark:border-slate-700/60">
                     <button
-                      onClick={() => setCommunityPosts(prev => prev.map(p =>
-                        p.id === post.id ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 } : p
-                      ))}
+                      onClick={() => toggleCommunityLike(post.id)}
                       className={`flex items-center gap-1.5 text-xs font-semibold transition-colors ${post.liked ? 'text-red-500' : 'text-gray-400 dark:text-slate-500 hover:text-red-400'}`}>
                       <Heart className="w-3.5 h-3.5" style={{ fill: post.liked ? 'currentColor' : 'none' }} />
-                      {post.likes}
+                      {post.likes_count}
                     </button>
-                    <button className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-slate-500 hover:text-blue-400 transition-colors">
+                    <span className="flex items-center gap-1.5 text-xs text-gray-300 dark:text-slate-600">
                       <MessageSquare className="w-3.5 h-3.5" />
-                      Responder
-                    </button>
+                      OSI Fleet
+                    </span>
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* ── LEADERBOARD ────────────────────────────── */}
+          {hubSection === 'leaderboard' && (
+            <div className="px-4 pb-5 space-y-3 fade-in">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 shadow-sm">
+                <p className="text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2 text-gray-500 dark:text-slate-400">
+                  <Package className="w-3.5 h-3.5 text-orange-500" /> Top Drivers · últimos 30 días
+                </p>
+                {leaderboardLoading ? (
+                  <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Cargando...</p>
+                ) : topDrivers.length === 0 ? (
+                  <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Sin datos todavía</p>
+                ) : (
+                  <div className="space-y-2">
+                    {topDrivers.map((d, i) => (
+                      <div key={d.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 dark:bg-slate-900/50">
+                        <span className="w-6 text-center font-bold text-sm" style={{ color: i === 0 ? '#eab308' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : '#f97316' }}>#{i + 1}</span>
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs text-orange-600 bg-orange-50 dark:bg-orange-500/10 flex-shrink-0">
+                          {d.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold truncate text-gray-800 dark:text-slate-200">{d.name}{d.id === driver?.id ? ' (tú)' : ''}</p>
+                          <p className="text-[11px] text-gray-400 dark:text-slate-500">★ {d.rating?.toFixed(1) ?? '—'}</p>
+                        </div>
+                        <span className="text-sm font-bold text-gray-900 dark:text-white">{d.deliveries_30d}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 shadow-sm">
+                <p className="text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2 text-gray-500 dark:text-slate-400">
+                  <DollarSign className="w-3.5 h-3.5 text-orange-500" /> Top Dispatchers · últimos 30 días
+                </p>
+                {leaderboardLoading ? (
+                  <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Cargando...</p>
+                ) : topDispatchers.length === 0 ? (
+                  <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Sin datos todavía</p>
+                ) : (
+                  <div className="space-y-2">
+                    {topDispatchers.map((d, i) => (
+                      <div key={d.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 dark:bg-slate-900/50">
+                        <span className="w-6 text-center font-bold text-sm" style={{ color: i === 0 ? '#eab308' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : '#f97316' }}>#{i + 1}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold truncate text-gray-800 dark:text-slate-200">{d.name}</p>
+                          <p className="text-[11px] text-gray-400 dark:text-slate-500">{d.loads_30d} cargas</p>
+                        </div>
+                        <span className="text-sm font-bold text-gray-900 dark:text-white">${d.earned_30d.toFixed(0)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -3383,12 +3475,12 @@ export default function DriverPortal() {
                 <p className="text-[11px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-3">Recursos</p>
                 <div className="space-y-2">
                   {([
-                    { label: 'Manual del Driver OSI',   icon: '📋', desc: 'Procedimientos y políticas' },
-                    { label: 'Reportar Incidente',       icon: '⚠️', desc: 'Accidentes · Robos · Daños a carga' },
-                    { label: 'Solicitar Ajuste de Rate', icon: '💰', desc: 'Negociar compensación de carga' },
+                    { label: 'Manual del Driver OSI',   icon: '📋', desc: 'Procedimientos y políticas', action: undefined },
+                    { label: 'Reportar Incidente',       icon: '⚠️', desc: 'Accidentes · Robos · Daños a carga', action: () => setShowIncidentModal(true) },
+                    { label: 'Solicitar Ajuste de Rate', icon: '💰', desc: 'Negociar compensación de carga', action: undefined },
                   ]).map(r => (
-                    <button key={r.label}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 hover:bg-orange-50 dark:hover:bg-orange-500/8 transition-colors text-left">
+                    <button key={r.label} onClick={r.action} disabled={!r.action}
+                      className={`w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 transition-colors text-left ${r.action ? 'hover:bg-orange-50 dark:hover:bg-orange-500/8' : 'opacity-70 cursor-default'}`}>
                       <span className="text-lg flex-shrink-0">{r.icon}</span>
                       <div>
                         <p className="text-sm font-semibold text-gray-800 dark:text-slate-200">{r.label}</p>
@@ -4045,6 +4137,8 @@ export default function DriverPortal() {
           </div>
         </div>
       )}
+
+      {showIncidentModal && <IncidentReportModal onClose={() => setShowIncidentModal(false)} createIncident={incidentsApi.create} />}
 
       <div id="recaptcha-container" />
     </div>

@@ -57,6 +57,36 @@ router.get('/dashboard', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
+// Top drivers and top dispatchers over the trailing 30 days -- feeds the
+// Hub leaderboard that replaced the fake "Comunidad" feed's lack of any
+// real comparative stats.
+router.get('/leaderboard', async (req: Request, res: Response) => {
+  try {
+    const demo = req.user?.role !== 'admin' && isDemo(req.user?.email);
+    const df = demo ? DEMO_DRIVER_FILTER : REAL_DRIVER_FILTER;
+    const dispatcherEmailFilter = demo ? "u.email LIKE '%@osilogistics.com'" : "u.email NOT LIKE '%@osilogistics.com'";
+    const [topDrivers, topDispatchers] = await Promise.all([
+      query(`
+        SELECT d.id, d.name, d.avatar, d.rating,
+               COUNT(o.id) as deliveries_30d, COALESCE(SUM(o.price),0) as revenue_30d
+        FROM drivers d
+        LEFT JOIN orders o ON o.driver_id = d.id AND o.status = 'delivered' AND o.delivered_at >= date('now', '-30 days')
+        WHERE ${df}
+        GROUP BY d.id ORDER BY deliveries_30d DESC, revenue_30d DESC LIMIT 5
+      `),
+      query(`
+        SELECT u.id, u.name,
+               COUNT(c.id) as loads_30d, COALESCE(SUM(c.dispatcher_pay),0) as earned_30d
+        FROM users u
+        LEFT JOIN commissions c ON c.dispatcher_user_id = u.id AND c.delivery_date >= date('now', '-30 days')
+        WHERE u.role = 'dispatcher' AND ${dispatcherEmailFilter}
+        GROUP BY u.id ORDER BY loads_30d DESC, earned_30d DESC LIMIT 5
+      `),
+    ]);
+    res.json({ topDrivers, topDispatchers });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
 router.get('/reports/orders', async (req: Request, res: Response) => {
   try {
     const { start_date, end_date, group_by = 'day' } = req.query;

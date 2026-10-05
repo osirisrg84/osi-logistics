@@ -66,6 +66,20 @@ export const billingApi = {
   settleAll:  (driverId: string) => api.put(`/billing/driver/${driverId}/settle-all`),
 };
 
+export const analyticsApi = {
+  getLeaderboard: () => api.get('/analytics/leaderboard'),
+};
+
+export const communityApi = {
+  getPosts: () => api.get('/community'),
+  createPost: (message: string) => api.post('/community', { message }),
+  toggleLike: (id: string) => api.post(`/community/${id}/like`),
+};
+
+export const incidentsApi = {
+  create: (data: { category: string; description: string; order_number?: string }) => api.post('/incidents', data),
+};
+
 export const notificationsApi = {
   markRead:         (id: string)         => api.put(`/notifications/${id}/read`),
   getDriverNotifs:  (driverId: string)   => api.get(`/notifications/driver/${driverId}`),

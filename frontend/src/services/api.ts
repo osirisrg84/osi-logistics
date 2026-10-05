@@ -91,6 +91,17 @@ export const analyticsApi = {
   getOrdersReport: (params?: Record<string, unknown>) => api.get('/analytics/reports/orders', { params }),
   getDriversReport: () => api.get('/analytics/reports/drivers'),
   getFleetReport: () => api.get('/analytics/reports/fleet'),
+  getLeaderboard: () => api.get('/analytics/leaderboard'),
+};
+
+export const communityApi = {
+  getPosts: () => api.get('/community'),
+  createPost: (message: string) => api.post('/community', { message }),
+  toggleLike: (id: string) => api.post(`/community/${id}/like`),
+};
+
+export const incidentsApi = {
+  create: (data: { category: string; description: string; order_number?: string }) => api.post('/incidents', data),
 };
 
 export const billingApi = {
