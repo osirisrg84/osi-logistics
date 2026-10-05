@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, ClipboardList, Package, DollarSign, TrendingUp, Clock, X, Mail, CheckCircle, AlertCircle, Phone, Shield, Eye, EyeOff, Edit2, Trash2, Truck, Hash, Zap } from 'lucide-react';
 import type { ReactNode } from 'react';
 import api from '../services/api';
@@ -44,6 +45,7 @@ interface EditModalProps {
 }
 
 function EditModal({ dispatcher, onClose, onSaved }: EditModalProps) {
+  const { t } = useTranslation();
   const [name,     setName]     = useState(dispatcher.name  || '');
   const [email,    setEmail]    = useState(dispatcher.email || '');
   const [phone,    setPhone]    = useState(dispatcher.phone || '');
@@ -71,7 +73,7 @@ function EditModal({ dispatcher, onClose, onSaved }: EditModalProps) {
     <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-slate-700">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Editar dispatcher</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('dispatcherProfiles.editTitle')}</h3>
           <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
             <X className="w-4 h-4 text-gray-500" />
           </button>
@@ -80,19 +82,19 @@ function EditModal({ dispatcher, onClose, onSaved }: EditModalProps) {
 
           {/* Name */}
           <div>
-            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block">Nombre</label>
-            <input className="input w-full" placeholder="Nombre completo" value={name} onChange={e => setName(e.target.value)} />
+            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block">{t('dispatcherProfiles.name')}</label>
+            <input className="input w-full" placeholder={t('dispatcherProfiles.fullName')} value={name} onChange={e => setName(e.target.value)} />
           </div>
 
           {/* Email */}
           <div>
-            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block">Email</label>
+            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block">{t('dispatcherProfiles.email')}</label>
             <input className="input w-full" type="email" placeholder="email@osilogistics.com" value={email} onChange={e => setEmail(e.target.value)} />
           </div>
 
           {/* Phone */}
           <div>
-            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block">Teléfono</label>
+            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block">{t('dispatcherProfiles.phone')}</label>
             <input className="input w-full" placeholder="(305) 555-0000" value={phone} onChange={e => setPhone(e.target.value)} />
           </div>
 
@@ -102,12 +104,12 @@ function EditModal({ dispatcher, onClose, onSaved }: EditModalProps) {
               <Shield className="w-3 h-3" /> SSN
             </label>
             <input className="input w-full font-mono" placeholder="XXX-XX-XXXX" value={ssn} onChange={e => setSSN(e.target.value)} />
-            <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">Confidencial — solo visible para admins</p>
+            <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">{t('dispatcherProfiles.ssnConfidential')}</p>
           </div>
 
           {/* Password */}
           <div>
-            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block">Nueva contraseña <span className="text-gray-400 font-normal">(dejar vacío para no cambiar)</span></label>
+            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block">{t('dispatcherProfiles.newPassword')} <span className="text-gray-400 font-normal">{t('dispatcherProfiles.leaveBlank')}</span></label>
             <div className="relative">
               <input
                 className="input w-full pr-9"
@@ -124,7 +126,7 @@ function EditModal({ dispatcher, onClose, onSaved }: EditModalProps) {
 
           {/* Active toggle */}
           <div className="flex items-center justify-between py-1">
-            <span className="text-xs font-medium text-gray-600 dark:text-slate-400">Estado de cuenta</span>
+            <span className="text-xs font-medium text-gray-600 dark:text-slate-400">{t('dispatcherProfiles.accountStatus')}</span>
             <button
               type="button"
               onClick={() => setActive(!active)}
@@ -136,9 +138,9 @@ function EditModal({ dispatcher, onClose, onSaved }: EditModalProps) {
 
           {/* Actions */}
           <div className="flex gap-2 pt-1">
-            <button onClick={onClose} className="btn-secondary flex-1 text-sm">Cancelar</button>
+            <button onClick={onClose} className="btn-secondary flex-1 text-sm">{t('dispatcherProfiles.cancel')}</button>
             <button onClick={handleSave} disabled={saving} className="btn-primary flex-1 text-sm">
-              {saving ? 'Guardando...' : 'Guardar'}
+              {saving ? t('dispatcherProfiles.saving') : t('dispatcherProfiles.save')}
             </button>
           </div>
         </div>
@@ -170,6 +172,7 @@ function SectionLabel({ children }: { children: ReactNode }) {
 }
 
 function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
+  const { t } = useTranslation();
   const [showSSN, setShowSSN] = useState(false);
   const initials = dispatcher.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
   const pct = dispatcher.total_earned > 0 ? Math.round((dispatcher.settled / dispatcher.total_earned) * 100) : 0;
@@ -181,7 +184,7 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
 
         {/* ── Title bar ── */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Perfil del Dispatcher</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">{t('dispatcherProfiles.profileTitle')}</h2>
           <button onClick={onClose}><X className="w-5 h-5 text-gray-500 dark:text-slate-400" /></button>
         </div>
 
@@ -200,7 +203,7 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
                     : 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400'
                 }`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${dispatcher.active ? 'bg-green-500' : 'bg-gray-400'}`} />
-                  {dispatcher.active ? 'Activo' : 'Inactivo'}
+                  {dispatcher.active ? t('dispatcherProfiles.active') : t('dispatcherProfiles.inactive')}
                 </span>
                 <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
                   dispatcher.shift_active
@@ -208,7 +211,7 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
                     : 'bg-gray-100 text-gray-400 dark:bg-slate-700 dark:text-slate-500'
                 }`}>
                   <Zap className="w-2.5 h-2.5" />
-                  {dispatcher.shift_active ? 'En turno' : 'Libre'}
+                  {dispatcher.shift_active ? t('dispatcherProfiles.onShift') : t('dispatcherProfiles.free')}
                 </span>
                 {dispatcher.dispatcher_code && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/20 px-2 py-0.5 rounded-full tracking-widest">
@@ -216,10 +219,10 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">Miembro desde {format(new Date(dispatcher.created_at), 'MMM d, yyyy')}</p>
+              <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{t('dispatcherProfiles.memberSince', { date: format(new Date(dispatcher.created_at), 'MMM d, yyyy') })}</p>
               {dispatcher.shift_changed_at && (
                 <p className="text-xs text-gray-400 dark:text-slate-500">
-                  {dispatcher.shift_active ? 'En turno' : 'Libre'} desde {formatDistanceToNow(new Date(dispatcher.shift_changed_at), { addSuffix: true })}
+                  {t('dispatcherProfiles.sinceTime', { status: dispatcher.shift_active ? t('dispatcherProfiles.onShift') : t('dispatcherProfiles.free'), time: formatDistanceToNow(new Date(dispatcher.shift_changed_at), { addSuffix: true }) })}
                 </p>
               )}
             </div>
@@ -229,15 +232,15 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3 text-center">
               <p className="text-2xl font-bold text-orange-600">{dispatcher.total_orders}</p>
-              <p className="text-xs text-gray-500 dark:text-slate-400 flex items-center justify-center gap-1"><Package className="w-3 h-3" /> Órdenes</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400 flex items-center justify-center gap-1"><Package className="w-3 h-3" /> {t('dispatcherProfiles.orders')}</p>
             </div>
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 text-center">
               <p className="text-2xl font-bold text-blue-600">{dispatcher.active_orders}</p>
-              <p className="text-xs text-gray-500 dark:text-slate-400">Activas</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">{t('dispatcherProfiles.activeOrders')}</p>
             </div>
             <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 text-center">
               <p className="text-xl font-bold text-green-600">${dispatcher.total_earned.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
-              <p className="text-xs text-gray-500 dark:text-slate-400">Ganado</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">{t('dispatcherProfiles.earned')}</p>
             </div>
           </div>
 
@@ -251,7 +254,7 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
             ) : (
               <div className="flex items-center gap-3 bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
                 <Phone className="w-4 h-4 text-gray-300 dark:text-slate-600" />
-                <button onClick={onEdit} className="text-sm text-orange-500 hover:text-orange-600 font-medium">+ Agregar teléfono</button>
+                <button onClick={onEdit} className="text-sm text-orange-500 hover:text-orange-600 font-medium">{t('dispatcherProfiles.addPhone')}</button>
               </div>
             )}
             <a href={`mailto:${dispatcher.email}`} className="flex items-center gap-3 bg-gray-50 dark:bg-slate-900 rounded-xl p-3 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
@@ -263,40 +266,40 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
           {/* ── Personal / Professional info ── */}
           {(dispatcher.date_of_birth || dispatcher.city || dispatcher.years_experience > 0 || dispatcher.availability || dispatcher.languages || dispatcher.previous_companies) && (
             <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4 space-y-2.5">
-              <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1">Professional Info</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1">{t('dispatcherProfiles.professionalInfo')}</p>
               {dispatcher.years_experience > 0 && (
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-400 dark:text-slate-500">Años de experiencia</span>
-                  <span className="font-bold text-orange-500">{dispatcher.years_experience} {dispatcher.years_experience === 1 ? 'año' : 'años'}</span>
+                  <span className="text-gray-400 dark:text-slate-500">{t('dispatcherProfiles.yearsExperience')}</span>
+                  <span className="font-bold text-orange-500">{dispatcher.years_experience} {dispatcher.years_experience === 1 ? t('dispatcherProfiles.yearSingular') : t('dispatcherProfiles.yearPlural')}</span>
                 </div>
               )}
               {dispatcher.previous_companies && (
                 <div className="flex justify-between items-start text-sm gap-4">
-                  <span className="text-gray-400 dark:text-slate-500 flex-shrink-0">Empresas anteriores</span>
+                  <span className="text-gray-400 dark:text-slate-500 flex-shrink-0">{t('dispatcherProfiles.previousCompanies')}</span>
                   <span className="font-medium text-gray-800 dark:text-slate-200 text-right">{dispatcher.previous_companies}</span>
                 </div>
               )}
               {dispatcher.languages && (
                 <div className="flex justify-between items-start text-sm gap-4">
-                  <span className="text-gray-400 dark:text-slate-500 flex-shrink-0">Idiomas</span>
+                  <span className="text-gray-400 dark:text-slate-500 flex-shrink-0">{t('dispatcherProfiles.languages')}</span>
                   <span className="font-medium text-gray-800 dark:text-slate-200 text-right">{dispatcher.languages}</span>
                 </div>
               )}
               {dispatcher.availability && (
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-400 dark:text-slate-500">Disponibilidad</span>
+                  <span className="text-gray-400 dark:text-slate-500">{t('dispatcherProfiles.availability')}</span>
                   <span className="font-medium text-gray-800 dark:text-slate-200 capitalize">{dispatcher.availability.replace('-', ' ')}</span>
                 </div>
               )}
               {dispatcher.date_of_birth && (
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-400 dark:text-slate-500">Fecha de nacimiento</span>
+                  <span className="text-gray-400 dark:text-slate-500">{t('dispatcherProfiles.dob')}</span>
                   <span className="font-medium text-gray-800 dark:text-slate-200">{format(new Date(dispatcher.date_of_birth), 'MMM d, yyyy')}</span>
                 </div>
               )}
               {dispatcher.city && (
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-400 dark:text-slate-500">Ciudad</span>
+                  <span className="text-gray-400 dark:text-slate-500">{t('dispatcherProfiles.city')}</span>
                   <span className="font-medium text-gray-800 dark:text-slate-200">{dispatcher.city}</span>
                 </div>
               )}
@@ -305,11 +308,11 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
 
           {/* ── Commissions ── */}
           <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4 space-y-3">
-            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Comisiones · 4% por carga</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">{t('dispatcherProfiles.commissionsTitle')}</p>
             {[
-              { label: 'Total generado', value: `$${dispatcher.total_earned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, cls: 'font-bold text-gray-900 dark:text-white' },
-              { label: 'Liquidado',      value: `$${dispatcher.settled.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,      cls: 'font-semibold text-green-600 dark:text-green-400' },
-              { label: 'Pendiente',      value: `$${dispatcher.pending.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,      cls: 'font-semibold text-yellow-600 dark:text-yellow-400' },
+              { label: t('dispatcherProfiles.totalGenerated'), value: `$${dispatcher.total_earned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, cls: 'font-bold text-gray-900 dark:text-white' },
+              { label: t('dispatcherProfiles.settled'),        value: `$${dispatcher.settled.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,      cls: 'font-semibold text-green-600 dark:text-green-400' },
+              { label: t('dispatcherProfiles.pending'),        value: `$${dispatcher.pending.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,      cls: 'font-semibold text-yellow-600 dark:text-yellow-400' },
             ].map(r => (
               <div key={r.label} className="flex justify-between items-center text-sm">
                 <span className="text-gray-500 dark:text-slate-400">{r.label}</span>
@@ -319,7 +322,7 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
             {dispatcher.total_earned > 0 && (
               <div className="pt-1">
                 <div className="flex justify-between text-[10px] text-gray-400 dark:text-slate-500 mb-1.5">
-                  <span>Progreso de liquidación</span><span className="font-semibold">{pct}%</span>
+                  <span>{t('dispatcherProfiles.settlementProgress')}</span><span className="font-semibold">{pct}%</span>
                 </div>
                 <div className="h-1.5 bg-gray-200 dark:bg-slate-600 rounded-full overflow-hidden">
                   <div className="h-full bg-green-500 rounded-full" style={{ width: `${pct}%` }} />
@@ -331,7 +334,7 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
           {/* ── Tax / SSN ── */}
           <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4">
             <p className="text-xs font-semibold text-purple-700 dark:text-purple-400 flex items-center gap-2 mb-3">
-              <Shield className="w-3 h-3" /> INFORMACIÓN FISCAL · 1099
+              <Shield className="w-3 h-3" /> {t('dispatcherProfiles.taxInfo')}
             </p>
             {dispatcher.ssn ? (
               <div className="flex items-center justify-between">
@@ -344,14 +347,14 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
                 </div>
               </div>
             ) : (
-              <button onClick={onEdit} className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 font-medium">+ Agregar SSN</button>
+              <button onClick={onEdit} className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 font-medium">{t('dispatcherProfiles.addSsn')}</button>
             )}
           </div>
 
           {/* ── Equipment experience ── */}
           {eqList.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-3">Experiencia en loads</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-3">{t('dispatcherProfiles.loadExperience')}</p>
               <div className="flex flex-wrap gap-2">
                 {eqList.map(eq => (
                   <span key={eq} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold ${EQ_COLORS[eq] || 'bg-gray-100 text-gray-700'}`}>
@@ -368,6 +371,7 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
 }
 
 export default function DispatcherProfiles() {
+  const { t } = useTranslation();
   const [dispatchers, setDispatchers] = useState<DispatcherProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -392,7 +396,7 @@ export default function DispatcherProfiles() {
   }, []);
 
   async function handleDelete(d: DispatcherProfile) {
-    if (!confirm(`¿Eliminar a ${d.name}? Esta acción no se puede deshacer.`)) return;
+    if (!confirm(t('dispatcherProfiles.deleteConfirm', { name: d.name }))) return;
     try {
       await api.delete(`/admin/users/${d.id}`);
       setDispatchers(prev => prev.filter(x => x.id !== d.id));
@@ -402,14 +406,14 @@ export default function DispatcherProfiles() {
 
   const [payingOut, setPayingOut] = useState<string | null>(null);
   async function handlePayDispatcher(d: DispatcherProfile) {
-    if (!confirm(`¿Confirmas que ya le pagaste a ${d.name} sus $${d.pending.toFixed(2)} pendientes?`)) return;
+    if (!confirm(t('dispatcherProfiles.payConfirm', { name: d.name, amount: `$${d.pending.toFixed(2)}` }))) return;
     setPayingOut(d.id);
     try {
       await api.put(`/billing/dispatcher/${d.id}/settle-all`);
       setDispatchers(prev => prev.map(x => x.id === d.id ? { ...x, settled: x.settled + x.pending, pending: 0 } : x));
       setSelected(prev => prev?.id === d.id ? { ...prev, settled: prev.settled + prev.pending, pending: 0 } : prev);
     } catch {
-      alert('No se pudo registrar el pago. Intenta de nuevo.');
+      alert(t('dispatcherProfiles.payError'));
     } finally {
       setPayingOut(null);
     }
@@ -434,11 +438,11 @@ export default function DispatcherProfiles() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { label: 'Dispatchers', value: dispatchers.length, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/20' },
-          { label: 'En turno ahora', value: onShiftCount, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
-          { label: 'Órdenes gestionadas', value: totalOrders, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-          { label: 'Comisiones totales', value: `$${totalEarned.toFixed(2)}`, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
-          { label: 'Pendiente por pagar', value: `$${totalPending.toFixed(2)}`, color: 'text-yellow-600', bg: 'bg-yellow-50 dark:bg-yellow-900/20' },
+          { label: t('dispatcherProfiles.statDispatchers'), value: dispatchers.length, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/20' },
+          { label: t('dispatcherProfiles.statOnShiftNow'), value: onShiftCount, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
+          { label: t('dispatcherProfiles.statOrdersManaged'), value: totalOrders, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+          { label: t('dispatcherProfiles.statTotalCommissions'), value: `$${totalEarned.toFixed(2)}`, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
+          { label: t('dispatcherProfiles.statPendingPayout'), value: `$${totalPending.toFixed(2)}`, color: 'text-yellow-600', bg: 'bg-yellow-50 dark:bg-yellow-900/20' },
         ].map(s => (
           <div key={s.label} className={`card ${s.bg} p-4`}>
             <p className="text-xs text-gray-500 dark:text-slate-400">{s.label}</p>
@@ -451,16 +455,16 @@ export default function DispatcherProfiles() {
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-xs">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
-          <input className="input pl-9 w-full" placeholder="Buscar dispatcher..." value={search} onChange={e => setSearch(e.target.value)} />
+          <input className="input pl-9 w-full" placeholder={t('dispatcherProfiles.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
         </div>
-        <p className="text-xs text-gray-500 dark:text-slate-400">{filtered.length} dispatcher{filtered.length !== 1 ? 's' : ''}</p>
+        <p className="text-xs text-gray-500 dark:text-slate-400">{t('dispatcherProfiles.countSuffix', { count: filtered.length })}</p>
       </div>
 
       {/* Cards */}
       {loading ? (
-        <div className="text-center py-16 text-gray-400 dark:text-slate-500">Cargando...</div>
+        <div className="text-center py-16 text-gray-400 dark:text-slate-500">{t('dispatcherProfiles.loading')}</div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 text-gray-400 dark:text-slate-500">No se encontraron dispatchers</div>
+        <div className="text-center py-16 text-gray-400 dark:text-slate-500">{t('dispatcherProfiles.noneFound')}</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map(d => {
@@ -479,13 +483,13 @@ export default function DispatcherProfiles() {
                         d.active ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400'
                       }`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${d.active ? 'bg-green-500' : 'bg-gray-400'}`} />
-                        {d.active ? 'Activo' : 'Inactivo'}
+                        {d.active ? t('dispatcherProfiles.active') : t('dispatcherProfiles.inactive')}
                       </span>
                       <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                         d.shift_active ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-400 dark:bg-slate-700 dark:text-slate-500'
-                      }`} title={d.shift_changed_at ? `Desde ${formatDistanceToNow(new Date(d.shift_changed_at), { addSuffix: true })}` : undefined}>
+                      }`} title={d.shift_changed_at ? t('dispatcherProfiles.sinceLabel', { time: formatDistanceToNow(new Date(d.shift_changed_at), { addSuffix: true }) }) : undefined}>
                         <Zap className="w-2.5 h-2.5" />
-                        {d.shift_active ? 'En turno' : 'Libre'}
+                        {d.shift_active ? t('dispatcherProfiles.onShift') : t('dispatcherProfiles.free')}
                       </span>
                       {d.dispatcher_code && (
                         <span className="text-[10px] font-bold text-orange-500 tracking-widest">{d.dispatcher_code}</span>
@@ -509,7 +513,7 @@ export default function DispatcherProfiles() {
                 <div className="space-y-1.5 text-xs mb-3">
                   <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
                     <Phone className="w-3 h-3 text-gray-400 dark:text-slate-500 flex-shrink-0" />
-                    <span>{d.phone || <span className="italic text-gray-300 dark:text-slate-600">Sin teléfono</span>}</span>
+                    <span>{d.phone || <span className="italic text-gray-300 dark:text-slate-600">{t('dispatcherProfiles.noPhone')}</span>}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
                     <Mail className="w-3 h-3 text-gray-400 dark:text-slate-500 flex-shrink-0" />
@@ -518,7 +522,7 @@ export default function DispatcherProfiles() {
                   <div className="flex items-center gap-2">
                     <Shield className="w-3 h-3 text-gray-400 dark:text-slate-500 flex-shrink-0" />
                     <span className={`text-xs font-medium ${d.ssn ? 'text-green-600 dark:text-green-400' : 'italic text-gray-300 dark:text-slate-600'}`}>
-                      {d.ssn ? 'SSN registrado' : 'Sin SSN'}
+                      {d.ssn ? t('dispatcherProfiles.ssnOnFile') : t('dispatcherProfiles.noSsn')}
                     </span>
                   </div>
                 </div>
@@ -527,15 +531,15 @@ export default function DispatcherProfiles() {
                 <div className="grid grid-cols-3 gap-2 mb-3">
                   <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-2 text-center">
                     <p className="text-base font-bold text-orange-600">{d.total_orders}</p>
-                    <p className="text-[10px] text-gray-400 dark:text-slate-500">Órdenes</p>
+                    <p className="text-[10px] text-gray-400 dark:text-slate-500">{t('dispatcherProfiles.orders')}</p>
                   </div>
                   <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-2 text-center">
                     <p className="text-base font-bold text-blue-600">{d.active_orders}</p>
-                    <p className="text-[10px] text-gray-400 dark:text-slate-500">Activas</p>
+                    <p className="text-[10px] text-gray-400 dark:text-slate-500">{t('dispatcherProfiles.activeOrders')}</p>
                   </div>
                   <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-2 text-center">
                     <p className="text-base font-bold text-green-600">${d.total_earned.toFixed(0)}</p>
-                    <p className="text-[10px] text-gray-400 dark:text-slate-500">Ganado</p>
+                    <p className="text-[10px] text-gray-400 dark:text-slate-500">{t('dispatcherProfiles.earned')}</p>
                   </div>
                 </div>
 
@@ -543,7 +547,7 @@ export default function DispatcherProfiles() {
                 {d.total_earned > 0 && (
                   <div>
                     <div className="flex items-center justify-between text-[10px] text-gray-400 dark:text-slate-500 mb-1">
-                      <span className="flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Comisiones liquidadas</span>
+                      <span className="flex items-center gap-1"><TrendingUp className="w-3 h-3" /> {t('dispatcherProfiles.settledCommissions')}</span>
                       <span>{Math.round((d.settled / d.total_earned) * 100)}%</span>
                     </div>
                     <div className="h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -551,13 +555,13 @@ export default function DispatcherProfiles() {
                     </div>
                     {d.pending > 0 && (
                       <div className="flex items-center justify-between mt-1">
-                        <p className="text-[10px] text-yellow-600">${d.pending.toFixed(2)} pendiente</p>
+                        <p className="text-[10px] text-yellow-600">{t('dispatcherProfiles.pendingSuffix', { amount: `$${d.pending.toFixed(2)}` })}</p>
                         <button
                           onClick={(e) => { e.stopPropagation(); handlePayDispatcher(d); }}
                           disabled={payingOut === d.id}
                           className="text-[10px] font-semibold text-green-600 hover:text-green-700 disabled:opacity-50"
                         >
-                          {payingOut === d.id ? 'Guardando...' : 'Marcar pagado'}
+                          {payingOut === d.id ? t('dispatcherProfiles.saving') : t('dispatcherProfiles.markPaid')}
                         </button>
                       </div>
                     )}
@@ -577,7 +581,7 @@ export default function DispatcherProfiles() {
 
                 <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-3">
                   <ClipboardList className="w-3 h-3 inline mr-1" />
-                  Miembro desde {format(new Date(d.created_at), 'MMM yyyy')}
+                  {t('dispatcherProfiles.sinceMonth', { date: format(new Date(d.created_at), 'MMM yyyy') })}
                 </p>
               </div>
             );
