@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Search, Edit2, Trash2, X, Shield, UserCheck, Truck, AlertTriangle, Clock, CheckCircle, XCircle, Mail } from 'lucide-react';
 import api from '../services/api';
 import { format } from 'date-fns';
@@ -169,6 +170,7 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
 }
 
 export default function UsersManagement() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [pending, setPending] = useState<PendingUser[]>([]);
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -200,7 +202,7 @@ export default function UsersManagement() {
     try {
       const res = await api.put(`/admin/users/${id}/approve`);
       if (!res.data.emailSent) {
-        alert('✅ Cuenta aprobada.\n\n⚠️ El email de activación no se pudo enviar (SMTP no configurado en Render). Usa el botón "Reenviar email" cuando lo configures.');
+        alert(`✅ ${t('usersMgmt.approveSuccess')}\n\n⚠️ ${t('usersMgmt.approveEmailWarning')}`);
       }
       fetchData();
     } finally {
@@ -212,17 +214,17 @@ export default function UsersManagement() {
     setActionLoading(id + '_email');
     try {
       await api.post(`/admin/users/${id}/resend-activation`);
-      alert(`✅ Email de activación reenviado a ${name}`);
+      alert(`✅ ${t('usersMgmt.resendSuccess', { name })}`);
     } catch (e: unknown) {
       const err = e as { response?: { data?: { error?: string } } };
-      alert(`❌ ${err?.response?.data?.error || 'Error al enviar el email'}`);
+      alert(`❌ ${err?.response?.data?.error || t('usersMgmt.resendError')}`);
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleReject = async (id: string) => {
-    if (!confirm('¿Rechazar esta solicitud de cuenta?')) return;
+    if (!confirm(t('usersMgmt.rejectConfirm'))) return;
     setActionLoading(id + '_reject');
     try {
       await api.put(`/admin/users/${id}/reject`);
@@ -235,12 +237,12 @@ export default function UsersManagement() {
   useEffect(() => { fetchData(); }, []);
 
   const handleDelete = async (user: User) => {
-    if (!confirm(`Delete ${user.name}? This action cannot be undone.`)) return;
+    if (!confirm(t('usersMgmt.deleteConfirm', { name: user.name }))) return;
     try {
       await api.delete(`/admin/users/${user.id}`);
       fetchData();
     } catch (err: unknown) {
-      alert((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Cannot delete user');
+      alert((err as { response?: { data?: { error?: string } } })?.response?.data?.error || t('usersMgmt.cannotDeleteUser'));
     }
   };
 
@@ -266,8 +268,8 @@ export default function UsersManagement() {
               <Clock className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-amber-800 dark:text-amber-300">Cuentas Pendientes de Aprobación</h3>
-              <p className="text-xs text-amber-600 dark:text-amber-400">{pending.length} solicitud{pending.length !== 1 ? 'es' : ''} esperando revisión</p>
+              <h3 className="text-sm font-bold text-amber-800 dark:text-amber-300">{t('usersMgmt.pendingApprovals')}</h3>
+              <p className="text-xs text-amber-600 dark:text-amber-400">{t('usersMgmt.pendingCount', { count: pending.length })}</p>
             </div>
           </div>
           <div className="divide-y divide-amber-100 dark:divide-amber-800/30">
@@ -285,12 +287,12 @@ export default function UsersManagement() {
                   </div>
                   <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{u.email} {u.phone && `· ${u.phone}`} {u.city && `· ${u.city}`}</p>
                   {u.role === 'dispatcher' && u.years_experience > 0 && (
-                    <p className="text-xs text-gray-400 dark:text-slate-500">{u.years_experience} años exp. · {u.availability} {u.languages && `· ${u.languages}`}</p>
+                    <p className="text-xs text-gray-400 dark:text-slate-500">{u.years_experience} {t('usersMgmt.yearsExpSuffix')} · {u.availability} {u.languages && `· ${u.languages}`}</p>
                   )}
                   {u.role === 'driver' && u.license_number && (
-                    <p className="text-xs text-gray-400 dark:text-slate-500">Licencia: {u.license_number} · {u.equipment_type}</p>
+                    <p className="text-xs text-gray-400 dark:text-slate-500">{t('usersMgmt.license')}: {u.license_number} · {u.equipment_type}</p>
                   )}
-                  <p className="text-xs text-gray-400 dark:text-slate-500">Registrado {format(new Date(u.created_at), 'MMM d, yyyy HH:mm')}</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500">{t('usersMgmt.registered', { date: format(new Date(u.created_at), 'MMM d, yyyy HH:mm') })}</p>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
                   <button
@@ -299,7 +301,7 @@ export default function UsersManagement() {
                     className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white text-xs font-semibold transition-colors"
                   >
                     <CheckCircle className="w-3.5 h-3.5" />
-                    {actionLoading === u.id + '_approve' ? 'Aprobando...' : 'Aprobar'}
+                    {actionLoading === u.id + '_approve' ? t('usersMgmt.approving') : t('usersMgmt.approve')}
                   </button>
                   <button
                     onClick={() => handleReject(u.id)}
@@ -307,7 +309,7 @@ export default function UsersManagement() {
                     className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 disabled:opacity-50 text-red-600 dark:text-red-400 text-xs font-semibold transition-colors"
                   >
                     <XCircle className="w-3.5 h-3.5" />
-                    {actionLoading === u.id + '_reject' ? '...' : 'Rechazar'}
+                    {actionLoading === u.id + '_reject' ? t('usersMgmt.rejecting') : t('usersMgmt.reject')}
                   </button>
                 </div>
               </div>
@@ -320,11 +322,11 @@ export default function UsersManagement() {
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
           {[
-            { label: 'Total Users', value: stats.total_users, color: 'text-gray-900', bg: 'bg-white' },
-            { label: 'Admins', value: stats.admins, color: 'text-purple-700', bg: 'bg-purple-50' },
-            { label: 'Dispatchers', value: stats.dispatchers, color: 'text-orange-700', bg: 'bg-orange-50' },
-            { label: 'Drivers', value: stats.drivers_with_account, color: 'text-blue-700', bg: 'bg-blue-50' },
-            { label: 'Active Sessions', value: stats.active_sessions, color: 'text-green-700', bg: 'bg-green-50' },
+            { label: t('usersMgmt.statTotalUsers'), value: stats.total_users, color: 'text-gray-900', bg: 'bg-white' },
+            { label: t('usersMgmt.statAdmins'), value: stats.admins, color: 'text-purple-700', bg: 'bg-purple-50' },
+            { label: t('usersMgmt.statDispatchers'), value: stats.dispatchers, color: 'text-orange-700', bg: 'bg-orange-50' },
+            { label: t('usersMgmt.statDrivers'), value: stats.drivers_with_account, color: 'text-blue-700', bg: 'bg-blue-50' },
+            { label: t('usersMgmt.statActiveSessions'), value: stats.active_sessions, color: 'text-green-700', bg: 'bg-green-50' },
           ].map(s => (
             <div key={s.label} className={`card ${s.bg} p-4`}>
               <p className="text-xs text-gray-500 dark:text-slate-400">{s.label}</p>
@@ -339,10 +341,10 @@ export default function UsersManagement() {
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
-            <input className="input pl-9 w-52" placeholder="Search users..." value={search} onChange={e => setSearch(e.target.value)} />
+            <input className="input pl-9 w-52" placeholder={t('usersMgmt.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <select className="input w-36" value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
-            <option value="">All Roles</option>
+            <option value="">{t('usersMgmt.allRoles')}</option>
             <option value="admin">Admin</option>
             <option value="dispatcher">Dispatcher</option>
             <option value="driver">Driver</option>
@@ -350,7 +352,7 @@ export default function UsersManagement() {
         </div>
         <button onClick={() => { setEditUser(null); setShowForm(true); }}
           className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm">
-          <Plus className="w-4 h-4" /> Create User
+          <Plus className="w-4 h-4" /> {t('usersMgmt.createUser')}
         </button>
       </div>
 
@@ -360,16 +362,16 @@ export default function UsersManagement() {
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
-                {['User', 'Role', 'Status', 'Driver Profile', 'Created', 'Actions'].map(h => (
+                {[t('usersMgmt.tableUser'), t('usersMgmt.tableRole'), t('usersMgmt.tableStatus'), t('usersMgmt.tableDriverProfile'), t('usersMgmt.tableCreated'), t('usersMgmt.tableActions')].map(h => (
                   <th key={h} className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={6} className="text-center py-10 text-gray-400 dark:text-slate-500">Loading users...</td></tr>
+                <tr><td colSpan={6} className="text-center py-10 text-gray-400 dark:text-slate-500">{t('usersMgmt.loadingUsers')}</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-10 text-gray-400 dark:text-slate-500">No users found</td></tr>
+                <tr><td colSpan={6} className="text-center py-10 text-gray-400 dark:text-slate-500">{t('usersMgmt.noUsersFound')}</td></tr>
               ) : filtered.map(user => {
                 const RoleIcon = ROLE_ICONS[user.role];
                 return (
@@ -398,21 +400,21 @@ export default function UsersManagement() {
                         <button onClick={() => handleToggleActive(user)}
                           className={`badge border cursor-pointer transition-colors w-fit ${user.active ? 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200' : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200'}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${user.active ? 'bg-green-500' : 'bg-gray-400'}`} />
-                          {user.active ? 'Active' : 'Inactive'}
+                          {user.active ? t('usersMgmt.active') : t('usersMgmt.inactive')}
                         </button>
                         {user.approval_status === 'pending' && (
                           <span className="badge border w-fit bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700/50 text-[10px]">
-                            <Clock className="w-3 h-3" /> Pendiente verificación
+                            <Clock className="w-3 h-3" /> {t('usersMgmt.pendingVerification')}
                           </span>
                         )}
                         {user.approval_status === 'rejected' && (
                           <span className="badge border w-fit bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-700/40 text-[10px]">
-                            ✕ Rechazado
+                            ✕ {t('usersMgmt.rejected')}
                           </span>
                         )}
                         {user.approval_status === 'archived' && (
                           <span className="badge border w-fit bg-gray-100 text-gray-500 border-gray-200 dark:bg-slate-700/50 dark:text-slate-400 dark:border-slate-600 text-[10px]">
-                            Archivado
+                            {t('usersMgmt.archived')}
                           </span>
                         )}
                       </div>
@@ -436,15 +438,15 @@ export default function UsersManagement() {
                       <div className="flex items-center gap-1">
                         <button onClick={() => handleResendEmail(user.id, user.name)}
                           disabled={actionLoading === user.id + '_email'}
-                          className="p-1.5 hover:bg-blue-50 rounded-lg disabled:opacity-40" title="Reenviar email de activación">
+                          className="p-1.5 hover:bg-blue-50 rounded-lg disabled:opacity-40" title={t('usersMgmt.resendActivationEmail')}>
                           <Mail className="w-3.5 h-3.5 text-blue-500" />
                         </button>
                         <button onClick={() => { setEditUser(user); setShowForm(true); }}
-                          className="p-1.5 hover:bg-purple-50 rounded-lg" title="Edit">
+                          className="p-1.5 hover:bg-purple-50 rounded-lg" title={t('usersMgmt.edit')}>
                           <Edit2 className="w-3.5 h-3.5 text-purple-500" />
                         </button>
                         <button onClick={() => handleDelete(user)}
-                          className="p-1.5 hover:bg-red-50 rounded-lg" title="Delete">
+                          className="p-1.5 hover:bg-red-50 rounded-lg" title={t('usersMgmt.delete')}>
                           <Trash2 className="w-3.5 h-3.5 text-red-400" />
                         </button>
                       </div>
@@ -460,7 +462,7 @@ export default function UsersManagement() {
       {/* Recent logins */}
       {stats && stats.recent_logins.length > 0 && (
         <div className="card">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Recent Sign-Ins</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">{t('usersMgmt.recentSignIns')}</h3>
           <div className="space-y-2">
             {stats.recent_logins.map((login, i) => (
               <div key={i} className="flex items-center justify-between text-sm">
