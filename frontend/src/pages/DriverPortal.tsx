@@ -3155,12 +3155,12 @@ export default function DriverPortal() {
 
                   {/* Method tabs */}
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Método de pago</label>
+                    <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">{t('driverPortal.paymentMethod')}</label>
                     <div className="grid grid-cols-3 gap-1.5 mt-1.5">
                       {([
-                        { id: 'card',  label: '💳 Tarjeta' },
-                        { id: 'zelle', label: '📱 Zelle' },
-                        { id: 'ach',   label: '🏦 ACH' },
+                        { id: 'card',  label: t('driverPortal.cardLabel') },
+                        { id: 'zelle', label: t('driverPortal.zelleLabel') },
+                        { id: 'ach',   label: t('driverPortal.achLabel') },
                       ] as { id: PayTab; label: string }[]).map(m => (
                         <button
                           key={m.id}
@@ -3198,20 +3198,20 @@ export default function DriverPortal() {
                   {payTab === 'zelle' && (
                     <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700/40 rounded-2xl p-4 space-y-2">
                       <p className="text-sm font-semibold text-purple-800 dark:text-purple-300 flex items-center gap-2">
-                        <Send className="w-4 h-4" /> Enviar por Zelle
+                        <Send className="w-4 h-4" /> {t('driverPortal.sendViaZelle')}
                       </p>
-                      <p className="text-xs text-purple-600 dark:text-purple-400">Envía el monto exacto a:</p>
+                      <p className="text-xs text-purple-600 dark:text-purple-400">{t('driverPortal.sendExactAmountTo')}</p>
                       <div className="bg-white dark:bg-slate-800 rounded-xl px-4 py-3 space-y-1.5">
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500 dark:text-slate-400">Email</span>
+                          <span className="text-gray-500 dark:text-slate-400">{t('driverPortal.email')}</span>
                           <span className="font-semibold text-gray-900 dark:text-white">admin@osilogistics.com</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500 dark:text-slate-400">A nombre de</span>
+                          <span className="text-gray-500 dark:text-slate-400">{t('driverPortal.payableTo')}</span>
                           <span className="font-semibold text-gray-900 dark:text-white">OSI Logistics Inc.</span>
                         </div>
                       </div>
-                      <p className="text-[11px] text-purple-500 dark:text-purple-400">Incluye tu nombre completo en el memo del Zelle.</p>
+                      <p className="text-[11px] text-purple-500 dark:text-purple-400">{t('driverPortal.zelleMemoHint')}</p>
                     </div>
                   )}
 
@@ -3219,11 +3219,11 @@ export default function DriverPortal() {
                   {payTab === 'ach' && (
                     <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/40 rounded-2xl p-4 space-y-2">
                       <p className="text-sm font-semibold text-blue-800 dark:text-blue-300 flex items-center gap-2">
-                        🏦 Transferencia ACH / Wire
+                        {t('driverPortal.achWireTransfer')}
                       </p>
                       <div className="bg-white dark:bg-slate-800 rounded-xl px-4 py-3 space-y-1.5">
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500 dark:text-slate-400">Banco</span>
+                          <span className="text-gray-500 dark:text-slate-400">{t('driverPortal.bank')}</span>
                           <span className="font-semibold text-gray-900 dark:text-white">Chase</span>
                         </div>
                         <div className="flex justify-between text-sm">
@@ -3231,15 +3231,15 @@ export default function DriverPortal() {
                           <span className="font-mono font-semibold text-gray-900 dark:text-white">267084131</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500 dark:text-slate-400">Account #</span>
+                          <span className="text-gray-500 dark:text-slate-400">{t('driverPortal.accountNum')}</span>
                           <span className="font-mono font-semibold text-gray-900 dark:text-white">••••••1105</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500 dark:text-slate-400">Beneficiario</span>
+                          <span className="text-gray-500 dark:text-slate-400">{t('driverPortal.beneficiary')}</span>
                           <span className="font-semibold text-gray-900 dark:text-white">OSI Logistics Inc.</span>
                         </div>
                       </div>
-                      <p className="text-[11px] text-blue-500 dark:text-blue-400">Incluye tu nombre y Driver ID en el memo.</p>
+                      <p className="text-[11px] text-blue-500 dark:text-blue-400">{t('driverPortal.achMemoHint')}</p>
                     </div>
                   )}
 
@@ -3251,13 +3251,13 @@ export default function DriverPortal() {
                         onClick={() => setShowPayModal(false)}
                         className="flex-1 py-3 rounded-2xl text-sm font-semibold text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
                       >
-                        Cancelar
+                        {t('driverPortal.cancel')}
                       </button>
                       <button
                         onClick={() => setShowPayModal(false)}
                         className="flex-1 py-3 rounded-2xl text-sm font-bold text-white bg-green-500 hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
                       >
-                        <CheckCircle className="w-4 h-4" /> Entendido
+                        <CheckCircle className="w-4 h-4" /> {t('driverPortal.understood')}
                       </button>
                     </div>
                   )}
