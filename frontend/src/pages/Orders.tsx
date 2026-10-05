@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Plus, Search, Filter, X, ChevronDown, Package,
   MapPin, User, Truck, Clock, DollarSign, Eye, Edit2, Trash2, UserCheck, CheckCircle,
@@ -833,6 +834,7 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
 }
 
 export default function Orders() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const canEditOrder = (order: Order) =>
     user?.role === 'admin' || !order.dispatcher_user_id || order.dispatcher_user_id === user?.id;
@@ -901,7 +903,7 @@ export default function Orders() {
   }, [fetchOrders]);
 
   const handleDelete = async (id: string, orderNumber: string) => {
-    if (!confirm(`Delete order ${orderNumber}? This cannot be undone.`)) return;
+    if (!confirm(t('orders.confirmDeleteOne', { orderNumber }))) return;
     await ordersApi.delete(id);
     setSelected(prev => { const n = new Set(prev); n.delete(id); return n; });
     fetchOrders();
@@ -909,11 +911,11 @@ export default function Orders() {
 
   const handleBulkDelete = async () => {
     const count = selected.size;
-    if (!confirm(`Delete ${count} order${count !== 1 ? 's' : ''}? This cannot be undone.`)) return;
+    if (!confirm(t('orders.confirmDeleteBulk', { count }))) return;
     await Promise.all([...selected].map(id => ordersApi.delete(id)));
     setSelected(new Set());
     fetchOrders();
-    showToast(`${count} order${count !== 1 ? 's' : ''} deleted`);
+    showToast(t('orders.deletedToast', { count }));
   };
 
   return (
@@ -929,20 +931,20 @@ export default function Orders() {
       {/* Bulk action bar */}
       {isAdmin && selected.size > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-gray-900 dark:bg-slate-700 text-white px-5 py-3 rounded-2xl shadow-2xl border border-white/10">
-          <span className="text-sm font-semibold">{selected.size} selected</span>
+          <span className="text-sm font-semibold">{t('orders.selectedCount', { count: selected.size })}</span>
           <div className="w-px h-4 bg-white/20" />
           <button
             onClick={handleBulkDelete}
             className="flex items-center gap-1.5 text-sm font-semibold text-red-400 hover:text-red-300 transition-colors"
           >
-            <Trash2 className="w-4 h-4" /> Delete
+            <Trash2 className="w-4 h-4" /> {t('orders.delete')}
           </button>
           <div className="w-px h-4 bg-white/20" />
           <button
             onClick={() => setSelected(new Set())}
             className="text-sm text-white/50 hover:text-white/80 transition-colors"
           >
-            Cancel
+            {t('orders.cancel')}
           </button>
         </div>
       )}
@@ -952,20 +954,20 @@ export default function Orders() {
         <div className="flex items-center gap-2 flex-1 flex-wrap">
           <div className="relative flex-1 min-w-0">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
-            <input className="input pl-9 w-full" placeholder="Search orders..." value={search} onChange={e => setSearch(e.target.value)} />
+            <input className="input pl-9 w-full" placeholder={t('orders.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <select className="input w-full sm:w-32" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-            <option value="">All Status</option>
-            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
+            <option value="">{t('orders.allStatus')}</option>
+            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{t(`orders.status.${s}`)}</option>)}
           </select>
           <select className="input w-full sm:w-28" value={pageSize} onChange={e => setPageSize(Number(e.target.value))}>
-            <option value={25}>25 / page</option>
-            <option value={50}>50 / page</option>
-            <option value={100}>100 / page</option>
+            <option value={25}>25 / {t('orders.pageSize')}</option>
+            <option value={50}>50 / {t('orders.pageSize')}</option>
+            <option value={100}>100 / {t('orders.pageSize')}</option>
           </select>
         </div>
         <button onClick={() => setShowCreate(true)} className="btn-primary w-full sm:w-auto justify-center">
-          <Plus className="w-4 h-4" /> New Order
+          <Plus className="w-4 h-4" /> {t('orders.newOrder')}
         </button>
       </div>
 
@@ -977,7 +979,7 @@ export default function Orders() {
         return (
           <div className="flex items-center justify-between">
             <p className="text-xs text-gray-500 dark:text-slate-400">
-              {total === 0 ? '0 orders' : `${from}–${to} of ${total} orders`}
+              {total === 0 ? t('orders.countZero') : t('orders.countRange', { from, to, total })}
             </p>
             {totalPages > 1 && (
               <div className="flex items-center gap-1">
@@ -985,7 +987,7 @@ export default function Orders() {
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
                   className="px-2.5 py-1 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
-                >← Prev</button>
+                >{t('orders.prev')}</button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
                   .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
                   .reduce<(number | '…')[]>((acc, p, i, arr) => {
@@ -1003,7 +1005,7 @@ export default function Orders() {
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
                   className="px-2.5 py-1 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
-                >Next →</button>
+                >{t('orders.next')}</button>
               </div>
             )}
           </div>
@@ -1012,9 +1014,9 @@ export default function Orders() {
 
       {/* Orders — cards on mobile, table on desktop */}
       {loading ? (
-        <div className="text-center py-12 text-gray-400 dark:text-slate-500">Loading orders...</div>
+        <div className="text-center py-12 text-gray-400 dark:text-slate-500">{t('orders.loading')}</div>
       ) : orders.length === 0 ? (
-        <EmptyState icon={Package} title="No se encontraron órdenes" hint="Prueba a cambiar los filtros o crea una nueva orden" />
+        <EmptyState icon={Package} title={t('orders.emptyTitle')} hint={t('orders.emptyHint')} />
       ) : (
         <>
           {/* Mobile cards */}

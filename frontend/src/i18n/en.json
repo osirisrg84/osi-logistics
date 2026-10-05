@@ -52,5 +52,31 @@
     "onTimeRate": "On-Time Rate",
     "pendingOrders": "Pending Orders",
     "thisMonth": "this month"
+  },
+  "orders": {
+    "searchPlaceholder": "Search orders...",
+    "allStatus": "All Status",
+    "newOrder": "New Order",
+    "pageSize": "page",
+    "selectedCount_one": "{{count}} selected",
+    "selectedCount_other": "{{count}} selected",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "confirmDeleteOne": "Delete order {{orderNumber}}? This cannot be undone.",
+    "confirmDeleteBulk_one": "Delete {{count}} order? This cannot be undone.",
+    "confirmDeleteBulk_other": "Delete {{count}} orders? This cannot be undone.",
+    "deletedToast_one": "{{count}} order deleted",
+    "deletedToast_other": "{{count}} orders deleted",
+    "countZero": "0 orders",
+    "countRange": "{{from}}–{{to}} of {{total}} orders",
+    "prev": "← Prev",
+    "next": "Next →",
+    "loading": "Loading orders...",
+    "emptyTitle": "No orders found",
+    "emptyHint": "Try changing the filters or create a new order",
+    "status": {
+      "pending": "Pending", "offered": "Offered", "assigned": "Assigned",
+      "picked_up": "Picked Up", "in_transit": "In Transit", "delivered": "Delivered", "cancelled": "Cancelled"
+    }
   }
 }

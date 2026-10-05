@@ -52,5 +52,31 @@
     "onTimeRate": "Tasa a Tiempo",
     "pendingOrders": "Órdenes Pendientes",
     "thisMonth": "este mes"
+  },
+  "orders": {
+    "searchPlaceholder": "Buscar órdenes...",
+    "allStatus": "Todos los Estados",
+    "newOrder": "Nueva Orden",
+    "pageSize": "página",
+    "selectedCount_one": "{{count}} seleccionada",
+    "selectedCount_other": "{{count}} seleccionadas",
+    "delete": "Eliminar",
+    "cancel": "Cancelar",
+    "confirmDeleteOne": "¿Eliminar la orden {{orderNumber}}? Esta acción no se puede deshacer.",
+    "confirmDeleteBulk_one": "¿Eliminar {{count}} orden? Esta acción no se puede deshacer.",
+    "confirmDeleteBulk_other": "¿Eliminar {{count}} órdenes? Esta acción no se puede deshacer.",
+    "deletedToast_one": "{{count}} orden eliminada",
+    "deletedToast_other": "{{count}} órdenes eliminadas",
+    "countZero": "0 órdenes",
+    "countRange": "{{from}}–{{to}} de {{total}} órdenes",
+    "prev": "← Anterior",
+    "next": "Siguiente →",
+    "loading": "Cargando órdenes...",
+    "emptyTitle": "No se encontraron órdenes",
+    "emptyHint": "Prueba a cambiar los filtros o crea una nueva orden",
+    "status": {
+      "pending": "Pendiente", "offered": "Ofertada", "assigned": "Asignada",
+      "picked_up": "Recogida", "in_transit": "En Tránsito", "delivered": "Entregada", "cancelled": "Cancelada"
+    }
   }
 }
