@@ -1,0 +1,56 @@
+{
+  "common": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "orders": "Orders",
+      "tracking": "Live Tracking",
+      "drivers": "Drivers",
+      "fleet": "Fleet",
+      "dispatchers": "Dispatchers",
+      "reports": "Reports",
+      "hub": "Hub",
+      "commissions": "My Commissions",
+      "profile": "My Profile",
+      "billing": "Billing",
+      "users": "Users",
+      "verifications": "Verifications",
+      "settings": "Settings"
+    }
+  },
+  "sidebar": {
+    "adminConsole": "Admin Console",
+    "dispatchCenter": "Dispatch Center",
+    "systemOnline": "System Online",
+    "adminSection": "Admin"
+  },
+  "header": {
+    "searchPlaceholder": "Search orders, drivers...",
+    "notifications": "Notifications",
+    "markAllRead": "Mark all read",
+    "noNotifications": "No notifications",
+    "signOut": "Sign Out",
+    "lightMode": "Switch to Light Mode",
+    "darkMode": "Switch to Dark Mode",
+    "mustGoFreeAlert": "You must go \"Free\" (Active off) before signing out.",
+    "notePlaceholder": "Jot down something important...",
+    "switchActive": { "label": "Active", "onShift": "On Shift", "free": "Free" },
+    "switchNotes": { "label": "Notes", "empty": "Empty" },
+    "switchNotesCount_one": "{{count}} note",
+    "switchNotesCount_other": "{{count}} notes",
+    "switchMusic": { "label": "Music", "play": "Play", "pop": "Pop" }
+  },
+  "dashboard": {
+    "totalOrders": "Total Orders",
+    "newToday": "{{count}} new today",
+    "vsLastWeek": "vs last week",
+    "inTransit": "In Transit",
+    "assigned": "{{count}} assigned",
+    "activeDrivers": "Active Drivers",
+    "available": "{{count}} available",
+    "deliveredToday": "Delivered Today",
+    "avgDeliveryTime": "Avg Delivery Time",
+    "onTimeRate": "On-Time Rate",
+    "pendingOrders": "Pending Orders",
+    "thisMonth": "this month"
+  }
+}

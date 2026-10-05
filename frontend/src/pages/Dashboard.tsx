@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Package, Users, Truck, TrendingUp, DollarSign,
   Clock, CheckCircle, AlertTriangle, Activity,
@@ -61,6 +62,7 @@ function StatCard({ title, value, sub, icon: Icon, color, trend, onClick }: Stat
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [orderStats, setOrderStats] = useState<Record<string, number>>({});
@@ -140,32 +142,32 @@ export default function Dashboard() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
-          title="Total Orders"
+          title={t('dashboard.totalOrders')}
           value={orderStats.total || 0}
-          sub={`${orderStats.today || 0} new today`}
+          sub={t('dashboard.newToday', { count: orderStats.today || 0 })}
           icon={Package}
           color="bg-blue-100 text-blue-600"
           trend={8.2}
         />
         <StatCard
-          title="In Transit"
+          title={t('dashboard.inTransit')}
           value={orderStats.in_transit || 0}
-          sub={`${orderStats.assigned || 0} assigned`}
+          sub={t('dashboard.assigned', { count: orderStats.assigned || 0 })}
           icon={Activity}
           color="bg-purple-100 text-purple-600"
         />
         <StatCard
-          title="Active Drivers"
+          title={t('dashboard.activeDrivers')}
           value={driverStats.busy || 0}
-          sub={`${driverStats.available || 0} available`}
+          sub={t('dashboard.available', { count: driverStats.available || 0 })}
           icon={Users}
           color="bg-green-100 text-green-600"
           trend={2.1}
         />
         <StatCard
-          title="Mis Comisiones"
+          title={t('common.nav.commissions')}
           value={`$${commissionTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-          sub={`$${commissionMonth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} este mes`}
+          sub={`$${commissionMonth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${t('dashboard.thisMonth')}`}
           icon={DollarSign}
           color="bg-orange-100 text-orange-600"
           onClick={() => navigate('/commissions')}
@@ -179,7 +181,7 @@ export default function Dashboard() {
             <CheckCircle className="w-5 h-5 text-green-600" />
           </div>
           <div>
-            <p className="text-xs text-gray-500 dark:text-slate-400">Delivered Today</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">{t('dashboard.deliveredToday')}</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{orderStats.delivered_today || 0}</p>
           </div>
         </div>
@@ -188,7 +190,7 @@ export default function Dashboard() {
             <Clock className="w-5 h-5 text-yellow-600" />
           </div>
           <div>
-            <p className="text-xs text-gray-500 dark:text-slate-400">Avg Delivery Time</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">{t('dashboard.avgDeliveryTime')}</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{(stats?.kpis.avg_delivery_hours || 0).toFixed(1)}h</p>
           </div>
         </div>
@@ -197,7 +199,7 @@ export default function Dashboard() {
             <TrendingUp className="w-5 h-5 text-blue-600" />
           </div>
           <div>
-            <p className="text-xs text-gray-500 dark:text-slate-400">On-Time Rate</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">{t('dashboard.onTimeRate')}</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{(stats?.kpis.on_time_rate || 0).toFixed(1)}%</p>
           </div>
         </div>
@@ -206,7 +208,7 @@ export default function Dashboard() {
             <AlertTriangle className="w-5 h-5 text-red-500" />
           </div>
           <div>
-            <p className="text-xs text-gray-500 dark:text-slate-400">Pending Orders</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">{t('dashboard.pendingOrders')}</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{orderStats.pending || 0}</p>
           </div>
         </div>

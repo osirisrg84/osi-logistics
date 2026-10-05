@@ -1,0 +1,56 @@
+{
+  "common": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "orders": "Órdenes",
+      "tracking": "Rastreo en Vivo",
+      "drivers": "Conductores",
+      "fleet": "Flota",
+      "dispatchers": "Dispatchers",
+      "reports": "Reportes",
+      "hub": "Hub",
+      "commissions": "Mis Comisiones",
+      "profile": "Mi Perfil",
+      "billing": "Facturación",
+      "users": "Usuarios",
+      "verifications": "Verificaciones",
+      "settings": "Ajustes"
+    }
+  },
+  "sidebar": {
+    "adminConsole": "Consola Admin",
+    "dispatchCenter": "Centro de Despacho",
+    "systemOnline": "Sistema en Línea",
+    "adminSection": "Admin"
+  },
+  "header": {
+    "searchPlaceholder": "Buscar órdenes, conductores...",
+    "notifications": "Notificaciones",
+    "markAllRead": "Marcar todas leídas",
+    "noNotifications": "Sin notificaciones",
+    "signOut": "Cerrar Sesión",
+    "lightMode": "Cambiar a Modo Claro",
+    "darkMode": "Cambiar a Modo Oscuro",
+    "mustGoFreeAlert": "Debes ponerte \"Libre\" (Activo apagado) antes de cerrar sesión.",
+    "notePlaceholder": "Apunta algo importante...",
+    "switchActive": { "label": "Activo", "onShift": "En turno", "free": "Libre" },
+    "switchNotes": { "label": "Notas", "empty": "Vacío" },
+    "switchNotesCount_one": "{{count}} nota",
+    "switchNotesCount_other": "{{count}} notas",
+    "switchMusic": { "label": "Music", "play": "Play", "pop": "Pop" }
+  },
+  "dashboard": {
+    "totalOrders": "Total de Órdenes",
+    "newToday": "{{count}} nuevas hoy",
+    "vsLastWeek": "vs semana pasada",
+    "inTransit": "En Tránsito",
+    "assigned": "{{count}} asignadas",
+    "activeDrivers": "Conductores Activos",
+    "available": "{{count}} disponibles",
+    "deliveredToday": "Entregadas Hoy",
+    "avgDeliveryTime": "Tiempo Prom. de Entrega",
+    "onTimeRate": "Tasa a Tiempo",
+    "pendingOrders": "Órdenes Pendientes",
+    "thisMonth": "este mes"
+  }
+}

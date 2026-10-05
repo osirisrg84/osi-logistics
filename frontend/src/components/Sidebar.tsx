@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import osiLogo from '../assets/osi-logo.jpeg';
 import {
   LayoutDashboard, Package, MapPin, Users, Truck,
@@ -6,41 +7,43 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-const SHARED_NAV = [
-  { to: '/dashboard',   icon: LayoutDashboard, label: 'Dashboard',   adminOnly: false },
-  { to: '/orders',      icon: Package,         label: 'Orders',      adminOnly: false },
-  { to: '/tracking',    icon: MapPin,          label: 'Live Tracking', adminOnly: false },
-  { to: '/drivers',     icon: Users,           label: 'Drivers',     adminOnly: false },
-  { to: '/fleet',       icon: Truck,           label: 'Fleet',       adminOnly: false },
-  { to: '/dispatchers', icon: Headset,         label: 'Dispatchers', adminOnly: true  },
-  { to: '/reports',     icon: BarChart3,       label: 'Reports',     adminOnly: false },
-  { to: '/hub',         icon: Layers,          label: 'Hub',         adminOnly: false },
-];
-
-const DISPATCHER_ONLY_NAV = [
-  { to: '/commissions', icon: TrendingUp,  label: 'Mis Comisiones' },
-  { to: '/profile',     icon: UserCircle,  label: 'Mi Perfil'      },
-];
-
-const ADMIN_ONLY_NAV = [
-  { to: '/billing',       icon: Receipt,     label: 'Billing'         },
-  { to: '/users',         icon: UserCog,     label: 'Users'           },
-  { to: '/verifications', icon: ShieldCheck, label: 'Verificaciones'  },
-  { to: '/profile',       icon: UserCircle,  label: 'Mi Perfil'       },
-  { to: '/settings',      icon: Settings,    label: 'Settings'        },
-];
-
-const DISPATCHER_BOTTOM_NAV = [
-  { to: '/settings', icon: Settings, label: 'Settings' },
-];
-
 interface SidebarProps {
   onClose?: () => void;
 }
 
 export default function Sidebar({ onClose }: SidebarProps) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const isAdmin = user?.role === 'admin';
+
+  const SHARED_NAV = [
+    { to: '/dashboard',   icon: LayoutDashboard, label: t('common.nav.dashboard'), adminOnly: false },
+    { to: '/orders',      icon: Package,         label: t('common.nav.orders'),    adminOnly: false },
+    { to: '/tracking',    icon: MapPin,          label: t('common.nav.tracking'),  adminOnly: false },
+    { to: '/drivers',     icon: Users,           label: t('common.nav.drivers'),   adminOnly: false },
+    { to: '/fleet',       icon: Truck,           label: t('common.nav.fleet'),     adminOnly: false },
+    { to: '/dispatchers', icon: Headset,         label: t('common.nav.dispatchers'), adminOnly: true },
+    { to: '/reports',     icon: BarChart3,       label: t('common.nav.reports'),   adminOnly: false },
+    { to: '/hub',         icon: Layers,          label: t('common.nav.hub'),       adminOnly: false },
+  ];
+
+  const DISPATCHER_ONLY_NAV = [
+    { to: '/commissions', icon: TrendingUp,  label: t('common.nav.commissions') },
+    { to: '/profile',     icon: UserCircle,  label: t('common.nav.profile')     },
+  ];
+
+  const ADMIN_ONLY_NAV = [
+    { to: '/billing',       icon: Receipt,     label: t('common.nav.billing')       },
+    { to: '/users',         icon: UserCog,     label: t('common.nav.users')         },
+    { to: '/verifications', icon: ShieldCheck, label: t('common.nav.verifications') },
+    { to: '/profile',       icon: UserCircle,  label: t('common.nav.profile')       },
+    { to: '/settings',      icon: Settings,    label: t('common.nav.settings')      },
+  ];
+
+  const DISPATCHER_BOTTOM_NAV = [
+    { to: '/settings', icon: Settings, label: t('common.nav.settings') },
+  ];
+
   const topNav = isAdmin
     ? SHARED_NAV.filter(n => !n.adminOnly || isAdmin)
     : [...SHARED_NAV.filter(n => !n.adminOnly), ...DISPATCHER_ONLY_NAV];
@@ -58,7 +61,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
               ? 'text-purple-300 bg-purple-500/20 border-purple-500/30'
               : 'text-orange-300 bg-orange-500/20 border-orange-500/30'
           }`}>
-            {isAdmin ? 'Admin Console' : 'Dispatch Center'}
+            {isAdmin ? t('sidebar.adminConsole') : t('sidebar.dispatchCenter')}
           </span>
         </div>
         {/* Close button — mobile only */}
@@ -73,7 +76,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
       <div className="px-5 py-2.5 border-b border-slate-800">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 bg-green-400 rounded-full pulse-dot" />
-          <span className="text-xs text-slate-400 font-medium">System Online</span>
+          <span className="text-xs text-slate-400 font-medium">{t('sidebar.systemOnline')}</span>
           <Zap className="w-3 h-3 text-green-400 ml-auto" />
         </div>
       </div>
@@ -103,7 +106,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
         {bottomNav.length > 0 && (
           <>
             <div className="my-3 border-t border-slate-800" />
-            {isAdmin && <p className="text-xs text-slate-600 font-semibold uppercase tracking-widest px-3 mb-2">Admin</p>}
+            {isAdmin && <p className="text-xs text-slate-600 font-semibold uppercase tracking-widest px-3 mb-2">{t('sidebar.adminSection')}</p>}
             <div className="space-y-0.5">
               {bottomNav.map(({ to, icon: Icon, label }) => (
                 <NavLink

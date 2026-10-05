@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Bell, Search, RefreshCw, X, Check, LogOut, ChevronDown, Shield, Truck, ClipboardList, Sun, Moon, Zap, StickyNote, Headphones, Plus, Pin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Bell, Search, RefreshCw, X, Check, LogOut, ChevronDown, Shield, Truck, ClipboardList, Sun, Moon, Zap, StickyNote, Headphones, Plus, Pin, Languages } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
 import InstallAppButton from './InstallAppButton';
 import api, { notificationsApi } from '../services/api';
@@ -8,22 +9,9 @@ import { Notification } from '../types';
 import { getSocket } from '../services/socket';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { formatDistanceToNow } from 'date-fns';
 import { playNotificationPing } from '../utils/sounds';
-
-const PAGE_TITLES: Record<string, string> = {
-  '/dashboard': 'Dashboard',
-  '/orders': 'Orders',
-  '/tracking': 'Live Tracking',
-  '/drivers': 'Drivers',
-  '/fleet': 'Fleet',
-  '/reports': 'Reports',
-  '/settings': 'Settings',
-  '/users': 'Users',
-  '/hub': 'Hub',
-  '/commissions': 'Mis Comisiones',
-  '/profile': 'Mi Perfil',
-};
 
 const NOTIF_COLORS: Record<string, string> = {
   order: 'bg-blue-100 text-blue-700',
@@ -114,8 +102,10 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick }: HeaderProps) {
   const location = useLocation();
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const { dark, toggle: toggleTheme } = useTheme();
+  const { lang, toggle: toggleLang } = useLanguage();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unread, setUnread] = useState(0);
   const [showNotifs, setShowNotifs] = useState(false);
@@ -123,6 +113,19 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const [loading, setLoading] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const PAGE_TITLES: Record<string, string> = {
+    '/dashboard': t('common.nav.dashboard'),
+    '/orders': t('common.nav.orders'),
+    '/tracking': t('common.nav.tracking'),
+    '/drivers': t('common.nav.drivers'),
+    '/fleet': t('common.nav.fleet'),
+    '/reports': t('common.nav.reports'),
+    '/settings': t('common.nav.settings'),
+    '/users': t('common.nav.users'),
+    '/hub': t('common.nav.hub'),
+    '/commissions': t('common.nav.commissions'),
+    '/profile': t('common.nav.profile'),
+  };
   const title = PAGE_TITLES[location.pathname] || 'OSI Logistics';
   const isDispatcher = user?.role === 'dispatcher';
 
@@ -172,7 +175,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <div className={`rounded-xl overflow-hidden ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-gray-50 border border-gray-200'}`}>
             <div className="flex gap-2 px-3 py-2.5" style={{ borderBottom: notes.length > 0 ? `1px solid ${dark ? 'rgba(255,255,255,0.04)' : '#f1f5f9'}` : 'none' }}>
               <input value={noteInput} onChange={e => setNoteInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addNote(); }}
-                placeholder="Apunta algo importante..." maxLength={200}
+                placeholder={t('header.notePlaceholder')} maxLength={200}
                 className={`flex-1 text-sm px-3 py-2 rounded-lg outline-none border-0 ${dark ? 'bg-slate-700 text-slate-200 placeholder:text-slate-500' : 'bg-white text-gray-800 placeholder:text-gray-400'}`} />
               <button onClick={addNote} disabled={!noteInput.trim()}
                 className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 active:scale-90 disabled:opacity-40"
@@ -253,7 +256,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
               ? 'text-purple-700 bg-purple-50 border-purple-200 dark:text-purple-300 dark:bg-purple-500/20 dark:border-purple-500/30'
               : 'text-orange-700 bg-orange-50 border-orange-200 dark:text-orange-300 dark:bg-orange-500/20 dark:border-orange-500/30'
           }`}>
-            {user?.role === 'admin' ? 'Admin Console' : 'Dispatch Center'}
+            {user?.role === 'admin' ? t('sidebar.adminConsole') : t('sidebar.dispatchCenter')}
           </span>
         </button>
         {/* Page title — desktop only */}
@@ -271,19 +274,19 @@ export default function Header({ onMenuClick }: HeaderProps) {
           {/* Activo */}
           <button onClick={() => setDispActive(v => { const nv = !v; nv ? playShiftOnSound() : playShiftOffSound(); api.put('/auth/shift', { active: nv }).catch(() => {}); return nv; })} className="flex-1 flex items-center gap-1 px-1.5 py-2 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(dispActive,'rgba(34,197,94,0.13)','rgba(34,197,94,0.35)')}>
             <Zap className={`w-3 h-3 flex-shrink-0 ${dispActive ? 'text-green-400' : 'text-slate-400'}`} />
-            <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Activo</p><p className="text-[8px] leading-none mt-0.5" style={{ color: dispActive ? '#4ade80' : '#94a3b8' }}>{dispActive ? 'En turno' : 'Libre'}</p></div>
+            <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>{t('header.switchActive.label')}</p><p className="text-[8px] leading-none mt-0.5" style={{ color: dispActive ? '#4ade80' : '#94a3b8' }}>{dispActive ? t('header.switchActive.onShift') : t('header.switchActive.free')}</p></div>
             <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(dispActive,'linear-gradient(90deg,#22c55e,#16a34a)','rgba(34,197,94,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(dispActive)} /></div>
           </button>
           {/* Notas */}
           <button onClick={() => setNotesOpen(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(notesOpen,'rgba(251,191,36,0.13)','rgba(251,191,36,0.35)')}>
             <StickyNote className={`w-3 h-3 flex-shrink-0 ${notesOpen ? 'text-amber-400' : 'text-slate-400'}`} />
-            <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Notas</p><p className="text-[8px] leading-none mt-0.5" style={{ color: notesOpen ? '#fbbf24' : '#94a3b8' }}>{notes.length > 0 ? `${notes.length} nota${notes.length !== 1 ? 's' : ''}` : 'Vacío'}</p></div>
+            <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>{t('header.switchNotes.label')}</p><p className="text-[8px] leading-none mt-0.5" style={{ color: notesOpen ? '#fbbf24' : '#94a3b8' }}>{notes.length > 0 ? t('header.switchNotesCount', { count: notes.length }) : t('header.switchNotes.empty')}</p></div>
             <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(notesOpen,'linear-gradient(90deg,#f59e0b,#d97706)','rgba(251,191,36,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(notesOpen)} /></div>
           </button>
           {/* Music */}
           <button onClick={() => setMusicOn(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(musicOn,'rgba(168,85,247,0.13)','rgba(168,85,247,0.35)')}>
             <Headphones className={`w-3 h-3 flex-shrink-0 ${musicOn ? 'text-purple-400' : 'text-slate-400'}`} />
-            <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Music</p><p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }}>{musicOn ? '▶ Play' : 'Pop'}</p></div>
+            <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>{t('header.switchMusic.label')}</p><p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }}>{musicOn ? `▶ ${t('header.switchMusic.play')}` : t('header.switchMusic.pop')}</p></div>
             <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(musicOn,'linear-gradient(90deg,#a855f7,#7c3aed)','rgba(168,85,247,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(musicOn)} /></div>
           </button>
         </div>
@@ -295,7 +298,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Search orders, drivers..."
+            placeholder={t('header.searchPlaceholder')}
             className="pl-9 pr-4 py-2 text-sm rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-400 w-52"
           />
         </div>
@@ -313,12 +316,22 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <button
           onClick={toggleTheme}
           className="p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-          title={dark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          title={dark ? t('header.lightMode') : t('header.darkMode')}
         >
           {dark
             ? <Sun className="w-4 h-4 text-yellow-400" />
             : <Moon className="w-4 h-4" />
           }
+        </button>
+
+        {/* Language toggle */}
+        <button
+          onClick={toggleLang}
+          className="px-2 py-2 rounded-lg text-xs font-bold text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1"
+          title={lang === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+        >
+          <Languages className="w-4 h-4" />
+          <span className="hidden sm:inline">{lang.toUpperCase()}</span>
         </button>
 
         {/* Notifications */}
@@ -336,11 +349,11 @@ export default function Header({ onMenuClick }: HeaderProps) {
           {showNotifs && (
             <div className="absolute right-0 top-full mt-2 w-72 md:w-80 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 z-50 slide-in">
               <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-slate-700">
-                <span className="font-semibold text-gray-900 dark:text-slate-100 text-sm">Notifications</span>
+                <span className="font-semibold text-gray-900 dark:text-slate-100 text-sm">{t('header.notifications')}</span>
                 <div className="flex items-center gap-2">
                   {unread > 0 && (
                     <button onClick={handleMarkAllRead} className="text-xs text-orange-500 hover:text-orange-600 flex items-center gap-1">
-                      <Check className="w-3 h-3" /> Mark all read
+                      <Check className="w-3 h-3" /> {t('header.markAllRead')}
                     </button>
                   )}
                   <button onClick={() => setShowNotifs(false)}>
@@ -350,7 +363,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
               </div>
               <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
                 {notifications.length === 0 ? (
-                  <div className="py-8 text-center text-gray-400 text-sm">No notifications</div>
+                  <div className="py-8 text-center text-gray-400 text-sm">{t('header.noNotifications')}</div>
                 ) : notifications.map(n => (
                   <div key={n.id} className={`px-4 py-3 hover:bg-gray-50 ${!n.read ? 'bg-orange-50/30' : ''}`}>
                     <div className="flex items-start gap-3">
@@ -397,14 +410,14 @@ export default function Header({ onMenuClick }: HeaderProps) {
                   // Igual que en Driver Portal: no dejar cerrar sesion
                   // estando "en turno" -- primero hay que ponerse "Libre".
                   if (isDispatcher && dispActive) {
-                    alert('Debes ponerte "Libre" (Activo apagado) antes de cerrar sesión.');
+                    alert(t('header.mustGoFreeAlert'));
                     return;
                   }
                   logout();
                 }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
                 <LogOut className="w-4 h-4" />
-                Sign Out
+                {t('header.signOut')}
               </button>
             </div>
           )}
@@ -418,17 +431,17 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <div className="flex gap-1.5">
             <button onClick={() => setDispActive(v => { const nv = !v; nv ? playShiftOnSound() : playShiftOffSound(); api.put('/auth/shift', { active: nv }).catch(() => {}); return nv; })} className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(dispActive,'rgba(34,197,94,0.13)','rgba(34,197,94,0.35)')}>
               <Zap className={`w-3 h-3 flex-shrink-0 ${dispActive ? 'text-green-400' : 'text-slate-400'}`} />
-              <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Activo</p><p className="text-[8px] leading-none mt-0.5" style={{ color: dispActive ? '#4ade80' : '#94a3b8' }}>{dispActive ? 'En turno' : 'Libre'}</p></div>
+              <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>{t('header.switchActive.label')}</p><p className="text-[8px] leading-none mt-0.5" style={{ color: dispActive ? '#4ade80' : '#94a3b8' }}>{dispActive ? t('header.switchActive.onShift') : t('header.switchActive.free')}</p></div>
               <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(dispActive,'linear-gradient(90deg,#22c55e,#16a34a)','rgba(34,197,94,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(dispActive)} /></div>
             </button>
             <button onClick={() => setNotesOpen(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(notesOpen,'rgba(251,191,36,0.13)','rgba(251,191,36,0.35)')}>
               <StickyNote className={`w-3 h-3 flex-shrink-0 ${notesOpen ? 'text-amber-400' : 'text-slate-400'}`} />
-              <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Notas</p><p className="text-[8px] leading-none mt-0.5" style={{ color: notesOpen ? '#fbbf24' : '#94a3b8' }}>{notes.length > 0 ? `${notes.length} nota${notes.length !== 1 ? 's' : ''}` : 'Vacío'}</p></div>
+              <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>{t('header.switchNotes.label')}</p><p className="text-[8px] leading-none mt-0.5" style={{ color: notesOpen ? '#fbbf24' : '#94a3b8' }}>{notes.length > 0 ? t('header.switchNotesCount', { count: notes.length }) : t('header.switchNotes.empty')}</p></div>
               <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(notesOpen,'linear-gradient(90deg,#f59e0b,#d97706)','rgba(251,191,36,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(notesOpen)} /></div>
             </button>
             <button onClick={() => setMusicOn(v => !v)} className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all" style={swStyle(musicOn,'rgba(168,85,247,0.13)','rgba(168,85,247,0.35)')}>
               <Headphones className={`w-3 h-3 flex-shrink-0 ${musicOn ? 'text-purple-400' : 'text-slate-400'}`} />
-              <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>Music</p><p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }}>{musicOn ? '▶ Play' : 'Pop'}</p></div>
+              <div className="flex-1 text-left"><p className={`text-[9px] font-bold leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>{t('header.switchMusic.label')}</p><p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#94a3b8' }}>{musicOn ? `▶ ${t('header.switchMusic.play')}` : t('header.switchMusic.pop')}</p></div>
               <div className="relative flex-shrink-0 rounded-full" style={toggleStyle(musicOn,'linear-gradient(90deg,#a855f7,#7c3aed)','rgba(168,85,247,0.45)')}><div className="absolute rounded-full bg-white" style={knobLeft(musicOn)} /></div>
             </button>
           </div>
