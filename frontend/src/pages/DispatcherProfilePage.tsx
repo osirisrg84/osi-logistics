@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
 import { firebaseAuth } from '../services/firebase';
 import {
@@ -38,6 +39,7 @@ interface CommissionRow {
 }
 
 export default function DispatcherProfilePage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { dark } = useTheme();
   const isAdmin = user?.role === 'admin';
@@ -86,7 +88,7 @@ export default function DispatcherProfilePage() {
           const result = await signInWithPhoneNumber(firebaseAuth, e164, recaptchaRef.current);
           setConfirmationResult(result);
           setCodeSent(true);
-          setVerifyMsg('Código enviado por SMS');
+          setVerifyMsg(t('profile.codeSent'));
           return;
         } catch (fbErr: unknown) {
           recaptchaRef.current?.clear(); recaptchaRef.current = null;
@@ -208,26 +210,26 @@ export default function DispatcherProfilePage() {
 
   // ── Profile completion ──────────────────────────────────
   const profileItems = [
-    { label: 'Teléfono',             done: !!profile.phone },
-    { label: 'Método de Pago',       done: !!profile.payout_method },
-    { label: 'Ciudad actual',               done: !!profile.city },
-    { label: 'Fecha de nacimiento',  done: !!profile.date_of_birth },
-    { label: 'Idiomas',              done: !!profile.languages },
-    { label: 'Años de experiencia',  done: !!profile.years_experience },
-    { label: 'Disponibilidad',       done: !!profile.availability },
-    { label: 'Exp. con equipos',      done: !!profile.equipment_experience },
+    { label: t('profile.items.phone'),        done: !!profile.phone },
+    { label: t('profile.items.payoutMethod'), done: !!profile.payout_method },
+    { label: t('profile.items.city'),         done: !!profile.city },
+    { label: t('profile.items.dob'),          done: !!profile.date_of_birth },
+    { label: t('profile.items.languages'),    done: !!profile.languages },
+    { label: t('profile.items.yearsExp'),     done: !!profile.years_experience },
+    { label: t('profile.items.availability'), done: !!profile.availability },
+    { label: t('profile.items.equipmentExp'), done: !!profile.equipment_experience },
   ];
   const score = profileItems.filter(i => i.done).length;
 
   // ── Achievements ────────────────────────────────────────
   const ACHIEVEMENTS = [
-    { icon: '✅', label: 'Perfil Completo',      desc: 'Todas las secciones del perfil llenas',  unlocked: score >= 5,        current: score,                   target: 5  },
-    { icon: '🚀', label: 'Primera Carga',        desc: 'Despacha tu primera orden',              unlocked: totalLoads >= 1,   current: Math.min(totalLoads, 1), target: 1  },
-    { icon: '📦', label: 'Arrancando',           desc: '10 cargas despachadas',                  unlocked: totalLoads >= 10,  current: Math.min(totalLoads,10), target: 10 },
-    { icon: '💪', label: 'Dispatch Pro',         desc: '50 cargas despachadas',                  unlocked: totalLoads >= 50,  current: Math.min(totalLoads,50), target: 50 },
-    { icon: '🏆', label: 'Elite Dispatcher',     desc: '100 cargas despachadas',                 unlocked: totalLoads >= 100, current: Math.min(totalLoads,100),target: 100},
-    { icon: '⭐', label: 'Top Performer',        desc: 'Rating de 4.5 o superior',               unlocked: Number(rating) >= 4.5, current: Number(rating),      target: 4.5},
-    { icon: '💰', label: 'Power Earner',         desc: '$1,000+ en comisiones acumuladas',        unlocked: totalEarned >= 1000, current: Math.min(totalEarned,1000), target: 1000 },
+    { icon: '✅', label: t('profile.achievementList.completeProfile.label'), desc: t('profile.achievementList.completeProfile.desc'), unlocked: score >= 5,        current: score,                   target: 5  },
+    { icon: '🚀', label: t('profile.achievementList.firstLoad.label'),       desc: t('profile.achievementList.firstLoad.desc'),       unlocked: totalLoads >= 1,   current: Math.min(totalLoads, 1), target: 1  },
+    { icon: '📦', label: t('profile.achievementList.gettingStarted.label'),  desc: t('profile.achievementList.gettingStarted.desc'),  unlocked: totalLoads >= 10,  current: Math.min(totalLoads,10), target: 10 },
+    { icon: '💪', label: t('profile.achievementList.dispatchPro.label'),     desc: t('profile.achievementList.dispatchPro.desc'),     unlocked: totalLoads >= 50,  current: Math.min(totalLoads,50), target: 50 },
+    { icon: '🏆', label: t('profile.achievementList.eliteDispatcher.label'), desc: t('profile.achievementList.eliteDispatcher.desc'), unlocked: totalLoads >= 100, current: Math.min(totalLoads,100),target: 100},
+    { icon: '⭐', label: t('profile.achievementList.topPerformer.label'),    desc: t('profile.achievementList.topPerformer.desc'),    unlocked: Number(rating) >= 4.5, current: Number(rating),      target: 4.5},
+    { icon: '💰', label: t('profile.achievementList.powerEarner.label'),     desc: t('profile.achievementList.powerEarner.desc'),     unlocked: totalEarned >= 1000, current: Math.min(totalEarned,1000), target: 1000 },
   ];
   const unlockedCount = ACHIEVEMENTS.filter(a => a.unlocked).length;
 
@@ -296,7 +298,7 @@ export default function DispatcherProfilePage() {
               {profile.email_verified
                 ? <span className="flex items-center gap-0.5 text-[10px] font-bold text-emerald-500 flex-shrink-0"><CheckCircle className="w-3 h-3" /> OK</span>
                 : <button onClick={() => { setVerifying('email'); setCodeSent(false); setCodeInput(''); setVerifyMsg(''); }}
-                    className="text-[10px] font-bold text-orange-500 hover:text-orange-400 flex-shrink-0 whitespace-nowrap">Verificar</button>
+                    className="text-[10px] font-bold text-orange-500 hover:text-orange-400 flex-shrink-0 whitespace-nowrap">{t('profile.verify')}</button>
               }
             </div>
             <div className="flex items-center gap-2">
@@ -308,24 +310,24 @@ export default function DispatcherProfilePage() {
                 profile.phone_verified
                   ? <span className="flex items-center gap-0.5 text-[10px] font-bold text-emerald-500 flex-shrink-0"><CheckCircle className="w-3 h-3" /> OK</span>
                   : <button onClick={() => { setVerifying('phone'); setCodeSent(false); setCodeInput(''); setVerifyMsg(''); }}
-                      className="text-[10px] font-bold text-orange-500 hover:text-orange-400 flex-shrink-0 whitespace-nowrap">Verificar</button>
+                      className="text-[10px] font-bold text-orange-500 hover:text-orange-400 flex-shrink-0 whitespace-nowrap">{t('profile.verify')}</button>
               )}
             </div>
             {/* Verification panel */}
             {verifying && (
               <div className={`mt-1 p-3 rounded-xl border ${dark ? 'bg-slate-700/60 border-slate-600' : 'bg-white/90 border-orange-100'}`}>
                 <p className={`text-xs font-semibold mb-2 ${dark ? 'text-white' : 'text-gray-800'}`}>
-                  Verificar {verifying === 'email' ? 'correo' : 'teléfono'}
+                  {verifying === 'email' ? t('profile.verifyEmail') : t('profile.verifyPhone')}
                 </p>
                 {!codeSent ? (
                   <button onClick={() => handleSendCode(verifying)} disabled={sendingCode}
                     className="w-full py-2 rounded-lg text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center gap-1.5">
                     {sendingCode && <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />}
-                    Enviar código
+                    {t('profile.sendCode')}
                   </button>
                 ) : (
                   <div className="space-y-2">
-                    <p className="text-[11px] text-emerald-400 font-medium">✓ {verifyMsg || 'Código enviado'}</p>
+                    <p className="text-[11px] text-emerald-400 font-medium">✓ {verifyMsg || t('profile.codeSent')}</p>
                     <input type="text" inputMode="numeric" maxLength={6} placeholder="000000"
                       value={codeInput}
                       onChange={e => setCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
@@ -333,7 +335,7 @@ export default function DispatcherProfilePage() {
                     <button onClick={handleVerifyCode} disabled={verifyingCode || codeInput.length < 6}
                       className="w-full py-2 rounded-lg text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 flex items-center justify-center gap-1.5">
                       {verifyingCode && <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />}
-                      Confirmar código
+                      {t('profile.confirmCode')}
                     </button>
                     {confirmationResult && verifying === 'phone' && (
                       <button onClick={async () => {
@@ -347,14 +349,14 @@ export default function DispatcherProfilePage() {
                         } catch { setVerifyMsg('Error al reenviar'); }
                         finally { setSendingCode(false); }
                       }} className="text-[10px] text-gray-400 underline w-full text-center">
-                        ¿No llegó el SMS? Enviar al correo
+                        {t('profile.resendToEmail')}
                       </button>
                     )}
                   </div>
                 )}
                 {verifyMsg && !codeSent && <p className="text-[11px] mt-1 text-red-400">{verifyMsg}</p>}
                 {verifyMsg && codeSent && verifyMsg.includes('ncorrecto') && <p className="text-[11px] mt-1 text-red-400">{verifyMsg}</p>}
-                <button onClick={cancelVerify} className="mt-2 text-[10px] text-gray-400 hover:text-gray-300">Cancelar</button>
+                <button onClick={cancelVerify} className="mt-2 text-[10px] text-gray-400 hover:text-gray-300">{t('profile.cancel')}</button>
               </div>
             )}
             <div id="recaptcha-container-disp" />
@@ -365,10 +367,10 @@ export default function DispatcherProfilePage() {
         <div className={`border-t mx-4 mb-1 ${dark ? 'border-slate-700' : 'border-gray-100'}`} />
         <div className="grid grid-cols-2 gap-3 p-4">
           {[
-            { label: 'Total Loads', value: String(totalLoads),                    icon: Package,    color: 'text-blue-500',   bg: dark ? 'bg-blue-500/10'   : 'bg-blue-50'   },
-            { label: 'Este mes',    value: String(monthLoads),                    icon: TrendingUp, color: 'text-green-500',  bg: dark ? 'bg-green-500/10'  : 'bg-green-50'  },
-            { label: 'Rating',      value: `★ ${rating}`,                         icon: Star,       color: 'text-amber-500',  bg: dark ? 'bg-amber-500/10'  : 'bg-amber-50'  },
-            { label: 'Logros',      value: `${unlockedCount}/${ACHIEVEMENTS.length}`, icon: Award,  color: 'text-purple-500', bg: dark ? 'bg-purple-500/10' : 'bg-purple-50' },
+            { label: t('profile.statTotalLoads'), value: String(totalLoads),                    icon: Package,    color: 'text-blue-500',   bg: dark ? 'bg-blue-500/10'   : 'bg-blue-50'   },
+            { label: t('profile.statThisMonth'),  value: String(monthLoads),                    icon: TrendingUp, color: 'text-green-500',  bg: dark ? 'bg-green-500/10'  : 'bg-green-50'  },
+            { label: t('profile.statRating'),     value: `★ ${rating}`,                         icon: Star,       color: 'text-amber-500',  bg: dark ? 'bg-amber-500/10'  : 'bg-amber-50'  },
+            { label: t('profile.statAchievements'), value: `${unlockedCount}/${ACHIEVEMENTS.length}`, icon: Award,  color: 'text-purple-500', bg: dark ? 'bg-purple-500/10' : 'bg-purple-50' },
           ].map(({ label, value, icon: Icon, color, bg }) => (
             <div key={label} className={`rounded-xl p-3 ${dark ? 'bg-slate-700/60' : 'bg-gray-50'}`}>
               <div className="flex items-center gap-1.5 mb-1.5">
@@ -391,8 +393,8 @@ export default function DispatcherProfilePage() {
             <Edit3 className="w-4 h-4" style={{ color: accent }} />
           </div>
           <div className="flex-1">
-            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Completar perfil</h3>
-            <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{score} / {profileItems.length} secciones completas</p>
+            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>{t('profile.completeProfile')}</h3>
+            <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{t('profile.sectionsComplete', { score, total: profileItems.length })}</p>
           </div>
           <span className="text-sm font-black" style={{ color: accent }}>{Math.round((score / profileItems.length) * 100)}%</span>
         </div>
@@ -411,7 +413,7 @@ export default function DispatcherProfilePage() {
                 {item.label}
               </span>
               {!item.done && (
-                <span className={`ml-auto text-[10px] font-medium ${dark ? 'text-slate-600' : 'text-gray-300'}`}>Pendiente</span>
+                <span className={`ml-auto text-[10px] font-medium ${dark ? 'text-slate-600' : 'text-gray-300'}`}>{t('profile.pending')}</span>
               )}
             </div>
           ))}
@@ -419,7 +421,7 @@ export default function DispatcherProfilePage() {
         <button onClick={() => setEditingContact(true)}
            className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-xl w-full transition-colors"
            style={{ background: `${accent}15`, color: accent }}>
-          <Edit3 className="w-3 h-3" /> Editar información
+          <Edit3 className="w-3 h-3" /> {t('profile.editInfo')}
         </button>
       </div>
 
@@ -431,24 +433,24 @@ export default function DispatcherProfilePage() {
                  style={{ background: 'rgba(16,185,129,0.12)' }}>
               <User className="w-4 h-4 text-emerald-500" />
             </div>
-            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Información de contacto</h3>
+            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>{t('profile.contactInfo')}</h3>
           </div>
           {!editingContact ? (
             <button onClick={() => setEditingContact(true)}
               className="flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
-              <Edit3 className="w-3.5 h-3.5" /> Editar
+              <Edit3 className="w-3.5 h-3.5" /> {t('profile.edit')}
             </button>
           ) : (
             <div className="flex items-center gap-2">
               <button onClick={() => setEditingContact(false)}
                 className="flex items-center gap-1 text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors">
-                <X className="w-3.5 h-3.5" /> Cancelar
+                <X className="w-3.5 h-3.5" /> {t('profile.cancel')}
               </button>
               <button onClick={saveContact} disabled={savingContact}
                 className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg text-white transition-colors disabled:opacity-50"
                 style={{ background: 'rgba(16,185,129,1)' }}>
                 {savingContact ? <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" /> : <Save className="w-3 h-3" />}
-                Guardar
+                {t('profile.save')}
               </button>
             </div>
           )}
@@ -457,7 +459,7 @@ export default function DispatcherProfilePage() {
         {editingContact ? (
           <div className="space-y-3">
             <div>
-              <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Teléfono</label>
+              <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{t('profile.phoneLabel')}</label>
               <input type="tel" placeholder="(305) 555-0000" value={contactForm.phone}
                 onChange={e => setContactForm({ phone: e.target.value })}
                 className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-emerald-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`} />
@@ -469,24 +471,24 @@ export default function DispatcherProfilePage() {
               <Mail className="w-4 h-4 flex-shrink-0 text-slate-400" />
               <div className="flex-1 min-w-0">
                 <p className={`text-xs font-medium truncate ${dark ? 'text-white' : 'text-gray-800'}`}>{user?.email}</p>
-                <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>Email</p>
+                <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{t('profile.emailLabel')}</p>
               </div>
               {profile.email_verified
-                ? <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500"><CheckCircle className="w-3.5 h-3.5" /> Verificado</span>
-                : <span className="text-[10px] text-gray-400 italic">Sin verificar</span>
+                ? <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500"><CheckCircle className="w-3.5 h-3.5" /> {t('profile.verified')}</span>
+                : <span className="text-[10px] text-gray-400 italic">{t('profile.unverified')}</span>
               }
             </div>
             <div className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
               <Phone className="w-4 h-4 flex-shrink-0 text-slate-400" />
               <div className="flex-1 min-w-0">
                 <p className={`text-xs font-medium ${dark ? 'text-white' : 'text-gray-800'}`}>{profile.phone || '—'}</p>
-                <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>Teléfono</p>
+                <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{t('profile.phoneLabel')}</p>
               </div>
               {profile.phone
                 ? profile.phone_verified
-                  ? <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500"><CheckCircle className="w-3.5 h-3.5" /> Verificado</span>
-                  : <span className="text-[10px] text-gray-400 italic">Sin verificar</span>
-                : <button onClick={() => setEditingContact(true)} className="text-[10px] font-bold text-orange-500 whitespace-nowrap">+ Agregar</button>
+                  ? <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500"><CheckCircle className="w-3.5 h-3.5" /> {t('profile.verified')}</span>
+                  : <span className="text-[10px] text-gray-400 italic">{t('profile.unverified')}</span>
+                : <button onClick={() => setEditingContact(true)} className="text-[10px] font-bold text-orange-500 whitespace-nowrap">{t('profile.addPhone')}</button>
               }
             </div>
           </div>
@@ -501,24 +503,24 @@ export default function DispatcherProfilePage() {
                  style={{ background: 'rgba(59,130,246,0.12)' }}>
               <User className="w-4 h-4 text-blue-500" />
             </div>
-            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Información personal</h3>
+            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>{t('profile.personalInfo')}</h3>
           </div>
           {!editingPersonal ? (
             <button onClick={() => setEditingPersonal(true)}
               className="flex items-center gap-1 text-xs font-semibold text-blue-500 hover:text-blue-600 transition-colors">
-              <Edit3 className="w-3.5 h-3.5" /> Editar
+              <Edit3 className="w-3.5 h-3.5" /> {t('profile.edit')}
             </button>
           ) : (
             <div className="flex items-center gap-2">
               <button onClick={() => setEditingPersonal(false)}
                 className="flex items-center gap-1 text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors">
-                <X className="w-3.5 h-3.5" /> Cancelar
+                <X className="w-3.5 h-3.5" /> {t('profile.cancel')}
               </button>
               <button onClick={savePersonal} disabled={savingPersonal}
                 className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg text-white transition-colors disabled:opacity-50"
                 style={{ background: '#3b82f6' }}>
                 {savingPersonal ? <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" /> : <Save className="w-3 h-3" />}
-                Guardar
+                {t('profile.save')}
               </button>
             </div>
           )}
@@ -526,13 +528,13 @@ export default function DispatcherProfilePage() {
         {editingPersonal ? (
           <div className="space-y-3">
             <div>
-              <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Ciudad actual</label>
+              <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{t('profile.cityLabel')}</label>
               <input type="text" placeholder="Miami, FL" value={personalForm.city}
                 onChange={e => setPersonalForm(f => ({ ...f, city: e.target.value }))}
                 className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-blue-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`} />
             </div>
             <div>
-              <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Fecha de nacimiento</label>
+              <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{t('profile.dobLabel')}</label>
               <input type="date" value={personalForm.date_of_birth}
                 onChange={e => setPersonalForm(f => ({ ...f, date_of_birth: e.target.value }))}
                 className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-blue-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`} />
@@ -541,8 +543,8 @@ export default function DispatcherProfilePage() {
         ) : (
           <div className="space-y-2">
             {([
-              { icon: MapPin,   label: profile.city || '—',          sub: 'Ciudad actual' },
-              { icon: Calendar, label: profile.date_of_birth || '—', sub: 'Fecha de nacimiento' },
+              { icon: MapPin,   label: profile.city || '—',          sub: t('profile.cityLabel') },
+              { icon: Calendar, label: profile.date_of_birth || '—', sub: t('profile.dobLabel') },
             ] as { icon: React.ComponentType<{ className?: string }>; label: string; sub: string }[]).filter(row => row.label && row.label !== '—').map(row => (
               <div key={row.sub} className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
                 <row.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
@@ -555,7 +557,7 @@ export default function DispatcherProfilePage() {
             {!profile.city && !profile.date_of_birth && (
               <button onClick={() => setEditingPersonal(true)}
                 className={`w-full mt-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${dark ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-gray-200 text-gray-400 hover:bg-gray-50'}`}>
-                + Agregar información personal
+                {t('profile.addPersonalInfo')}
               </button>
             )}
           </div>
@@ -570,24 +572,24 @@ export default function DispatcherProfilePage() {
                  style={{ background: 'rgba(249,115,22,0.12)' }}>
               <Briefcase className="w-4 h-4 text-orange-500" />
             </div>
-            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Perfil profesional</h3>
+            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>{t('profile.professionalProfile')}</h3>
           </div>
           {!editingProfile ? (
             <button onClick={() => setEditingProfile(true)}
               className="flex items-center gap-1 text-xs font-semibold text-orange-500 hover:text-orange-600 transition-colors">
-              <Edit3 className="w-3.5 h-3.5" /> Editar
+              <Edit3 className="w-3.5 h-3.5" /> {t('profile.edit')}
             </button>
           ) : (
             <div className="flex items-center gap-2">
               <button onClick={() => setEditingProfile(false)}
                 className="flex items-center gap-1 text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors">
-                <X className="w-3.5 h-3.5" /> Cancelar
+                <X className="w-3.5 h-3.5" /> {t('profile.cancel')}
               </button>
               <button onClick={saveProfile} disabled={savingProfile}
                 className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg text-white transition-colors disabled:opacity-50"
                 style={{ background: '#f97316' }}>
                 {savingProfile ? <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" /> : <Save className="w-3 h-3" />}
-                Guardar
+                {t('profile.save')}
               </button>
             </div>
           )}
@@ -596,8 +598,8 @@ export default function DispatcherProfilePage() {
         {editingProfile ? (
           <div className="space-y-3">
             {([
-              { label: 'Idiomas',             key: 'languages',        placeholder: 'English, Spanish', type: 'text'   },
-              { label: 'Años de experiencia', key: 'years_experience', placeholder: '5',                type: 'number' },
+              { label: t('profile.languagesLabel'), key: 'languages',        placeholder: 'English, Spanish', type: 'text'   },
+              { label: t('profile.yearsExpLabel'),   key: 'years_experience', placeholder: '5',                type: 'number' },
             ] as { label: string; key: string; placeholder: string; type: string }[]).map(({ label, key, placeholder, type }) => (
               <div key={key}>
                 <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{label}</label>
@@ -608,7 +610,7 @@ export default function DispatcherProfilePage() {
               </div>
             ))}
             <div>
-              <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Disponibilidad</label>
+              <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{t('profile.availabilityLabel')}</label>
               <select value={profileForm.availability}
                 onChange={e => setProfileForm(f => ({ ...f, availability: e.target.value }))}
                 className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-orange-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`}>
@@ -616,7 +618,7 @@ export default function DispatcherProfilePage() {
               </select>
             </div>
             <div>
-              <label className={`block text-[10px] font-semibold mb-2 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Experiencia con equipos</label>
+              <label className={`block text-[10px] font-semibold mb-2 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{t('profile.equipmentExpLabel')}</label>
               <div className="flex flex-wrap gap-1.5">
                 {EQUIP_TYPES.map(eq => {
                   const selected = profileForm.equipment_experience.split(',').map(s => s.trim()).filter(Boolean).includes(eq);
@@ -638,9 +640,9 @@ export default function DispatcherProfilePage() {
         ) : (
           <div className="space-y-2">
             {([
-              { icon: Clock,     label: profile.availability || '—',                sub: 'Disponibilidad' },
-              { icon: Briefcase, label: profile.years_experience ? `${profile.years_experience} años` : '—', sub: 'Experiencia' },
-              { icon: Globe,     label: profile.languages || '—',                   sub: 'Idiomas' },
+              { icon: Clock,     label: profile.availability || '—',                sub: t('profile.availabilityLabel') },
+              { icon: Briefcase, label: profile.years_experience ? `${profile.years_experience} ${t('profile.yearsSuffix')}` : '—', sub: t('profile.experienceLabel') },
+              { icon: Globe,     label: profile.languages || '—',                   sub: t('profile.languagesLabel') },
             ] as { icon: React.ComponentType<{ className?: string }>; label: string; sub: string }[]).filter(row => row.label && row.label !== '—').map(row => (
               <div key={row.sub} className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
                 <row.icon className="w-4 h-4 flex-shrink-0 text-slate-400" />
@@ -652,7 +654,7 @@ export default function DispatcherProfilePage() {
             ))}
             {profile.equipment_experience && (
               <div className={`p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
-                <p className={`text-[10px] font-semibold mb-1.5 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Experiencia con equipos</p>
+                <p className={`text-[10px] font-semibold mb-1.5 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{t('profile.equipmentExpLabel')}</p>
                 <div className="flex flex-wrap gap-1">
                   {profile.equipment_experience.split(',').map(s => s.trim()).filter(Boolean).map(eq => (
                     <span key={eq} className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-orange-100 dark:bg-orange-500/15 text-orange-700 dark:text-orange-400">{eq}</span>
@@ -672,12 +674,12 @@ export default function DispatcherProfilePage() {
                style={{ background: isAdmin ? 'rgba(168,85,247,0.12)' : 'rgba(249,115,22,0.12)' }}>
             <DollarSign className="w-4 h-4" style={{ color: accent }} />
           </div>
-          <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Comisiones</h3>
+          <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>{t('profile.commissions')}</h3>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {[
-            { label: 'Cobrado',   value: `$${totalEarned.toFixed(2)}`,   color: '#22c55e' },
-            { label: 'Pendiente', value: `$${pendingEarned.toFixed(2)}`, color: '#f59e0b' },
+            { label: t('profile.collected'),    value: `$${totalEarned.toFixed(2)}`,   color: '#22c55e' },
+            { label: t('profile.pendingAmount'), value: `$${pendingEarned.toFixed(2)}`, color: '#f59e0b' },
           ].map(s => (
             <div key={s.label} className={`rounded-xl p-3 ${dark ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
               <p className="text-xs font-semibold" style={{ color: s.color }}>{s.label}</p>
@@ -695,7 +697,7 @@ export default function DispatcherProfilePage() {
                  style={{ background: 'rgba(251,191,36,0.12)' }}>
               <Award className="w-4 h-4 text-yellow-500" />
             </div>
-            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>Logros</h3>
+            <h3 className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>{t('profile.achievements')}</h3>
           </div>
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${dark ? 'bg-slate-700 text-slate-300' : 'bg-gray-100 text-gray-600'}`}>
             {unlockedCount} / {ACHIEVEMENTS.length}
@@ -722,7 +724,7 @@ export default function DispatcherProfilePage() {
                   {a.unlocked && (
                     <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
                           style={{ background: `${accent}20`, color: accent }}>
-                      UNLOCKED
+                      {t('profile.unlocked')}
                     </span>
                   )}
                 </div>
