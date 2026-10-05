@@ -7,12 +7,19 @@ import { sendDriverOnlineEmail } from '../email';
 const router = Router();
 
 const isDemo = (email?: string) => (email ?? '').endsWith('@osilogistics.com');
+// Un dispatcher demo (@osilogistics.com) debe ver SOLO choferes demo -- nunca
+// datos de clientes reales durante una demo de ventas. Un dispatcher real debe
+// ver solo sus propios choferes reales, nunca los de demo. orders.ts,
+// tracking.ts y analytics.ts ya aplican ambos lados de este filtro; aqui solo
+// se habia implementado el lado "real", dejando a los dispatchers demo ver
+// TODO (reales incluidos) -- exactamente el hueco que reporto el usuario.
 const DEMO_FILTER = "AND d.email NOT LIKE '%@osilogistics.com'";
+const DEMO_ONLY_FILTER = "AND d.email LIKE '%@osilogistics.com'";
 
 router.get('/', async (req: Request, res: Response) => {
   try {
     const { status, search } = req.query;
-    const demo = isDemo(req.user?.email);
+    const demo = req.user?.role !== 'admin' && isDemo(req.user?.email);
     let sql = `
       SELECT d.*,
              t.plate_number, t.make, t.model, t.type as truck_type,
@@ -21,7 +28,7 @@ router.get('/', async (req: Request, res: Response) => {
       FROM drivers d
       LEFT JOIN trucks t ON d.truck_id = t.id
       LEFT JOIN users u ON u.driver_id = d.id
-      WHERE 1=1 ${demo ? '' : DEMO_FILTER}
+      WHERE 1=1 ${demo ? DEMO_ONLY_FILTER : DEMO_FILTER}
         AND (u.id IS NULL OR u.approval_status NOT IN ('rejected', 'archived'))
     `;
     const params: unknown[] = [];
@@ -37,8 +44,8 @@ router.get('/', async (req: Request, res: Response) => {
 
 router.get('/stats', async (req: Request, res: Response) => {
   try {
-    const demo = isDemo(req.user?.email);
-    const f = demo ? '' : DEMO_FILTER;
+    const demo = req.user?.role !== 'admin' && isDemo(req.user?.email);
+    const f = demo ? DEMO_ONLY_FILTER : DEMO_FILTER;
     const activeF = `AND (u.id IS NULL OR u.approval_status NOT IN ('rejected', 'archived'))`;
     const [total, available, busy, on_break, offline, avg, top] = await Promise.all([
       queryOne<{c:number}>(`SELECT COUNT(*) as c FROM drivers d LEFT JOIN users u ON u.driver_id = d.id WHERE 1=1 ${f} ${activeF}`),
@@ -59,7 +66,7 @@ router.get('/stats', async (req: Request, res: Response) => {
 
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const driver = await queryOne(`
+    const driver = await queryOne<{ email?: string }>(`
       SELECT d.*, t.plate_number, t.make, t.model, t.type as truck_type, t.fuel_level,
              u.payout_method, u.payout_details
       FROM drivers d
@@ -68,6 +75,13 @@ router.get('/:id', async (req: Request, res: Response) => {
       WHERE d.id = ?
     `, [req.params.id]);
     if (!driver) return res.status(404).json({ error: 'Driver not found' });
+    // Mismo limite demo/real que la lista -- sin esto, cualquiera podia ver el
+    // detalle (incluido metodo y datos de pago) de un chofer del otro lado
+    // solo con su ID, aunque nunca apareciera en su propia lista. Admin queda
+    // exento, igual que en la lista.
+    if (req.user?.role !== 'admin' && isDemo(req.user?.email) !== isDemo(driver.email)) {
+      return res.status(404).json({ error: 'Driver not found' });
+    }
 
     const [recentOrders, trackingHistory] = await Promise.all([
       query('SELECT id, order_number, customer_name, status, delivery_address, created_at, delivered_at FROM orders WHERE driver_id = ? ORDER BY created_at DESC LIMIT 10', [req.params.id]),
