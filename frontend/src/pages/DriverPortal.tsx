@@ -23,6 +23,7 @@ import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from 'date-fns';
 import { getSocket } from '../services/socket';
 import Map3D from '../components/Map3D';
+import { playNotificationPing, playSuccessChime } from '../utils/sounds';
 
 function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -707,26 +708,50 @@ export default function DriverPortal() {
   // link solo abria el portal pero nunca mostraba la orden en si (el driver se quedaba
   // viendo la pantalla general sin saber cual orden era la nueva).
   const [highlightOrderId, setHighlightOrderId] = useState<string | null>(null);
+  const [orderNotFoundMsg, setOrderNotFoundMsg] = useState<string | null>(null);
   useEffect(() => {
     if (loading) return;
     const params = new URLSearchParams(window.location.search);
     const targetId = params.get('order');
     if (!targetId) return;
+
+    const clearParam = () => {
+      params.delete('order');
+      const rest = params.toString();
+      window.history.replaceState({}, '', window.location.pathname + (rest ? '?' + rest : ''));
+    };
+
     const inActive = activeOrders.some(o => o.id === targetId);
     const inDelivered = deliveredToday.some(o => o.id === targetId);
-    if (!inActive && !inDelivered) return;
-    setTab(inActive ? 'active' : 'delivered');
-    setHighlightOrderId(targetId);
-    // Limpia el parametro para que no se vuelva a disparar en cada re-render/poll
-    params.delete('order');
-    const rest = params.toString();
-    window.history.replaceState({}, '', window.location.pathname + (rest ? '?' + rest : ''));
-    setTimeout(() => {
-      document.getElementById(`order-${targetId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 300);
-    const t = setTimeout(() => setHighlightOrderId(null), 6000);
-    return () => clearTimeout(t);
-  }, [loading, activeOrders, deliveredToday]);
+    if (inActive || inDelivered) {
+      setTab(inActive ? 'active' : 'delivered');
+      setHighlightOrderId(targetId);
+      clearParam();
+      setTimeout(() => {
+        document.getElementById(`order-${targetId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+      const t = setTimeout(() => setHighlightOrderId(null), 6000);
+      return () => clearTimeout(t);
+    }
+
+    // Una oferta todavia sin aceptar no vive en activeOrders/deliveredToday --
+    // vive en pendingOffer (lo llena checkActiveOffer(), que corre aparte). Si
+    // coincide, el modal de oferta ya se muestra solo, no hace falta nada mas.
+    if (pendingOffer?.id === targetId) {
+      clearParam();
+      return;
+    }
+
+    // Ni esta en las ordenes del driver ni es la oferta pendiente -- dale un
+    // respiro a checkActiveOffer()/fetchOrders() para terminar de cargar antes
+    // de darla por perdida (evita un falso "ya no esta disponible" en el
+    // primer render, mientras las llamadas iniciales todavia estan en vuelo).
+    const giveUp = setTimeout(() => {
+      setOrderNotFoundMsg('Esta oferta u orden ya no está disponible -- probablemente expiró o fue tomada por otro conductor.');
+      clearParam();
+    }, 4000);
+    return () => clearTimeout(giveUp);
+  }, [loading, activeOrders, deliveredToday, pendingOffer]);
 
   useEffect(() => {
     if (driver?.status) setDriverStatus(driver.status as DriverStatus);
@@ -877,6 +902,7 @@ export default function DriverPortal() {
     socket.on('order_updated', () => fetchOrders());
     socket.on('driver:notification', (notif: DriverNotif) => {
       setDriverNotifs(prev => [notif, ...prev]);
+      playNotificationPing();
     });
     socket.on('driver:offer', (offer: Order) => {
       setPendingOffer(offer);
@@ -1415,6 +1441,20 @@ export default function DriverPortal() {
         <div className="px-4 pt-3 pb-4">
           <div className="max-w-lg mx-auto">
 
+            {orderNotFoundMsg && (
+              <div className="mb-3 rounded-2xl px-4 py-3.5 bg-amber-500/10 border border-amber-500/25 flex items-start gap-3">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-amber-500/20 text-amber-300">
+                  <AlertTriangle className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-white">Esa oferta ya no está</p>
+                  <p className="text-xs mt-0.5 text-slate-300">{orderNotFoundMsg}</p>
+                </div>
+                <button onClick={() => setOrderNotFoundMsg(null)} className="p-1 rounded flex-shrink-0 text-slate-400 hover:bg-white/10">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
             <NotificationBlockedBanner />
             <InstallAppBanner dismissKey="osi_install_banner_dismissed_driver" variant="dark" />
 
@@ -3014,6 +3054,7 @@ export default function DriverPortal() {
                         // driver de una vez y refresca la pantalla para que el "Balance
                         // pendiente" baje a $0 sin que el conductor tenga que recargar.
                         if (driverId) billingApi.settleAll(driverId).catch(() => {}).finally(() => fetchBilling());
+                        playSuccessChime();
                         setPaySuccess(true);
                       }}
                       onCancel={() => setShowPayModal(false)}

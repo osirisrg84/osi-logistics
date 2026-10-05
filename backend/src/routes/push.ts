@@ -12,19 +12,34 @@ webpush.setVapidDetails('mailto:admin@osilogistics.com', VAPID_PUBLIC, VAPID_PRI
 
 type StoredSub = { endpoint: string; p256dh: string; auth: string };
 
+// Antes cualquier fallo que no fuera 404/410 se tragaba en silencio -- no habia
+// forma de saber POR QUE un push nunca llegaba (VAPID mal configurado, payload
+// invalido, limite de tamano excedido, etc.). Ahora cada intento se loguea con
+// su resultado para poder diagnosticar desde los logs de Render.
 async function sendToSubscriptions(subs: StoredSub[], payload: object): Promise<void> {
+  if (subs.length === 0) {
+    console.warn('[Push] No hay suscripciones registradas para este envio -- el driver nunca activo las notificaciones push (o su suscripcion se invalido).');
+    return;
+  }
   const data = JSON.stringify(payload);
-  await Promise.all(subs.map(async (s) => {
+  const results = await Promise.all(subs.map(async (s) => {
     try {
       await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, data);
+      return { ok: true };
     } catch (e) {
-      const statusCode = (e as { statusCode?: number })?.statusCode;
+      const err = e as { statusCode?: number; body?: string; message?: string };
       // 404/410 = the browser/OS invalidated this subscription — stop trying it.
-      if (statusCode === 404 || statusCode === 410) {
+      if (err.statusCode === 404 || err.statusCode === 410) {
         await exec('DELETE FROM push_subscriptions WHERE endpoint = ?', [s.endpoint]);
+        console.warn(`[Push] Suscripcion invalida (${err.statusCode}), eliminada: ${s.endpoint.slice(0, 60)}...`);
+      } else {
+        console.error(`[Push] Fallo al enviar (status ${err.statusCode ?? 'n/a'}): ${err.body ?? err.message ?? e}`);
       }
+      return { ok: false };
     }
   }));
+  const sent = results.filter(r => r.ok).length;
+  console.log(`[Push] Enviado a ${sent}/${subs.length} suscripciones.`);
 }
 
 export async function sendPushToAll(payload: object): Promise<void> {
@@ -35,6 +50,7 @@ export async function sendPushToAll(payload: object): Promise<void> {
 export async function sendPushToDriver(driverId: string, payload: object): Promise<void> {
   if (!driverId) return;
   const subs = await query<StoredSub>('SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE driver_id = ?', [driverId]);
+  console.log(`[Push] Enviando oferta a driver ${driverId}: ${subs.length} suscripcion(es) encontrada(s).`);
   await sendToSubscriptions(subs, payload);
 }
 

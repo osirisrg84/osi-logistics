@@ -523,6 +523,34 @@ export async function sendDriverOnlineEmail(to: string, dispatcherName: string, 
   });
 }
 
+export async function sendPasswordResetEmail(to: string, name: string, code: string) {
+  await sendEmail({
+    from: FROM,
+    to,
+    subject: `Restablecer contraseña — código: ${code}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;background:#f1f5f9;padding:32px 16px;">
+        <div style="background:#0f172a;border-radius:12px 12px 0 0;padding:20px 32px;text-align:center;">
+          <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;letter-spacing:1px;">OSI Logistics</h1>
+        </div>
+        <div style="background:#fff;border-radius:0 0 12px 12px;padding:32px;border:1px solid #e2e8f0;border-top:none;">
+          <h2 style="color:#111827;margin:0 0 8px;font-size:18px;">Hola, ${name}</h2>
+          <p style="color:#374151;line-height:1.6;margin:0 0 28px;">
+            Solicitaste restablecer tu contraseña. Usa este código para continuar:
+          </p>
+          <div style="background:#2563eb;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
+            <span style="color:#fff;font-size:40px;font-weight:800;letter-spacing:10px;">${code}</span>
+          </div>
+          <p style="color:#6b7280;font-size:13px;text-align:center;margin:0;">
+            Válido por <strong>15 minutos</strong>. Si no pediste este cambio, ignora este correo — tu contraseña actual sigue funcionando.
+          </p>
+        </div>
+        <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px;">© OSI Logistics · Miami, FL</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendVerificationCode(to: string, name: string, code: string, type: 'email' | 'phone', role = 'driver') {
   const label = type === 'email' ? 'correo electrónico' : 'número de teléfono';
   const accent = role === 'admin' ? '#4f46e5' : role === 'dispatcher' ? '#f97316' : '#2563eb';

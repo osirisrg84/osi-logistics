@@ -3,7 +3,7 @@ import { scryptSync, randomBytes, timingSafeEqual } from 'node:crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne } from '../database';
 import { appEvents } from '../events';
-import { sendVerificationCode, sendNewDriverRegistrationEmail } from '../email';
+import { sendVerificationCode, sendNewDriverRegistrationEmail, sendPasswordResetEmail } from '../email';
 import { sendSmsCode } from '../sms';
 import { getFirebaseAdmin } from '../firebase-admin';
 
@@ -418,6 +418,59 @@ router.put('/change-password', async (req: Request, res: Response) => {
 
     res.json({ success: true });
   } catch { res.status(500).json({ error: 'Error al cambiar contraseña' }); }
+});
+
+// ── Forgot password (logged out, no session yet) ──────────────────
+// Siempre responde igual exista o no la cuenta, para no filtrar que emails
+// estan registrados.
+router.post('/forgot-password', async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body as { email?: string };
+    if (!email) return res.status(400).json({ error: 'Email requerido' });
+
+    const user = await queryOne<{ id: string; name: string; active: number }>(
+      'SELECT id, name, active FROM users WHERE email = ?', [email.toLowerCase().trim()]
+    );
+    if (user && user.active) {
+      const code = String(Math.floor(100000 + Math.random() * 900000));
+      const expires = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+      await exec("DELETE FROM verification_codes WHERE user_id = ? AND type = 'password_reset'", [user.id]);
+      await exec(
+        "INSERT INTO verification_codes (id, user_id, code, type, expires_at, used) VALUES (?, ?, ?, 'password_reset', ?, 0)",
+        [uuidv4(), user.id, code, expires]
+      );
+      sendPasswordResetEmail(email.toLowerCase().trim(), user.name, code).catch(() => {});
+    }
+    res.json({ sent: true, message: 'Si existe una cuenta con ese correo, te enviamos un código para restablecer la contraseña.' });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+// ── Reset password with the emailed code ───────────────────────────
+router.post('/reset-password', async (req: Request, res: Response) => {
+  try {
+    const { email, code, new_password } = req.body as { email?: string; code?: string; new_password?: string };
+    if (!email || !code || !new_password) return res.status(400).json({ error: 'Completa todos los campos' });
+    if (new_password.length < 8) return res.status(400).json({ error: 'Mínimo 8 caracteres' });
+
+    const user = await queryOne<{ id: string }>('SELECT id FROM users WHERE email = ?', [email.toLowerCase().trim()]);
+    if (!user) return res.status(400).json({ error: 'Código incorrecto o expirado' });
+
+    const row = await queryOne<{ id: string; code: string; expires_at: string }>(
+      "SELECT * FROM verification_codes WHERE user_id = ? AND type = 'password_reset' AND used = 0 ORDER BY expires_at DESC LIMIT 1",
+      [user.id]
+    );
+    if (!row || row.code !== String(code).trim() || new Date(row.expires_at) < new Date()) {
+      return res.status(400).json({ error: 'Código incorrecto o expirado' });
+    }
+
+    const newSalt = randomBytes(16).toString('hex');
+    const newHash = hashPassword(new_password, newSalt);
+    await exec('UPDATE users SET password_hash = ?, salt = ? WHERE id = ?', [newHash, newSalt, user.id]);
+    await exec("UPDATE verification_codes SET used = 1 WHERE id = ?", [row.id]);
+    await exec('DELETE FROM sessions WHERE user_id = ?', [user.id]);
+
+    res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Error al restablecer la contraseña' }); }
 });
 
 // One-time admin creation — no secret needed if zero admins exist, otherwise requires ADMIN_SETUP_SECRET

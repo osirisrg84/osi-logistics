@@ -9,6 +9,7 @@ import { getSocket } from '../services/socket';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { formatDistanceToNow } from 'date-fns';
+import { playNotificationPing } from '../utils/sounds';
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -214,6 +215,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
     socket.on('notification', (notif: Notification) => {
       setNotifications(prev => [notif, ...prev].slice(0, 50));
       setUnread(prev => prev + 1);
+      playNotificationPing();
     });
     return () => { socket.off('notification'); };
   }, []);
