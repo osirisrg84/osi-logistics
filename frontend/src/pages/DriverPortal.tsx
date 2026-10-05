@@ -118,6 +118,70 @@ const DOC_TYPES: { value: OrderDocument['type']; label: string }[] = [
   { value: 'other',         label: ORDER_DOCUMENT_TYPE_LABELS.other },
 ];
 
+function DriverRateCon({ orderId }: { orderId: string }) {
+  const [rateCon, setRateCon] = useState<{ filename: string; uploaded_at: string } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    ordersApi.getRateCon(orderId)
+      .then(({ data }) => setRateCon(data))
+      .catch(() => setRateCon(null))
+      .finally(() => setLoading(false));
+  }, [orderId]);
+
+  const handleFile = async (file: File) => {
+    setError('');
+    if (file.size > 8 * 1024 * 1024) { setError('El archivo no puede superar 8MB'); return; }
+    setUploading(true);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      const { data } = await ordersApi.uploadRateCon(orderId, { filename: file.name, data: base64 });
+      setRateCon({ filename: data.filename, uploaded_at: data.uploaded_at });
+    } catch {
+      setError('Error al subir el archivo');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  if (loading) return null;
+
+  return (
+    <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/30 rounded-xl p-3 space-y-2">
+      <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 flex items-center gap-1.5">
+        <FileText className="w-3.5 h-3.5 text-amber-500" /> Rate Confirmation
+      </p>
+      {rateCon ? (
+        <div className="flex items-center justify-between gap-2 bg-white dark:bg-slate-700 rounded-lg px-2.5 py-1.5 border border-amber-100 dark:border-amber-800/30">
+          <p className="text-xs text-gray-700 dark:text-slate-300 truncate">{rateCon.filename}</p>
+          <label className="text-[10px] font-semibold text-amber-600 hover:text-amber-700 flex-shrink-0 cursor-pointer">
+            {uploading ? '...' : 'Reemplazar'}
+            <input ref={fileInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" disabled={uploading}
+              onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
+          </label>
+        </div>
+      ) : (
+        <label className="flex items-center justify-center gap-1.5 cursor-pointer px-3 py-2 rounded-lg border-2 border-dashed border-amber-300 dark:border-amber-700 hover:border-amber-400 transition-colors text-xs font-semibold text-amber-600 dark:text-amber-400">
+          {uploading ? <div className="w-3.5 h-3.5 border-2 border-amber-300 border-t-amber-600 rounded-full animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+          Subir Rate Confirmation (PDF, JPG, PNG)
+          <input ref={fileInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" disabled={uploading}
+            onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
+        </label>
+      )}
+      {error && <p className="text-[10px] text-red-500">{error}</p>}
+    </div>
+  );
+}
+
 function OrderDocuments({ orderId }: { orderId: string }) {
   const [docs, setDocs] = useState<OrderDocument[]>([]);
   const [loading, setLoading] = useState(true);
@@ -288,7 +352,7 @@ function OrderCard({ order, onStatusUpdate, highlighted }: { order: Order; onSta
         </div>
         <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
           <p className="text-xs text-gray-400 dark:text-slate-500">Created</p>
-          <p className="text-xs font-medium text-gray-900 dark:text-slate-100">{formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}</p>
+          <p className="text-xs font-medium text-gray-900 dark:text-slate-100 break-words">{formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}</p>
         </div>
         <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
           <p className="text-xs text-gray-400 dark:text-slate-500">ETA</p>
@@ -331,6 +395,7 @@ function OrderCard({ order, onStatusUpdate, highlighted }: { order: Order; onSta
         </div>
       )}
 
+      {order.status !== 'cancelled' && <DriverRateCon orderId={order.id} />}
       {order.status !== 'cancelled' && <OrderDocuments orderId={order.id} />}
 
       {flow && order.status !== 'delivered' && order.status !== 'cancelled' && (

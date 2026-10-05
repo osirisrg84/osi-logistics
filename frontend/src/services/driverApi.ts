@@ -47,6 +47,8 @@ export const ordersApi = {
   uploadDocument:  (id: string, data: { type: string; filename: string; data: string }) =>
     api.post(`/orders/${id}/documents`, data),
   deleteDocument:  (id: string, docId: string) => api.delete(`/orders/${id}/documents/${docId}`),
+  getRateCon:      (id: string) => api.get(`/orders/${id}/rate-con`),
+  uploadRateCon:   (id: string, data: { filename: string; data: string }) => api.post(`/orders/${id}/rate-con`, data),
 };
 
 export const driversApi = {

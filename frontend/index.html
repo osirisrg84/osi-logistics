@@ -1,7 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" translate="no">
   <head>
     <meta charset="UTF-8" />
+    <!-- Evita que Chrome traduzca la pagina automaticamente -- el traductor
+    confundio "Susmary" (nombre real de una dispatcher) con un typo de
+    "summary" y lo mostro como "Resumen", y antes hizo lo mismo con la marca
+    "Stripe" mostrandola como "Raya". Nombres, precios y otros datos reales
+    nunca deben pasar por una traduccion automatica. -->
+    <meta name="google" content="notranslate" />
     <link rel="icon" type="image/png" href="/favicon-32.png" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest-dispatch.webmanifest" />
@@ -31,6 +37,16 @@
     fbq('track', 'PageView');
     </script>
     <!-- End Meta Pixel Code -->
+
+    <!-- Google Analytics 4 (OSI Logistics - App) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V95GQZFEGY"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-V95GQZFEGY');
+    </script>
+    <!-- End Google Analytics 4 -->
   <style>
     #pre-loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;z-index:99999;transition:opacity .25s}
     #pre-loader.done{opacity:0;pointer-events:none}
