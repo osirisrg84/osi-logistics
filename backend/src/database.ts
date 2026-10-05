@@ -415,7 +415,17 @@ export async function initDatabase(): Promise<void> {
   await seedCommissions();
   await seedHistoricalOrders();
   await initCommissions();
+  // Fuerza un refresh demo mas, una sola vez, para que el fix de
+  // estimated_delivery (antes quedaba desfasado tras el primer refresh,
+  // dando un On-Time Rate practicamente al azar) se aplique hoy mismo en
+  // vez de esperar al rollover de manana.
+  const estFixFlag = await queryOne<{ value: string }>("SELECT value FROM meta WHERE key = 'estimated_delivery_refetch_v1'");
+  if (!estFixFlag) {
+    await exec("DELETE FROM meta WHERE key = 'demo_refreshed_at'");
+    await exec("INSERT OR REPLACE INTO meta (key, value) VALUES ('estimated_delivery_refetch_v1', '1')");
+  }
   await refreshDemoData();
+  await syncDemoDriverStatus();
 }
 
 async function seedHistoricalOrders(): Promise<void> {
@@ -521,6 +531,25 @@ async function seedHistoricalOrders(): Promise<void> {
   console.log(`✅ ${counter - 1} historical orders seeded for analytics`);
 }
 
+// Sincroniza el status "en vivo" (busy/available) de los drivers demo con
+// las ordenes demo activas que tienen asignadas ahora mismo. Se llama en
+// cada boot, no solo en el refresh diario de refreshDemoData(), porque
+// antes el status se quedaba fijo en lo que el seed inicial puso (3 busy /
+// 3 available) sin relacion con cuantas ordenes activas tiene cada uno,
+// haciendo que el dashboard mostrara p.ej. "9 en transito" pero solo
+// "1 driver activo".
+async function syncDemoDriverStatus(): Promise<void> {
+  await exec("UPDATE drivers SET status = 'available' WHERE email LIKE '%@osilogistics.com'");
+  await exec(`
+    UPDATE drivers SET status = 'busy'
+    WHERE email LIKE '%@osilogistics.com'
+      AND id IN (
+        SELECT driver_id FROM orders
+        WHERE order_number LIKE 'OSI-H%' AND status IN ('assigned','picked_up','in_transit') AND driver_id IS NOT NULL
+      )
+  `);
+}
+
 async function refreshDemoData(): Promise<void> {
   const today = new Date().toISOString().slice(0, 10);
   const last = await queryOne<{ value: string }>("SELECT value FROM meta WHERE key = 'demo_refreshed_at'");
@@ -555,15 +584,23 @@ async function refreshDemoData(): Promise<void> {
 
     if (isDelivered) {
       const deliveredAt = new Date(base.getTime() + (3 + (i % 4)) * 3600000);
+      // estimated_delivery vive junto a created_at/delivered_at -- antes se
+      // dejaba con el valor del seed original (sin re-fechar), asi que tras
+      // el primer refresh quedaba desalineado con las fechas nuevas y el
+      // On-Time Rate del dashboard salia practicamente al azar. Ventana de
+      // 5h (vs el delivered_at de 3-6h de arriba) deja ~75% a tiempo, un
+      // numero creible para un "negocio activo".
+      const estimatedAt = new Date(base.getTime() + 5 * 3600000);
       await exec(`UPDATE orders SET
         status='delivered', created_at=?, assigned_at=?, picked_up_at=?, in_transit_at=?,
-        delivered_at=?, dispatcher_user_id=?
+        delivered_at=?, estimated_delivery=?, dispatcher_user_id=?
         WHERE id=?`, [
         base.toISOString(),
         new Date(base.getTime() + 25 * 60000).toISOString(),
         new Date(base.getTime() + 85 * 60000).toISOString(),
         new Date(base.getTime() + 115 * 60000).toISOString(),
         deliveredAt.toISOString(),
+        estimatedAt.toISOString(),
         mgUser?.id ?? null,
         orders[i].id,
       ]);
@@ -590,6 +627,7 @@ async function refreshDemoData(): Promise<void> {
       await exec("DELETE FROM commissions WHERE order_id=? AND status != 'settled'", [orders[i].id]);
     }
   }
+
   await exec("INSERT OR REPLACE INTO meta (key, value) VALUES ('demo_refreshed_at', ?)", [today]);
   console.log(`✅ Demo refreshed: ${DELIVERED_COUNT} delivered, ${total - DELIVERED_COUNT} active orders`);
 }

@@ -177,7 +177,7 @@ export default function Dashboard() {
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-slate-400">Delivered Today</p>
-            <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{orderStats.delivered || 0}</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{orderStats.delivered_today || 0}</p>
           </div>
         </div>
         <div className="card flex items-center gap-4">

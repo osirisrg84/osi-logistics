@@ -86,7 +86,7 @@ router.get('/stats', async (req: Request, res: Response) => {
   try {
     const authReqS = req as AuthRequest;
     const f = getOrderFilter(authReqS.user?.email, authReqS.user?.role, authReqS.user?.id, authReqS.user?.driver_id);
-    const [total, pending, assigned, in_transit, delivered, cancelled, today, revenue, avgRow] = await Promise.all([
+    const [total, pending, assigned, in_transit, delivered, cancelled, today, deliveredToday, revenue, avgRow] = await Promise.all([
       queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE 1=1 ${f}`),
       queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE o.status = 'pending' ${f}`),
       queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE o.status = 'assigned' ${f}`),
@@ -94,13 +94,14 @@ router.get('/stats', async (req: Request, res: Response) => {
       queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE o.status = 'delivered' ${f}`),
       queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE o.status = 'cancelled' ${f}`),
       queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE date(o.created_at) = date('now') ${f}`),
+      queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders o WHERE o.status = 'delivered' AND date(o.delivered_at) = date('now') ${f}`),
       queryOne<{r:number}>(`SELECT COALESCE(SUM(o.price),0) as r FROM orders o WHERE o.status = 'delivered' ${f}`),
       queryOne<{avg:number|null}>(`SELECT AVG((julianday(o.delivered_at) - julianday(o.picked_up_at)) * 24) as avg FROM orders o WHERE o.delivered_at IS NOT NULL AND o.picked_up_at IS NOT NULL ${f}`),
     ]);
     res.json({
       total: total?.c ?? 0, pending: pending?.c ?? 0, assigned: assigned?.c ?? 0,
       in_transit: in_transit?.c ?? 0, delivered: delivered?.c ?? 0, cancelled: cancelled?.c ?? 0,
-      today: today?.c ?? 0, revenue: revenue?.r ?? 0,
+      today: today?.c ?? 0, delivered_today: deliveredToday?.c ?? 0, revenue: revenue?.r ?? 0,
       avg_delivery_time: avgRow?.avg ?? 0,
     });
   } catch { res.status(500).json({ error: 'Failed' }); }
