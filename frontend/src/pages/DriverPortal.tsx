@@ -2913,12 +2913,12 @@ export default function DriverPortal() {
                 ? 'bg-gradient-to-br from-slate-800 to-slate-900 text-white'
                 : 'bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-300'
             }`}>
-              <p className={`text-base font-semibold mb-1 ${dark ? 'text-slate-300' : 'text-slate-600'}`}>Balance pendiente</p>
+              <p className={`text-base font-semibold mb-1 ${dark ? 'text-slate-300' : 'text-slate-600'}`}>{t('driverPortal.pendingBalance')}</p>
               <p className={`text-3xl font-bold ${dark ? 'text-yellow-400' : 'text-orange-500'}`}>${billingSummary.pending.toFixed(2)}</p>
-              <p className={`text-xs mt-2 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Por cada carga entregada, OSI toma solo el <span className={`font-semibold ${dark ? 'text-slate-300' : 'text-slate-600'}`}>7%</span></p>
+              <p className={`text-xs mt-2 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>{t('driverPortal.osiTakesOnly')} <span className={`font-semibold ${dark ? 'text-slate-300' : 'text-slate-600'}`}>7%</span></p>
               <div className="mt-4 space-y-1.5">
                 <div className="flex justify-between text-xs">
-                  <span className={dark ? 'text-slate-400' : 'text-slate-500'}>Progreso de pago</span>
+                  <span className={dark ? 'text-slate-400' : 'text-slate-500'}>{t('driverPortal.paymentProgress')}</span>
                   <span className={`font-medium ${dark ? 'text-white' : 'text-slate-700'}`}>
                     {billingSummary.total_charged > 0 ? Math.round((billingSummary.settled / billingSummary.total_charged) * 100) : 0}%
                   </span>
@@ -2930,8 +2930,8 @@ export default function DriverPortal() {
                   />
                 </div>
                 <div className="flex justify-between text-[10px] pt-0.5">
-                  <span className={dark ? 'text-slate-500' : 'text-slate-400'}>Pagado: <span className="text-green-500 font-semibold">${billingSummary.settled.toFixed(2)}</span></span>
-                  <span className={dark ? 'text-slate-500' : 'text-slate-400'}>Total: <span className={`font-semibold ${dark ? 'text-slate-300' : 'text-slate-600'}`}>${billingSummary.total_charged.toFixed(2)}</span></span>
+                  <span className={dark ? 'text-slate-500' : 'text-slate-400'}>{t('driverPortal.paid')}: <span className="text-green-500 font-semibold">${billingSummary.settled.toFixed(2)}</span></span>
+                  <span className={dark ? 'text-slate-500' : 'text-slate-400'}>{t('driverPortal.total')}: <span className={`font-semibold ${dark ? 'text-slate-300' : 'text-slate-600'}`}>${billingSummary.total_charged.toFixed(2)}</span></span>
                 </div>
               </div>
               {billingSummary.pending > 0 && (
@@ -2939,13 +2939,13 @@ export default function DriverPortal() {
                   onClick={openPayModal}
                   className="mt-4 w-full bg-green-500 hover:bg-green-400 active:scale-95 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
                 >
-                  <CreditCard className="w-4 h-4" /> Realizar Pago
+                  <CreditCard className="w-4 h-4" /> {t('driverPortal.makePayment')}
                 </button>
               )}
               {billingSummary.pending === 0 && billingSummary.total_charged > 0 && (
                 <div className="mt-4 flex items-center justify-center gap-2 bg-green-500/10 border border-green-500/30 rounded-xl py-2.5">
                   <ShieldCheck className="w-4 h-4 text-green-400" />
-                  <span className="text-sm font-semibold text-green-400">Al día con OSI ✓</span>
+                  <span className="text-sm font-semibold text-green-400">{t('driverPortal.upToDateWithOsi')}</span>
                 </div>
               )}
             </div>
@@ -2956,23 +2956,23 @@ export default function DriverPortal() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Wallet className="w-4 h-4 text-green-500" />
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Método de Pago</h3>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('driverPortal.paymentMethod')}</h3>
               </div>
               {!editingPayout ? (
                 <button onClick={() => setEditingPayout(true)}
                   className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400 font-semibold hover:text-green-700 dark:hover:text-green-300 transition-colors">
-                  <Edit3 className="w-3.5 h-3.5" /> {payoutMethod ? 'Editar' : 'Configurar'}
+                  <Edit3 className="w-3.5 h-3.5" /> {payoutMethod ? t('driverPortal.edit') : t('driverPortal.setUp')}
                 </button>
               ) : (
                 <div className="flex items-center gap-2">
                   <button onClick={() => setEditingPayout(false)}
                     className="text-xs text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition-colors">
-                    Cancelar
+                    {t('driverPortal.cancel')}
                   </button>
                   <button onClick={savePayout} disabled={savingPayout}
                     className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors disabled:opacity-50">
                     {savingPayout && <div className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" />}
-                    Guardar
+                    {t('driverPortal.save')}
                   </button>
                 </div>
               )}
@@ -2993,10 +2993,10 @@ export default function DriverPortal() {
                   <div className="w-10 h-10 bg-gray-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-2">
                     <Wallet className="w-5 h-5 text-gray-300 dark:text-slate-600" />
                   </div>
-                  <p className="text-xs text-gray-400 dark:text-slate-500">No tienes un método de pago configurado</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500">{t('driverPortal.noPayoutMethodSet')}</p>
                   <button onClick={() => setEditingPayout(true)}
                     className="mt-2.5 text-xs font-semibold text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors">
-                    + Configurar ahora
+                    {t('driverPortal.setUpNow')}
                   </button>
                 </div>
               )
@@ -3056,13 +3056,13 @@ export default function DriverPortal() {
 
           {/* Records */}
           <div>
-            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide px-1 mb-2">Historial de pagos</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide px-1 mb-2">{t('driverPortal.paymentHistory')}</p>
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden">
               {billingRows.length === 0 ? (
                 <div className="py-10 text-center">
                   <Wallet className="w-10 h-10 text-gray-200 dark:text-slate-700 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500 dark:text-slate-400">Todo al día 👍</p>
-                  <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">Aquí aparecerán los cobros cuando entregues cargas</p>
+                  <p className="text-sm text-gray-500 dark:text-slate-400">{t('driverPortal.allCaughtUp')}</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{t('driverPortal.chargesAppearHint')}</p>
                 </div>
               ) : (
                 <div className="divide-y divide-gray-50 dark:divide-slate-700/50">
@@ -3073,7 +3073,7 @@ export default function DriverPortal() {
                         <div>
                           <p className="text-sm font-semibold text-gray-900 dark:text-white">{r.order_number}</p>
                           <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-                            ${r.order_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} rate · 7% = <span className="font-semibold text-gray-600 dark:text-slate-300">${r.driver_charge.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            ${r.order_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {t('driverPortal.ratePercent')} <span className="font-semibold text-gray-600 dark:text-slate-300">${r.driver_charge.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                           </p>
                         </div>
                       </div>
@@ -3082,7 +3082,7 @@ export default function DriverPortal() {
                           ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                           : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
                       }`}>
-                        {r.status === 'settled' ? '✓ Pagado' : 'Pendiente'}
+                        {r.status === 'settled' ? t('driverPortal.paidStatus') : t('driverPortal.pendingStatus')}
                       </span>
                     </div>
                   ))}
@@ -3104,18 +3104,18 @@ export default function DriverPortal() {
                 <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                   <ShieldCheck className="w-8 h-8 text-green-500" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">¡Pago enviado!</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{t('driverPortal.paymentSentTitle')}</h3>
                 <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">
-                  <span className="font-semibold text-green-600">${parseFloat(payAmount || '0').toFixed(2)}</span> procesado correctamente
+                  <span className="font-semibold text-green-600">${parseFloat(payAmount || '0').toFixed(2)}</span> {t('driverPortal.processedSuccessfully')}
                 </p>
                 <p className="text-xs text-gray-400 dark:text-slate-500 mb-6">
-                  {payTab === 'card' ? 'Tu balance quedó al día.' : 'OSI Logistics recibirá la confirmación en breve.'}
+                  {payTab === 'card' ? t('driverPortal.balanceUpToDate') : t('driverPortal.osiWillReceiveConfirmation')}
                 </p>
                 <button
                   onClick={() => setShowPayModal(false)}
                   className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-2xl transition-colors"
                 >
-                  Cerrar
+                  {t('driverPortal.close')}
                 </button>
               </div>
             ) : (
@@ -3123,8 +3123,8 @@ export default function DriverPortal() {
                 {/* Header */}
                 <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-gray-100 dark:border-slate-700">
                   <div>
-                    <h3 className="text-base font-bold text-gray-900 dark:text-white">Realizar Pago a OSI</h3>
-                    <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Selecciona método y monto</p>
+                    <h3 className="text-base font-bold text-gray-900 dark:text-white">{t('driverPortal.makePaymentToOsi')}</h3>
+                    <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{t('driverPortal.selectMethodAndAmount')}</p>
                   </div>
                   <button onClick={() => setShowPayModal(false)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
                     <X className="w-4 h-4 text-gray-400" />
@@ -3134,7 +3134,7 @@ export default function DriverPortal() {
                 <div className="p-5 space-y-4">
                   {/* Amount input */}
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Monto a pagar</label>
+                    <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">{t('driverPortal.amountToPay')}</label>
                     <div className="relative mt-1.5">
                       <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">$</span>
                       <input
@@ -3148,7 +3148,7 @@ export default function DriverPortal() {
                     </div>
                     {billingSummary && parseFloat(payAmount) > 0 && (
                       <p className="text-xs text-gray-400 dark:text-slate-500 mt-1 px-1">
-                        Balance pendiente: <span className="font-semibold text-yellow-500">${billingSummary.pending.toFixed(2)}</span>
+                        {t('driverPortal.pendingBalanceColon')} <span className="font-semibold text-yellow-500">${billingSummary.pending.toFixed(2)}</span>
                       </p>
                     )}
                   </div>
