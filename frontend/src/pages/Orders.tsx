@@ -957,7 +957,7 @@ export default function Orders() {
             <option value="">All Status</option>
             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
           </select>
-          <select className="input w-full sm:w-24" value={pageSize} onChange={e => setPageSize(Number(e.target.value))}>
+          <select className="input w-full sm:w-28" value={pageSize} onChange={e => setPageSize(Number(e.target.value))}>
             <option value={25}>25 / page</option>
             <option value={50}>50 / page</option>
             <option value={100}>100 / page</option>
