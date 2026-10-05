@@ -388,10 +388,17 @@ export async function initDatabase(): Promise<void> {
 }
 
 async function seedHistoricalOrders(): Promise<void> {
+  // ~5-8 ordenes/dia durante 28 dias para que el dashboard demo se vea como un
+  // negocio con movimiento constante -- antes esto generaba apenas 1-5/dia
+  // (~90 en total), una base tan delgada que la actividad real de un dia de
+  // pruebas se veia como un pico descomunal al final del grafico. Topa en vez
+  // de solo-si-esta-vacio para que una base existente mas chica tambien suba.
+  const TARGET_TOTAL = 200;
   const existing = await queryOne<{ count: number }>(
     "SELECT COUNT(*) as count FROM orders WHERE order_number LIKE 'OSI-H%'"
   );
-  if ((existing?.count ?? 0) > 0) return;
+  const already = existing?.count ?? 0;
+  if (already >= TARGET_TOTAL) return;
 
   const drivers = await query<{ id: string }>('SELECT id FROM drivers ORDER BY id LIMIT 5');
   if (drivers.length === 0) return;
@@ -424,13 +431,13 @@ async function seedHistoricalOrders(): Promise<void> {
     'Electrodomésticos',                      'Productos frescos',
   ];
 
-  let counter = 1;
+  let counter = already + 1;
   for (let daysAgo = 28; daysAgo >= 1; daysAgo--) {
     const base = new Date();
     base.setDate(base.getDate() - daysAgo);
     const dow = base.getDay();
-    // weekdays 3-5 orders, saturday 2, sunday 1
-    const ordersToday = dow === 0 ? 1 : dow === 6 ? 2 : 3 + Math.floor(Math.random() * 3);
+    // weekdays 6-9 orders, saturday 4-5, sunday 2-3
+    const ordersToday = dow === 0 ? 2 + Math.floor(Math.random() * 2) : dow === 6 ? 4 + Math.floor(Math.random() * 2) : 6 + Math.floor(Math.random() * 4);
 
     for (let j = 0; j < ordersToday; j++) {
       const id = uuidv4();
@@ -493,7 +500,11 @@ async function refreshDemoData(): Promise<void> {
   );
   const now = new Date();
   const total = orders.length;
-  const DELIVERED_COUNT = 38;
+  // Antes un numero fijo (38) que se quedaba chico frente al total creciente
+  // de ordenes historicas -- escala con el total real, dejando siempre ~12
+  // como "activas" para que el dashboard en vivo tambien tenga algo que
+  // mostrar, en vez de una fraccion cada vez mas angosta del historial.
+  const DELIVERED_COUNT = Math.max(1, total - 12);
 
   for (let i = 0; i < total; i++) {
     const isDelivered = i < DELIVERED_COUNT;
