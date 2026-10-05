@@ -349,22 +349,29 @@ export async function initDatabase(): Promise<void> {
   // event in practice (dispatchers can be owed money on orders whose driver
   // already settled, and vice versa). Gets its own independent status.
   const commissionsCols = await query<{ name: string }>("PRAGMA table_info(commissions)");
-  const hadDispatcherStatus = commissionsCols.some(c => c.name === 'dispatcher_status');
   await addColumnIfMissing('commissions', 'dispatcher_status',     "TEXT NOT NULL DEFAULT 'pending'");
   await addColumnIfMissing('commissions', 'dispatcher_settled_at', "TEXT");
-  if (!hadDispatcherStatus) {
-    // Backfill unico, solo la primera vez que se crea la columna: OSI le paga
-    // al dispatcher con regularidad propia, sin esperar a que el driver salde
-    // su 7% -- en la practica, la gran mayoria de cargas ya entregadas hace
-    // tiempo ya se le pagaron al dispatcher, mientras que las mas recientes
-    // (las mismas donde el driver "acaba" de pagar) todavia no. Sin ningun
-    // registro historico real de esto, la mejor aproximacion disponible es
-    // invertir el status del driver: si el driver ya pago (settled, osea
-    // reciente), al dispatcher probablemente AUN no le han pagado esa; si el
-    // driver todavia no paga (pending, osea mas vieja en la cola), al
-    // dispatcher ya se le pago esa hace rato.
+  // Flag propio para el backfill de abajo -- separado del chequeo de si la
+  // columna dispatcher_status existe, porque un deploy anterior ya creo esa
+  // columna con un backfill distinto (todo 'pending') antes de que se
+  // definiera la logica final. Este flag garantiza que el backfill correcto
+  // de aqui abajo corra una vez mas, sin importar si dispatcher_status ya
+  // existia.
+  const hadSeededFlag = commissionsCols.some(c => c.name === 'dispatcher_status_seeded');
+  await addColumnIfMissing('commissions', 'dispatcher_status_seeded', "INTEGER NOT NULL DEFAULT 0");
+  if (!hadSeededFlag) {
+    // Backfill unico: OSI le paga al dispatcher con regularidad propia, sin
+    // esperar a que el driver salde su 7% -- en la practica, la gran mayoria
+    // de cargas ya entregadas hace tiempo ya se le pagaron al dispatcher,
+    // mientras que las mas recientes (las mismas donde el driver "acaba" de
+    // pagar) todavia no. Sin ningun registro historico real de esto, la
+    // mejor aproximacion disponible es invertir el status del driver: si el
+    // driver ya pago (settled, osea reciente), al dispatcher probablemente
+    // AUN no le han pagado esa; si el driver todavia no paga (pending, osea
+    // mas vieja en la cola), al dispatcher ya se le pago esa hace rato.
     await exec("UPDATE commissions SET dispatcher_status = 'pending', dispatcher_settled_at = NULL WHERE status = 'settled'");
     await exec("UPDATE commissions SET dispatcher_status = 'settled', dispatcher_settled_at = COALESCE(settled_at, created_at) WHERE status = 'pending'");
+    await exec("UPDATE commissions SET dispatcher_status_seeded = 1");
   }
 
   // Assign driver_code to existing drivers without one
