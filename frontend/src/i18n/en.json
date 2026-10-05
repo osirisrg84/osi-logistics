@@ -795,7 +795,17 @@
     "reportIncident": "Report Incident",
     "reportIncidentDesc": "Accidents · Theft · Cargo damage",
     "requestRateAdjustment": "Request Rate Adjustment",
-    "requestRateAdjustmentDesc": "Negotiate load compensation"
+    "requestRateAdjustmentDesc": "Negotiate load compensation",
+    "osiRadio": "OSI Radio",
+    "onlineChannel": "Online · OSI Fleet Channel",
+    "live": "LIVE",
+    "transmitting": "Transmitting",
+    "transmittingShort": "TRANSMITTING",
+    "pushToTalk": "PUSH  TO  TALK",
+    "tapToStop": "● Tap to stop",
+    "tapToRecord": "Tap to record",
+    "secureChannel": "OSI Fleet · Secure Channel",
+    "textToChannel": "Text message to channel..."
   },
   "driverNav": {
     "active": "Active",

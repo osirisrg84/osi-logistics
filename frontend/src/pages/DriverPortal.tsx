@@ -3521,13 +3521,13 @@ export default function DriverPortal() {
                     <Radio className="w-4 h-4 text-cyan-400" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-bold text-white">OSI Radio</p>
+                    <p className="text-sm font-bold text-white">{t('driverPortal.osiRadio')}</p>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                      <p className="text-[11px] text-green-400">En línea · Canal OSI Fleet</p>
+                      <p className="text-[11px] text-green-400">{t('driverPortal.onlineChannel')}</p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold text-cyan-400/70 bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 rounded-lg">LIVE</span>
+                  <span className="text-[10px] font-bold text-cyan-400/70 bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 rounded-lg">{t('driverPortal.live')}</span>
                 </div>
 
                 {/* Messages */}
@@ -3625,7 +3625,7 @@ export default function DriverPortal() {
                     <div className="flex items-center justify-between px-4 py-1.5" style={{ background: 'rgba(239,68,68,0.12)', borderBottom: '1px solid rgba(239,68,68,0.2)' }}>
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" style={{ boxShadow: '0 0 6px rgba(239,68,68,0.8)' }} />
-                        <span className="text-[11px] font-bold text-red-400 tracking-widest uppercase">Transmitting</span>
+                        <span className="text-[11px] font-bold text-red-400 tracking-widest uppercase">{t('driverPortal.transmitting')}</span>
                       </div>
                       <span className="text-[11px] font-mono text-red-400">
                         {String(Math.floor(recordingDuration/60)).padStart(1,'0')}:{String(recordingDuration%60).padStart(2,'0')}
@@ -3877,7 +3877,7 @@ export default function DriverPortal() {
                             }}>PTT</span>
                             {/* Sub label */}
                             <span style={{ fontSize: 5.5, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.55)', fontFamily: 'Arial', fontWeight: 700 }}>
-                              {isRecording ? 'TRANSMITTING' : 'PUSH  TO  TALK'}
+                              {isRecording ? t('driverPortal.transmittingShort') : t('driverPortal.pushToTalk')}
                             </span>
                           </div>
                           {/* Right ridge */}
@@ -3890,11 +3890,11 @@ export default function DriverPortal() {
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 8, paddingTop: 4, gap: 3 }}>
                           {isRecording ? (
                             <span style={{ fontSize: 8.5, fontWeight: 800, letterSpacing: '0.16em', color: '#f87171', textTransform: 'uppercase', fontFamily: 'Arial', textShadow: '0 0 10px rgba(239,68,68,0.7)', animation: 'pulse-dot 1s ease-in-out infinite' }}>
-                              ● Toca para detener
+                              {t('driverPortal.tapToStop')}
                             </span>
                           ) : (
                             <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.14em', color: 'rgba(251,146,60,0.75)', textTransform: 'uppercase', fontFamily: 'Arial' }}>
-                              Toca para grabar
+                              {t('driverPortal.tapToRecord')}
                             </span>
                           )}
                           <span style={{ fontSize: 5.5, letterSpacing: '0.35em', fontWeight: 900, fontFamily: 'Arial', color: 'rgba(71,85,105,0.38)', textTransform: 'uppercase' }}>OSI · FLEET RADIO</span>
@@ -3913,7 +3913,7 @@ export default function DriverPortal() {
                       </div>
 
                     </div>{/* end drop-shadow wrapper */}
-                    <p className="text-[9px] text-slate-500 tracking-wider uppercase">OSI Fleet · Canal Seguro</p>
+                    <p className="text-[9px] text-slate-500 tracking-wider uppercase">{t('driverPortal.secureChannel')}</p>
                   </div>
 
                   {/* Text input row */}
@@ -3930,7 +3930,7 @@ export default function DriverPortal() {
                         setRadioMsgs(prev => [...prev, { id: Date.now().toString(), name, msg: radioInput.trim(), type: 'text', ts: new Date().toISOString() }]);
                         setRadioInput('');
                       }}
-                      placeholder="Mensaje de texto al canal..."
+                      placeholder={t('driverPortal.textToChannel')}
                       className="flex-1 text-xs text-white placeholder:text-slate-600 rounded-xl px-3 py-2 outline-none focus:ring-1 focus:ring-cyan-500/30"
                       style={{ background: 'rgba(15,30,53,0.7)', border: '1px solid rgba(56,189,248,0.1)' }}
                     />
