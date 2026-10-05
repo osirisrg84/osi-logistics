@@ -430,6 +430,7 @@ export default function DriverPortal() {
 
   // ── Offer overlay ─────────────────────────────────────────
   const [pendingOffer, setPendingOffer] = useState<Order | null>(null);
+  const [offerChecked, setOfferChecked] = useState(false);
   const [offerCountdown, setOfferCountdown] = useState(60);
 
   // ── Favorites ────────────────────────────────────────────
@@ -742,16 +743,17 @@ export default function DriverPortal() {
       return;
     }
 
-    // Ni esta en las ordenes del driver ni es la oferta pendiente -- dale un
-    // respiro a checkActiveOffer()/fetchOrders() para terminar de cargar antes
-    // de darla por perdida (evita un falso "ya no esta disponible" en el
-    // primer render, mientras las llamadas iniciales todavia estan en vuelo).
-    const giveUp = setTimeout(() => {
-      setOrderNotFoundMsg('Esta oferta u orden ya no está disponible -- probablemente expiró o fue tomada por otro conductor.');
-      clearParam();
-    }, 4000);
-    return () => clearTimeout(giveUp);
-  }, [loading, activeOrders, deliveredToday, pendingOffer]);
+    // Ni esta en las ordenes del driver ni es la oferta pendiente -- pero no la
+    // demos por perdida hasta que checkActiveOffer() haya terminado de verdad.
+    // Un timeout fijo quedaba corto en un arranque en frio (tocar la
+    // notificacion/el correo abre la app desde cero: cargar el bundle entero +
+    // autenticar + pedir la oferta al servidor facilmente pasa de unos
+    // segundos en datos moviles), lo que disparaba un falso "ya no esta
+    // disponible" para una oferta que en realidad seguia esperando respuesta.
+    if (!offerChecked) return;
+    setOrderNotFoundMsg('Esta oferta u orden ya no está disponible -- probablemente expiró o fue tomada por otro conductor.');
+    clearParam();
+  }, [loading, activeOrders, deliveredToday, pendingOffer, offerChecked]);
 
   useEffect(() => {
     if (driver?.status) setDriverStatus(driver.status as DriverStatus);
@@ -867,14 +869,15 @@ export default function DriverPortal() {
       ordersApi.getAll({ offered_to_driver_id: driverId, status: 'offered' })
         .then(r => {
           const active = (r.data.orders as Order[])[0];
-          if (!active) return;
+          if (!active) { setOfferChecked(true); return; }
           setPendingOffer(active);
           const offeredAtMs = active.offered_at ? new Date(active.offered_at).getTime() : Date.now();
           const elapsedSecs = Math.floor((Date.now() - offeredAtMs) / 1000);
           setOfferCountdown(Math.max(0, 7200 - elapsedSecs));
           startAlarm();
+          setOfferChecked(true);
         })
-        .catch(() => {});
+        .catch(() => setOfferChecked(true));
     };
 
     const socket = getSocket();

@@ -6,6 +6,7 @@
   "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
+  "capture_links": "existing-client-navigate",
   "background_color": "#ffffff",
   "theme_color": "#f97316",
   "orientation": "portrait-primary",
