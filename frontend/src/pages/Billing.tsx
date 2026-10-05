@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   DollarSign, TrendingUp, TrendingDown, CheckCircle2,
   Clock, RefreshCw, ChevronDown, Users, UserCog, FileText, Search, X
@@ -58,6 +59,7 @@ interface Summary {
 function fmt(n: number) { return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }); }
 
 function StatusChip({ status }: { status: 'pending' | 'settled' }) {
+  const { t } = useTranslation();
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
       status === 'settled'
@@ -65,12 +67,13 @@ function StatusChip({ status }: { status: 'pending' | 'settled' }) {
         : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
     }`}>
       {status === 'settled' ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-      {status === 'settled' ? 'Liquidado' : 'Pendiente'}
+      {status === 'settled' ? t('billing.statusPaid') : t('billing.statusPendingChip')}
     </span>
   );
 }
 
 export default function Billing() {
+  const { t } = useTranslation();
   const [summary, setSummary] = useState<Summary | null>(null);
   const [records, setRecords] = useState<Commission[]>([]);
   const [byDriver, setByDriver] = useState<DriverSummary[]>([]);
@@ -155,23 +158,23 @@ export default function Billing() {
                 <CheckCircle2 className="w-5 h-5 text-orange-500" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-gray-900 dark:text-white">Confirmar liquidación</h3>
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">{t('billing.confirmTitle')}</h3>
                 <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{confirmSettle.label}</p>
               </div>
             </div>
             <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 mb-5 text-center">
-              <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Monto a liquidar</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">{t('billing.amountToSettle')}</p>
               <p className="text-2xl font-black text-orange-600">{fmt(confirmSettle.amount)}</p>
             </div>
             <p className="text-xs text-gray-500 dark:text-slate-400 text-center mb-5">
-              Esta acción marcará la comisión como <span className="font-semibold text-green-600">liquidada</span>. No se puede deshacer.
+              {t('billing.confirmHintPrefix')} <span className="font-semibold text-green-600">{t('billing.settledWord')}</span>. {t('billing.confirmHintSuffix')}
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmSettle(null)}
                 className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 text-sm font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
               >
-                Cancelar
+                {t('billing.cancel')}
               </button>
               <button
                 onClick={() =>
@@ -182,7 +185,7 @@ export default function Billing() {
                 disabled={!!settling}
                 className="flex-1 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-sm font-bold text-white transition-colors"
               >
-                {settling ? 'Procesando...' : 'Confirmar'}
+                {settling ? t('billing.processing') : t('billing.confirm')}
               </button>
             </div>
           </div>
@@ -191,10 +194,10 @@ export default function Billing() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Facturación & Comisiones</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t('billing.title')}</h1>
           <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-            Drivers pagan <span className="font-semibold text-red-600">7%</span> · Dispatch recibe{' '}
-            <span className="font-semibold text-blue-600">4%</span> · OSI neto{' '}
+            {t('billing.subtitleDriversPay')} <span className="font-semibold text-red-600">7%</span> · {t('billing.subtitleDispatchGets')}{' '}
+            <span className="font-semibold text-blue-600">4%</span> · {t('billing.subtitleOsiNet')}{' '}
             <span className="font-semibold text-green-600">3%</span>
           </p>
         </div>
@@ -211,10 +214,10 @@ export default function Billing() {
               <div className="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
                 <TrendingDown className="w-4 h-4 text-red-600 dark:text-red-400" />
               </div>
-              <span className="text-xs text-gray-500 dark:text-slate-400">Cobrado a Drivers</span>
+              <span className="text-xs text-gray-500 dark:text-slate-400">{t('billing.statChargedDrivers')}</span>
             </div>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{fmt(summary.total_driver_charges)}</p>
-            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">7% · {summary.total_orders} cargas</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{t('billing.statLoadsSuffix', { count: summary.total_orders })}</p>
           </div>
 
           <div className="card p-4">
@@ -222,10 +225,10 @@ export default function Billing() {
               <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                 <TrendingUp className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
-              <span className="text-xs text-gray-500 dark:text-slate-400">Por pagar a Dispatch</span>
+              <span className="text-xs text-gray-500 dark:text-slate-400">{t('billing.statOwedDispatch')}</span>
             </div>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{fmt(summary.total_dispatcher_pay)}</p>
-            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">4% · {summary.total_orders} cargas</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{t('billing.statLoadsSuffix4', { count: summary.total_orders })}</p>
           </div>
 
           <div className="card p-4">
@@ -233,10 +236,10 @@ export default function Billing() {
               <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
                 <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
               </div>
-              <span className="text-xs text-gray-500 dark:text-slate-400">Ganancia Neta OSI</span>
+              <span className="text-xs text-gray-500 dark:text-slate-400">{t('billing.statNetEarnings')}</span>
             </div>
             <p className="text-2xl font-bold text-green-600">{fmt(summary.total_net_osi)}</p>
-            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">3% neto por carga</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{t('billing.statNetSuffix')}</p>
           </div>
 
           <div className="card p-4">
@@ -244,10 +247,10 @@ export default function Billing() {
               <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
                 <Clock className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
               </div>
-              <span className="text-xs text-gray-500 dark:text-slate-400">Pendientes</span>
+              <span className="text-xs text-gray-500 dark:text-slate-400">{t('billing.statPending')}</span>
             </div>
             <p className="text-2xl font-bold text-yellow-600">{fmt(summary.pending_driver)}</p>
-            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{summary.pending_count} sin liquidar</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{t('billing.statUnsettledSuffix', { count: summary.pending_count })}</p>
           </div>
         </div>
       )}
@@ -256,9 +259,9 @@ export default function Billing() {
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex gap-1 bg-gray-100 dark:bg-slate-800 rounded-xl p-1">
           {([
-            { id: 'records',     label: 'Todas las órdenes', icon: FileText },
-            { id: 'drivers',     label: 'Por Driver',        icon: Users },
-            { id: 'dispatchers', label: 'Por Dispatch',      icon: UserCog },
+            { id: 'records',     label: t('billing.tabRecords'),     icon: FileText },
+            { id: 'drivers',     label: t('billing.tabByDriver'),     icon: Users },
+            { id: 'dispatchers', label: t('billing.tabByDispatcher'), icon: UserCog },
           ] as const).map(({ id, label, icon: Icon }) => (
             <button key={id} onClick={() => setTab(id)}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
@@ -280,7 +283,7 @@ export default function Billing() {
                 type="text"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Buscar orden, driver..."
+                placeholder={t('billing.searchPlaceholder')}
                 className="pl-9 pr-8 py-2 text-sm border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400/40 w-52"
               />
               {search && (
@@ -295,9 +298,9 @@ export default function Billing() {
                 onChange={e => setStatusFilter(e.target.value)}
                 className="appearance-none pl-3 pr-8 py-2 text-sm border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400/40"
               >
-                <option value="">Todos los estados</option>
-                <option value="pending">Pendientes</option>
-                <option value="settled">Liquidados</option>
+                <option value="">{t('billing.allStatus')}</option>
+                <option value="pending">{t('billing.statusPending')}</option>
+                <option value="settled">{t('billing.statusSettled')}</option>
               </select>
               <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
@@ -306,9 +309,9 @@ export default function Billing() {
               onChange={e => setPageSize(Number(e.target.value))}
               className="pl-3 pr-2 py-2 text-sm border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400/40"
             >
-              <option value={25}>25 / pág</option>
-              <option value={50}>50 / pág</option>
-              <option value={100}>100 / pág</option>
+              <option value={25}>25 / {t('billing.pageSize')}</option>
+              <option value={50}>50 / {t('billing.pageSize')}</option>
+              <option value={100}>100 / {t('billing.pageSize')}</option>
             </select>
           </div>
         )}
@@ -321,11 +324,11 @@ export default function Billing() {
         const to = Math.min(page * pageSize, total);
         return (
           <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-500 dark:text-slate-400">{from}–{to} de {total} registros</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">{t('billing.countRange', { from, to, total })}</p>
             {totalPages > 1 && (
               <div className="flex items-center gap-1">
                 <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                  className="px-2.5 py-1 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">← Prev</button>
+                  className="px-2.5 py-1 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">{t('billing.prev')}</button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
                   .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
                   .reduce<(number | '…')[]>((acc, p, i, arr) => {
@@ -339,7 +342,7 @@ export default function Billing() {
                       >{p}</button>
                   )}
                 <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                  className="px-2.5 py-1 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">Next →</button>
+                  className="px-2.5 py-1 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">{t('billing.next')}</button>
               </div>
             )}
           </div>
@@ -354,23 +357,23 @@ export default function Billing() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 dark:border-slate-700 text-xs text-gray-500 dark:text-slate-400 uppercase">
-                  <th className="text-left px-4 py-3 font-semibold">Orden</th>
-                  <th className="text-left px-4 py-3 font-semibold">Driver</th>
-                  <th className="text-left px-4 py-3 font-semibold">Dispatcher</th>
-                  <th className="text-right px-4 py-3 font-semibold">Precio</th>
-                  <th className="text-right px-4 py-3 font-semibold text-red-600">Driver 7%</th>
-                  <th className="text-right px-4 py-3 font-semibold text-blue-600">Dispatch 4%</th>
-                  <th className="text-right px-4 py-3 font-semibold text-green-600">OSI 3%</th>
-                  <th className="text-left px-4 py-3 font-semibold">Fecha</th>
-                  <th className="text-center px-4 py-3 font-semibold">Estado</th>
+                  <th className="text-left px-4 py-3 font-semibold">{t('billing.tableOrder')}</th>
+                  <th className="text-left px-4 py-3 font-semibold">{t('billing.tableDriver')}</th>
+                  <th className="text-left px-4 py-3 font-semibold">{t('billing.tableDispatcher')}</th>
+                  <th className="text-right px-4 py-3 font-semibold">{t('billing.tablePrice')}</th>
+                  <th className="text-right px-4 py-3 font-semibold text-red-600">{t('billing.tableDriver7')}</th>
+                  <th className="text-right px-4 py-3 font-semibold text-blue-600">{t('billing.tableDispatch4')}</th>
+                  <th className="text-right px-4 py-3 font-semibold text-green-600">{t('billing.tableOsi3')}</th>
+                  <th className="text-left px-4 py-3 font-semibold">{t('billing.tableDate')}</th>
+                  <th className="text-center px-4 py-3 font-semibold">{t('billing.tableStatus')}</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-slate-700/50">
                 {loading ? (
-                  <tr><td colSpan={10} className="text-center py-8 text-gray-400">Cargando...</td></tr>
+                  <tr><td colSpan={10} className="text-center py-8 text-gray-400">{t('billing.loading')}</td></tr>
                 ) : records.length === 0 ? (
-                  <tr><td colSpan={10} className="text-center py-8 text-gray-400">Sin registros</td></tr>
+                  <tr><td colSpan={10} className="text-center py-8 text-gray-400">{t('billing.noRecords')}</td></tr>
                 ) : records.map(r => (
                   <tr key={r.id} className={`hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors ${
                     r.status === 'pending' ? 'bg-yellow-50/30 dark:bg-yellow-900/5' : ''
@@ -394,14 +397,14 @@ export default function Billing() {
                             disabled={settling === r.id}
                             className="text-xs font-medium text-purple-600 hover:text-purple-700 disabled:opacity-40 whitespace-nowrap"
                           >
-                            {settling === r.id ? '...' : '💳 Stripe'}
+                            {settling === r.id ? '...' : t('billing.stripePay')}
                           </button>
                           <button
-                            onClick={() => setConfirmSettle({ id: r.id, label: `Orden ${r.order_number} · ${r.driver_name}`, amount: r.driver_charge, type: 'one' })}
+                            onClick={() => setConfirmSettle({ id: r.id, label: `${r.order_number} · ${r.driver_name}`, amount: r.driver_charge, type: 'one' })}
                             disabled={settling === r.id}
                             className="text-xs font-medium text-orange-600 hover:text-orange-700 disabled:opacity-40 whitespace-nowrap"
                           >
-                            Liquidar
+                            {t('billing.settle')}
                           </button>
                         </div>
                       )}
@@ -415,7 +418,7 @@ export default function Billing() {
           {/* Mobile cards */}
           <div className="md:hidden divide-y divide-gray-100 dark:divide-slate-700">
             {loading ? (
-              <div className="py-8 text-center text-gray-400 text-sm">Cargando...</div>
+              <div className="py-8 text-center text-gray-400 text-sm">{t('billing.loading')}</div>
             ) : records.map(r => (
               <div key={r.id} className="p-4 space-y-2">
                 <div className="flex items-center justify-between">
@@ -428,22 +431,22 @@ export default function Billing() {
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-2 text-center">
-                    <p className="text-red-400 mb-0.5">Driver 7%</p>
+                    <p className="text-red-400 mb-0.5">{t('billing.tableDriver7')}</p>
                     <p className="font-bold text-red-600">{fmt(r.driver_charge)}</p>
                   </div>
                   <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 text-center">
-                    <p className="text-blue-400 mb-0.5">Dispatch 4%</p>
+                    <p className="text-blue-400 mb-0.5">{t('billing.tableDispatch4')}</p>
                     <p className="font-bold text-blue-600">{fmt(r.dispatcher_pay)}</p>
                   </div>
                   <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-2 text-center">
-                    <p className="text-green-400 mb-0.5">OSI 3%</p>
+                    <p className="text-green-400 mb-0.5">{t('billing.tableOsi3')}</p>
                     <p className="font-bold text-green-600">{fmt(r.net_osi)}</p>
                   </div>
                 </div>
                 {r.status === 'pending' && (
-                  <button onClick={() => setConfirmSettle({ id: r.id, label: `Orden ${r.order_number} · ${r.driver_name}`, amount: r.driver_charge, type: 'one' })} disabled={settling === r.id}
+                  <button onClick={() => setConfirmSettle({ id: r.id, label: `${r.order_number} · ${r.driver_name}`, amount: r.driver_charge, type: 'one' })} disabled={settling === r.id}
                     className="w-full py-2 rounded-xl text-sm font-semibold text-orange-600 border border-orange-200 dark:border-orange-800 hover:bg-orange-50 dark:hover:bg-orange-900/20 disabled:opacity-40 transition-colors">
-                    {settling === r.id ? 'Procesando...' : 'Marcar como liquidado'}
+                    {settling === r.id ? t('billing.processing') : t('billing.markSettled')}
                   </button>
                 )}
               </div>
@@ -456,7 +459,7 @@ export default function Billing() {
       {tab === 'drivers' && (
         <div className="space-y-3">
           {loading ? (
-            <div className="card py-8 text-center text-gray-400">Cargando...</div>
+            <div className="card py-8 text-center text-gray-400">{t('billing.loading')}</div>
           ) : byDriver.map(d => (
             <div key={d.driver_id} className="card p-4">
               <div className="flex items-center justify-between mb-3">
@@ -466,37 +469,37 @@ export default function Billing() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-900 dark:text-white">{d.driver_name}</p>
-                    <p className="text-xs text-gray-400 dark:text-slate-500">{d.total_orders} cargas · {fmt(d.total_revenue)} ingresos</p>
+                    <p className="text-xs text-gray-400 dark:text-slate-500">{t('billing.driverLoadsRevenue', { count: d.total_orders, revenue: fmt(d.total_revenue) })}</p>
                   </div>
                 </div>
                 {d.pending > 0 && (
                   <button
-                    onClick={() => setConfirmSettle({ id: d.driver_id, label: `${d.driver_name} · todas las pendientes`, amount: d.pending, type: 'driver_all' })}
+                    onClick={() => setConfirmSettle({ id: d.driver_id, label: `${d.driver_name}`, amount: d.pending, type: 'driver_all' })}
                     disabled={settling === d.driver_id}
                     className="text-xs font-semibold text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-40 px-3 py-1.5 rounded-lg transition-colors"
                   >
-                    {settling === d.driver_id ? '...' : 'Liquidar todo'}
+                    {settling === d.driver_id ? '...' : t('billing.settleAll')}
                   </button>
                 )}
               </div>
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-3 text-center">
-                  <p className="text-red-400 mb-1">Total cobrado (7%)</p>
+                  <p className="text-red-400 mb-1">{t('billing.totalCharged7')}</p>
                   <p className="text-lg font-bold text-red-600">{fmt(d.total_charged)}</p>
                 </div>
                 <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 text-center">
-                  <p className="text-green-400 mb-1">Liquidado</p>
+                  <p className="text-green-400 mb-1">{t('billing.settled')}</p>
                   <p className="text-lg font-bold text-green-600">{fmt(d.settled)}</p>
                 </div>
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-3 text-center">
-                  <p className="text-yellow-400 mb-1">Pendiente</p>
+                  <p className="text-yellow-400 mb-1">{t('billing.pending')}</p>
                   <p className="text-lg font-bold text-yellow-600">{fmt(d.pending)}</p>
                 </div>
               </div>
             </div>
           ))}
           {!loading && byDriver.length === 0 && (
-            <div className="card py-8 text-center text-gray-400">Sin registros de comisiones</div>
+            <div className="card py-8 text-center text-gray-400">{t('billing.noCommissionRecords')}</div>
           )}
         </div>
       )}
@@ -505,7 +508,7 @@ export default function Billing() {
       {tab === 'dispatchers' && (
         <div className="space-y-3">
           {loading ? (
-            <div className="card py-8 text-center text-gray-400">Cargando...</div>
+            <div className="card py-8 text-center text-gray-400">{t('billing.loading')}</div>
           ) : byDispatcher.map((d, i) => (
             <div key={d.dispatcher_user_id || i} className="card p-4">
               <div className="flex items-center gap-3 mb-3">
@@ -514,27 +517,27 @@ export default function Billing() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">{d.dispatcher_name}</p>
-                  <p className="text-xs text-gray-400 dark:text-slate-500">{d.total_orders} órdenes · {fmt(d.total_order_value)} gestionado</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500">{t('billing.dispatcherOrdersManaged', { count: d.total_orders, value: fmt(d.total_order_value) })}</p>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 text-center">
-                  <p className="text-blue-400 mb-1">Por cobrar (4%)</p>
+                  <p className="text-blue-400 mb-1">{t('billing.toCollect4')}</p>
                   <p className="text-lg font-bold text-blue-600">{fmt(d.total_earned)}</p>
                 </div>
                 <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 text-center">
-                  <p className="text-green-400 mb-1">Pagado</p>
+                  <p className="text-green-400 mb-1">{t('billing.paid')}</p>
                   <p className="text-lg font-bold text-green-600">{fmt(d.settled)}</p>
                 </div>
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-3 text-center">
-                  <p className="text-yellow-400 mb-1">Pendiente</p>
+                  <p className="text-yellow-400 mb-1">{t('billing.pending')}</p>
                   <p className="text-lg font-bold text-yellow-600">{fmt(d.pending)}</p>
                 </div>
               </div>
             </div>
           ))}
           {!loading && byDispatcher.length === 0 && (
-            <div className="card py-8 text-center text-gray-400">Sin registros</div>
+            <div className="card py-8 text-center text-gray-400">{t('billing.noRecords')}</div>
           )}
         </div>
       )}
