@@ -546,6 +546,7 @@ export default function DriverPortal() {
   const [sendingCode,        setSendingCode]        = useState(false);
   const [verifyingCode,      setVerifyingCode]      = useState(false);
   const [verifyMsg,          setVerifyMsg]          = useState('');
+  const [verifyMsgIsError,   setVerifyMsgIsError]   = useState(false);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const recaptchaRef = useRef<RecaptchaVerifier | null>(null);
   const [profilePhone, setProfilePhone] = useState('');
@@ -562,7 +563,7 @@ export default function DriverPortal() {
           const result = await signInWithPhoneNumber(firebaseAuth, e164, recaptchaRef.current);
           setConfirmationResult(result);
           setCodeSent(true);
-          setVerifyMsg('Código enviado por SMS');
+          setVerifyMsg(t('driverPortal.codeSentSms'));
           return;
         } catch (fbErr: unknown) {
           recaptchaRef.current?.clear(); recaptchaRef.current = null;
@@ -573,10 +574,10 @@ export default function DriverPortal() {
       // Fallback: backend sends code via Textbelt SMS → email if SMS fails
       await userApi.sendVerification(type);
       setCodeSent(true);
-      setVerifyMsg(type === 'phone' ? 'Código enviado — revisa tus SMS o correo' : 'Código enviado — revisa tu correo');
+      setVerifyMsg(type === 'phone' ? t('driverPortal.codeSentPhoneOrEmail') : t('driverPortal.codeSentEmail'));
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { error?: string } }; message?: string })
-        ?.response?.data?.error || (e as { message?: string })?.message || 'Error al enviar el código';
+        ?.response?.data?.error || (e as { message?: string })?.message || t('driverPortal.codeSendError');
       setVerifyMsg(msg);
       recaptchaRef.current?.clear(); recaptchaRef.current = null;
     } finally { setSendingCode(false); }
@@ -584,7 +585,7 @@ export default function DriverPortal() {
 
   const handleVerifyCode = async () => {
     if (!verifying) return;
-    setVerifyingCode(true); setVerifyMsg('');
+    setVerifyingCode(true); setVerifyMsg(''); setVerifyMsgIsError(false);
     try {
       if (verifying === 'phone' && confirmationResult) {
         const credential = await confirmationResult.confirm(codeInput);
@@ -597,12 +598,12 @@ export default function DriverPortal() {
         else setPhoneVerified(true);
       }
       setVerifying(null); setCodeInput(''); setCodeSent(false); setConfirmationResult(null);
-    } catch { setVerifyMsg('Código incorrecto o expirado'); }
+    } catch { setVerifyMsg(t('driverPortal.verifyCodeIncorrect')); setVerifyMsgIsError(true); }
     finally { setVerifyingCode(false); }
   };
 
   const cancelVerify = () => {
-    setVerifying(null); setCodeInput(''); setCodeSent(false); setVerifyMsg('');
+    setVerifying(null); setCodeInput(''); setCodeSent(false); setVerifyMsg(''); setVerifyMsgIsError(false);
     setConfirmationResult(null);
     recaptchaRef.current?.clear(); recaptchaRef.current = null;
   };
@@ -873,7 +874,7 @@ export default function DriverPortal() {
     // disparaba un falso "ya no esta disponible" para una oferta que en
     // realidad seguia esperando respuesta.
     if (!offerChecked) return;
-    setOrderNotFoundMsg('Esta oferta u orden ya no está disponible -- probablemente expiró o fue tomada por otro conductor.');
+    setOrderNotFoundMsg(t('driverPortal.offerNotFoundDetail'));
     clearParam();
   }, [loading, jumpToOrder, offerChecked]);
 
@@ -1363,13 +1364,13 @@ export default function DriverPortal() {
   const verificationPanel = verifying && (
     <div className="mt-2 p-3 rounded-xl border border-orange-100 bg-orange-50 dark:bg-slate-700/60 dark:border-slate-600">
       <p className="text-xs font-semibold text-gray-800 dark:text-white mb-2">
-        Verificar {verifying === 'email' ? 'correo' : 'teléfono'}
+        {verifying === 'email' ? t('driverPortal.verifyEmailTitle') : t('driverPortal.verifyPhoneTitle')}
       </p>
       {!codeSent ? (
         <button onClick={() => handleSendCode(verifying)} disabled={sendingCode}
           className="w-full py-2 rounded-lg text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center gap-1.5">
           {sendingCode && <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />}
-          Enviar código de 6 dígitos
+          {t('driverPortal.sendCode6Digits')}
         </button>
       ) : (
         <div className="space-y-2">
@@ -1381,28 +1382,28 @@ export default function DriverPortal() {
           <button onClick={handleVerifyCode} disabled={verifyingCode || codeInput.length < 6}
             className="w-full py-2 rounded-lg text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 flex items-center justify-center gap-1.5">
             {verifyingCode && <div className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />}
-            Confirmar código
+            {t('driverPortal.confirmCode')}
           </button>
           {confirmationResult && verifying === 'phone' && (
             <button onClick={async () => {
               recaptchaRef.current?.clear(); recaptchaRef.current = null;
-              setConfirmationResult(null); setCodeSent(false); setCodeInput(''); setVerifyMsg('');
+              setConfirmationResult(null); setCodeSent(false); setCodeInput(''); setVerifyMsg(''); setVerifyMsgIsError(false);
               setSendingCode(true);
               try {
                 await userApi.sendVerification('phone');
                 setCodeSent(true);
-                setVerifyMsg('Código enviado — revisa tu correo');
-              } catch { setVerifyMsg('Error al reenviar'); }
+                setVerifyMsg(t('driverPortal.codeSentEmail'));
+              } catch { setVerifyMsg(t('driverPortal.resendError')); }
               finally { setSendingCode(false); }
             }} className="text-[10px] text-gray-400 underline w-full text-center">
-              ¿No llegó el SMS? Enviar al correo
+              {t('driverPortal.resendToEmailPrompt')}
             </button>
           )}
         </div>
       )}
       {!codeSent && verifyMsg && <p className="text-[10px] text-red-500 mt-1">{verifyMsg}</p>}
-      {codeSent && verifyMsg && verifyMsg.includes('ncorrecto') && <p className="text-[10px] text-red-500 mt-1">{verifyMsg}</p>}
-      <button onClick={cancelVerify} className="mt-2 text-[10px] text-gray-400 hover:text-gray-600">Cancelar</button>
+      {codeSent && verifyMsg && verifyMsgIsError && <p className="text-[10px] text-red-500 mt-1">{verifyMsg}</p>}
+      <button onClick={cancelVerify} className="mt-2 text-[10px] text-gray-400 hover:text-gray-600">{t('driverPortal.cancel')}</button>
     </div>
   );
 
@@ -1512,9 +1513,9 @@ export default function DriverPortal() {
                   }}>
                   <Headphones className={`w-3 h-3 flex-shrink-0 transition-colors ${musicOn ? 'text-purple-400' : 'text-slate-600'}`} />
                   <div className="flex-1 min-w-0 text-left">
-                    <p className="text-[9px] font-bold text-white leading-none">Music</p>
+                    <p className="text-[9px] font-bold text-white leading-none">{t('driverPortal.musicLabel')}</p>
                     <p className="text-[8px] leading-none mt-0.5" style={{ color: musicOn ? '#c084fc' : '#475569' }}>
-                      {musicOn ? '▶ Play' : 'Trap'}
+                      {musicOn ? `▶ ${t('driverPortal.musicPlaying')}` : 'Trap'}
                     </p>
                   </div>
                   <div className="relative flex-shrink-0 rounded-full" style={{ width: 24, height: 13, background: musicOn ? 'linear-gradient(90deg,#a855f7,#7c3aed)' : 'rgba(51,65,85,0.9)', boxShadow: musicOn ? '0 0 6px rgba(168,85,247,0.4)' : 'none', transition: 'background 0.25s' }}>
@@ -1576,7 +1577,7 @@ export default function DriverPortal() {
                   <AlertTriangle className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white">Esa oferta ya no está</p>
+                  <p className="text-sm font-semibold text-white">{t('driverPortal.offerExpiredTitle')}</p>
                   <p className="text-xs mt-0.5 text-slate-300">{orderNotFoundMsg}</p>
                 </div>
                 <button onClick={() => setOrderNotFoundMsg(null)} className="p-1 rounded flex-shrink-0 text-slate-400 hover:bg-white/10">
@@ -1646,12 +1647,12 @@ export default function DriverPortal() {
                  style={{ fontSize: 'clamp(13px, 4vw, 18px)' }}>
                 ${displayRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
-              <p className="text-xs mt-0.5 text-slate-500">Last Week's Revenue</p>
+              <p className="text-xs mt-0.5 text-slate-500">{t('driverPortal.lastWeekRevenue')}</p>
             </button>
             <div className="rounded-2xl px-2 py-4 text-center bg-white/6 border border-white/10">
               <Award className="w-5 h-5 text-orange-400 mx-auto" />
               <p className="text-2xl font-bold text-orange-400 mt-0.5">{unlockedCount}<span className="text-sm text-orange-500/60 font-normal">/8</span></p>
-              <p className="text-xs mt-0.5 text-slate-500">Logros</p>
+              <p className="text-xs mt-0.5 text-slate-500">{t('driverPortal.achievements')}</p>
             </div>
           </div>
         </div>
@@ -1669,7 +1670,7 @@ export default function DriverPortal() {
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
               <div className="flex items-center gap-2">
                 <Bell className="w-4 h-4 text-blue-400" />
-                <span className="text-sm font-bold text-white">Notificaciones</span>
+                <span className="text-sm font-bold text-white">{t('header.notifications')}</span>
                 {unreadCount > 0 && (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500 text-white">{unreadCount}</span>
                 )}
@@ -1684,7 +1685,7 @@ export default function DriverPortal() {
                     }}
                     className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 px-2 py-1 rounded-lg hover:bg-white/5 transition-colors"
                   >
-                    <CheckCheck className="w-3.5 h-3.5" /> Leer todo
+                    <CheckCheck className="w-3.5 h-3.5" /> {t('header.markAllRead')}
                   </button>
                 )}
                 <button onClick={() => setShowNotifs(false)} className="p-1.5 rounded-lg hover:bg-white/10 transition-colors">
@@ -1698,7 +1699,7 @@ export default function DriverPortal() {
               {driverNotifs.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 gap-2">
                   <BellOff className="w-8 h-8 text-slate-600" />
-                  <p className="text-sm text-slate-500">Sin notificaciones</p>
+                  <p className="text-sm text-slate-500">{t('header.noNotifications')}</p>
                 </div>
               ) : (
                 driverNotifs.map(notif => (
@@ -1711,7 +1712,7 @@ export default function DriverPortal() {
                       }
                       setShowNotifs(false);
                       if (notif.related_id && !jumpToOrder(notif.related_id)) {
-                        setOrderNotFoundMsg('Esta oferta u orden ya no está disponible -- probablemente expiró o fue tomada por otro conductor.');
+                        setOrderNotFoundMsg(t('driverPortal.offerNotFoundDetail'));
                       }
                     }}
                     className={`flex items-start gap-3 px-4 py-3.5 border-b border-white/5 cursor-pointer transition-colors ${
@@ -1832,7 +1833,7 @@ export default function DriverPortal() {
                 <div className="inline-flex items-center gap-1.5 mb-3 px-2.5 py-1 rounded-full"
                   style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
                   <span className="w-1.5 h-1.5 rounded-full bg-red-400" style={{ boxShadow: '0 0 4px rgba(239,68,68,0.8)' }} />
-                  <span className="text-[10px] font-bold text-red-400 tracking-[0.12em] uppercase">Offline</span>
+                  <span className="text-[10px] font-bold text-red-400 tracking-[0.12em] uppercase">{t('driverPortal.statusOffline')}</span>
                 </div>
               )}
 
@@ -3018,35 +3019,35 @@ export default function DriverPortal() {
                 </div>
                 {/* Fields per method */}
                 {payoutMethod === 'zelle' && (
-                  <input type="text" placeholder="Número o email de Zelle"
+                  <input type="text" placeholder={t('driverPortal.zellePlaceholder')}
                     value={payoutDetails.contact || ''} onChange={e => updatePayoutDetail('contact', e.target.value)}
                     className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-400/40" />
                 )}
                 {payoutMethod === 'paypal' && (
-                  <input type="email" placeholder="Email de PayPal"
+                  <input type="email" placeholder={t('driverPortal.paypalPlaceholder')}
                     value={payoutDetails.email || ''} onChange={e => updatePayoutDetail('email', e.target.value)}
                     className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-400/40" />
                 )}
                 {payoutMethod === 'venmo' && (
-                  <input type="text" placeholder="@username de Venmo"
+                  <input type="text" placeholder={t('driverPortal.venmoPlaceholder')}
                     value={payoutDetails.username || ''} onChange={e => updatePayoutDetail('username', e.target.value)}
                     className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-400/40" />
                 )}
                 {payoutMethod === 'ach' && (
                   <div className="space-y-2">
-                    <input type="text" placeholder="Nombre del banco"
+                    <input type="text" placeholder={t('driverPortal.bankNamePlaceholder')}
                       value={payoutDetails.bank || ''} onChange={e => updatePayoutDetail('bank', e.target.value)}
                       className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-400/40" />
-                    <input type="text" placeholder="Número de cuenta"
+                    <input type="text" placeholder={t('driverPortal.accountNumberPlaceholder')}
                       value={payoutDetails.account || ''} onChange={e => updatePayoutDetail('account', e.target.value)}
                       className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-400/40" />
-                    <input type="text" placeholder="Routing number"
+                    <input type="text" placeholder={t('driverPortal.routingNumberPlaceholder')}
                       value={payoutDetails.routing || ''} onChange={e => updatePayoutDetail('routing', e.target.value)}
                       className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-400/40" />
                   </div>
                 )}
                 {payoutMethod === 'check' && (
-                  <input type="text" placeholder="Nombre para el cheque (a nombre de)"
+                  <input type="text" placeholder={t('driverPortal.checkPayableToPlaceholder')}
                     value={payoutDetails.payable_to || ''} onChange={e => updatePayoutDetail('payable_to', e.target.value)}
                     className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-400/40" />
                 )}
