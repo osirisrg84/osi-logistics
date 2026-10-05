@@ -187,5 +187,37 @@
     "emptyHint2": "Commissions appear once your loads are delivered",
     "statusPaid": "Paid",
     "statusPending": "Pending"
+  },
+  "settings": {
+    "sections": {
+      "company": "Company", "notifications": "Notifications", "dispatch": "Dispatch Rules",
+      "tracking": "Tracking", "appearance": "Appearance", "security": "Security", "api": "API & Integrations"
+    },
+    "companyInfo": "Company Information",
+    "notificationPrefs": "Notification Preferences",
+    "dispatchRules": "Dispatch Rules",
+    "trackingSettings": "Tracking Settings",
+    "appearanceTitle": "Appearance",
+    "apiIntegrations": "API & Integrations",
+    "currentAccount": "Current Account",
+    "displayName": "Display Name",
+    "namePlaceholder": "Your full name",
+    "nameEmpty": "Name cannot be empty",
+    "nameUpdated": "Name updated",
+    "saveError": "Error saving",
+    "saving": "Saving...",
+    "saveName": "Save name",
+    "changePassword": "Change Password",
+    "fieldCurrentPassword": "Current password",
+    "fieldNewPassword": "New password",
+    "fieldConfirmPassword": "Confirm new",
+    "passwordFillAll": "Fill in all fields",
+    "passwordMismatch": "Passwords don't match",
+    "passwordMinLength": "Minimum 8 characters",
+    "passwordUpdated": "Password updated",
+    "passwordChangeError": "Error changing password",
+    "savePassword": "Save password",
+    "saved": "Saved!",
+    "saveSettings": "Save Settings"
   }
 }

@@ -1,25 +1,26 @@
 ﻿import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Save, Bell, Map, Truck, Shield, Globe, Palette, Server, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 interface SettingsSection {
   id: string;
-  label: string;
   icon: React.ComponentType<{ className?: string }>;
 }
 
 const sections: SettingsSection[] = [
-  { id: 'company', label: 'Company', icon: Globe },
-  { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'dispatch', label: 'Dispatch Rules', icon: Truck },
-  { id: 'tracking', label: 'Tracking', icon: Map },
-  { id: 'appearance', label: 'Appearance', icon: Palette },
-  { id: 'security', label: 'Security', icon: Shield },
-  { id: 'api', label: 'API & Integrations', icon: Server },
+  { id: 'company', icon: Globe },
+  { id: 'notifications', icon: Bell },
+  { id: 'dispatch', icon: Truck },
+  { id: 'tracking', icon: Map },
+  { id: 'appearance', icon: Palette },
+  { id: 'security', icon: Shield },
+  { id: 'api', icon: Server },
 ];
 
 export default function Settings() {
+  const { t } = useTranslation();
   const { user, updateUser } = useAuth();
   const [activeSection, setActiveSection] = useState('company');
   const [saved, setSaved] = useState(false);
@@ -33,15 +34,15 @@ export default function Settings() {
   if (user && !nameVal) setNameVal(user.name);
 
   const saveName = async () => {
-    if (!nameVal.trim()) { setNameMsg('El nombre no puede estar vacío'); setNameStatus('error'); return; }
+    if (!nameVal.trim()) { setNameMsg(t('settings.nameEmpty')); setNameStatus('error'); return; }
     setNameStatus('saving'); setNameMsg('');
     try {
       await api.put('/auth/account', { name: nameVal.trim() });
       updateUser({ name: nameVal.trim() });
-      setNameStatus('ok'); setNameMsg('Nombre actualizado');
+      setNameStatus('ok'); setNameMsg(t('settings.nameUpdated'));
     } catch (e: unknown) {
       const err = e as { response?: { data?: { error?: string } } };
-      setNameMsg(err?.response?.data?.error || 'Error al guardar'); setNameStatus('error');
+      setNameMsg(err?.response?.data?.error || t('settings.saveError')); setNameStatus('error');
     }
   };
 
@@ -52,16 +53,16 @@ export default function Settings() {
   const [pwMsg, setPwMsg]     = useState('');
 
   const changePassword = async () => {
-    if (!pwForm.current || !pwForm.newPw) { setPwMsg('Completa todos los campos'); setPwStatus('error'); return; }
-    if (pwForm.newPw !== pwForm.confirm)  { setPwMsg('Las contraseñas no coinciden'); setPwStatus('error'); return; }
-    if (pwForm.newPw.length < 8)          { setPwMsg('Mínimo 8 caracteres'); setPwStatus('error'); return; }
+    if (!pwForm.current || !pwForm.newPw) { setPwMsg(t('settings.passwordFillAll')); setPwStatus('error'); return; }
+    if (pwForm.newPw !== pwForm.confirm)  { setPwMsg(t('settings.passwordMismatch')); setPwStatus('error'); return; }
+    if (pwForm.newPw.length < 8)          { setPwMsg(t('settings.passwordMinLength')); setPwStatus('error'); return; }
     setPwStatus('saving'); setPwMsg('');
     try {
       await api.put('/auth/change-password', { current_password: pwForm.current, new_password: pwForm.newPw });
-      setPwStatus('ok'); setPwMsg('Contraseña actualizada'); setPwForm({ current: '', newPw: '', confirm: '' });
+      setPwStatus('ok'); setPwMsg(t('settings.passwordUpdated')); setPwForm({ current: '', newPw: '', confirm: '' });
     } catch (e: unknown) {
       const err = e as { response?: { data?: { error?: string } } };
-      setPwMsg(err?.response?.data?.error || 'Error al cambiar contraseña');
+      setPwMsg(err?.response?.data?.error || t('settings.passwordChangeError'));
       setPwStatus('error');
     }
   };
@@ -118,7 +119,7 @@ export default function Settings() {
       <div className="w-full md:w-48 md:flex-shrink-0">
         <div className="card p-2 flex md:block overflow-x-auto gap-1">
           <nav className="flex md:flex-col gap-1 md:gap-0 md:space-y-0.5">
-            {sections.map(({ id, label, icon: Icon }) => (
+            {sections.map(({ id, icon: Icon }) => (
               <button
                 key={id}
                 onClick={() => setActiveSection(id)}
@@ -129,7 +130,7 @@ export default function Settings() {
                 }`}
               >
                 <Icon className="w-4 h-4" />
-                {label}
+                {t(`settings.sections.${id}`)}
               </button>
             ))}
           </nav>
@@ -140,7 +141,7 @@ export default function Settings() {
       <div className="flex-1 space-y-5">
         {activeSection === 'company' && (
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">Company Information</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">{t('settings.companyInfo')}</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className="label">Company Name</label>
@@ -203,7 +204,7 @@ export default function Settings() {
 
         {activeSection === 'notifications' && (
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">Notification Preferences</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">{t('settings.notificationPrefs')}</h3>
             <div className="space-y-4">
               <p className="text-sm font-medium text-gray-700 dark:text-slate-300">Order Events</p>
               {[
@@ -259,7 +260,7 @@ export default function Settings() {
 
         {activeSection === 'dispatch' && (
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">Dispatch Rules</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">{t('settings.dispatchRules')}</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-gray-50">
                 <div>
@@ -301,7 +302,7 @@ export default function Settings() {
 
         {activeSection === 'tracking' && (
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">Tracking Settings</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">{t('settings.trackingSettings')}</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="label">GPS Update Interval (seconds)</label>
@@ -348,7 +349,7 @@ export default function Settings() {
 
         {activeSection === 'appearance' && (
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">Appearance</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">{t('settings.appearanceTitle')}</h3>
             <div className="space-y-5">
               <div>
                 <label className="label">Brand Color</label>
@@ -381,17 +382,17 @@ export default function Settings() {
         {activeSection === 'security' && (
           <div className="space-y-4">
             <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-1">Cuenta actual</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-1">{t('settings.currentAccount')}</h3>
               <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">{user?.email}</p>
 
               {/* Name */}
-              <h4 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Nombre visible</h4>
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">{t('settings.displayName')}</h4>
               <div className="space-y-2 max-w-sm mb-6">
                 <input
                   className="input"
                   value={nameVal}
                   onChange={e => { setNameVal(e.target.value); setNameStatus('idle'); }}
-                  placeholder="Tu nombre completo"
+                  placeholder={t('settings.namePlaceholder')}
                 />
                 {nameStatus !== 'idle' && (
                   <div className={`flex items-center gap-2 text-sm rounded-xl px-3 py-2 ${
@@ -406,18 +407,18 @@ export default function Settings() {
                 <button onClick={saveName} disabled={nameStatus === 'saving'}
                   className="btn-primary flex items-center gap-2 disabled:opacity-50">
                   {nameStatus === 'saving'
-                    ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Guardando...</>
-                    : <><Save className="w-4 h-4" /> Guardar nombre</>}
+                    ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {t('settings.saving')}</>
+                    : <><Save className="w-4 h-4" /> {t('settings.saveName')}</>}
                 </button>
               </div>
 
               <div className="border-t border-gray-100 dark:border-slate-700 pt-5">
-              <h4 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Cambiar contraseña</h4>
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">{t('settings.changePassword')}</h4>
               <div className="space-y-3 max-w-sm">
                 {[
-                  { label: 'Contraseña actual',  key: 'current' },
-                  { label: 'Nueva contraseña',   key: 'newPw'   },
-                  { label: 'Confirmar nueva',    key: 'confirm' },
+                  { label: t('settings.fieldCurrentPassword'),  key: 'current' },
+                  { label: t('settings.fieldNewPassword'),   key: 'newPw'   },
+                  { label: t('settings.fieldConfirmPassword'),    key: 'confirm' },
                 ].map(({ label, key }) => (
                   <div key={key}>
                     <label className="label">{label}</label>
@@ -453,8 +454,8 @@ export default function Settings() {
                 <button onClick={changePassword} disabled={pwStatus === 'saving'}
                   className="btn-primary flex items-center gap-2 disabled:opacity-50">
                   {pwStatus === 'saving'
-                    ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Guardando...</>
-                    : <><Save className="w-4 h-4" /> Guardar contraseña</>}
+                    ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {t('settings.saving')}</>
+                    : <><Save className="w-4 h-4" /> {t('settings.savePassword')}</>}
                 </button>
               </div>
               </div>
@@ -464,7 +465,7 @@ export default function Settings() {
 
         {activeSection === 'api' && (
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">API & Integrations</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">{t('settings.apiIntegrations')}</h3>
             <div className="space-y-4">
               <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-xl p-4">
                 <p className="text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Backend API</p>
@@ -490,7 +491,7 @@ export default function Settings() {
         <div className="flex justify-end">
           <button onClick={handleSave} className={`btn-primary ${saved ? 'bg-green-500 hover:bg-green-600' : ''}`}>
             <Save className="w-4 h-4" />
-            {saved ? 'Saved!' : 'Save Settings'}
+            {saved ? t('settings.saved') : t('settings.saveSettings')}
           </button>
         </div>
       </div>

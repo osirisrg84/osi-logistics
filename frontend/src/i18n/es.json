@@ -187,5 +187,37 @@
     "emptyHint2": "Las comisiones aparecen cuando tus cargas se entregan",
     "statusPaid": "Pagado",
     "statusPending": "Pendiente"
+  },
+  "settings": {
+    "sections": {
+      "company": "Compañía", "notifications": "Notificaciones", "dispatch": "Reglas de Dispatch",
+      "tracking": "Rastreo", "appearance": "Apariencia", "security": "Seguridad", "api": "API e Integraciones"
+    },
+    "companyInfo": "Información de la Compañía",
+    "notificationPrefs": "Preferencias de Notificación",
+    "dispatchRules": "Reglas de Dispatch",
+    "trackingSettings": "Configuración de Rastreo",
+    "appearanceTitle": "Apariencia",
+    "apiIntegrations": "API e Integraciones",
+    "currentAccount": "Cuenta actual",
+    "displayName": "Nombre visible",
+    "namePlaceholder": "Tu nombre completo",
+    "nameEmpty": "El nombre no puede estar vacío",
+    "nameUpdated": "Nombre actualizado",
+    "saveError": "Error al guardar",
+    "saving": "Guardando...",
+    "saveName": "Guardar nombre",
+    "changePassword": "Cambiar contraseña",
+    "fieldCurrentPassword": "Contraseña actual",
+    "fieldNewPassword": "Nueva contraseña",
+    "fieldConfirmPassword": "Confirmar nueva",
+    "passwordFillAll": "Completa todos los campos",
+    "passwordMismatch": "Las contraseñas no coinciden",
+    "passwordMinLength": "Mínimo 8 caracteres",
+    "passwordUpdated": "Contraseña actualizada",
+    "passwordChangeError": "Error al cambiar contraseña",
+    "savePassword": "Guardar contraseña",
+    "saved": "¡Guardado!",
+    "saveSettings": "Guardar Ajustes"
   }
 }
