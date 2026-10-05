@@ -712,7 +712,7 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
               <p className="text-xs text-gray-500 dark:text-slate-400">Rate</p>
-              <p className="text-sm font-semibold text-green-600">${(Math.round(order.price / 100) * 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <p className="text-sm font-semibold text-green-600">${order.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
             <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
               <p className="text-xs text-gray-500 dark:text-slate-400">Distance</p>
@@ -1011,7 +1011,7 @@ export default function Orders() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-green-600">${(Math.round(order.price / 100) * 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p className="text-sm font-bold text-green-600">${order.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     <OrderStatusBadge status={order.status} />
                   </div>
                 </div>
@@ -1106,7 +1106,7 @@ export default function Orders() {
                         }
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <span className="text-sm font-semibold text-green-600">${(Math.round(order.price / 100) * 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span className="text-sm font-semibold text-green-600">${order.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center gap-1">
