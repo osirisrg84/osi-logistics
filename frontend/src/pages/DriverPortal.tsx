@@ -775,6 +775,31 @@ export default function DriverPortal() {
   // viendo la pantalla general sin saber cual orden era la nueva).
   const [highlightOrderId, setHighlightOrderId] = useState<string | null>(null);
   const [orderNotFoundMsg, setOrderNotFoundMsg] = useState<string | null>(null);
+
+  // Logica compartida para "llevame a esta orden especifica" -- la usan tanto
+  // el deep link del correo/push (?order=<id> en la URL) como un tap directo
+  // en el panel de notificaciones en la app (que antes no hacia nada al
+  // tocarlo, solo marcaba como leido). Devuelve true si la encontro en algun
+  // lado (activa/entregada/oferta pendiente), false si de verdad no esta.
+  const jumpToOrder = useCallback((targetId: string): boolean => {
+    const inActive = activeOrders.some(o => o.id === targetId);
+    const inDelivered = deliveredToday.some(o => o.id === targetId);
+    if (inActive || inDelivered) {
+      setTab(inActive ? 'active' : 'delivered');
+      setHighlightOrderId(targetId);
+      setTimeout(() => {
+        document.getElementById(`order-${targetId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+      setTimeout(() => setHighlightOrderId(null), 6000);
+      return true;
+    }
+    // Una oferta todavia sin aceptar no vive en activeOrders/deliveredToday --
+    // vive en pendingOffer (lo llena checkActiveOffer(), que corre aparte). Si
+    // coincide, el modal de oferta ya se muestra solo, no hace falta nada mas.
+    if (pendingOffer?.id === targetId) return true;
+    return false;
+  }, [activeOrders, deliveredToday, pendingOffer]);
+
   useEffect(() => {
     if (loading) return;
     const params = new URLSearchParams(window.location.search);
@@ -787,38 +812,19 @@ export default function DriverPortal() {
       window.history.replaceState({}, '', window.location.pathname + (rest ? '?' + rest : ''));
     };
 
-    const inActive = activeOrders.some(o => o.id === targetId);
-    const inDelivered = deliveredToday.some(o => o.id === targetId);
-    if (inActive || inDelivered) {
-      setTab(inActive ? 'active' : 'delivered');
-      setHighlightOrderId(targetId);
-      clearParam();
-      setTimeout(() => {
-        document.getElementById(`order-${targetId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 300);
-      const t = setTimeout(() => setHighlightOrderId(null), 6000);
-      return () => clearTimeout(t);
-    }
+    if (jumpToOrder(targetId)) { clearParam(); return; }
 
-    // Una oferta todavia sin aceptar no vive en activeOrders/deliveredToday --
-    // vive en pendingOffer (lo llena checkActiveOffer(), que corre aparte). Si
-    // coincide, el modal de oferta ya se muestra solo, no hace falta nada mas.
-    if (pendingOffer?.id === targetId) {
-      clearParam();
-      return;
-    }
-
-    // Ni esta en las ordenes del driver ni es la oferta pendiente -- pero no la
-    // demos por perdida hasta que checkActiveOffer() haya terminado de verdad.
-    // Un timeout fijo quedaba corto en un arranque en frio (tocar la
-    // notificacion/el correo abre la app desde cero: cargar el bundle entero +
-    // autenticar + pedir la oferta al servidor facilmente pasa de unos
-    // segundos en datos moviles), lo que disparaba un falso "ya no esta
-    // disponible" para una oferta que en realidad seguia esperando respuesta.
+    // No esta en ningun lado todavia -- pero no la demos por perdida hasta que
+    // checkActiveOffer() haya terminado de verdad. Un timeout fijo quedaba
+    // corto en un arranque en frio (tocar la notificacion/el correo abre la
+    // app desde cero: cargar el bundle entero + autenticar + pedir la oferta
+    // al servidor facilmente pasa de unos segundos en datos moviles), lo que
+    // disparaba un falso "ya no esta disponible" para una oferta que en
+    // realidad seguia esperando respuesta.
     if (!offerChecked) return;
     setOrderNotFoundMsg('Esta oferta u orden ya no está disponible -- probablemente expiró o fue tomada por otro conductor.');
     clearParam();
-  }, [loading, activeOrders, deliveredToday, pendingOffer, offerChecked]);
+  }, [loading, jumpToOrder, offerChecked]);
 
   useEffect(() => {
     if (driver?.status) setDriverStatus(driver.status as DriverStatus);
@@ -1647,6 +1653,10 @@ export default function DriverPortal() {
                       if (notif.read === 0) {
                         await notificationsApi.markRead(notif.id);
                         setDriverNotifs(prev => prev.map(n => n.id === notif.id ? { ...n, read: 1 } : n));
+                      }
+                      setShowNotifs(false);
+                      if (notif.related_id && !jumpToOrder(notif.related_id)) {
+                        setOrderNotFoundMsg('Esta oferta u orden ya no está disponible -- probablemente expiró o fue tomada por otro conductor.');
                       }
                     }}
                     className={`flex items-start gap-3 px-4 py-3.5 border-b border-white/5 cursor-pointer transition-colors ${
