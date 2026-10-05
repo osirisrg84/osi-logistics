@@ -452,6 +452,11 @@ async function seedHistoricalOrders(): Promise<void> {
       const dist     = Math.round((10 + Math.random() * 55) * 10) / 10;
       const weight   = Math.round((400 + Math.random() * 4600) * 10) / 10;
       const volume   = Math.round(weight / 280 * 10) / 10;
+      // Antes siempre 'normal' -- el grafico de "Orders by Priority" se veia
+      // como un circulo casi solido de un solo color. Mezcla realista: la
+      // mayoria normal, una porcion visible high, algo menos low.
+      const priorityRoll = Math.random();
+      const priority = priorityRoll < 0.2 ? 'high' : priorityRoll < 0.3 ? 'low' : 'normal';
 
       const createdAt   = new Date(base);
       createdAt.setHours(6 + j * 2, Math.floor(Math.random() * 60));
@@ -472,7 +477,7 @@ async function seedHistoricalOrders(): Promise<void> {
         [id, orderNum, cust.name, cust.phone, cust.email,
          pu.addr, pu.lat, pu.lng, 'Miami',
          del.addr, del.lat, del.lng, 'Miami',
-         'delivered', 'normal', weight, volume, descs[counter % descs.length], '',
+         'delivered', priority, weight, volume, descs[counter % descs.length], '',
          driver.id, null,
          createdAt.toISOString(), assignedAt.toISOString(), pickedUpAt.toISOString(),
          inTransitAt.toISOString(), deliveredAt.toISOString(), estimatedAt.toISOString(),
