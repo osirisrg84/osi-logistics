@@ -3432,27 +3432,27 @@ export default function DriverPortal() {
                       <Briefcase className="w-5 h-5 text-blue-500" />
                     </div>
                     <div>
-                      <p className="text-[11px] font-bold text-blue-500 uppercase tracking-wider">Dispatcher Actual</p>
+                      <p className="text-[11px] font-bold text-blue-500 uppercase tracking-wider">{t('driverPortal.currentDispatcher')}</p>
                       <p className="text-base font-bold text-gray-900 dark:text-white">{activeOrders[0].dispatcher_name}</p>
                     </div>
                   </div>
                   {activeOrders[0].dispatcher_code && (
                     <div className="flex items-center justify-between mb-4 bg-blue-50 dark:bg-blue-500/10 rounded-xl px-3 py-2.5">
-                      <span className="text-xs text-blue-400">Código dispatcher</span>
+                      <span className="text-xs text-blue-400">{t('driverPortal.dispatcherCode')}</span>
                       <span className="text-sm font-mono font-bold text-blue-600 dark:text-blue-300">{activeOrders[0].dispatcher_code}</span>
                     </div>
                   )}
                   <a href="tel:+17863334444"
                     className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm text-white transition-colors"
                     style={{ background: 'linear-gradient(90deg, #3b82f6, #2563eb)', boxShadow: '0 4px 12px rgba(59,130,246,0.3)' }}>
-                    <PhoneCall className="w-4 h-4" /> Llamar al Dispatcher
+                    <PhoneCall className="w-4 h-4" /> {t('driverPortal.callDispatcher')}
                   </a>
                 </div>
               ) : (
                 <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-6 text-center shadow-sm">
                   <Briefcase className="w-8 h-8 text-gray-200 dark:text-slate-700 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-gray-400 dark:text-slate-500">Sin carga activa asignada</p>
-                  <p className="text-xs text-gray-300 dark:text-slate-600 mt-1">El dispatcher aparece aquí cuando aceptas una oferta</p>
+                  <p className="text-sm font-semibold text-gray-400 dark:text-slate-500">{t('driverPortal.noActiveLoad')}</p>
+                  <p className="text-xs text-gray-300 dark:text-slate-600 mt-1">{t('driverPortal.dispatcherAppearsHint')}</p>
                 </div>
               )}
 
@@ -3462,12 +3462,12 @@ export default function DriverPortal() {
                   <div className="w-8 h-8 rounded-xl bg-orange-100 dark:bg-orange-500/10 flex items-center justify-center">
                     <PhoneCall className="w-4 h-4 text-orange-500" />
                   </div>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">OSI Logistics — Contactos</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">{t('driverPortal.osiContacts')}</p>
                 </div>
                 <div className="space-y-2.5">
                   {([
-                    { label: 'Dispatch 24/7',          phone: '+1 (904) 945-1816', desc: 'Lunes a Domingo · 24 horas' },
-                    { label: 'Soporte al Driver',       phone: '+1 (904) 610-3125', desc: 'Pagos · Issues técnicos' },
+                    { label: t('driverPortal.dispatch247'),    phone: '+1 (904) 945-1816', desc: t('driverPortal.dispatch247Desc') },
+                    { label: t('driverPortal.driverSupport'),  phone: '+1 (904) 610-3125', desc: t('driverPortal.driverSupportDesc') },
                   ]).map(c => (
                     <a key={c.phone} href={`tel:+${c.phone.replace(/\D/g,'')}`}
                       className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 hover:bg-orange-50 dark:hover:bg-orange-500/8 transition-colors group">
@@ -3486,12 +3486,12 @@ export default function DriverPortal() {
 
               {/* Resources */}
               <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5 shadow-sm">
-                <p className="text-[11px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-3">Recursos</p>
+                <p className="text-[11px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-3">{t('driverPortal.resources')}</p>
                 <div className="space-y-2">
                   {([
-                    { label: 'Manual del Driver OSI',   icon: '📋', desc: 'Procedimientos y políticas', action: undefined },
-                    { label: 'Reportar Incidente',       icon: '⚠️', desc: 'Accidentes · Robos · Daños a carga', action: () => setShowIncidentModal(true) },
-                    { label: 'Solicitar Ajuste de Rate', icon: '💰', desc: 'Negociar compensación de carga', action: undefined },
+                    { label: t('driverPortal.driverManual'),   icon: '📋', desc: t('driverPortal.driverManualDesc'), action: undefined },
+                    { label: t('driverPortal.reportIncident'),       icon: '⚠️', desc: t('driverPortal.reportIncidentDesc'), action: () => setShowIncidentModal(true) },
+                    { label: t('driverPortal.requestRateAdjustment'), icon: '💰', desc: t('driverPortal.requestRateAdjustmentDesc'), action: undefined },
                   ]).map(r => (
                     <button key={r.label} onClick={r.action} disabled={!r.action}
                       className={`w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 transition-colors text-left ${r.action ? 'hover:bg-orange-50 dark:hover:bg-orange-500/8' : 'opacity-70 cursor-default'}`}>

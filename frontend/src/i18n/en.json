@@ -545,9 +545,7 @@
     "complianceDesc": "DOT · FMCSA · Active licenses",
     "directEmails": "Direct Emails",
     "dispatchOperations": "Dispatch Operations",
-    "billingPayments": "Billing / Payments",
-    "tabRadio": "OSI Radio",
-    "youSuffix": " (you)"
+    "billingPayments": "Billing / Payments"
   },
   "driverLogin": {
     "backToPortalSelect": "Back to portal selection",
@@ -778,7 +776,26 @@
     "ratePerMile": "Rate / Mile",
     "loadDetail": "Load Detail",
     "noDeliveriesToday": "No deliveries yet today",
-    "delivered": "Delivered"
+    "delivered": "Delivered",
+    "tabRadio": "OSI Radio",
+    "youSuffix": " (you)",
+    "currentDispatcher": "Current Dispatcher",
+    "dispatcherCode": "Dispatcher Code",
+    "callDispatcher": "Call Dispatcher",
+    "noActiveLoad": "No active load assigned",
+    "dispatcherAppearsHint": "The dispatcher appears here once you accept an offer",
+    "osiContacts": "OSI Logistics — Contacts",
+    "dispatch247": "Dispatch 24/7",
+    "dispatch247Desc": "Monday to Sunday · 24 hours",
+    "driverSupport": "Driver Support",
+    "driverSupportDesc": "Payments · Technical issues",
+    "resources": "Resources",
+    "driverManual": "OSI Driver Manual",
+    "driverManualDesc": "Procedures and policies",
+    "reportIncident": "Report Incident",
+    "reportIncidentDesc": "Accidents · Theft · Cargo damage",
+    "requestRateAdjustment": "Request Rate Adjustment",
+    "requestRateAdjustmentDesc": "Negotiate load compensation"
   },
   "driverNav": {
     "active": "Active",

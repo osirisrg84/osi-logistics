@@ -545,9 +545,7 @@
     "complianceDesc": "DOT · FMCSA · Licencias activas",
     "directEmails": "Emails directos",
     "dispatchOperations": "Dispatch Operations",
-    "billingPayments": "Billing / Payments",
-    "tabRadio": "OSI Radio",
-    "youSuffix": " (tú)"
+    "billingPayments": "Billing / Payments"
   },
   "driverLogin": {
     "backToPortalSelect": "Volver a selección de portal",
@@ -778,7 +776,26 @@
     "ratePerMile": "Tarifa / Milla",
     "loadDetail": "Detalle de cargas",
     "noDeliveriesToday": "Sin entregas hoy todavía",
-    "delivered": "Entregado"
+    "delivered": "Entregado",
+    "tabRadio": "OSI Radio",
+    "youSuffix": " (tú)",
+    "currentDispatcher": "Dispatcher Actual",
+    "dispatcherCode": "Código dispatcher",
+    "callDispatcher": "Llamar al Dispatcher",
+    "noActiveLoad": "Sin carga activa asignada",
+    "dispatcherAppearsHint": "El dispatcher aparece aquí cuando aceptas una oferta",
+    "osiContacts": "OSI Logistics — Contactos",
+    "dispatch247": "Dispatch 24/7",
+    "dispatch247Desc": "Lunes a Domingo · 24 horas",
+    "driverSupport": "Soporte al Driver",
+    "driverSupportDesc": "Pagos · Issues técnicos",
+    "resources": "Recursos",
+    "driverManual": "Manual del Driver OSI",
+    "driverManualDesc": "Procedimientos y políticas",
+    "reportIncident": "Reportar Incidente",
+    "reportIncidentDesc": "Accidentes · Robos · Daños a carga",
+    "requestRateAdjustment": "Solicitar Ajuste de Rate",
+    "requestRateAdjustmentDesc": "Negociar compensación de carga"
   },
   "driverNav": {
     "active": "Activas",
