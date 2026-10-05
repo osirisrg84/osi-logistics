@@ -1827,7 +1827,7 @@ export default function DriverPortal() {
               {loading ? (
                 <div className="text-center py-12 text-gray-400 dark:text-slate-500">Loading orders...</div>
               ) : activeOrders.length === 0 ? (
-                <div className="text-center py-16">
+                <div className="text-center py-16 fade-in">
                   <Package className="w-12 h-12 text-gray-200 dark:text-slate-600 mx-auto mb-3" />
                   <p className="text-gray-500 dark:text-slate-400 font-medium">No active orders</p>
                   <p className="text-gray-400 dark:text-slate-500 text-sm mt-1">New orders will appear here when assigned</p>
@@ -1917,7 +1917,7 @@ export default function DriverPortal() {
               })()}
 
               {deliveredToday.length === 0 ? (
-                <div className="text-center py-16">
+                <div className="text-center py-16 fade-in">
                   <CheckCircle className="w-12 h-12 text-gray-200 dark:text-slate-600 mx-auto mb-3" />
                   <p className="text-gray-500 dark:text-slate-400 font-medium">No deliveries yet today</p>
                 </div>

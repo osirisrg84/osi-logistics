@@ -1,9 +1,11 @@
 ﻿import { useState, useEffect } from 'react';
-import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin, Building2, Clock, Wallet, ShieldCheck, FileText, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
+import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin, Building2, Clock, Wallet, ShieldCheck, FileText, Calendar, AlertCircle, CheckCircle, TrendingUp } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Driver, DriverStatus } from '../types';
 import { driversApi, trucksApi, ordersApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { DriverStatusBadge } from '../components/StatusBadge';
+import { EmptyState } from '../components/EmptyState';
 import { format, formatDistanceToNow } from 'date-fns';
 import { playSuccessChime } from '../utils/sounds';
 
@@ -162,12 +164,14 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
 interface DriverDetailProps {
   driver: Driver;
   onClose: () => void;
+  fleetAvgRating: number;
+  fleetAvgOnTime: number;
 }
 
 interface Favorite { id: string; name: string; address: string; type: string; }
 const FAV_ICONS: Record<string, string> = { home: '🏠', work: '🏢', frequent: '⭐', other: '📍' };
 
-function DriverDetail({ driver, onClose }: DriverDetailProps) {
+function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: DriverDetailProps) {
   const [recentOrders, setRecentOrders] = useState<unknown[]>([]);
   const [favorites, setFavorites] = useState<Favorite[]>([]);
 
@@ -220,6 +224,34 @@ function DriverDetail({ driver, onClose }: DriverDetailProps) {
               <p className="text-2xl font-bold text-green-600">{driver.on_time_rate.toFixed(0)}%</p>
               <p className="text-xs text-gray-500 dark:text-slate-400">On-Time</p>
             </div>
+          </div>
+
+          {/* Vs. fleet average */}
+          <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4">
+            <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 flex items-center gap-2 mb-2">
+              <TrendingUp className="w-3.5 h-3.5 text-orange-500" /> VS. PROMEDIO DE FLOTA
+            </p>
+            <ResponsiveContainer width="100%" height={140}>
+              <BarChart
+                data={[
+                  { metric: 'Rating', driver: (driver.rating / 5) * 100, fleet: (fleetAvgRating / 5) * 100, driverLabel: driver.rating.toFixed(1), fleetLabel: fleetAvgRating.toFixed(1) },
+                  { metric: 'On-Time', driver: driver.on_time_rate, fleet: fleetAvgOnTime, driverLabel: `${driver.on_time_rate.toFixed(0)}%`, fleetLabel: `${fleetAvgOnTime.toFixed(0)}%` },
+                ]}
+                margin={{ top: 4, right: 8, left: -20, bottom: 0 }}
+              >
+                <XAxis dataKey="metric" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis hide domain={[0, 100]} />
+                <Tooltip
+                  formatter={(_value, name, item) => {
+                    const payload = item.payload as { driverLabel: string; fleetLabel: string };
+                    return [name === 'driver' ? payload.driverLabel : payload.fleetLabel, name === 'driver' ? driver.name : 'Promedio flota'];
+                  }}
+                />
+                <Legend formatter={v => v === 'driver' ? driver.name.split(' ')[0] : 'Promedio flota'} wrapperStyle={{ fontSize: 11 }} />
+                <Bar dataKey="driver" fill="#f97316" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="fleet" fill="#cbd5e1" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
 
           {/* Contact */}
@@ -560,7 +592,7 @@ export default function Drivers() {
         {loading ? (
           <div className="col-span-3 text-center py-12 text-gray-400 dark:text-slate-500">Loading...</div>
         ) : drivers.length === 0 ? (
-          <div className="col-span-3 text-center py-12 text-gray-400 dark:text-slate-500">No drivers found</div>
+          <div className="col-span-3"><EmptyState icon={Truck} title="No se encontraron conductores" hint="Prueba a cambiar los filtros o agrega uno nuevo" /></div>
         ) : drivers.map(driver => (
           <div key={driver.id} className="card hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-3">
@@ -680,7 +712,14 @@ export default function Drivers() {
           onSave={(isNew) => { fetchDrivers(); if (isNew) { showToast('¡Conductor agregado con éxito! 🚚'); playSuccessChime(); } }}
         />
       )}
-      {detailDriver && <DriverDetail driver={detailDriver} onClose={() => setDetailDriver(null)} />}
+      {detailDriver && (
+        <DriverDetail
+          driver={detailDriver}
+          onClose={() => setDetailDriver(null)}
+          fleetAvgRating={stats.avg_rating || 0}
+          fleetAvgOnTime={drivers.length ? drivers.reduce((s, d) => s + (d.on_time_rate || 0), 0) / drivers.length : 0}
+        />
+      )}
     </div>
   );
 }

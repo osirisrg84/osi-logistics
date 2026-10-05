@@ -35,7 +35,10 @@ interface StatCardProps {
 
 function StatCard({ title, value, sub, icon: Icon, color, trend, onClick }: StatCardProps) {
   return (
-    <div className={`card${onClick ? ' cursor-pointer hover:ring-2 hover:ring-orange-400/50 transition-all active:scale-[0.98]' : ''}`} onClick={onClick}>
+    <div
+      className={`card fade-in transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md${onClick ? ' cursor-pointer hover:ring-2 hover:ring-orange-400/50 active:scale-[0.98]' : ''}`}
+      onClick={onClick}
+    >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-xs sm:text-sm text-gray-500 font-medium truncate">{title}</p>
@@ -171,7 +174,7 @@ export default function Dashboard() {
 
       {/* Secondary KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="card flex items-center gap-4">
+        <div className="card fade-in flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
           <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
             <CheckCircle className="w-5 h-5 text-green-600" />
           </div>
@@ -180,7 +183,7 @@ export default function Dashboard() {
             <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{orderStats.delivered_today || 0}</p>
           </div>
         </div>
-        <div className="card flex items-center gap-4">
+        <div className="card fade-in flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
           <div className="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center">
             <Clock className="w-5 h-5 text-yellow-600" />
           </div>
@@ -189,7 +192,7 @@ export default function Dashboard() {
             <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{(stats?.kpis.avg_delivery_hours || 0).toFixed(1)}h</p>
           </div>
         </div>
-        <div className="card flex items-center gap-4">
+        <div className="card fade-in flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
           <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
             <TrendingUp className="w-5 h-5 text-blue-600" />
           </div>
@@ -198,7 +201,7 @@ export default function Dashboard() {
             <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{(stats?.kpis.on_time_rate || 0).toFixed(1)}%</p>
           </div>
         </div>
-        <div className="card flex items-center gap-4">
+        <div className="card fade-in flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
           <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
             <AlertTriangle className="w-5 h-5 text-red-500" />
           </div>

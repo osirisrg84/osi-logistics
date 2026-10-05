@@ -7,6 +7,7 @@ import {
 import { Order, Driver, Truck as TruckType, OrderStatus } from '../types';
 import { ordersApi, driversApi, trucksApi } from '../services/api';
 import { OrderStatusBadge, DriverStatusBadge } from '../components/StatusBadge';
+import { EmptyState } from '../components/EmptyState';
 import { format, formatDistanceToNow } from 'date-fns';
 import { getSocket } from '../services/socket';
 import { playSuccessChime } from '../utils/sounds';
@@ -1013,7 +1014,7 @@ export default function Orders() {
       {loading ? (
         <div className="text-center py-12 text-gray-400 dark:text-slate-500">Loading orders...</div>
       ) : orders.length === 0 ? (
-        <div className="text-center py-12 text-gray-400 dark:text-slate-500">No orders found</div>
+        <EmptyState icon={Package} title="No se encontraron órdenes" hint="Prueba a cambiar los filtros o crea una nueva orden" />
       ) : (
         <>
           {/* Mobile cards */}

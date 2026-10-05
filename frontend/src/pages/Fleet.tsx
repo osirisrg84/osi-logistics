@@ -1,10 +1,18 @@
 ﻿import { useState, useEffect } from 'react';
-import { Plus, Search, X, Edit2, Trash2, Fuel, Wrench, AlertTriangle, Eye, CheckCircle } from 'lucide-react';
+import { Plus, Search, X, Edit2, Trash2, Fuel, Wrench, AlertTriangle, Eye, CheckCircle, Truck as TruckIcon } from 'lucide-react';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Truck } from '../types';
 import { trucksApi } from '../services/api';
 import { TruckStatusBadge } from '../components/StatusBadge';
+import { EmptyState } from '../components/EmptyState';
 import { format, differenceInDays } from 'date-fns';
 import { playSuccessChime } from '../utils/sounds';
+
+const FLEET_STATUS_COLORS: Record<string, string> = {
+  active: '#22c55e',
+  maintenance: '#eab308',
+  inactive: '#94a3b8',
+};
 
 interface TruckFormProps {
   truck?: Truck;
@@ -220,6 +228,31 @@ export default function Fleet() {
         ))}
       </div>
 
+      {/* Status breakdown chart */}
+      {trucks.length > 0 && (
+        <div className="card p-4">
+          <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">Distribución de la flota</p>
+          <div className="flex items-center">
+            <ResponsiveContainer width="100%" height={160}>
+              <PieChart>
+                <Pie
+                  data={(['active', 'maintenance', 'inactive'] as const)
+                    .map(st => ({ name: st, value: trucks.filter(t => t.status === st).length }))
+                    .filter(d => d.value > 0)}
+                  dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={64} paddingAngle={2}
+                >
+                  {(['active', 'maintenance', 'inactive'] as const).map(st => (
+                    <Cell key={st} fill={FLEET_STATUS_COLORS[st]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend formatter={(v: string) => v === 'active' ? 'Activo' : v === 'maintenance' ? 'Mantenimiento' : 'Inactivo'} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
@@ -244,7 +277,7 @@ export default function Fleet() {
         {loading ? (
           <div className="col-span-3 text-center py-12 text-gray-400 dark:text-slate-500">Loading fleet...</div>
         ) : trucks.length === 0 ? (
-          <div className="col-span-3 text-center py-12 text-gray-400 dark:text-slate-500">No trucks found</div>
+          <div className="col-span-3"><EmptyState icon={TruckIcon} title="No se encontraron camiones" hint="Prueba a cambiar los filtros o agrega uno nuevo" /></div>
         ) : trucks.map(truck => {
           const maintStatus = getMaintenanceStatus(truck.next_maintenance);
           return (
