@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ShieldCheck, Clock, ChevronDown, ChevronUp,
   User, Truck, AlertTriangle, CheckCircle2,
@@ -57,24 +58,6 @@ interface DispatcherEntity {
   approval_status: string;
 }
 
-const DRIVER_CHECK_LABELS: Record<string, string> = {
-  identity:            'Verificación de Identidad',
-  license:             'Licencia de Conducir',
-  mvr:                 'MVR – Historial de Manejo',
-  insurance:           'Seguro / COI',
-  criminal_background: 'Background Criminal',
-  drug_test:           'Prueba de Drogas',
-  equipment:           'Verificación de Equipo',
-};
-
-const DISPATCHER_CHECK_LABELS: Record<string, string> = {
-  identity:           'Verificación de Identidad',
-  background:         'Background Check',
-  employment_history: 'Historial Laboral',
-  references:         'Referencias',
-  experience:         'Verificación de Experiencia',
-};
-
 const STATUS_STYLES: Record<CheckStatus, string> = {
   pending:  'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700/40',
   verified: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700/40',
@@ -89,13 +72,15 @@ const STATUS_ICON: Record<CheckStatus, React.ReactNode> = {
   na:       <span className="text-xs font-bold">N/A</span>,
 };
 
-function overallStatus(checks: VerificationCheck[]): { label: string; color: string } {
+type TFn = (key: string, options?: Record<string, unknown>) => string;
+
+function overallStatus(checks: VerificationCheck[], t: TFn): { label: string; color: string } {
   if (checks.every(c => c.status === 'verified' || c.status === 'na'))
-    return { label: 'Verificado', color: 'text-green-600 dark:text-green-400' };
+    return { label: t('verifications.verified'), color: 'text-green-600 dark:text-green-400' };
   if (checks.some(c => c.status === 'failed'))
-    return { label: 'Con observaciones', color: 'text-red-600 dark:text-red-400' };
+    return { label: t('verifications.withIssues'), color: 'text-red-600 dark:text-red-400' };
   const done = checks.filter(c => c.status !== 'pending').length;
-  return { label: `${done}/${checks.length} completados`, color: 'text-amber-600 dark:text-amber-400' };
+  return { label: t('verifications.completed', { done, total: checks.length, count: done }), color: 'text-amber-600 dark:text-amber-400' };
 }
 
 interface CheckRowProps {
@@ -105,6 +90,7 @@ interface CheckRowProps {
 }
 
 function CheckRow({ check, label, onUpdate }: CheckRowProps) {
+  const { t } = useTranslation();
   const [notes, setNotes] = useState(check.notes || '');
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -124,7 +110,7 @@ function CheckRow({ check, label, onUpdate }: CheckRowProps) {
       >
         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-semibold flex-shrink-0 ${STATUS_STYLES[check.status]}`}>
           {STATUS_ICON[check.status]}
-          {check.status === 'na' ? 'N/A' : check.status.charAt(0).toUpperCase() + check.status.slice(1)}
+          {check.status === 'na' ? 'N/A' : check.status === 'verified' ? t('verifications.markVerified') : check.status === 'failed' ? t('verifications.markFailed') : t('verifications.markPending')}
         </span>
         <span className="flex-1 text-sm font-medium text-gray-800 dark:text-slate-200">{label}</span>
         {check.checked_by && (
@@ -138,13 +124,13 @@ function CheckRow({ check, label, onUpdate }: CheckRowProps) {
       {expanded && (
         <div className="px-4 pb-4 space-y-3 border-t border-gray-100 dark:border-slate-700 pt-3">
           <div>
-            <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1 block">Notas / Observaciones</label>
+            <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1 block">{t('verifications.notesLabel')}</label>
             <textarea
               className="input resize-none text-sm"
               rows={2}
               value={notes}
               onChange={e => setNotes(e.target.value)}
-              placeholder="Ej: Licencia válida hasta 2027, sin infracciones..."
+              placeholder={t('verifications.notesPlaceholder')}
             />
           </div>
           <div className="flex flex-wrap gap-2">
@@ -153,14 +139,14 @@ function CheckRow({ check, label, onUpdate }: CheckRowProps) {
               disabled={saving}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white text-xs font-semibold transition-colors"
             >
-              <CheckCircle2 className="w-3.5 h-3.5" /> Verificado
+              <CheckCircle2 className="w-3.5 h-3.5" /> {t('verifications.markVerified')}
             </button>
             <button
               onClick={() => handleUpdate('failed')}
               disabled={saving}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white text-xs font-semibold transition-colors"
             >
-              <XCircle className="w-3.5 h-3.5" /> No Pasó
+              <XCircle className="w-3.5 h-3.5" /> {t('verifications.markFailed')}
             </button>
             <button
               onClick={() => handleUpdate('na')}
@@ -175,14 +161,14 @@ function CheckRow({ check, label, onUpdate }: CheckRowProps) {
                 disabled={saving}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 disabled:opacity-50 text-amber-700 dark:text-amber-400 text-xs font-semibold transition-colors"
               >
-                <Clock className="w-3.5 h-3.5" /> Pendiente
+                <Clock className="w-3.5 h-3.5" /> {t('verifications.markPending')}
               </button>
             )}
-            {saving && <span className="text-xs text-gray-400 self-center">Guardando...</span>}
+            {saving && <span className="text-xs text-gray-400 self-center">{t('verifications.saving')}</span>}
           </div>
           {check.checked_by && (
             <p className="text-xs text-gray-400 dark:text-slate-500">
-              Última actualización por <span className="font-medium">{check.checked_by}</span>
+              {t('verifications.lastUpdatedBy')} <span className="font-medium">{check.checked_by}</span>
               {check.checked_at && ` · ${format(new Date(check.checked_at), 'MMM d, yyyy HH:mm')}`}
             </p>
           )}
@@ -201,7 +187,7 @@ interface EntityCardProps {
   subtitle: string;
   detail: string;
   checks: VerificationCheck[];
-  checkLabels: Record<string, string>;
+  checkNamespace: 'driverChecks' | 'dispatcherChecks';
   onUpdate: (entityId: string, checkName: string, status: CheckStatus, notes: string) => Promise<void>;
   onApprove: (userId: string) => Promise<void>;
   onReject: (userId: string) => Promise<void>;
@@ -209,24 +195,28 @@ interface EntityCardProps {
   children?: React.ReactNode;
 }
 
-const STATUS_BANNER: Record<string, { bg: string; border: string; iconColor: string; label: string }> = {
-  pending:  { bg: 'bg-amber-50 dark:bg-amber-900/20',  border: 'border-amber-200 dark:border-amber-700/40',  iconColor: 'text-amber-500',  label: 'Cuenta pendiente de aprobación' },
-  rejected: { bg: 'bg-red-50 dark:bg-red-900/20',      border: 'border-red-200 dark:border-red-700/40',      iconColor: 'text-red-500',    label: 'Cuenta rechazada' },
-  archived: { bg: 'bg-gray-100 dark:bg-slate-800/60',  border: 'border-gray-200 dark:border-slate-600/40',   iconColor: 'text-gray-400',   label: 'Cuenta archivada' },
+const STATUS_BANNER: Record<string, { bg: string; border: string; iconColor: string }> = {
+  pending:  { bg: 'bg-amber-50 dark:bg-amber-900/20',  border: 'border-amber-200 dark:border-amber-700/40',  iconColor: 'text-amber-500' },
+  rejected: { bg: 'bg-red-50 dark:bg-red-900/20',      border: 'border-red-200 dark:border-red-700/40',      iconColor: 'text-red-500' },
+  archived: { bg: 'bg-gray-100 dark:bg-slate-800/60',  border: 'border-gray-200 dark:border-slate-600/40',   iconColor: 'text-gray-400' },
 };
 
-function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtitle, detail, checks, checkLabels, onUpdate, onApprove, onReject, onArchive, children }: EntityCardProps) {
+function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtitle, detail, checks, checkNamespace, onUpdate, onApprove, onReject, onArchive, children }: EntityCardProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [acting, setAct] = useState<'approve' | 'reject' | 'archive' | null>(null);
-  const overall = overallStatus(checks);
+  const overall = overallStatus(checks, t);
   const pendingCount = checks.filter(c => c.status === 'pending').length;
   const showBanner = approvalStatus === 'pending' || approvalStatus === 'rejected' || approvalStatus === 'archived';
   const banner = STATUS_BANNER[approvalStatus] ?? STATUS_BANNER.pending;
+  const bannerLabel = approvalStatus === 'rejected' ? t('verifications.accountRejected')
+    : approvalStatus === 'archived' ? t('verifications.accountArchived')
+    : t('verifications.accountPending');
 
   const act = async (e: React.MouseEvent, type: 'approve' | 'reject' | 'archive') => {
     e.stopPropagation();
-    if (type === 'reject'  && !confirm(`¿Rechazar la cuenta de ${name}?`)) return;
-    if (type === 'archive' && !confirm(`¿Archivar la cuenta de ${name}?`)) return;
+    if (type === 'reject'  && !confirm(t('verifications.rejectConfirm', { name }))) return;
+    if (type === 'archive' && !confirm(t('verifications.archiveConfirm', { name }))) return;
     setAct(type);
     if (type === 'approve') await onApprove(userId);
     if (type === 'reject')  await onReject(userId);
@@ -248,7 +238,7 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
         <div className={`flex items-center justify-between px-5 py-2.5 ${banner.bg} border-b ${banner.border}`}>
           <div className="flex items-center gap-2">
             <Clock className={`w-4 h-4 ${banner.iconColor} flex-shrink-0`} />
-            <span className={`text-xs font-semibold ${banner.iconColor}`}>{banner.label}</span>
+            <span className={`text-xs font-semibold ${banner.iconColor}`}>{bannerLabel}</span>
           </div>
           <div className="flex items-center gap-1.5">
             {approvalStatus !== 'pending' && (
@@ -258,7 +248,7 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white text-xs font-bold transition-colors"
               >
                 <UserCheck className="w-3 h-3" />
-                {acting === 'approve' ? '...' : 'Aprobar'}
+                {acting === 'approve' ? '...' : t('verifications.approve')}
               </button>
             )}
             {approvalStatus === 'pending' && (
@@ -268,7 +258,7 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white text-xs font-bold transition-colors"
               >
                 <UserCheck className="w-3.5 h-3.5" />
-                {acting === 'approve' ? 'Aprobando...' : 'Aprobar cuenta'}
+                {acting === 'approve' ? t('verifications.approving') : t('verifications.approveAccount')}
               </button>
             )}
             {approvalStatus !== 'rejected' && (
@@ -278,7 +268,7 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white text-xs font-bold transition-colors"
               >
                 <Ban className="w-3 h-3" />
-                {acting === 'reject' ? '...' : 'Rechazar'}
+                {acting === 'reject' ? '...' : t('verifications.reject')}
               </button>
             )}
             {approvalStatus !== 'archived' && (
@@ -288,7 +278,7 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-400 hover:bg-gray-500 dark:bg-slate-600 dark:hover:bg-slate-500 disabled:opacity-50 text-white text-xs font-bold transition-colors"
               >
                 <Archive className="w-3 h-3" />
-                {acting === 'archive' ? '...' : 'Archivar'}
+                {acting === 'archive' ? '...' : t('verifications.archive')}
               </button>
             )}
           </div>
@@ -304,9 +294,9 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{name}</p>
-            {approvalStatus === 'pending'  && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border border-amber-200 dark:border-amber-700/40">Pendiente</span>}
-            {approvalStatus === 'rejected' && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border border-red-200 dark:border-red-700/40">Rechazado</span>}
-            {approvalStatus === 'archived' && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400 border border-gray-200 dark:border-slate-600">Archivado</span>}
+            {approvalStatus === 'pending'  && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border border-amber-200 dark:border-amber-700/40">{t('verifications.pending')}</span>}
+            {approvalStatus === 'rejected' && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border border-red-200 dark:border-red-700/40">{t('verifications.rejected')}</span>}
+            {approvalStatus === 'archived' && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400 border border-gray-200 dark:border-slate-600">{t('verifications.archived')}</span>}
             {pendingCount > 0 && (
               <span className="bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{pendingCount}</span>
             )}
@@ -327,13 +317,13 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
               {children}
             </div>
           )}
-          <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-2">Checklist de Verificación</p>
+          <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-2">{t('verifications.verificationChecklist')}</p>
           <div className="space-y-2">
             {checks.map(c => (
               <CheckRow
                 key={c.check_name}
                 check={c}
-                label={checkLabels[c.check_name] || c.check_name}
+                label={t(`verifications.${checkNamespace}.${c.check_name}`, { defaultValue: c.check_name })}
                 onUpdate={(checkName, status, notes) => onUpdate(entityId, checkName, status, notes)}
               />
             ))}
@@ -345,6 +335,7 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
 }
 
 export default function Verifications() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<'drivers' | 'dispatchers'>('drivers');
   const [drivers, setDrivers] = useState<DriverEntity[]>([]);
   const [dispatchers, setDispatchers] = useState<DispatcherEntity[]>([]);
@@ -418,23 +409,23 @@ export default function Verifications() {
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <ShieldCheck className="w-6 h-6 text-purple-500" /> Verificaciones
+            <ShieldCheck className="w-6 h-6 text-purple-500" /> {t('verifications.title')}
           </h1>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">Verificación de identidad, licencias y background checks</p>
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">{t('verifications.subtitle')}</p>
         </div>
         <button onClick={() => { setLoading(true); fetchData(); }}
           className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors self-start sm:self-auto">
-          <RefreshCw className="w-4 h-4" /> Actualizar
+          <RefreshCw className="w-4 h-4" /> {t('verifications.refresh')}
         </button>
       </div>
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Drivers',       value: drivers.length,      sub: `${pendingDrivers} pendientes`,      color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-          { label: 'Dispatchers',   value: dispatchers.length,  sub: `${pendingDispatchers} pendientes`,  color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/20' },
-          { label: 'Verificaciones pendientes', value: checks.filter(c => c.status === 'pending').length, sub: 'sin revisar', color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-          { label: 'Con observaciones', value: checks.filter(c => c.status === 'failed').length, sub: 'requieren atención', color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-900/20' },
+          { label: t('verifications.statDrivers'),       value: drivers.length,      sub: t('verifications.pendingSuffix', { count: pendingDrivers }),      color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+          { label: t('verifications.statDispatchers'),   value: dispatchers.length,  sub: t('verifications.pendingSuffix', { count: pendingDispatchers }),  color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/20' },
+          { label: t('verifications.statPendingVerifications'), value: checks.filter(c => c.status === 'pending').length, sub: t('verifications.unreviewed'), color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+          { label: t('verifications.statWithIssues'), value: checks.filter(c => c.status === 'failed').length, sub: t('verifications.needsAttention'), color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-900/20' },
         ].map(s => (
           <div key={s.label} className={`card ${s.bg} p-4`}>
             <p className="text-xs text-gray-500 dark:text-slate-400">{s.label}</p>
@@ -465,11 +456,11 @@ export default function Verifications() {
 
         <div className="relative flex-1 min-w-0">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input className="input pl-9 w-full" placeholder="Buscar por nombre o email..." value={search} onChange={e => setSearch(e.target.value)} />
+          <input className="input pl-9 w-full" placeholder={t('verifications.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
         </div>
 
         <div className="flex rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 flex-shrink-0 text-xs font-semibold">
-          {([['all','Todos'],['pending','Pendientes'],['issues','Observaciones']] as const).map(([v, l]) => (
+          {([['all',t('verifications.filterAll')],['pending',t('verifications.filterPending')],['issues',t('verifications.filterIssues')]] as const).map(([v, l]) => (
             <button key={v} onClick={() => setFilter(v)}
               className={`px-3 py-2 transition-colors ${filter === v ? 'bg-purple-600 text-white' : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'} ${v !== 'all' ? 'border-l border-gray-200 dark:border-slate-700' : ''}`}
             >{l}</button>
@@ -479,10 +470,10 @@ export default function Verifications() {
 
       {/* Content */}
       {loading ? (
-        <div className="text-center py-16 text-gray-400 dark:text-slate-500">Cargando verificaciones...</div>
+        <div className="text-center py-16 text-gray-400 dark:text-slate-500">{t('verifications.loadingVerifications')}</div>
       ) : tab === 'drivers' ? (
         filteredDrivers.length === 0 ? (
-          <div className="text-center py-16 text-gray-400 dark:text-slate-500">No se encontraron drivers</div>
+          <div className="text-center py-16 text-gray-400 dark:text-slate-500">{t('verifications.noDriversFound')}</div>
         ) : (
           <div className="space-y-3">
             {filteredDrivers.map(d => {
@@ -498,18 +489,18 @@ export default function Verifications() {
                   subtitle={`${d.email} · ${d.phone}`}
                   detail={`${d.equipment_type} · ${d.company_name}${d.mc_number ? ` · MC# ${d.mc_number}` : ''}`}
                   checks={dChecks}
-                  checkLabels={DRIVER_CHECK_LABELS}
+                  checkNamespace="driverChecks"
                   onUpdate={handleUpdate}
                   onApprove={handleApprove}
                   onReject={handleReject}
                   onArchive={handleArchive}
                 >
-                  <InfoRow label="Licencia #" value={d.license_number} />
-                  <InfoRow label="Vence" value={d.license_expiry ? format(new Date(d.license_expiry), 'MMM d, yyyy') : '—'} warn={!!d.license_expiry && new Date(d.license_expiry) < new Date(Date.now() + 90*24*3600*1000)} />
-                  <InfoRow label="COI" value={d.coi_filename || 'No subido'} warn={!d.coi_filename} />
-                  <InfoRow label="COI Vence" value={d.coi_expiry ? format(new Date(d.coi_expiry), 'MMM d, yyyy') : '—'} warn={!!d.coi_expiry && new Date(d.coi_expiry) < new Date(Date.now() + 90*24*3600*1000)} />
-                  <InfoRow label="Fecha Contrato" value={d.hire_date ? format(new Date(d.hire_date), 'MMM d, yyyy') : '—'} />
-                  <InfoRow label="Código Driver" value={d.driver_code} />
+                  <InfoRow label={t('verifications.licenseNumber')} value={d.license_number} />
+                  <InfoRow label={t('verifications.expires')} value={d.license_expiry ? format(new Date(d.license_expiry), 'MMM d, yyyy') : '—'} warn={!!d.license_expiry && new Date(d.license_expiry) < new Date(Date.now() + 90*24*3600*1000)} />
+                  <InfoRow label={t('verifications.coi')} value={d.coi_filename || t('verifications.notUploaded')} warn={!d.coi_filename} />
+                  <InfoRow label={t('verifications.coiExpires')} value={d.coi_expiry ? format(new Date(d.coi_expiry), 'MMM d, yyyy') : '—'} warn={!!d.coi_expiry && new Date(d.coi_expiry) < new Date(Date.now() + 90*24*3600*1000)} />
+                  <InfoRow label={t('verifications.hireDate')} value={d.hire_date ? format(new Date(d.hire_date), 'MMM d, yyyy') : '—'} />
+                  <InfoRow label={t('verifications.driverCode')} value={d.driver_code} />
                 </EntityCard>
               );
             })}
@@ -517,7 +508,7 @@ export default function Verifications() {
         )
       ) : (
         filteredDispatchers.length === 0 ? (
-          <div className="text-center py-16 text-gray-400 dark:text-slate-500">No se encontraron dispatchers</div>
+          <div className="text-center py-16 text-gray-400 dark:text-slate-500">{t('verifications.noDispatchersFound')}</div>
         ) : (
           <div className="space-y-3">
             {filteredDispatchers.map(d => {
@@ -531,29 +522,29 @@ export default function Verifications() {
                   approvalStatus={d.approval_status}
                   name={d.name}
                   subtitle={`${d.email} · ${d.phone}`}
-                  detail={`${d.city} · ${d.years_experience} años exp. · ${d.availability}`}
+                  detail={`${d.city} · ${t('verifications.yearsExp', { count: d.years_experience })} · ${d.availability}`}
                   checks={dChecks}
-                  checkLabels={DISPATCHER_CHECK_LABELS}
+                  checkNamespace="dispatcherChecks"
                   onUpdate={handleUpdate}
                   onApprove={handleApprove}
                   onReject={handleReject}
                   onArchive={handleArchive}
                 >
-                  <InfoRow label="Fecha Nacimiento" value={d.date_of_birth || '—'} />
-                  <InfoRow label="Ciudad" value={d.city || '—'} />
-                  <InfoRow label="Experiencia" value={`${d.years_experience} años`} />
-                  <InfoRow label="Disponibilidad" value={d.availability} />
-                  <InfoRow label="Idiomas" value={d.languages || '—'} />
-                  <InfoRow label="Código Dispatcher" value={d.dispatcher_code} />
+                  <InfoRow label={t('verifications.dob')} value={d.date_of_birth || '—'} />
+                  <InfoRow label={t('verifications.city')} value={d.city || '—'} />
+                  <InfoRow label={t('verifications.experience')} value={t('verifications.yearsExp', { count: d.years_experience })} />
+                  <InfoRow label={t('verifications.availability')} value={d.availability} />
+                  <InfoRow label={t('verifications.languages')} value={d.languages || '—'} />
+                  <InfoRow label={t('verifications.dispatcherCode')} value={d.dispatcher_code} />
                   {d.previous_companies && (
                     <div className="col-span-2">
-                      <span className="text-xs text-gray-500 dark:text-slate-400">Empresas anteriores: </span>
+                      <span className="text-xs text-gray-500 dark:text-slate-400">{t('verifications.previousCompanies')}: </span>
                       <span className="text-xs text-gray-800 dark:text-slate-200">{d.previous_companies}</span>
                     </div>
                   )}
                   {d.equipment_experience && (
                     <div className="col-span-2">
-                      <span className="text-xs text-gray-500 dark:text-slate-400">Experiencia en equipo: </span>
+                      <span className="text-xs text-gray-500 dark:text-slate-400">{t('verifications.equipmentExperience')}: </span>
                       <span className="text-xs text-gray-800 dark:text-slate-200">{d.equipment_experience}</span>
                     </div>
                   )}
