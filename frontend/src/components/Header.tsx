@@ -20,6 +20,9 @@ const PAGE_TITLES: Record<string, string> = {
   '/reports': 'Reports',
   '/settings': 'Settings',
   '/users': 'Users',
+  '/hub': 'Hub',
+  '/commissions': 'Mis Comisiones',
+  '/profile': 'Mi Perfil',
 };
 
 const NOTIF_COLORS: Record<string, string> = {
