@@ -2047,7 +2047,7 @@ export default function DriverPortal() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
-                      <span className="text-[10px] font-bold text-cyan-400 tracking-[0.15em] uppercase">Live Tracking</span>
+                      <span className="text-[10px] font-bold text-cyan-400 tracking-[0.15em] uppercase">{t('driverPortal.liveTracking')}</span>
                     </div>
                     <span className="text-[10px] font-mono text-cyan-300/60">
                       {driver.current_lat?.toFixed(4)}°N · {Math.abs(driver.current_lng ?? 0).toFixed(4)}°W
@@ -2109,7 +2109,7 @@ export default function DriverPortal() {
               {activeOrders.length > 0 && (
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 rounded-2xl p-4">
                   <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                    <Navigation className="w-3 h-3" /> Orden activa
+                    <Navigation className="w-3 h-3" /> {t('driverPortal.activeOrder')}
                   </p>
                   {activeOrders[0].status === 'assigned' && (
                     <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(formatLocation(activeOrders[0].pickup_address, activeOrders[0].pickup_contact))}`}
@@ -2120,7 +2120,7 @@ export default function DriverPortal() {
                           <MapPin className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                         </div>
                         <div>
-                          <p className="text-[9px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Ir al Pickup</p>
+                          <p className="text-[9px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wide">{t('driverPortal.goToPickup')}</p>
                           <p className="text-xs font-semibold text-gray-800 dark:text-slate-200 truncate max-w-[200px]">{formatLocation(activeOrders[0].pickup_address, activeOrders[0].pickup_contact)}</p>
                         </div>
                       </div>
@@ -2136,7 +2136,7 @@ export default function DriverPortal() {
                           <MapPin className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
                         </div>
                         <div>
-                          <p className="text-[9px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Ir al Delivery</p>
+                          <p className="text-[9px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wide">{t('driverPortal.goToDelivery')}</p>
                           <p className="text-xs font-semibold text-gray-800 dark:text-slate-200 truncate max-w-[200px]">{formatLocation(activeOrders[0].delivery_address, activeOrders[0].delivery_contact)}</p>
                         </div>
                       </div>
@@ -2203,7 +2203,7 @@ export default function DriverPortal() {
                   {emailVerified
                     ? <span className="flex items-center gap-0.5 text-[9px] font-bold text-emerald-500 flex-shrink-0"><CheckCircle className="w-3 h-3" /> OK</span>
                     : <button onClick={() => { setVerifying('email'); setCodeSent(false); setCodeInput(''); setVerifyMsg(''); }}
-                        className="text-[9px] font-bold text-orange-500 hover:text-orange-600 flex-shrink-0">Verificar</button>
+                        className="text-[9px] font-bold text-orange-500 hover:text-orange-600 flex-shrink-0">{t('driverPortal.verify')}</button>
                   }
                 </div>
                 {/* Phone row */}
@@ -2215,7 +2215,7 @@ export default function DriverPortal() {
                   {phoneVerified
                     ? <span className="flex items-center gap-0.5 text-[9px] font-bold text-emerald-500 flex-shrink-0"><CheckCircle className="w-3 h-3" /> OK</span>
                     : <button onClick={() => { setVerifying('phone'); setCodeSent(false); setCodeInput(''); setVerifyMsg(''); }}
-                        className="text-[9px] font-bold text-orange-500 hover:text-orange-600 flex-shrink-0">Verificar</button>
+                        className="text-[9px] font-bold text-orange-500 hover:text-orange-600 flex-shrink-0">{t('driverPortal.verify')}</button>
                   }
                 </div>
                 {/* Verification panel (shared by email/phone) */}
@@ -2227,12 +2227,12 @@ export default function DriverPortal() {
             <div className="border-t border-gray-100 dark:border-slate-700 mx-4 mb-1" />
             <div className="grid grid-cols-2 gap-3 p-4">
               {[
-                { label: 'Total Deliveries', value: driver.total_deliveries,                icon: Package,   color: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-500/10' },
-                { label: 'On-Time Rate',     value: `${driver.on_time_rate.toFixed(0)}%`,   icon: Clock,     color: 'text-green-500',  bg: 'bg-green-50 dark:bg-green-500/10' },
-                { label: 'License #',        value: driver.license_number,                  icon: FileText,  color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-500/10' },
-                { label: 'Rating',           value: `★ ${driver.rating.toFixed(1)}`,        icon: Star,      color: 'text-amber-500',  bg: 'bg-amber-50 dark:bg-amber-500/10' },
-                { label: 'Lic. Expiry',      value: driver.license_expiry || '—',           icon: Calendar,  color: 'text-rose-500',   bg: 'bg-rose-50 dark:bg-rose-500/10' },
-                { label: 'Hire Date',        value: driver.hire_date || '—',                icon: Briefcase, color: 'text-teal-500',   bg: 'bg-teal-50 dark:bg-teal-500/10' },
+                { label: t('driverPortal.statTotalDeliveries'), value: driver.total_deliveries,                icon: Package,   color: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-500/10' },
+                { label: t('driverPortal.statOnTimeRate'),     value: `${driver.on_time_rate.toFixed(0)}%`,   icon: Clock,     color: 'text-green-500',  bg: 'bg-green-50 dark:bg-green-500/10' },
+                { label: t('driverPortal.statLicenseNumber'),  value: driver.license_number,                  icon: FileText,  color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-500/10' },
+                { label: t('driverPortal.statRating'),         value: `★ ${driver.rating.toFixed(1)}`,        icon: Star,      color: 'text-amber-500',  bg: 'bg-amber-50 dark:bg-amber-500/10' },
+                { label: t('driverPortal.statLicExpiry'),      value: driver.license_expiry || '—',           icon: Calendar,  color: 'text-rose-500',   bg: 'bg-rose-50 dark:bg-rose-500/10' },
+                { label: t('driverPortal.statHireDate'),       value: driver.hire_date || '—',                icon: Briefcase, color: 'text-teal-500',   bg: 'bg-teal-50 dark:bg-teal-500/10' },
               ].map(({ label, value, icon: Icon, color, bg }) => (
                 <div key={label} className="bg-gray-50 dark:bg-slate-700/60 rounded-xl p-3">
                   <div className="flex items-center gap-1.5 mb-1.5">
@@ -2253,7 +2253,7 @@ export default function DriverPortal() {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Zap className="w-4 h-4 text-orange-500" />
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">Completa tu Perfil</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">{t('driverPortal.completeProfile')}</p>
                 </div>
                 <span className="text-xs font-bold text-orange-600 dark:text-orange-400">{profileScore}/{profileItems.length}</span>
               </div>
@@ -2280,12 +2280,12 @@ export default function DriverPortal() {
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
             <div className="flex items-center gap-2 mb-3">
               <Building2 className="w-4 h-4 text-green-500" />
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Company / Authority</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('driverPortal.companyAuthority')}</h3>
             </div>
             <div className="space-y-2.5">
               {driver.company_name && (
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500 dark:text-slate-400">Company Name</span>
+                  <span className="text-xs text-gray-500 dark:text-slate-400">{t('driverPortal.companyName')}</span>
                   <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{driver.company_name}</span>
                 </div>
               )}
@@ -2297,7 +2297,7 @@ export default function DriverPortal() {
               )}
               {driver.authority_since && (
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> Tiempo con autoridad</span>
+                  <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> {t('driverPortal.authorityTime')}</span>
                   <span className="text-sm font-semibold text-green-600 dark:text-green-400">{calcAuthority(driver.authority_since)}</span>
                 </div>
               )}
@@ -2305,28 +2305,28 @@ export default function DriverPortal() {
               {/* Rate Confirmation Email */}
               <div className="pt-1 border-t border-gray-100 dark:border-slate-700">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1"><Mail className="w-3 h-3" /> Rate Con Email</span>
+                  <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1"><Mail className="w-3 h-3" /> {t('driverPortal.rateConEmail')}</span>
                   {!editingRateConEmail && (
                     <button onClick={() => setEditingRateConEmail(true)}
                       className="text-[9px] font-bold text-orange-500 hover:text-orange-600 flex-shrink-0">
-                      {rateConEmail ? 'Editar' : 'Agregar'}
+                      {rateConEmail ? t('driverPortal.edit') : t('driverPortal.add')}
                     </button>
                   )}
                 </div>
                 {!editingRateConEmail ? (
                   <span className={`text-sm font-medium ${rateConEmail ? 'text-gray-800 dark:text-slate-200' : 'text-gray-300 dark:text-slate-600 italic'}`}>
-                    {rateConEmail || 'Not set'}
+                    {rateConEmail || t('driverPortal.notSet')}
                   </span>
                 ) : (
                   <div className="space-y-2 mt-1">
                     <input type="email" className="input text-sm w-full" value={rateConEmail}
                       onChange={e => setRateConEmail(e.target.value)}
                       placeholder="dispatch@tuempresa.com" />
-                    <p className="text-[10px] text-gray-400 dark:text-slate-500">Los brokers enviarán el rate confirmation a este correo.</p>
+                    <p className="text-[10px] text-gray-400 dark:text-slate-500">{t('driverPortal.rateConEmailHint')}</p>
                     <div className="flex gap-2">
                       <button onClick={() => { setEditingRateConEmail(false); setRateConEmail(driverExtra?.rate_con_email || ''); }}
                         className="flex-1 text-xs py-1.5 rounded-xl border border-gray-200 dark:border-slate-600 text-gray-500">
-                        Cancelar
+                        {t('driverPortal.cancel')}
                       </button>
                       <button
                         disabled={savingRateConEmail}
@@ -2340,7 +2340,7 @@ export default function DriverPortal() {
                         }}
                         className="flex-1 text-xs py-1.5 rounded-xl bg-orange-500 text-white font-semibold hover:bg-orange-600 transition-colors flex items-center justify-center gap-1">
                         {savingRateConEmail ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <CheckCircle className="w-3 h-3" />}
-                        Guardar
+                        {t('driverPortal.save')}
                       </button>
                     </div>
                   </div>
@@ -2354,23 +2354,23 @@ export default function DriverPortal() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Truck className="w-4 h-4 text-blue-500" />
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">My Equipment</h3>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('driverPortal.myEquipment')}</h3>
               </div>
               {!editingEquip ? (
                 <button onClick={() => setEditingEquip(true)}
                   className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
-                  <Edit3 className="w-3.5 h-3.5" /> Edit
+                  <Edit3 className="w-3.5 h-3.5" /> {t('driverPortal.edit')}
                 </button>
               ) : (
                 <div className="flex items-center gap-2">
                   <button onClick={() => setEditingEquip(false)}
                     className="text-xs text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition-colors">
-                    Cancel
+                    {t('driverPortal.cancel')}
                   </button>
                   <button onClick={saveEquipment} disabled={savingEquip}
                     className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50">
                     {savingEquip && <div className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" />}
-                    Save
+                    {t('driverPortal.save')}
                   </button>
                 </div>
               )}
@@ -2379,9 +2379,9 @@ export default function DriverPortal() {
             {!editingEquip ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500 dark:text-slate-400">Truck</span>
+                  <span className="text-xs text-gray-500 dark:text-slate-400">{t('driverPortal.truck')}</span>
                   <span className={`text-sm font-semibold ${localTruckMake ? 'text-gray-800 dark:text-slate-200' : 'text-gray-300 dark:text-slate-600 italic'}`}>
-                    {localTruckMake || 'Not set'}
+                    {localTruckMake || t('driverPortal.notSet')}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
