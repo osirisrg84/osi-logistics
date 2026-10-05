@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Users, PhoneCall, MessageSquare, Heart, Trophy, Package, DollarSign,
   Briefcase, Shield, BookOpen, AlertTriangle, ChevronRight
@@ -17,6 +18,7 @@ interface LeaderDriver { id: string; name: string; avatar?: string; rating: numb
 interface LeaderDispatcher { id: string; name: string; loads_30d: number; earned_30d: number; }
 
 export default function DispatcherHub() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { dark } = useTheme();
   const isAdmin = user?.role === 'admin';
@@ -45,7 +47,7 @@ export default function DispatcherHub() {
       setPosts(prev => [data, ...prev]);
       setPostText('');
     } catch {
-      alert('No se pudo publicar. Intenta de nuevo.');
+      alert(t('hub.postError'));
     } finally {
       setPosting(false);
     }
@@ -76,9 +78,9 @@ export default function DispatcherHub() {
       {/* ── Section Tabs ─────────────────────────────────── */}
       <div className="flex gap-2">
         {([
-          { id: 'community' as const,   icon: Users,   label: 'Comunidad' },
-          { id: 'leaderboard' as const, icon: Trophy,  label: 'Top' },
-          { id: 'support' as const,     icon: PhoneCall, label: 'Support' },
+          { id: 'community' as const,   icon: Users,   label: t('hub.tabCommunity') },
+          { id: 'leaderboard' as const, icon: Trophy,  label: t('hub.tabTop') },
+          { id: 'support' as const,     icon: PhoneCall, label: t('hub.tabSupport') },
         ]).map(s => (
           <button
             key={s.id}
@@ -116,7 +118,7 @@ export default function DispatcherHub() {
                 <textarea
                   value={postText}
                   onChange={e => setPostText(e.target.value)}
-                  placeholder="Comparte una actualización con el equipo OSI..."
+                  placeholder={t('hub.composerPlaceholder')}
                   className={`w-full text-sm rounded-xl p-3 resize-none border-0 outline-none ${dark ? 'bg-slate-700 text-slate-200 placeholder:text-slate-500' : 'bg-gray-50 text-gray-800 placeholder:text-gray-400'}`}
                   rows={2}
                   maxLength={280}
@@ -128,7 +130,7 @@ export default function DispatcherHub() {
                     onClick={publish}
                     className="px-4 py-1.5 rounded-xl text-xs font-bold text-white active:scale-95 disabled:opacity-40 transition-all"
                     style={{ background: `linear-gradient(135deg,${accent},${isAdmin ? '#7c3aed' : '#ea580c'})` }}>
-                    {posting ? 'Publicando...' : 'Publicar'}
+                    {posting ? t('hub.publishing') : t('hub.publish')}
                   </button>
                 </div>
               </div>
@@ -137,11 +139,11 @@ export default function DispatcherHub() {
 
           {/* Posts feed */}
           {postsLoading ? (
-            <div className="text-center py-10 text-sm text-gray-400 dark:text-slate-500">Cargando...</div>
+            <div className="text-center py-10 text-sm text-gray-400 dark:text-slate-500">{t('hub.loading')}</div>
           ) : posts.length === 0 ? (
             <div className="text-center py-10">
               <Users className="w-10 h-10 text-gray-200 dark:text-slate-600 mx-auto mb-2" />
-              <p className="text-sm text-gray-400 dark:text-slate-500">Nadie ha publicado todavía. ¡Sé el primero!</p>
+              <p className="text-sm text-gray-400 dark:text-slate-500">{t('hub.emptyFeed')}</p>
             </div>
           ) : posts.map(post => (
             <div key={post.id}
@@ -157,10 +159,10 @@ export default function DispatcherHub() {
                     <p className={`text-sm font-bold truncate ${dark ? 'text-white' : 'text-gray-900'}`}>{post.author_name}</p>
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 capitalize"
                           style={{ background: post.author_role === 'admin' ? 'rgba(168,85,247,0.15)' : 'rgba(249,115,22,0.12)', color: post.author_role === 'admin' ? '#c084fc' : '#fb923c' }}>
-                      {post.author_role === 'driver' ? 'Driver' : post.author_role === 'admin' ? 'Admin' : 'Dispatcher'}
+                      {post.author_role === 'driver' ? t('hub.roleDriver') : post.author_role === 'admin' ? t('hub.roleAdmin') : t('hub.roleDispatcher')}
                     </span>
                   </div>
-                  <p className={`text-[11px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })} · OSI Team</p>
+                  <p className={`text-[11px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })} · {t('hub.osiTeam')}</p>
                 </div>
               </div>
 
@@ -175,7 +177,7 @@ export default function DispatcherHub() {
                 </button>
                 <span className={`flex items-center gap-1.5 text-xs ${dark ? 'text-slate-600' : 'text-gray-300'}`}>
                   <MessageSquare className="w-3.5 h-3.5" />
-                  OSI Fleet
+                  {t('hub.osiFleet')}
                 </span>
               </div>
             </div>
@@ -190,12 +192,12 @@ export default function DispatcherHub() {
         <div className="space-y-3 fade-in">
           <div className={`rounded-2xl p-4 shadow-sm ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-100'}`}>
             <p className={`text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>
-              <Package className="w-3.5 h-3.5" style={{ color: accent }} /> Top Drivers · últimos 30 días
+              <Package className="w-3.5 h-3.5" style={{ color: accent }} /> {t('hub.topDrivers30')}
             </p>
             {leaderboardLoading ? (
-              <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Cargando...</p>
+              <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">{t('hub.loading')}</p>
             ) : topDrivers.length === 0 ? (
-              <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Sin datos todavía</p>
+              <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">{t('hub.noDataYet')}</p>
             ) : (
               <div className="space-y-2">
                 {topDrivers.map((d, i) => (
@@ -217,12 +219,12 @@ export default function DispatcherHub() {
 
           <div className={`rounded-2xl p-4 shadow-sm ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-100'}`}>
             <p className={`text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>
-              <DollarSign className="w-3.5 h-3.5" style={{ color: accent }} /> Top Dispatchers · últimos 30 días
+              <DollarSign className="w-3.5 h-3.5" style={{ color: accent }} /> {t('hub.topDispatchers30')}
             </p>
             {leaderboardLoading ? (
-              <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Cargando...</p>
+              <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">{t('hub.loading')}</p>
             ) : topDispatchers.length === 0 ? (
-              <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">Sin datos todavía</p>
+              <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">{t('hub.noDataYet')}</p>
             ) : (
               <div className="space-y-2">
                 {topDispatchers.map((d, i) => (
@@ -230,7 +232,7 @@ export default function DispatcherHub() {
                     <span className="w-6 text-center font-bold text-sm" style={{ color: i === 0 ? '#eab308' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : accent }}>#{i + 1}</span>
                     <div className="flex-1 min-w-0">
                       <p className={`text-sm font-semibold truncate ${dark ? 'text-slate-200' : 'text-gray-800'}`}>{d.name}</p>
-                      <p className={`text-[11px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{d.loads_30d} cargas</p>
+                      <p className={`text-[11px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{d.loads_30d} {t('hub.deliveriesWord')}</p>
                     </div>
                     <span className={`text-sm font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>${d.earned_30d.toFixed(0)}</span>
                   </div>
@@ -255,14 +257,14 @@ export default function DispatcherHub() {
                 <PhoneCall className="w-4 h-4" style={{ color: accent }} />
               </div>
               <div>
-                <p className={`text-xs font-bold uppercase tracking-wider ${dark ? 'text-slate-400' : 'text-gray-500'}`}>Contactos OSI Logistics</p>
-                <p className={`text-sm font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>Líneas directas 24/7</p>
+                <p className={`text-xs font-bold uppercase tracking-wider ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{t('hub.contactsTitle')}</p>
+                <p className={`text-sm font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>{t('hub.contactsSubtitle')}</p>
               </div>
             </div>
             <div className="space-y-2.5">
               {([
-                { label: 'Operations Manager',     phone: '+1 (904) 945-1816', desc: 'Decisiones operacionales urgentes',   color: '#22c55e' },
-                { label: 'Driver Support Line',    phone: '+1 (904) 610-3125', desc: 'Issues con drivers · Status de ruta', color: '#3b82f6' },
+                { label: t('hub.opsManager'),     phone: '+1 (904) 945-1816', desc: t('hub.opsManagerDesc'),   color: '#22c55e' },
+                { label: t('hub.driverSupportLine'),    phone: '+1 (904) 610-3125', desc: t('hub.driverSupportDesc'), color: '#3b82f6' },
               ]).map(c => (
                 <a
                   key={c.phone}
@@ -292,14 +294,14 @@ export default function DispatcherHub() {
                    style={{ background: 'rgba(59,130,246,0.12)' }}>
                 <Shield className="w-4 h-4 text-blue-500" />
               </div>
-              <p className={`text-sm font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>Policies & Compliance</p>
+              <p className={`text-sm font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>{t('hub.policiesCompliance')}</p>
             </div>
             <div className="space-y-2">
               {([
-                { icon: BookOpen,      label: 'Manual de Operaciones OSI',      desc: 'Procedimientos y políticas internas', action: undefined },
-                { icon: AlertTriangle, label: 'Reportar Incidente',             desc: 'Accidentes · Robos · Daños a carga',  action: () => setShowIncidentModal(true) },
-                { icon: Briefcase,     label: 'Asignación de Loads',            desc: 'Criterios de asignación dispatcher',  action: undefined },
-                { icon: Shield,        label: 'Compliance & Regulatory',        desc: 'DOT · FMCSA · Licencias activas',     action: undefined },
+                { icon: BookOpen,      label: t('hub.manualTitle'),      desc: t('hub.manualDesc'), action: undefined },
+                { icon: AlertTriangle, label: t('hub.reportIncident'),             desc: t('hub.reportIncidentDesc'),  action: () => setShowIncidentModal(true) },
+                { icon: Briefcase,     label: t('hub.loadAssignment'),            desc: t('hub.loadAssignmentDesc'),  action: undefined },
+                { icon: Shield,        label: t('hub.complianceTitle'),        desc: t('hub.complianceDesc'),     action: undefined },
               ]).map(r => (
                 <button
                   key={r.label}
@@ -323,11 +325,11 @@ export default function DispatcherHub() {
 
           {/* Quick email */}
           <div className={`rounded-2xl p-5 shadow-sm ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-100'}`}>
-            <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${dark ? 'text-slate-400' : 'text-gray-400'}`}>Emails directos</p>
+            <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${dark ? 'text-slate-400' : 'text-gray-400'}`}>{t('hub.directEmails')}</p>
             <div className="space-y-2">
               {([
-                { label: 'Dispatch Operations', email: 'dispatch@osilogistics.com' },
-                { label: 'Billing / Payments',  email: 'billing@osilogistics.com'  },
+                { label: t('hub.dispatchOperations'), email: 'dispatch@osilogistics.com' },
+                { label: t('hub.billingPayments'),  email: 'billing@osilogistics.com'  },
               ]).map(e => (
                 <a
                   key={e.email}
