@@ -7,7 +7,7 @@ import {
   Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet, Building2, CreditCard,
   Lock, ShieldCheck, Send, Bell, BellOff, CheckCheck, Award, Edit3, Zap,
   Headphones, Radio, Users, PhoneCall, MessageSquare, Heart, Trophy, DollarSign,
-  FileText, Upload, Calendar, AlertCircle, Mail
+  FileText, Upload, Calendar, AlertCircle, Mail, Languages
 } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
 import InstallAppButton from '../components/InstallAppButton';
@@ -16,6 +16,8 @@ import { setAppManifest, setThemeColor, DRIVER_MANIFEST, DISPATCH_MANIFEST, DRIV
 import { formatLocation } from '../utils/location';
 import { useDriverAuth } from '../context/DriverAuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { ordersApi, driversApi, billingApi, notificationsApi, userApi, driverAxios, communityApi, analyticsApi, incidentsApi, assistantApi } from '../services/driverApi';
 import { StripeCardPayment } from '../components/StripeCardPayment';
 import { IncidentReportModal } from '../components/IncidentReportModal';
@@ -104,11 +106,13 @@ function calcAuthority(since: string): string {
   return `${years} año${years !== 1 ? 's' : ''}, ${months} mes${months !== 1 ? 'es' : ''}`;
 }
 
-const STATUS_FLOW: Record<string, { next: string; label: string; color: string }> = {
-  assigned:  { next: 'picked_up', label: 'Confirm Pickup',    color: 'bg-blue-500 hover:bg-blue-600'   },
-  picked_up: { next: 'in_transit', label: 'Start Rolling',    color: 'bg-purple-500 hover:bg-purple-600' },
-  in_transit:{ next: 'delivered',  label: 'Mark Delivered ✓', color: 'bg-green-500 hover:bg-green-600'  },
-};
+function getStatusFlow(t: (key: string) => string): Record<string, { next: string; label: string; color: string }> {
+  return {
+    assigned:  { next: 'picked_up', label: t('driverPortal.confirmPickup'),  color: 'bg-blue-500 hover:bg-blue-600'   },
+    picked_up: { next: 'in_transit', label: t('driverPortal.startRolling'), color: 'bg-purple-500 hover:bg-purple-600' },
+    in_transit:{ next: 'delivered',  label: t('driverPortal.markDelivered'), color: 'bg-green-500 hover:bg-green-600'  },
+  };
+}
 
 const DOC_TYPES: { value: OrderDocument['type']; label: string }[] = [
   { value: 'unsigned_bol',  label: ORDER_DOCUMENT_TYPE_LABELS.unsigned_bol },
@@ -274,8 +278,9 @@ function OrderDocuments({ orderId }: { orderId: string }) {
 }
 
 function OrderCard({ order, onStatusUpdate, highlighted }: { order: Order; onStatusUpdate: (id: string, status: string) => void; highlighted?: boolean }) {
+  const { t } = useTranslation();
   const [updating, setUpdating] = useState(false);
-  const flow = STATUS_FLOW[order.status];
+  const flow = getStatusFlow(t)[order.status];
 
   const handleUpdate = async () => {
     if (!flow) return;
@@ -319,7 +324,7 @@ function OrderCard({ order, onStatusUpdate, highlighted }: { order: Order; onSta
             <MapPin className="w-3 h-3 text-orange-600 dark:text-orange-400" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">Pickup</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">{t('driverPortal.pickup')}</p>
             <p className="text-sm text-gray-700 dark:text-slate-300">{formatLocation(order.pickup_address, order.pickup_contact)}</p>
           </div>
         </div>
@@ -329,7 +334,7 @@ function OrderCard({ order, onStatusUpdate, highlighted }: { order: Order; onSta
             <MapPin className="w-3 h-3 text-green-600 dark:text-green-400" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">Delivery</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase">{t('driverPortal.deliveryWord')}</p>
             <p className="text-sm text-gray-700 dark:text-slate-300">{formatLocation(order.delivery_address, order.delivery_contact)}</p>
           </div>
         </div>
@@ -349,15 +354,15 @@ function OrderCard({ order, onStatusUpdate, highlighted }: { order: Order; onSta
 
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
-          <p className="text-xs text-gray-400 dark:text-slate-500">Weight</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">{t('driverPortal.weight')}</p>
           <p className="text-sm font-semibold text-gray-900 dark:text-white">{(order.weight_kg * 2.20462).toFixed(0)} lbs</p>
         </div>
         <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
-          <p className="text-xs text-gray-400 dark:text-slate-500">Created</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">{t('driverPortal.created')}</p>
           <p className="text-xs font-medium text-gray-900 dark:text-slate-100 break-words">{formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}</p>
         </div>
         <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
-          <p className="text-xs text-gray-400 dark:text-slate-500">ETA</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">{t('driverPortal.eta')}</p>
           <p className="text-xs font-medium text-gray-900 dark:text-slate-100">
             {order.estimated_delivery ? format(new Date(order.estimated_delivery), 'HH:mm') : '—'}
           </p>
@@ -367,14 +372,14 @@ function OrderCard({ order, onStatusUpdate, highlighted }: { order: Order; onSta
       {order.truck_type && (
         <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-700 rounded-lg px-3 py-2">
           <Truck className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 flex-shrink-0" />
-          <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Equipment:</span>
+          <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{t('driverPortal.equipment')}</span>
           <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{order.truck_type}</span>
         </div>
       )}
 
       {order.description && (
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">
-          <p className="text-[10px] font-semibold text-blue-500 dark:text-blue-400 uppercase tracking-wide mb-0.5">Commodity</p>
+          <p className="text-[10px] font-semibold text-blue-500 dark:text-blue-400 uppercase tracking-wide mb-0.5">{t('driverPortal.commodity')}</p>
           <p className="text-xs text-gray-600 dark:text-slate-400">{order.description}</p>
         </div>
       )}
@@ -382,13 +387,13 @@ function OrderCard({ order, onStatusUpdate, highlighted }: { order: Order; onSta
       {/* Dispatcher info */}
       {(order.dispatcher_name || order.dispatcher_user_id) && (
         <div className="bg-orange-50 dark:bg-orange-900/15 border border-orange-100 dark:border-orange-800/30 rounded-xl px-4 py-3">
-          <p className="text-[9px] font-bold text-orange-400 dark:text-orange-500 uppercase tracking-widest mb-2">Asignado por</p>
+          <p className="text-[9px] font-bold text-orange-400 dark:text-orange-500 uppercase tracking-widest mb-2">{t('driverPortal.assignedBy')}</p>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm">
               {order.dispatcher_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || 'DS'}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-gray-900 dark:text-white leading-tight">{order.dispatcher_name || 'Dispatcher'}</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-white leading-tight">{order.dispatcher_name || t('driverPortal.dispatcherFallback')}</p>
               {order.dispatcher_code && (
                 <p className="text-[11px] font-bold text-orange-500 tracking-widest mt-0.5">ID #{order.dispatcher_code}</p>
               )}
@@ -412,7 +417,7 @@ function OrderCard({ order, onStatusUpdate, highlighted }: { order: Order; onSta
       {order.status === 'delivered' && (
         <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-xl p-3">
           <CheckCircle className="w-5 h-5" />
-          <span className="font-semibold text-sm">Delivered {order.delivered_at ? format(new Date(order.delivered_at), 'HH:mm') : ''}</span>
+          <span className="font-semibold text-sm">{t('driverPortal.deliveredAt', { time: order.delivered_at ? format(new Date(order.delivered_at), 'HH:mm') : '' })}</span>
         </div>
       )}
     </div>
@@ -422,12 +427,14 @@ function OrderCard({ order, onStatusUpdate, highlighted }: { order: Order; onSta
 const EQUIP_TYPES     = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'];
 const EQUIP_WITH_DIMS = ['Van', 'Box Truck', 'Hotshot'];
 
-const STATUS_CONFIG: Record<DriverStatus, { label: string; dot: string; bg: string; text: string }> = {
-  available: { label: 'Online',      dot: 'bg-green-400',  bg: 'bg-green-50 dark:bg-green-900/30',   text: 'text-green-700 dark:text-green-400' },
-  busy:      { label: 'On Delivery', dot: 'bg-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/30', text: 'text-orange-700 dark:text-orange-400' },
-  on_break:  { label: 'On Break',    dot: 'bg-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-400' },
-  offline:   { label: 'Offline',     dot: 'bg-gray-400',   bg: 'bg-gray-100 dark:bg-slate-700',      text: 'text-gray-500 dark:text-slate-400' },
-};
+function getStatusConfig(t: (key: string) => string): Record<DriverStatus, { label: string; dot: string; bg: string; text: string }> {
+  return {
+    available: { label: t('driverPortal.statusOnline'),     dot: 'bg-green-400',  bg: 'bg-green-50 dark:bg-green-900/30',   text: 'text-green-700 dark:text-green-400' },
+    busy:      { label: t('driverPortal.statusOnDelivery'), dot: 'bg-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/30', text: 'text-orange-700 dark:text-orange-400' },
+    on_break:  { label: t('driverPortal.statusOnBreak'),    dot: 'bg-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-400' },
+    offline:   { label: t('driverPortal.statusOffline'),    dot: 'bg-gray-400',   bg: 'bg-gray-100 dark:bg-slate-700',      text: 'text-gray-500 dark:text-slate-400' },
+  };
+}
 
 type Tab = 'active' | 'delivered' | 'map' | 'profile' | 'payments' | 'hub';
 
@@ -437,6 +444,7 @@ type Tab = 'active' | 'delivered' | 'map' | 'profile' | 'payments' | 'hub';
 // vuelve a preguntar una vez negado), asi que sin este aviso el driver nunca se entera
 // de que dejo de recibir ofertas de carga.
 function NotificationBlockedBanner() {
+  const { t } = useTranslation();
   const supported = typeof window !== 'undefined' && 'Notification' in window;
   const [permission, setPermission] = useState<NotificationPermission | null>(
     supported ? Notification.permission : null
@@ -458,10 +466,9 @@ function NotificationBlockedBanner() {
         <BellOff className="w-4 h-4" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-white">Notificaciones bloqueadas</p>
+        <p className="text-sm font-semibold text-white">{t('driverPortal.notifBlockedTitle')}</p>
         <p className="text-xs mt-0.5 text-slate-300">
-          No vas a recibir avisos de nuevas ofertas de carga. Ve a los ajustes de tu navegador o teléfono,
-          busca las notificaciones de este sitio y actívalas.
+          {t('driverPortal.notifBlockedDesc')}
         </p>
       </div>
     </div>
@@ -471,6 +478,8 @@ function NotificationBlockedBanner() {
 export default function DriverPortal() {
   const { user, driverProfile, logout } = useDriverAuth();
   const { dark, toggle: toggleTheme } = useTheme();
+  const { lang, toggle: toggleLang } = useLanguage();
+  const { t } = useTranslation();
   const driver = driverProfile as Driver | null;
 
   const [driverStatus, setDriverStatus] = useState<DriverStatus>((driver?.status as DriverStatus) ?? 'offline');
@@ -1303,7 +1312,7 @@ export default function DriverPortal() {
   const todayRevenue = deliveredToday.reduce((sum, o) => sum + o.price, 0);
   const isOsiDemo    = user?.email?.endsWith('@osilogistics.com') ?? false;
   const displayRevenue = isOsiDemo ? 8500 : todayRevenue;
-  const cfg = STATUS_CONFIG[driverStatus];
+  const cfg = getStatusConfig(t)[driverStatus];
 
   // ── Company / Authority helpers ────────────────────────────
   const currentEquipType = localEquipType || (driver?.equipment_type ?? '');
@@ -1419,6 +1428,10 @@ export default function DriverPortal() {
               />
               <button onClick={toggleTheme} className="p-2 rounded-xl hover:bg-white/10 transition-colors">
                 {dark ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-slate-300" />}
+              </button>
+              <button onClick={toggleLang} className="px-1.5 py-2 rounded-xl hover:bg-white/10 transition-colors flex items-center gap-0.5">
+                <Languages className="w-4 h-4 text-slate-300" />
+                <span className="text-[10px] font-bold text-slate-300">{lang.toUpperCase()}</span>
               </button>
               <button onClick={() => setShowNotifs(v => !v)} className="relative p-2 rounded-xl hover:bg-white/10 transition-colors">
                 <Bell className="w-4 h-4 text-slate-300" />
@@ -1826,10 +1839,10 @@ export default function DriverPortal() {
               {/* Text */}
               <h3 className={`text-lg font-bold mb-1.5 tracking-tight ${dark ? 'text-white' : 'text-gray-900'}`}
                 style={dark ? { textShadow: '0 1px 8px rgba(0,0,0,0.5)' } : undefined}>
-                You're Offline
+                {t('driverPortal.offlineTitle')}
               </h3>
               <p className={`leading-relaxed ${dark ? 'text-slate-400 text-sm mb-4' : 'text-gray-500 text-sm mb-5'}`}>
-                Conéctate para recibir ofertas de OSI Logistics
+                {t('driverPortal.offlineSubtitle')}
               </p>
 
               {/* CTA */}
@@ -1850,7 +1863,7 @@ export default function DriverPortal() {
                 {togglingStatus
                   ? <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                   : <Power className="w-3.5 h-3.5" />}
-                <span>Go Online Now</span>
+                <span>{t('driverPortal.goOnlineNow')}</span>
               </button>
             </div>
           </div>
@@ -1867,12 +1880,12 @@ export default function DriverPortal() {
           {tab === 'active' && (
             <div className="space-y-4">
               {loading ? (
-                <div className="text-center py-12 text-gray-400 dark:text-slate-500">Loading orders...</div>
+                <div className="text-center py-12 text-gray-400 dark:text-slate-500">{t('driverPortal.loadingOrders')}</div>
               ) : activeOrders.length === 0 ? (
                 <div className="text-center py-16 fade-in">
                   <Package className="w-12 h-12 text-gray-200 dark:text-slate-600 mx-auto mb-3" />
-                  <p className="text-gray-500 dark:text-slate-400 font-medium">No active orders</p>
-                  <p className="text-gray-400 dark:text-slate-500 text-sm mt-1">New orders will appear here when assigned</p>
+                  <p className="text-gray-500 dark:text-slate-400 font-medium">{t('driverPortal.noActiveOrders')}</p>
+                  <p className="text-gray-400 dark:text-slate-500 text-sm mt-1">{t('driverPortal.newOrdersHint')}</p>
                 </div>
               ) : (
                 activeOrders.map(order => (
@@ -1905,17 +1918,17 @@ export default function DriverPortal() {
                       boxShadow: '0 8px 32px rgba(5,150,105,0.35), inset 0 1px 0 rgba(167,243,208,0.15)'
                     }}>
                       <div className="px-5 pt-5 pb-4">
-                        <p className="text-[10px] font-bold text-emerald-300/60 uppercase tracking-widest mb-1">Last Week's Revenue</p>
+                        <p className="text-[10px] font-bold text-emerald-300/60 uppercase tracking-widest mb-1">{t('driverPortal.lastWeekRevenue')}</p>
                         <p className="text-4xl font-black text-white tracking-tight">${fmt(grossRevenue)}</p>
-                        <p className="text-xs text-emerald-200/50 mt-1">{loads} load{loads !== 1 ? 's' : ''} completed last week</p>
+                        <p className="text-xs text-emerald-200/50 mt-1">{t('driverPortal.loadsCompleted', { count: loads })}</p>
                       </div>
                       <div className="grid grid-cols-2 border-t border-white/10">
                         <div className="px-5 py-3 border-r border-white/10">
-                          <p className="text-[9px] text-emerald-300/50 uppercase tracking-widest mb-0.5">Tu ganancia (93%)</p>
+                          <p className="text-[9px] text-emerald-300/50 uppercase tracking-widest mb-0.5">{t('driverPortal.yourEarnings93')}</p>
                           <p className="text-xl font-black text-emerald-300">${fmt(driverNet)}</p>
                         </div>
                         <div className="px-5 py-3">
-                          <p className="text-[9px] text-white/30 uppercase tracking-widest mb-0.5">OSI fee (7%)</p>
+                          <p className="text-[9px] text-white/30 uppercase tracking-widest mb-0.5">{t('driverPortal.osiFee7')}</p>
                           <p className="text-xl font-bold text-white/50">${fmt(osiFee)}</p>
                         </div>
                       </div>
@@ -1925,15 +1938,15 @@ export default function DriverPortal() {
                     <div className="grid grid-cols-3 gap-2">
                       <div className="bg-white dark:bg-slate-800 rounded-2xl p-3 text-center border border-gray-100 dark:border-slate-700">
                         <p className="text-2xl font-black text-gray-900 dark:text-white">{loads}</p>
-                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Loads</p>
+                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">{t('driverPortal.loads')}</p>
                       </div>
                       <div className="bg-white dark:bg-slate-800 rounded-2xl p-3 text-center border border-gray-100 dark:border-slate-700">
                         <p className="text-base font-black text-gray-900 dark:text-white">${fmt(avgPerLoad, 2)}</p>
-                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Average</p>
+                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">{t('driverPortal.average')}</p>
                       </div>
                       <div className="bg-white dark:bg-slate-800 rounded-2xl p-3 text-center border border-gray-100 dark:border-slate-700">
                         <p className="text-base font-black text-green-600">${fmt(bestLoad, 2)}</p>
-                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">Best</p>
+                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">{t('driverPortal.best')}</p>
                       </div>
                     </div>
 
@@ -1941,19 +1954,19 @@ export default function DriverPortal() {
                     {totalMiles > 0 && (
                       <div className="bg-white dark:bg-slate-800 rounded-2xl px-5 py-4 border border-gray-100 dark:border-slate-700 flex items-center justify-between">
                         <div>
-                          <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Total Miles</p>
+                          <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">{t('driverPortal.totalMiles')}</p>
                           <p className="text-xl font-black text-gray-900 dark:text-white">{totalMiles.toFixed(1)} <span className="text-sm font-normal text-gray-400">mi</span></p>
                         </div>
                         <div className="w-px h-10 bg-gray-100 dark:bg-slate-700" />
                         <div className="text-right">
-                          <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Rate / Mile</p>
+                          <p className="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">{t('driverPortal.ratePerMile')}</p>
                           <p className="text-xl font-black text-blue-600">${ratePerMile.toFixed(2)}<span className="text-sm font-normal text-gray-400">/mi</span></p>
                         </div>
                       </div>
                     )}
 
                     {/* ── Section label ───────────────────────── */}
-                    <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest px-1">Detalle de cargas</p>
+                    <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest px-1">{t('driverPortal.loadDetail')}</p>
                   </>
                 );
               })()}
@@ -1961,7 +1974,7 @@ export default function DriverPortal() {
               {deliveredToday.length === 0 ? (
                 <div className="text-center py-16 fade-in">
                   <CheckCircle className="w-12 h-12 text-gray-200 dark:text-slate-600 mx-auto mb-3" />
-                  <p className="text-gray-500 dark:text-slate-400 font-medium">No deliveries yet today</p>
+                  <p className="text-gray-500 dark:text-slate-400 font-medium">{t('driverPortal.noDeliveriesToday')}</p>
                 </div>
               ) : isOsiDemo ? (
                 [
@@ -1980,7 +1993,7 @@ export default function DriverPortal() {
                       <p className="text-xs text-gray-400 dark:text-slate-500">{format(new Date(order.delivered_at), 'MM/dd · HH:mm')}</p>
                       <div className="flex items-center justify-end gap-1 mt-1">
                         <CheckCircle className="w-3 h-3 text-green-500" />
-                        <span className="text-xs text-green-600">Delivered</span>
+                        <span className="text-xs text-green-600">{t('driverPortal.delivered')}</span>
                       </div>
                     </div>
                   </div>
@@ -2002,7 +2015,7 @@ export default function DriverPortal() {
                       )}
                       <div className="flex items-center justify-end gap-1 mt-1">
                         <CheckCircle className="w-3 h-3 text-green-500" />
-                        <span className="text-xs text-green-600">Delivered</span>
+                        <span className="text-xs text-green-600">{t('driverPortal.delivered')}</span>
                       </div>
                     </div>
                   </div>
@@ -3945,12 +3958,12 @@ export default function DriverPortal() {
       {/* ── Fixed Bottom Navigation ─────────────────────────── */}
       <nav className="fixed bottom-0 inset-x-0 z-40 bg-slate-900 border-t border-slate-700 flex items-stretch">
         {([
-          { id: 'active',    icon: Activity,    label: 'Active',  badge: activeOrders.length },
-          { id: 'delivered', icon: CheckCircle, label: 'Done',    badge: deliveredToday.length },
-          { id: 'map',       icon: Navigation,  label: 'Map',     badge: 0 },
-          { id: 'hub',       icon: Users,       label: 'Hub',     badge: 0 },
-          { id: 'payments',  icon: Wallet,      label: 'Pagos',   badge: (billingSummary?.pending ?? 0) > 0 ? 1 : 0 },
-          { id: 'profile',   icon: User,        label: 'Perfil',  badge: 0 },
+          { id: 'active',    icon: Activity,    label: t('driverNav.active'),  badge: activeOrders.length },
+          { id: 'delivered', icon: CheckCircle, label: t('driverNav.done'),    badge: deliveredToday.length },
+          { id: 'map',       icon: Navigation,  label: t('driverNav.map'),     badge: 0 },
+          { id: 'hub',       icon: Users,       label: t('driverNav.hub'),     badge: 0 },
+          { id: 'payments',  icon: Wallet,      label: t('driverNav.payments'),   badge: (billingSummary?.pending ?? 0) > 0 ? 1 : 0 },
+          { id: 'profile',   icon: User,        label: t('driverNav.profile'),  badge: 0 },
         ] as const).map(({ id, icon: Icon, label, badge }) => {
           const isActive = tab === id;
           return (
