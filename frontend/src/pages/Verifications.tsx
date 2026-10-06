@@ -488,7 +488,7 @@ export default function Verifications() {
                   approvalStatus={d.approval_status}
                   name={d.name}
                   subtitle={`${d.email} · ${formatPhone(d.phone)}`}
-                  detail={`${d.equipment_type} · ${d.company_name}${d.mc_number ? ` · MC# ${d.mc_number}` : ''}`}
+                  detail={`${d.equipment_type} · ${d.company_name}${d.mc_number ? ` · MC# ${d.mc_number.replace(/^(MC-|DOT-)/i, '')}` : ''}`}
                   checks={dChecks}
                   checkNamespace="driverChecks"
                   onUpdate={handleUpdate}

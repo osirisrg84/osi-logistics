@@ -284,7 +284,7 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
                       {sel.mc_number && (
                         <div className="flex items-center gap-1 col-span-3">
                           <Hash className="w-3 h-3 flex-shrink-0 text-blue-400" />
-                          <span className="font-medium text-gray-600 dark:text-slate-300">MC# {sel.mc_number}</span>
+                          <span className="font-medium text-gray-600 dark:text-slate-300">MC# {sel.mc_number.replace(/^(MC-|DOT-)/i, '')}</span>
                         </div>
                       )}
                     </div>
