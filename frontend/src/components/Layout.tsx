@@ -188,7 +188,7 @@ export default function Layout() {
 
       {/* Driver online toasts */}
       {toasts.length > 0 && (
-        <div className="fixed bottom-20 md:bottom-6 right-4 z-50 flex flex-col gap-2 items-end">
+        <div className="fixed bottom-36 md:bottom-24 right-4 z-50 flex flex-col gap-2 items-end">
           {toasts.map(t => (
             <DriverOnlineToast key={t.id} toast={t} onClose={() => removeToast(t.id)} />
           ))}
@@ -200,8 +200,8 @@ export default function Layout() {
         chat={assistantApi.chat}
         title="Asistente de Despacho"
         greeting="Pregúntame por órdenes, conductores o tus comisiones."
-        buttonClassName="fixed bottom-20 md:bottom-6 left-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
-        panelClassName="fixed bottom-36 md:bottom-24 right-4 left-4 sm:right-auto sm:left-4 z-40 sm:w-96 max-h-[70vh] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col overflow-hidden fade-in"
+        buttonClassName="fixed bottom-20 md:bottom-6 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+        panelClassName="fixed bottom-36 md:bottom-24 right-4 left-4 sm:left-auto z-40 sm:w-96 max-h-[70vh] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col overflow-hidden fade-in"
       />
     </div>
   );
