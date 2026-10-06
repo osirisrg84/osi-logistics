@@ -3284,7 +3284,7 @@ export default function DriverPortal() {
               <button key={s.id} onClick={() => setHubSection(s.id)}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                   hubSection === s.id
-                    ? 'bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-lg shadow-orange-500/25'
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-400 text-white shadow-lg shadow-blue-500/25'
                     : 'text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700'
                 }`}>
                 <s.icon className="w-3.5 h-3.5" />
@@ -3300,7 +3300,7 @@ export default function DriverPortal() {
               {/* Post composer */}
               <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 shadow-sm">
                 <div className="flex gap-3">
-                  <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-sm bg-gradient-to-br from-orange-400 to-orange-600 text-white">
+                  <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-sm bg-gradient-to-br from-blue-400 to-blue-600 text-white">
                     {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'D'}
                   </div>
                   <div className="flex-1">
@@ -3317,7 +3317,7 @@ export default function DriverPortal() {
                       <button
                         onClick={publishCommunityPost}
                         disabled={!postText.trim() || posting}
-                        className="px-4 py-1.5 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-400 active:scale-95 disabled:opacity-40 text-white transition-all">
+                        className="px-4 py-1.5 rounded-xl text-xs font-bold bg-blue-500 hover:bg-blue-400 active:scale-95 disabled:opacity-40 text-white transition-all">
                         {posting ? t('hub.publishing') : t('hub.publish')}
                       </button>
                     </div>
@@ -3343,7 +3343,7 @@ export default function DriverPortal() {
                       <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{post.author_name}</p>
                       <p className="text-[11px] text-gray-400 dark:text-slate-500">{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })} · {t('hub.osiTeam')}</p>
                     </div>
-                    <span className="text-[10px] font-bold text-orange-400 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded-full flex-shrink-0 capitalize">
+                    <span className="text-[10px] font-bold text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 rounded-full flex-shrink-0 capitalize">
                       {post.author_role === 'driver' ? t('hub.roleDriver') : post.author_role === 'admin' ? t('hub.roleAdmin') : t('hub.roleDispatcher')}
                     </span>
                   </div>
@@ -3370,7 +3370,7 @@ export default function DriverPortal() {
             <div className="px-4 pb-5 space-y-3 fade-in">
               <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2 text-gray-500 dark:text-slate-400">
-                  <Package className="w-3.5 h-3.5 text-orange-500" /> {t('hub.topDrivers30')}
+                  <Package className="w-3.5 h-3.5 text-blue-500" /> {t('hub.topDrivers30')}
                 </p>
                 {leaderboardLoading ? (
                   <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">{t('hub.loading')}</p>
@@ -3380,8 +3380,8 @@ export default function DriverPortal() {
                   <div className="space-y-2">
                     {topDrivers.map((d, i) => (
                       <div key={d.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 dark:bg-slate-900/50">
-                        <span className="w-6 text-center font-bold text-sm" style={{ color: i === 0 ? '#eab308' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : '#f97316' }}>#{i + 1}</span>
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs text-orange-600 bg-orange-50 dark:bg-orange-500/10 flex-shrink-0">
+                        <span className="w-6 text-center font-bold text-sm" style={{ color: i === 0 ? '#eab308' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : '#3b82f6' }}>#{i + 1}</span>
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs text-blue-600 bg-blue-50 dark:bg-blue-500/10 flex-shrink-0">
                           {d.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -3397,7 +3397,7 @@ export default function DriverPortal() {
 
               <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2 text-gray-500 dark:text-slate-400">
-                  <DollarSign className="w-3.5 h-3.5 text-orange-500" /> {t('hub.topDispatchers30')}
+                  <DollarSign className="w-3.5 h-3.5 text-blue-500" /> {t('hub.topDispatchers30')}
                 </p>
                 {leaderboardLoading ? (
                   <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">{t('hub.loading')}</p>
@@ -3407,7 +3407,7 @@ export default function DriverPortal() {
                   <div className="space-y-2">
                     {topDispatchers.map((d, i) => (
                       <div key={d.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 dark:bg-slate-900/50">
-                        <span className="w-6 text-center font-bold text-sm" style={{ color: i === 0 ? '#eab308' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : '#f97316' }}>#{i + 1}</span>
+                        <span className="w-6 text-center font-bold text-sm" style={{ color: i === 0 ? '#eab308' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : '#3b82f6' }}>#{i + 1}</span>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold truncate text-gray-800 dark:text-slate-200">{d.name}</p>
                           <p className="text-[11px] text-gray-400 dark:text-slate-500">{d.loads_30d} {t('hub.deliveriesWord')}</p>
@@ -3460,8 +3460,8 @@ export default function DriverPortal() {
               {/* OSI Contact Lines */}
               <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="w-8 h-8 rounded-xl bg-orange-100 dark:bg-orange-500/10 flex items-center justify-center">
-                    <PhoneCall className="w-4 h-4 text-orange-500" />
+                  <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center">
+                    <PhoneCall className="w-4 h-4 text-blue-500" />
                   </div>
                   <p className="text-sm font-bold text-gray-900 dark:text-white">{t('driverPortal.osiContacts')}</p>
                 </div>
@@ -3471,14 +3471,14 @@ export default function DriverPortal() {
                     { label: t('driverPortal.driverSupport'),  phone: '+1 (904) 610-3125', desc: t('driverPortal.driverSupportDesc') },
                   ]).map(c => (
                     <a key={c.phone} href={`tel:+${c.phone.replace(/\D/g,'')}`}
-                      className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 hover:bg-orange-50 dark:hover:bg-orange-500/8 transition-colors group">
+                      className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 hover:bg-blue-50 dark:hover:bg-blue-500/8 transition-colors group">
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-gray-800 dark:text-slate-200 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">{c.label}</p>
+                        <p className="text-sm font-semibold text-gray-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{c.label}</p>
                         <p className="text-[11px] text-gray-400 dark:text-slate-500 truncate">{c.desc}</p>
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
-                        <span className="text-xs font-mono font-bold text-orange-500 whitespace-nowrap">{c.phone}</span>
-                        <PhoneCall className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
+                        <span className="text-xs font-mono font-bold text-blue-500 whitespace-nowrap">{c.phone}</span>
+                        <PhoneCall className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
                       </div>
                     </a>
                   ))}
@@ -3495,7 +3495,7 @@ export default function DriverPortal() {
                     { label: t('driverPortal.requestRateAdjustment'), icon: '💰', desc: t('driverPortal.requestRateAdjustmentDesc'), action: undefined },
                   ]).map(r => (
                     <button key={r.label} onClick={r.action} disabled={!r.action}
-                      className={`w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 transition-colors text-left ${r.action ? 'hover:bg-orange-50 dark:hover:bg-orange-500/8' : 'opacity-70 cursor-default'}`}>
+                      className={`w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 transition-colors text-left ${r.action ? 'hover:bg-blue-50 dark:hover:bg-blue-500/8' : 'opacity-70 cursor-default'}`}>
                       <span className="text-lg flex-shrink-0">{r.icon}</span>
                       <div>
                         <p className="text-sm font-semibold text-gray-800 dark:text-slate-200">{r.label}</p>
@@ -3538,14 +3538,14 @@ export default function DriverPortal() {
                     const isMe = !!myName && msg.name === myName;
                     return (
                       <div key={msg.id} className={`flex gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
-                        <div className={`w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-[10px] font-bold ${isMe ? 'bg-orange-500' : 'bg-slate-600/80'} text-white`}>
+                        <div className={`w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-[10px] font-bold ${isMe ? 'bg-blue-500' : 'bg-slate-600/80'} text-white`}>
                           {msg.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                         </div>
                         <div className={`max-w-[80%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                           {!isMe && <p className="text-[10px] text-slate-500 mb-0.5 ml-1">{msg.name}</p>}
                           {msg.type === 'voice' && msg.audioData ? (
                             <div className={`rounded-2xl px-3 py-2.5 min-w-[180px] ${isMe
-                              ? 'bg-gradient-to-br from-orange-500 to-orange-600 rounded-tr-sm'
+                              ? 'bg-gradient-to-br from-blue-500 to-blue-600 rounded-tr-sm'
                               : 'bg-slate-700/80 border border-white/5 rounded-tl-sm'
                             }`}>
                               {/* Voice message player */}
@@ -3605,7 +3605,7 @@ export default function DriverPortal() {
                             </div>
                           ) : (
                             <div className={`rounded-2xl px-3 py-2 ${isMe
-                              ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-tr-sm'
+                              ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-tr-sm'
                               : 'bg-slate-700/80 text-slate-200 border border-white/5 rounded-tl-sm'
                             }`}>
                               <p className="text-sm leading-snug">{msg.msg}</p>
@@ -3687,7 +3687,7 @@ export default function DriverPortal() {
                               <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'conic-gradient(from 0deg,#040a14 0deg,#0c1a28 9deg,#162638 14deg,#0c1a28 19deg,#040a14 28deg,#0c1a28 38deg,#162638 43deg,#0c1a28 48deg,#040a14 57deg,#0c1a28 67deg,#162638 72deg,#0c1a28 77deg,#040a14 86deg,#0c1a28 96deg,#162638 101deg,#0c1a28 106deg,#040a14 115deg,#0c1a28 125deg,#162638 130deg,#0c1a28 135deg,#040a14 144deg,#0c1a28 154deg,#162638 159deg,#0c1a28 164deg,#040a14 173deg,#0c1a28 183deg,#162638 188deg,#0c1a28 193deg,#040a14 202deg,#0c1a28 212deg,#162638 217deg,#0c1a28 222deg,#040a14 231deg,#0c1a28 241deg,#162638 246deg,#0c1a28 251deg,#040a14 260deg,#0c1a28 270deg,#162638 275deg,#0c1a28 280deg,#040a14 289deg,#0c1a28 299deg,#162638 304deg,#0c1a28 309deg,#040a14 318deg,#0c1a28 328deg,#162638 333deg,#0c1a28 338deg,#040a14 347deg,#0c1a28 357deg,#162638 360deg)', boxShadow: '0 3px 10px rgba(0,0,0,0.97), inset 0 2px 4px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.055)' }} />
                               <div style={{ position: 'absolute', inset: 4, borderRadius: '50%', background: 'linear-gradient(135deg,#818c9e 0%,#d1d9e6 22%,#f4f6f9 46%,#d1d9e6 70%,#818c9e 100%)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.5), inset 0 -1px 1px rgba(255,255,255,0.3)' }} />
                               <div style={{ position: 'absolute', inset: 7, borderRadius: '50%', background: 'radial-gradient(circle at 33% 28%,#223448 0%,#111f30 42%,#060c18 100%)', boxShadow: 'inset 0 3px 8px rgba(0,0,0,0.96)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 2 }}>
-                                <div style={{ width: 2.5, height: 4, borderRadius: '0 0 2px 2px', background: '#f97316', boxShadow: '0 0 7px #f97316' }} />
+                                <div style={{ width: 2.5, height: 4, borderRadius: '0 0 2px 2px', background: '#3b82f6', boxShadow: '0 0 7px #3b82f6' }} />
                               </div>
                             </div>
                             <span style={{ fontSize: 5.5, letterSpacing: '0.2em', color: 'rgba(100,130,180,0.6)', fontFamily: 'Arial', fontWeight: 800 }}>VOL</span>
@@ -3844,10 +3844,10 @@ export default function DriverPortal() {
                             borderRadius: 10, border: 'none', cursor: 'pointer',
                             background: isRecording
                               ? ['repeating-linear-gradient(135deg,rgba(0,0,0,0.1) 0px,rgba(0,0,0,0.1) 2px,transparent 2px,transparent 6px)','linear-gradient(180deg,#f87171 0%,#ef4444 36%,#991b1b 100%)'].join(',')
-                              : ['repeating-linear-gradient(135deg,rgba(0,0,0,0.09) 0px,rgba(0,0,0,0.09) 2px,transparent 2px,transparent 6px)','linear-gradient(180deg,#fb923c 0%,#f97316 36%,#b45309 100%)'].join(','),
+                              : ['repeating-linear-gradient(135deg,rgba(0,0,0,0.09) 0px,rgba(0,0,0,0.09) 2px,transparent 2px,transparent 6px)','linear-gradient(180deg,#60a5fa 0%,#3b82f6 36%,#1d4ed8 100%)'].join(','),
                             boxShadow: isRecording
                               ? 'inset 0 -6px 16px rgba(0,0,0,0.65), inset 0 3px 8px rgba(255,100,100,0.18), 0 0 28px rgba(239,68,68,0.82), 0 4px 12px rgba(0,0,0,0.9)'
-                              : 'inset 0 -6px 16px rgba(0,0,0,0.55), inset 0 3px 8px rgba(255,185,100,0.14), 0 0 18px rgba(249,115,22,0.48), 0 4px 12px rgba(0,0,0,0.9)',
+                              : 'inset 0 -6px 16px rgba(0,0,0,0.55), inset 0 3px 8px rgba(147,197,253,0.14), 0 0 18px rgba(59,130,246,0.48), 0 4px 12px rgba(0,0,0,0.9)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                             transition: 'all 0.15s',
                           }}
@@ -3894,7 +3894,7 @@ export default function DriverPortal() {
                               {t('driverPortal.tapToStop')}
                             </span>
                           ) : (
-                            <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.14em', color: 'rgba(251,146,60,0.75)', textTransform: 'uppercase', fontFamily: 'Arial' }}>
+                            <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.14em', color: 'rgba(96,165,250,0.75)', textTransform: 'uppercase', fontFamily: 'Arial' }}>
                               {t('driverPortal.tapToRecord')}
                             </span>
                           )}
@@ -3905,8 +3905,8 @@ export default function DriverPortal() {
 
                       {/* Side PTT bar */}
                       <div style={{ position: 'absolute', left: -6, top: 98, width: 8, height: 58, borderRadius: '4px 0 0 4px',
-                        background: isRecording ? 'linear-gradient(to right,#ef4444,#dc2626 60%,#991b1b 100%)' : 'linear-gradient(to right,#f97316,#ea580c 60%,#c2410c 100%)',
-                        boxShadow: isRecording ? '-4px 0 14px rgba(239,68,68,0.75)' : '-4px 0 14px rgba(249,115,22,0.6)',
+                        background: isRecording ? 'linear-gradient(to right,#ef4444,#dc2626 60%,#991b1b 100%)' : 'linear-gradient(to right,#3b82f6,#2563eb 60%,#1d4ed8 100%)',
+                        boxShadow: isRecording ? '-4px 0 14px rgba(239,68,68,0.75)' : '-4px 0 14px rgba(59,130,246,0.6)',
                         transition: 'all 0.3s',
                         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
                       }}>
@@ -3945,7 +3945,7 @@ export default function DriverPortal() {
                         setRadioInput('');
                       }}
                       className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all active:scale-95"
-                      style={{ background: radioInput.trim() ? 'linear-gradient(135deg,#f97316,#ea580c)' : 'rgba(51,65,85,0.4)' }}>
+                      style={{ background: radioInput.trim() ? 'linear-gradient(135deg,#3b82f6,#2563eb)' : 'rgba(51,65,85,0.4)' }}>
                       <Send className="w-3.5 h-3.5 text-white" />
                     </button>
                   </div>
