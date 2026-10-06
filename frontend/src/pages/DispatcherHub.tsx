@@ -234,7 +234,7 @@ export default function DispatcherHub() {
                       <p className={`text-sm font-semibold truncate ${dark ? 'text-slate-200' : 'text-gray-800'}`}>{d.name}</p>
                       <p className={`text-[11px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{d.loads_30d} {t('hub.deliveriesWord')}</p>
                     </div>
-                    <span className={`text-sm font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>${d.earned_30d.toFixed(0)}</span>
+                    <span className={`text-sm font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>${d.earned_30d.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                 ))}
               </div>
