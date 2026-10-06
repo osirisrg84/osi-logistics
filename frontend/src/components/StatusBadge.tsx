@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { OrderStatus, DriverStatus, TruckStatus, OrderPriority } from '../types';
 
 const ORDER_STATUS_STYLES: Record<OrderStatus, string> = {
@@ -9,17 +10,6 @@ const ORDER_STATUS_STYLES: Record<OrderStatus, string> = {
   delivered: 'bg-green-100 text-green-700 border-green-200',
   cancelled: 'bg-red-100 text-red-700 border-red-200',
   failed: 'bg-red-100 text-red-700 border-red-200',
-};
-
-const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  pending: 'Pending',
-  offered: 'Oferta Enviada',
-  assigned: 'Assigned',
-  picked_up: 'Picked Up',
-  in_transit: 'In Transit',
-  delivered: 'Delivered',
-  cancelled: 'Cancelled',
-  failed: 'Failed',
 };
 
 const DRIVER_STATUS_STYLES: Record<DriverStatus, string> = {
@@ -51,37 +41,41 @@ const TRUCK_STATUS_STYLES: Record<TruckStatus, string> = {
 
 interface OrderStatusBadgeProps { status: OrderStatus; className?: string; }
 export function OrderStatusBadge({ status, className = '' }: OrderStatusBadgeProps) {
+  const { t } = useTranslation();
   return (
     <span className={`badge border ${ORDER_STATUS_STYLES[status]} ${className}`}>
-      {ORDER_STATUS_LABELS[status]}
+      {t(`common.orderStatus.${status}`)}
     </span>
   );
 }
 
 interface DriverStatusBadgeProps { status: DriverStatus; className?: string; }
 export function DriverStatusBadge({ status, className = '' }: DriverStatusBadgeProps) {
+  const { t } = useTranslation();
   return (
     <span className={`badge border ${DRIVER_STATUS_STYLES[status]} ${className}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${DRIVER_STATUS_DOTS[status]}`} />
-      {status.replace('_', ' ')}
+      {t(`common.driverStatus.${status}`)}
     </span>
   );
 }
 
 interface PriorityBadgeProps { priority: OrderPriority; className?: string; }
 export function PriorityBadge({ priority, className = '' }: PriorityBadgeProps) {
+  const { t } = useTranslation();
   return (
     <span className={`badge border uppercase tracking-wide text-xs ${PRIORITY_STYLES[priority]} ${className}`}>
-      {priority}
+      {t(`common.priority.${priority}`)}
     </span>
   );
 }
 
 interface TruckStatusBadgeProps { status: TruckStatus; className?: string; }
 export function TruckStatusBadge({ status, className = '' }: TruckStatusBadgeProps) {
+  const { t } = useTranslation();
   return (
     <span className={`badge border ${TRUCK_STATUS_STYLES[status]} ${className}`}>
-      {status}
+      {t(`common.truckStatus.${status}`)}
     </span>
   );
 }

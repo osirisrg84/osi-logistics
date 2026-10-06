@@ -46,20 +46,21 @@ interface CityStateFieldsProps {
 // State first, then a city input that autosuggests (via <datalist>) once a state is picked —
 // makes it fast for dispatch to type a city without knowing it up front.
 function CityStateFields({ state, city, onStateChange, onCityChange, listId }: CityStateFieldsProps) {
+  const { t } = useTranslation();
   const cityOptions = CITIES_BY_STATE[state] || [];
   return (
     <div className="grid grid-cols-2 gap-2">
       <div>
-        <label className="label">State *</label>
+        <label className="label">{t('orders.stateLabel')}</label>
         <select className="input" value={state} onChange={e => onStateChange(e.target.value)} required>
-          <option value="">— Select State —</option>
+          <option value="">{t('orders.selectStatePlaceholder')}</option>
           {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
       <div>
-        <label className="label">City</label>
+        <label className="label">{t('orders.cityLabel')}</label>
         <input className="input" list={listId} value={city} onChange={e => onCityChange(e.target.value)}
-          placeholder={state ? 'Escribe para buscar...' : 'Ej: Miami'} />
+          placeholder={state ? t('orders.cityTypeToSearch') : t('orders.cityExamplePlaceholder')} />
         <datalist id={listId}>
           {cityOptions.map(c => <option key={c} value={c} />)}
         </datalist>
@@ -69,6 +70,7 @@ function CityStateFields({ state, city, onStateChange, onCityChange, listId }: C
 }
 
 function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     pickup_name: '', pickup_address: '',
     delivery_name: '', delivery_address: '',
@@ -87,7 +89,7 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.pickup_address || !form.delivery_address) {
-      setError('Por favor completa los campos requeridos');
+      setError(t('orders.errorRequiredFields'));
       return;
     }
     setSaving(true);
@@ -125,7 +127,7 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
       onSave();
       onClose();
     } catch {
-      setError('Error al crear la orden');
+      setError(t('orders.errorCreatingOrder'));
     } finally {
       setSaving(false);
     }
@@ -135,7 +137,7 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">New Order</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">{t('orders.newOrder')}</h2>
           <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
             <X className="w-5 h-5 text-gray-500 dark:text-slate-400" />
           </button>
@@ -146,11 +148,11 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
           {/* Pickup */}
           <div>
             <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-orange-500" /> Pickup Location
+              <MapPin className="w-4 h-4 text-orange-500" /> {t('orders.pickupLocationTitle')}
             </h3>
             <div className="space-y-3">
               <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30 rounded-xl p-3 space-y-2">
-                <p className="text-xs font-bold text-orange-600 dark:text-orange-400">Stop #1</p>
+                <p className="text-xs font-bold text-orange-600 dark:text-orange-400">{t('orders.stopNumber', { n: 1 })}</p>
                 <CityStateFields state={form.pickup_address} city={form.pickup_name}
                   onStateChange={v => setForm({...form, pickup_address: v})}
                   onCityChange={v => setForm({...form, pickup_name: v})}
@@ -159,17 +161,17 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
               {extraPickups.map((addr, i) => (
                 <div key={i} className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30 rounded-xl p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-bold text-orange-600 dark:text-orange-400">Stop #{i + 2}</p>
+                    <p className="text-xs font-bold text-orange-600 dark:text-orange-400">{t('orders.stopNumber', { n: i + 2 })}</p>
                     <button type="button" onClick={() => setExtraPickups(prev => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  <input className="input" value={addr} onChange={e => setExtraPickups(prev => prev.map((a, j) => j === i ? e.target.value : a))} placeholder="Dirección adicional de recogida" />
+                  <input className="input" value={addr} onChange={e => setExtraPickups(prev => prev.map((a, j) => j === i ? e.target.value : a))} placeholder={t('orders.extraPickupPlaceholder')} />
                 </div>
               ))}
               <button type="button" onClick={() => setExtraPickups(prev => [...prev, ''])}
                 className="flex items-center gap-1.5 text-xs text-orange-500 hover:text-orange-600 font-semibold transition-colors">
-                <Plus className="w-3.5 h-3.5" /> Agregar parada de recogida
+                <Plus className="w-3.5 h-3.5" /> {t('orders.addPickupStop')}
               </button>
             </div>
           </div>
@@ -177,11 +179,11 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
           {/* Delivery */}
           <div>
             <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-green-500" /> Delivery Location
+              <MapPin className="w-4 h-4 text-green-500" /> {t('orders.deliveryLocationTitle')}
             </h3>
             <div className="space-y-3">
               <div className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30 rounded-xl p-3 space-y-2">
-                <p className="text-xs font-bold text-green-600 dark:text-green-400">Stop #2</p>
+                <p className="text-xs font-bold text-green-600 dark:text-green-400">{t('orders.stopNumber', { n: 2 })}</p>
                 <CityStateFields state={form.delivery_address} city={form.delivery_name}
                   onStateChange={v => setForm({...form, delivery_address: v})}
                   onCityChange={v => setForm({...form, delivery_name: v})}
@@ -190,17 +192,17 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
               {extraDeliveries.map((addr, i) => (
                 <div key={i} className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30 rounded-xl p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-bold text-green-600 dark:text-green-400">Stop #{i + 3}</p>
+                    <p className="text-xs font-bold text-green-600 dark:text-green-400">{t('orders.stopNumber', { n: i + 3 })}</p>
                     <button type="button" onClick={() => setExtraDeliveries(prev => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  <input className="input" value={addr} onChange={e => setExtraDeliveries(prev => prev.map((a, j) => j === i ? e.target.value : a))} placeholder="Dirección adicional de entrega" />
+                  <input className="input" value={addr} onChange={e => setExtraDeliveries(prev => prev.map((a, j) => j === i ? e.target.value : a))} placeholder={t('orders.extraDeliveryPlaceholder')} />
                 </div>
               ))}
               <button type="button" onClick={() => setExtraDeliveries(prev => [...prev, ''])}
                 className="flex items-center gap-1.5 text-xs text-green-500 hover:text-green-600 font-semibold transition-colors">
-                <Plus className="w-3.5 h-3.5" /> Agregar parada de entrega
+                <Plus className="w-3.5 h-3.5" /> {t('orders.addDeliveryStop')}
               </button>
             </div>
           </div>
@@ -208,44 +210,44 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
           {/* Shipment Details */}
           <div>
             <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-              <Package className="w-4 h-4 text-orange-500" /> Shipment Details
+              <Package className="w-4 h-4 text-orange-500" /> {t('orders.shipmentDetailsTitle')}
             </h3>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="label">Rate ($)</label>
+                <label className="label">{t('orders.rateFieldLabel')}</label>
                 <input className="input" type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} placeholder="0.00" min="0" step="0.01" />
               </div>
               <div>
-                <label className="label">Distance (mi)</label>
+                <label className="label">{t('orders.distanceFieldLabel')}</label>
                 <input className="input" type="number" value={form.distance_mi} onChange={e => setForm({...form, distance_mi: e.target.value})} placeholder="0" min="0" />
               </div>
               <div>
-                <label className="label">Weight (lbs)</label>
+                <label className="label">{t('orders.weightFieldLabel')}</label>
                 <input className="input" type="number" value={form.weight_kg} onChange={e => setForm({...form, weight_kg: e.target.value})} placeholder="0" min="0" />
               </div>
               <div className={form.equipment_type === 'Reefer' ? 'col-span-2' : 'col-span-3'}>
-                <label className="label">Tipo de Equipo</label>
+                <label className="label">{t('orders.equipmentTypeFieldLabel')}</label>
                 <select className="input" value={form.equipment_type} onChange={e => setForm({...form, equipment_type: e.target.value})}>
-                  {EQUIPMENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                  {EQUIPMENT_TYPES.map(eq => <option key={eq} value={eq}>{eq}</option>)}
                 </select>
               </div>
               {form.equipment_type === 'Reefer' && (
                 <div>
-                  <label className="label">Temperatura</label>
-                  <input className="input" value={form.temperature} onChange={e => setForm({...form, temperature: e.target.value})} placeholder="Ej: 34°F" />
+                  <label className="label">{t('orders.temperatureFieldLabel')}</label>
+                  <input className="input" value={form.temperature} onChange={e => setForm({...form, temperature: e.target.value})} placeholder={t('orders.temperaturePlaceholder')} />
                 </div>
               )}
               <div className="col-span-2">
-                <label className="label">End Delivery</label>
+                <label className="label">{t('orders.estimatedDeliveryLabel')}</label>
                 <input className="input" type="datetime-local" value={form.estimated_delivery} onChange={e => setForm({...form, estimated_delivery: e.target.value})} />
               </div>
               <div className="col-span-3">
-                <label className="label">Commodity</label>
-                <input className="input" value={form.commodity} onChange={e => setForm({...form, commodity: e.target.value})} placeholder="Ej: Fresh produce, Electronics, Automotive parts..." />
+                <label className="label">{t('orders.commodityLabel')}</label>
+                <input className="input" value={form.commodity} onChange={e => setForm({...form, commodity: e.target.value})} placeholder={t('orders.commodityPlaceholder')} />
               </div>
               <div className="col-span-3">
-                <label className="label">Notes</label>
-                <textarea className="input resize-none" rows={2} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Special instructions..." />
+                <label className="label">{t('orders.notesLabel')}</label>
+                <textarea className="input resize-none" rows={2} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder={t('orders.notesPlaceholder')} />
               </div>
             </div>
           </div>
@@ -253,7 +255,7 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
           {/* Assign Driver */}
           <div>
             <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-              <UserCheck className="w-4 h-4 text-blue-500" /> Asignar Driver <span className="text-xs font-normal text-gray-400">(opcional)</span>
+              <UserCheck className="w-4 h-4 text-blue-500" /> {t('orders.assignDriverSectionTitle')} <span className="text-xs font-normal text-gray-400">{t('orders.optionalTag')}</span>
             </h3>
             <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30 rounded-xl p-4 space-y-3">
 
@@ -293,33 +295,33 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
                       <span className="text-gray-400">·</span>
                       <span>★ {sel.rating.toFixed(1)}</span>
                       <span className="text-gray-400">·</span>
-                      <span>{sel.total_deliveries} viajes</span>
+                      <span>{sel.total_deliveries} {t('orders.tripsWord')}</span>
                     </div>
                   </div>
                 );
               })()}
 
               <div>
-                <label className="label">Conductor ({availableDrivers.length} disponibles)</label>
+                <label className="label">{t('orders.driverFieldLabel', { count: availableDrivers.length })}</label>
                 <select className="input" value={assignDriverId} onChange={e => setAssignDriverId(e.target.value)}>
-                  <option value="">Sin asignar — asignar después</option>
+                  <option value="">{t('orders.unassignedSelectOption')}</option>
                   {availableDrivers.map(d => (
-                    <option key={d.id} value={d.id}>{d.name} · ★{d.rating.toFixed(1)} · {d.total_deliveries} viajes</option>
+                    <option key={d.id} value={d.id}>{d.name} · ★{d.rating.toFixed(1)} · {d.total_deliveries} {t('orders.tripsWord')}</option>
                   ))}
                 </select>
               </div>
               {assignDriverId && (
-                <p className="text-xs text-blue-600 dark:text-blue-400">La oferta se enviará al conductor en tiempo real al crear la orden.</p>
+                <p className="text-xs text-blue-600 dark:text-blue-400">{t('orders.offerWillSendHint')}</p>
               )}
             </div>
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">Cancel</button>
+            <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">{t('orders.cancel')}</button>
             <button type="submit" disabled={saving} className="btn-primary flex-1 justify-center gap-2">
               {saving
                 ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                : assignDriverId ? <><UserCheck className="w-4 h-4" /> Crear y Asignar</> : 'Create Order'}
+                : assignDriverId ? <><UserCheck className="w-4 h-4" /> {t('orders.createAndAssignBtn')}</> : t('orders.createOrderBtn')}
             </button>
           </div>
         </form>
@@ -335,6 +337,7 @@ interface EditOrderModalProps {
 }
 
 function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     pickup_name: order.pickup_contact || '',
     pickup_address: order.pickup_address || '',
@@ -368,7 +371,7 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
   const handleRateConUpload = async (file: File) => {
     setRateConError('');
     if (file.size > 8 * 1024 * 1024) {
-      setRateConError('El archivo no puede superar 8MB');
+      setRateConError(t('orders.errorFileTooLarge'));
       return;
     }
     setUploadingRateCon(true);
@@ -382,7 +385,7 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
       const { data } = await ordersApi.uploadRateCon(order.id, { filename: file.name, data: base64 });
       setRateCon({ filename: data.filename, uploaded_at: data.uploaded_at, data: base64 });
     } catch {
-      setRateConError('Error al subir el archivo');
+      setRateConError(t('orders.errorUploadingFile'));
     } finally {
       setUploadingRateCon(false);
     }
@@ -393,14 +396,14 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
       await ordersApi.deleteRateCon(order.id);
       setRateCon(null);
     } catch {
-      setRateConError('Error al eliminar el archivo');
+      setRateConError(t('orders.errorDeletingFile'));
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.pickup_address || !form.delivery_address) {
-      setError('Por favor completa los campos requeridos');
+      setError(t('orders.errorRequiredFields'));
       return;
     }
     setSaving(true);
@@ -422,7 +425,7 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
       onSave();
       onClose();
     } catch {
-      setError('Error al guardar los cambios');
+      setError(t('orders.errorSavingChanges'));
     } finally {
       setSaving(false);
     }
@@ -432,7 +435,7 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Edit Order · {order.order_number}</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">{t('orders.editOrderTitle', { orderNumber: order.order_number })}</h2>
           <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
             <X className="w-5 h-5 text-gray-500 dark:text-slate-400" />
           </button>
@@ -445,7 +448,7 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
           {(order.driver_name || (order.status === 'offered' && order.offered_driver_name)) && (
             <div className={`rounded-xl p-3 ${order.driver_name ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-orange-50 dark:bg-orange-900/20'}`}>
               <div className={`flex items-center gap-2 text-xs font-semibold mb-1 ${order.driver_name ? 'text-blue-700 dark:text-blue-400' : 'text-orange-700 dark:text-orange-400'}`}>
-                <User className="w-3 h-3" /> {order.driver_name ? 'ASSIGNED DRIVER' : 'OFERTA ENVIADA A'}
+                <User className="w-3 h-3" /> {order.driver_name ? t('orders.assignedDriverLabel') : t('orders.offerSentToLabel')}
               </div>
               <span className="text-sm font-medium text-gray-900 dark:text-slate-100">
                 {order.driver_name || `⏳ ${order.offered_driver_name}`}
@@ -456,10 +459,10 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
           {/* Rate Confirmation */}
           <div className="bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-xl p-4">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-indigo-500" /> Rate Confirmation
+              <FileText className="w-4 h-4 text-indigo-500" /> {t('orders.rateConfirmationTitle')}
             </h3>
             {loadingRateCon ? (
-              <p className="text-xs text-gray-400">Cargando...</p>
+              <p className="text-xs text-gray-400">{t('orders.loadingEllipsis')}</p>
             ) : (
               <div className="space-y-2">
                 {rateCon && (
@@ -468,21 +471,21 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
                       <FileText className="w-4 h-4 text-indigo-500 flex-shrink-0" />
                       <div className="min-w-0">
                         <p className="text-xs font-medium text-gray-800 dark:text-slate-200 truncate">{rateCon.filename}</p>
-                        <p className="text-[10px] text-gray-400">Subido {format(new Date(rateCon.uploaded_at), 'MMM d, yyyy HH:mm')}</p>
+                        <p className="text-[10px] text-gray-400">{t('orders.uploadedOn', { date: format(new Date(rateCon.uploaded_at), 'MMM d, yyyy HH:mm') })}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <a href={rateCon.data} download={rateCon.filename} target="_blank" rel="noreferrer"
-                        className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Ver</a>
+                        className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">{t('orders.viewLink')}</a>
                       <button type="button" onClick={handleRateConDelete} className="text-xs font-semibold text-red-400 hover:text-red-500">
-                        Eliminar
+                        {t('orders.delete')}
                       </button>
                     </div>
                   </div>
                 )}
                 <label className="flex items-center justify-center gap-2 cursor-pointer px-3 py-2 rounded-lg border-2 border-dashed border-indigo-300 dark:border-indigo-700 hover:border-indigo-400 transition-colors text-xs font-semibold text-indigo-600 dark:text-indigo-400">
                   {uploadingRateCon ? <div className="w-3.5 h-3.5 border-2 border-indigo-300 border-t-indigo-600 rounded-full animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                  {rateCon ? 'Reemplazar archivo' : 'Subir Rate Con (PDF, JPG, PNG)'}
+                  {rateCon ? t('orders.replaceFile') : t('orders.uploadRateConLabel')}
                   <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" disabled={uploadingRateCon}
                     onChange={e => { const f = e.target.files?.[0]; if (f) handleRateConUpload(f); e.target.value = ''; }} />
                 </label>
@@ -494,7 +497,7 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
           {/* Pickup */}
           <div>
             <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-orange-500" /> Pickup Location
+              <MapPin className="w-4 h-4 text-orange-500" /> {t('orders.pickupLocationTitle')}
             </h3>
             <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30 rounded-xl p-3">
               <CityStateFields state={form.pickup_address} city={form.pickup_name}
@@ -507,7 +510,7 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
           {/* Delivery */}
           <div>
             <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-green-500" /> Delivery Location
+              <MapPin className="w-4 h-4 text-green-500" /> {t('orders.deliveryLocationTitle')}
             </h3>
             <div className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30 rounded-xl p-3">
               <CityStateFields state={form.delivery_address} city={form.delivery_name}
@@ -520,52 +523,52 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
           {/* Shipment Details */}
           <div>
             <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-              <Package className="w-4 h-4 text-orange-500" /> Shipment Details
+              <Package className="w-4 h-4 text-orange-500" /> {t('orders.shipmentDetailsTitle')}
             </h3>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="label">Rate ($)</label>
+                <label className="label">{t('orders.rateFieldLabel')}</label>
                 <input className="input" type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} placeholder="0.00" min="0" step="0.01" />
               </div>
               <div>
-                <label className="label">Distance (mi)</label>
+                <label className="label">{t('orders.distanceFieldLabel')}</label>
                 <input className="input" type="number" value={form.distance_mi} onChange={e => setForm({...form, distance_mi: e.target.value})} placeholder="0" min="0" />
               </div>
               <div>
-                <label className="label">Weight (lbs)</label>
+                <label className="label">{t('orders.weightFieldLabel')}</label>
                 <input className="input" type="number" value={form.weight_kg} onChange={e => setForm({...form, weight_kg: e.target.value})} placeholder="0" min="0" />
               </div>
               <div className={form.equipment_type === 'Reefer' ? 'col-span-2' : 'col-span-3'}>
-                <label className="label">Tipo de Equipo</label>
+                <label className="label">{t('orders.equipmentTypeFieldLabel')}</label>
                 <select className="input" value={form.equipment_type} onChange={e => setForm({...form, equipment_type: e.target.value})}>
-                  {EQUIPMENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                  {EQUIPMENT_TYPES.map(eq => <option key={eq} value={eq}>{eq}</option>)}
                 </select>
               </div>
               {form.equipment_type === 'Reefer' && (
                 <div>
-                  <label className="label">Temperatura</label>
-                  <input className="input" value={form.temperature} onChange={e => setForm({...form, temperature: e.target.value})} placeholder="Ej: 34°F" />
+                  <label className="label">{t('orders.temperatureFieldLabel')}</label>
+                  <input className="input" value={form.temperature} onChange={e => setForm({...form, temperature: e.target.value})} placeholder={t('orders.temperaturePlaceholder')} />
                 </div>
               )}
               <div className="col-span-2">
-                <label className="label">End Delivery</label>
+                <label className="label">{t('orders.estimatedDeliveryLabel')}</label>
                 <input className="input" type="datetime-local" value={form.estimated_delivery} onChange={e => setForm({...form, estimated_delivery: e.target.value})} />
               </div>
               <div className="col-span-3">
-                <label className="label">Commodity</label>
-                <input className="input" value={form.commodity} onChange={e => setForm({...form, commodity: e.target.value})} placeholder="Ej: Fresh produce, Electronics, Automotive parts..." />
+                <label className="label">{t('orders.commodityLabel')}</label>
+                <input className="input" value={form.commodity} onChange={e => setForm({...form, commodity: e.target.value})} placeholder={t('orders.commodityPlaceholder')} />
               </div>
               <div className="col-span-3">
-                <label className="label">Notes</label>
-                <textarea className="input resize-none" rows={2} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Special instructions..." />
+                <label className="label">{t('orders.notesLabel')}</label>
+                <textarea className="input resize-none" rows={2} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder={t('orders.notesPlaceholder')} />
               </div>
             </div>
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">Cancel</button>
+            <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">{t('orders.cancel')}</button>
             <button type="submit" disabled={saving} className="btn-primary flex-1 justify-center gap-2">
-              {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Save Changes'}
+              {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : t('orders.saveChangesBtn')}
             </button>
           </div>
         </form>
@@ -583,6 +586,7 @@ interface AssignModalProps {
 }
 
 function AssignModal({ order, drivers, onClose, onSave }: Omit<AssignModalProps, 'trucks'>) {
+  const { t } = useTranslation();
   const [driverId, setDriverId] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -605,7 +609,7 @@ function AssignModal({ order, drivers, onClose, onSave }: Omit<AssignModalProps,
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Enviar Oferta al Conductor</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">{t('orders.sendOfferTitle')}</h2>
           <button onClick={onClose}><X className="w-5 h-5 text-gray-500 dark:text-slate-400" /></button>
         </div>
         <div className="p-6 space-y-4">
@@ -614,26 +618,26 @@ function AssignModal({ order, drivers, onClose, onSave }: Omit<AssignModalProps,
             <p className="text-xs text-gray-500 dark:text-slate-400">{[order.customer_name, formatLocation(order.delivery_address, order.delivery_contact)].filter(Boolean).join(' · ')}</p>
           </div>
           <p className="text-xs text-gray-500 dark:text-slate-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">
-            El conductor recibirá la oferta en tiempo real y tendrá 60 segundos para aceptarla o ignorarla.
+            {t('orders.offerExplainHint')}
           </p>
 
           <div>
-            <label className="label">Seleccionar Conductor ({availableDrivers.length} disponibles)</label>
+            <label className="label">{t('orders.selectDriverLabel', { count: availableDrivers.length })}</label>
             <select className="input" value={driverId} onChange={e => setDriverId(e.target.value)}>
-              <option value="">Elige un conductor...</option>
+              <option value="">{t('orders.chooseDriverPlaceholder')}</option>
               {availableDrivers.map(d => (
                 <option key={d.id} value={d.id}>
-                  {d.name} · ★{d.rating.toFixed(1)} · {d.total_deliveries} viajes
+                  {d.name} · ★{d.rating.toFixed(1)} · {d.total_deliveries} {t('orders.tripsWord')}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button onClick={onClose} className="btn-secondary flex-1 justify-center">Cancelar</button>
+            <button onClick={onClose} className="btn-secondary flex-1 justify-center">{t('orders.cancel')}</button>
             <button onClick={handleOffer} disabled={!driverId || saving} className="btn-primary flex-1 justify-center">
               <UserCheck className="w-4 h-4" />
-              {saving ? 'Enviando...' : 'Enviar Oferta'}
+              {saving ? t('orders.sendingEllipsis') : t('orders.sendOfferBtn')}
             </button>
           </div>
         </div>
@@ -649,6 +653,7 @@ interface DetailModalProps {
 }
 
 function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
+  const { t } = useTranslation();
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
   const nextStatus: Record<string, string> = {
@@ -686,11 +691,11 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
           {(order.customer_name || order.customer_phone || order.customer_email) && (
             <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-xl p-4 space-y-2">
               <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                <User className="w-4 h-4 text-orange-500" /> Customer
+                <User className="w-4 h-4 text-orange-500" /> {t('orders.customerSectionTitle')}
               </div>
-              {order.customer_name && <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">Name:</span> <span className="text-gray-900 font-medium">{order.customer_name}</span></div>}
-              {order.customer_phone && <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">Phone:</span> <span className="text-gray-900 dark:text-slate-100">{order.customer_phone}</span></div>}
-              {order.customer_email && <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">Email:</span> <span className="text-gray-900 dark:text-slate-100">{order.customer_email}</span></div>}
+              {order.customer_name && <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">{t('orders.nameLabel')}</span> <span className="text-gray-900 font-medium">{order.customer_name}</span></div>}
+              {order.customer_phone && <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">{t('orders.phoneLabel')}</span> <span className="text-gray-900 dark:text-slate-100">{order.customer_phone}</span></div>}
+              {order.customer_email && <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">{t('orders.emailLabel')}</span> <span className="text-gray-900 dark:text-slate-100">{order.customer_email}</span></div>}
             </div>
           )}
 
@@ -698,13 +703,13 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-orange-50 rounded-xl p-3">
               <div className="flex items-center gap-1 text-xs font-semibold text-orange-700 mb-2">
-                <MapPin className="w-3 h-3" /> PICKUP
+                <MapPin className="w-3 h-3" /> {t('orders.pickupLabel')}
               </div>
               <p className="text-sm text-gray-700 dark:text-slate-300">{formatLocation(order.pickup_address, order.pickup_contact)}</p>
             </div>
             <div className="bg-green-50 rounded-xl p-3">
               <div className="flex items-center gap-1 text-xs font-semibold text-green-700 mb-2">
-                <MapPin className="w-3 h-3" /> DELIVERY
+                <MapPin className="w-3 h-3" /> {t('orders.deliveryLabel')}
               </div>
               <p className="text-sm text-gray-700 dark:text-slate-300">{formatLocation(order.delivery_address, order.delivery_contact)}</p>
             </div>
@@ -726,15 +731,15 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
           {/* Shipment Info */}
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
-              <p className="text-xs text-gray-500 dark:text-slate-400">Rate</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">{t('orders.rateLabel')}</p>
               <p className="text-sm font-semibold text-green-600">${order.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
             <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
-              <p className="text-xs text-gray-500 dark:text-slate-400">Distance</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">{t('orders.distanceLabel')}</p>
               <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{(order.distance_km * 0.621371).toFixed(1)} mi</p>
             </div>
             <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
-              <p className="text-xs text-gray-500 dark:text-slate-400">Weight</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">{t('orders.weightLabel')}</p>
               <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{(order.weight_kg * 2.20462).toFixed(0)} lbs</p>
             </div>
           </div>
@@ -743,7 +748,7 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
           {order.driver_name ? (
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">
-                <User className="w-3 h-3" /> ASSIGNED DRIVER
+                <User className="w-3 h-3" /> {t('orders.assignedDriverLabel')}
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-900 dark:text-slate-100">{order.driver_name}</span>
@@ -759,7 +764,7 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
             // si lo mostraba.
             <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-orange-700 dark:text-orange-400 mb-2">
-                <User className="w-3 h-3" /> OFERTA ENVIADA A
+                <User className="w-3 h-3" /> {t('orders.offerSentToLabel')}
               </div>
               <span className="text-sm font-medium text-gray-900 dark:text-slate-100">⏳ {order.offered_driver_name}</span>
             </div>
@@ -778,7 +783,7 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-900 dark:text-slate-100 leading-tight">{order.dispatcher_name || 'Dispatcher'}</p>
-                    <p className="text-xs text-gray-500 dark:text-slate-400">Assigned this order</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400">{t('orders.assignedThisOrder')}</p>
                   </div>
                 </div>
                 <span className="text-xs bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 px-2.5 py-1 rounded-lg border border-orange-200 dark:border-orange-700 font-semibold">
@@ -790,19 +795,19 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
 
           {/* Timeline */}
           <div>
-            <p className="text-xs font-semibold text-gray-700 mb-3">TIMELINE</p>
+            <p className="text-xs font-semibold text-gray-700 mb-3">{t('orders.timelineTitle')}</p>
             <div className="space-y-2">
               {[
-                { label: 'Created', time: order.created_at },
-                { label: 'Assigned', time: order.assigned_at },
-                { label: 'Picked Up', time: order.picked_up_at },
-                { label: 'In Transit', time: order.in_transit_at },
-                { label: 'Delivered', time: order.delivered_at },
-              ].filter(t => t.time).map((t, i) => (
+                { label: t('orders.timelineCreated'), time: order.created_at },
+                { label: t('common.orderStatus.assigned'), time: order.assigned_at },
+                { label: t('common.orderStatus.picked_up'), time: order.picked_up_at },
+                { label: t('common.orderStatus.in_transit'), time: order.in_transit_at },
+                { label: t('common.orderStatus.delivered'), time: order.delivered_at },
+              ].filter(step => step.time).map((step, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-orange-400 rounded-full flex-shrink-0" />
-                  <span className="text-xs text-gray-500 w-20">{t.label}</span>
-                  <span className="text-xs text-gray-900 dark:text-slate-100">{format(new Date(t.time!), 'MMM d, HH:mm')}</span>
+                  <span className="text-xs text-gray-500 w-20">{step.label}</span>
+                  <span className="text-xs text-gray-900 dark:text-slate-100">{format(new Date(step.time!), 'MMM d, HH:mm')}</span>
                 </div>
               ))}
             </div>
@@ -815,7 +820,7 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
               disabled={updatingStatus}
               className="btn-primary w-full justify-center"
             >
-              Mark as {nextStatus[order.status].replace('_', ' ').toUpperCase()}
+              {t('orders.markAsStatus', { status: t(`common.orderStatus.${nextStatus[order.status]}`).toUpperCase() })}
             </button>
           )}
           {['pending', 'assigned'].includes(order.status) && (
@@ -824,7 +829,7 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
               disabled={updatingStatus}
               className="btn-danger w-full justify-center mt-2"
             >
-              Cancel Order
+              {t('orders.cancelOrder')}
             </button>
           )}
         </div>
@@ -1059,7 +1064,7 @@ export default function Orders() {
                       </button>
                     )}
                     {(user?.role === 'admin' || ['pending', 'cancelled'].includes(order.status)) && (
-                      <button onClick={() => handleDelete(order.id, order.order_number)} className="p-1.5 hover:bg-red-50 rounded-lg" title="Delete order">
+                      <button onClick={() => handleDelete(order.id, order.order_number)} className="p-1.5 hover:bg-red-50 rounded-lg" title={t('orders.deleteOrderTooltip')}>
                         <Trash2 className="w-4 h-4 text-red-400" />
                       </button>
                     )}
@@ -1086,14 +1091,14 @@ export default function Orders() {
                         </button>
                       </th>
                     )}
-                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">ORDER</th>
-                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">CUSTOMER</th>
-                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">PICKUP</th>
-                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">DELIVERY</th>
-                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">STATUS</th>
-                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3 hidden lg:table-cell">DRIVER</th>
-                    <th className="text-right text-xs font-semibold text-gray-500 px-4 py-3">RATE</th>
-                    <th className="text-center text-xs font-semibold text-gray-500 px-4 py-3">ACTIONS</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{t('orders.colOrder')}</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{t('orders.colCustomer')}</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{t('orders.pickupLabel')}</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{t('orders.deliveryLabel')}</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">{t('orders.colStatus')}</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3 hidden lg:table-cell">{t('orders.colDriver')}</th>
+                    <th className="text-right text-xs font-semibold text-gray-500 px-4 py-3">{t('orders.colRate')}</th>
+                    <th className="text-center text-xs font-semibold text-gray-500 px-4 py-3">{t('orders.colActions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1129,7 +1134,7 @@ export default function Orders() {
                           ? <p className="text-xs text-gray-700 dark:text-slate-300">{order.driver_name}</p>
                           : order.status === 'offered' && order.offered_driver_name
                             ? <p className="text-xs text-orange-600 dark:text-orange-400">⏳ {order.offered_driver_name}</p>
-                            : <span className="text-xs text-gray-400 dark:text-slate-500">Sin asignar</span>
+                            : <span className="text-xs text-gray-400 dark:text-slate-500">{t('orders.unassignedBadge')}</span>
                         }
                       </td>
                       <td className="px-4 py-3 text-right">
@@ -1151,7 +1156,7 @@ export default function Orders() {
                             </button>
                           )}
                           {(user?.role === 'admin' || ['pending', 'cancelled'].includes(order.status)) && (
-                            <button onClick={() => handleDelete(order.id, order.order_number)} className="p-1.5 hover:bg-red-50 rounded-lg" title="Delete order">
+                            <button onClick={() => handleDelete(order.id, order.order_number)} className="p-1.5 hover:bg-red-50 rounded-lg" title={t('orders.deleteOrderTooltip')}>
                               <Trash2 className="w-3.5 h-3.5 text-red-400" />
                             </button>
                           )}
