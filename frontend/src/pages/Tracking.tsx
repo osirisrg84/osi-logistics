@@ -199,7 +199,7 @@ export default function Tracking() {
   };
 
   const mapPanel = (
-    <div className="w-full rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700 h-[calc(100vh-10rem)] md:h-[calc(100vh-8rem)]">
+    <div className="w-full rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700 h-[calc(100dvh-17rem)] md:h-[calc(100vh-8rem)]">
       <MapContainer center={[25.7617, -80.1918]} zoom={11} style={{ height: '100%', width: '100%' }}>
         <TileLayer
           attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
