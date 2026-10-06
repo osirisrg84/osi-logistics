@@ -864,12 +864,18 @@ export default function Orders() {
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
   const isAdmin = user?.role === 'admin';
+  // Mismo criterio que el boton de borrar individual -- un dispatcher puede
+  // seleccionar/borrar en bloque pending/offered/cancelled (p.ej. ofertas
+  // atascadas de prueba), nunca ordenes ya en curso o facturadas; admin
+  // puede seleccionar cualquiera.
+  const canDeleteOrder = (o: Order) => isAdmin || ['pending', 'offered', 'cancelled'].includes(o.status);
+  const deletableOrders = orders.filter(canDeleteOrder);
   const toggleSelect = (id: string) =>
     setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
-  const allSelected = orders.length > 0 && orders.every(o => selected.has(o.id));
-  const someSelected = !allSelected && orders.some(o => selected.has(o.id));
+  const allSelected = deletableOrders.length > 0 && deletableOrders.every(o => selected.has(o.id));
+  const someSelected = !allSelected && deletableOrders.some(o => selected.has(o.id));
   const toggleSelectAll = () =>
-    setSelected(allSelected ? new Set() : new Set(orders.map(o => o.id)));
+    setSelected(allSelected ? new Set() : new Set(deletableOrders.map(o => o.id)));
 
   const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
     setToastType(type);
@@ -966,7 +972,7 @@ export default function Orders() {
       )}
 
       {/* Bulk action bar */}
-      {isAdmin && selected.size > 0 && (
+      {selected.size > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-gray-900 dark:bg-slate-700 text-white px-5 py-3 rounded-2xl shadow-2xl border border-white/10">
           <span className="text-sm font-semibold">{t('orders.selectedCount', { count: selected.size })}</span>
           <div className="w-px h-4 bg-white/20" />
@@ -1062,7 +1068,7 @@ export default function Orders() {
               <div key={order.id} className={`card p-4 transition-colors ${selected.has(order.id) ? 'ring-2 ring-orange-400 dark:ring-orange-500' : ''}`}>
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-start gap-2">
-                    {isAdmin && (
+                    {canDeleteOrder(order) && (
                       <button onClick={() => toggleSelect(order.id)} className="mt-0.5 flex-shrink-0">
                         {selected.has(order.id)
                           ? <CheckSquare className="w-4 h-4 text-orange-500" />
@@ -1112,7 +1118,7 @@ export default function Orders() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
-                    {isAdmin && (
+                    {deletableOrders.length > 0 && (
                       <th className="px-4 py-3 w-8">
                         <button onClick={toggleSelectAll} className="flex items-center">
                           {allSelected
@@ -1136,13 +1142,15 @@ export default function Orders() {
                 <tbody>
                   {orders.map(order => (
                     <tr key={order.id} className={`table-row ${selected.has(order.id) ? 'bg-orange-50/60 dark:bg-orange-900/10' : ''}`}>
-                      {isAdmin && (
+                      {deletableOrders.length > 0 && (
                         <td className="px-4 py-3 w-8">
+                          {canDeleteOrder(order) && (
                           <button onClick={() => toggleSelect(order.id)}>
                             {selected.has(order.id)
                               ? <CheckSquare className="w-4 h-4 text-orange-500" />
                               : <Square className="w-4 h-4 text-gray-300 dark:text-slate-600" />}
                           </button>
+                          )}
                         </td>
                       )}
                       <td className="px-4 py-3">
