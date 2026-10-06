@@ -18,5 +18,5 @@ export function setThemeColor(color: string) {
 export const DISPATCH_MANIFEST = '/manifest-dispatch.webmanifest';
 export const DRIVER_MANIFEST   = '/manifest-driver.webmanifest';
 export const DISPATCH_COLOR    = '#f97316';
-export const DRIVER_COLOR      = '#0f1e35';
+export const DRIVER_COLOR      = '#2563eb';
 export const NEUTRAL_COLOR     = '#0f172a';

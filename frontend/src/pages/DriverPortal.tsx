@@ -3972,17 +3972,17 @@ export default function DriverPortal() {
               key={id}
               onClick={() => setTab(id)}
               className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-colors relative ${
-                isActive ? 'text-orange-400' : 'text-slate-500 hover:text-slate-300'
+                isActive ? 'text-blue-400' : 'text-slate-500 hover:text-slate-300'
               }`}
             >
               {/* Active indicator bar */}
               {isActive && (
-                <span className="absolute top-0 inset-x-3 h-0.5 bg-orange-500 rounded-full" />
+                <span className="absolute top-0 inset-x-3 h-0.5 bg-blue-500 rounded-full" />
               )}
               <div className="relative">
                 <Icon className="w-5 h-5" />
                 {badge > 0 && (
-                  <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 bg-orange-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5">
+                  <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 bg-blue-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5">
                     {badge > 9 ? '9+' : badge}
                   </span>
                 )}
@@ -4159,7 +4159,8 @@ export default function DriverPortal() {
         chat={assistantApi.chat}
         title={t('driverPortal.assistantTitle')}
         greeting={t('driverPortal.assistantGreeting')}
-        buttonClassName="fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+        buttonClassName="fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+        accent="blue"
       />
 
       <div id="recaptcha-container" />

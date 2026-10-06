@@ -10,9 +10,24 @@ interface AiAssistantPanelProps {
   title?: string;
   placeholder?: string;
   greeting?: string;
+  accent?: 'orange' | 'blue';
 }
 
-export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title = 'Asistente OSI', placeholder = 'Pregunta algo...', greeting }: AiAssistantPanelProps) {
+const ACCENT_CLASSES = {
+  orange: {
+    header: 'bg-gradient-to-r from-orange-500 to-orange-400',
+    userBubble: 'bg-orange-500',
+    sendButton: 'bg-orange-500 hover:bg-orange-400',
+  },
+  blue: {
+    header: 'bg-gradient-to-r from-blue-500 to-blue-400',
+    userBubble: 'bg-blue-500',
+    sendButton: 'bg-blue-500 hover:bg-blue-400',
+  },
+} as const;
+
+export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title = 'Asistente OSI', placeholder = 'Pregunta algo...', greeting, accent = 'orange' }: AiAssistantPanelProps) {
+  const accentClasses = ACCENT_CLASSES[accent];
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -52,7 +67,7 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
 
       {open && (
         <div className={panelClassName ?? 'fixed bottom-24 right-4 left-4 sm:left-auto z-40 sm:w-96 max-h-[70vh] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col overflow-hidden fade-in'}>
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-orange-400 text-white flex-shrink-0">
+          <div className={`flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-slate-700 text-white flex-shrink-0 ${accentClasses.header}`}>
             <Sparkles className="w-4 h-4" />
             <p className="text-sm font-bold">{title}</p>
           </div>
@@ -67,7 +82,7 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap ${
                   m.role === 'user'
-                    ? 'bg-orange-500 text-white'
+                    ? `${accentClasses.userBubble} text-white`
                     : 'bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-200'
                 }`}>
                   {m.content}
@@ -95,7 +110,7 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
             <button
               onClick={send}
               disabled={!input.trim() || sending}
-              className="w-9 h-9 rounded-xl bg-orange-500 hover:bg-orange-400 disabled:opacity-40 text-white flex items-center justify-center flex-shrink-0 transition-colors"
+              className={`w-9 h-9 rounded-xl disabled:opacity-40 text-white flex items-center justify-center flex-shrink-0 transition-colors ${accentClasses.sendButton}`}
               aria-label="Enviar"
             >
               <Send className="w-4 h-4" />
