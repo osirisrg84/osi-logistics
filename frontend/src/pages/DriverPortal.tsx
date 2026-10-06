@@ -621,7 +621,7 @@ export default function DriverPortal() {
 
   // ── Hub: switches / radio / community ────────────────────
   const [trackingOn, setTrackingOn] = useState(true);
-  const [musicOn, setMusicOn] = useState(false);
+  const [musicOn, setMusicOn] = useState(() => localStorage.getItem('osi_driver_music_on') === '1');
   interface RadioMsg { id:string; name:string; msg:string; ts:string; type?:'text'|'voice'; audioData?:string; duration?:number; }
   const [radioMsgs, setRadioMsgs] = useState<RadioMsg[]>([
     { id:'r1', name:'Carlos M.', msg:'Buenos días familia OSI! Arrancando ruta norte 🛣️', ts: new Date(Date.now()-1800000).toISOString(), type:'text' },
@@ -1504,7 +1504,7 @@ export default function DriverPortal() {
 
                 {/* Switch 3 — Music */}
                 <button
-                  onClick={() => setMusicOn(v => !v)}
+                  onClick={() => setMusicOn(v => { const nv = !v; localStorage.setItem('osi_driver_music_on', nv ? '1' : '0'); return nv; })}
                   className="flex-1 flex items-center gap-1 px-1.5 py-2.5 rounded-xl select-none active:scale-[0.97] transition-all min-w-0"
                   style={{
                     background: musicOn ? 'rgba(168,85,247,0.13)' : 'rgba(15,30,53,0.9)',
@@ -3844,10 +3844,10 @@ export default function DriverPortal() {
                             borderRadius: 10, border: 'none', cursor: 'pointer',
                             background: isRecording
                               ? ['repeating-linear-gradient(135deg,rgba(0,0,0,0.1) 0px,rgba(0,0,0,0.1) 2px,transparent 2px,transparent 6px)','linear-gradient(180deg,#f87171 0%,#ef4444 36%,#991b1b 100%)'].join(',')
-                              : ['repeating-linear-gradient(135deg,rgba(0,0,0,0.09) 0px,rgba(0,0,0,0.09) 2px,transparent 2px,transparent 6px)','linear-gradient(180deg,#60a5fa 0%,#3b82f6 36%,#1d4ed8 100%)'].join(','),
+                              : ['repeating-linear-gradient(135deg,rgba(0,0,0,0.09) 0px,rgba(0,0,0,0.09) 2px,transparent 2px,transparent 6px)','linear-gradient(180deg,#fb923c 0%,#f97316 36%,#b45309 100%)'].join(','),
                             boxShadow: isRecording
                               ? 'inset 0 -6px 16px rgba(0,0,0,0.65), inset 0 3px 8px rgba(255,100,100,0.18), 0 0 28px rgba(239,68,68,0.82), 0 4px 12px rgba(0,0,0,0.9)'
-                              : 'inset 0 -6px 16px rgba(0,0,0,0.55), inset 0 3px 8px rgba(147,197,253,0.14), 0 0 18px rgba(59,130,246,0.48), 0 4px 12px rgba(0,0,0,0.9)',
+                              : 'inset 0 -6px 16px rgba(0,0,0,0.55), inset 0 3px 8px rgba(255,185,100,0.14), 0 0 18px rgba(249,115,22,0.48), 0 4px 12px rgba(0,0,0,0.9)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                             transition: 'all 0.15s',
                           }}
@@ -3894,7 +3894,7 @@ export default function DriverPortal() {
                               {t('driverPortal.tapToStop')}
                             </span>
                           ) : (
-                            <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.14em', color: 'rgba(96,165,250,0.75)', textTransform: 'uppercase', fontFamily: 'Arial' }}>
+                            <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.14em', color: 'rgba(251,146,60,0.75)', textTransform: 'uppercase', fontFamily: 'Arial' }}>
                               {t('driverPortal.tapToRecord')}
                             </span>
                           )}
@@ -3905,8 +3905,8 @@ export default function DriverPortal() {
 
                       {/* Side PTT bar */}
                       <div style={{ position: 'absolute', left: -6, top: 98, width: 8, height: 58, borderRadius: '4px 0 0 4px',
-                        background: isRecording ? 'linear-gradient(to right,#ef4444,#dc2626 60%,#991b1b 100%)' : 'linear-gradient(to right,#3b82f6,#2563eb 60%,#1d4ed8 100%)',
-                        boxShadow: isRecording ? '-4px 0 14px rgba(239,68,68,0.75)' : '-4px 0 14px rgba(59,130,246,0.6)',
+                        background: isRecording ? 'linear-gradient(to right,#ef4444,#dc2626 60%,#991b1b 100%)' : 'linear-gradient(to right,#f97316,#ea580c 60%,#c2410c 100%)',
+                        boxShadow: isRecording ? '-4px 0 14px rgba(239,68,68,0.75)' : '-4px 0 14px rgba(249,115,22,0.6)',
                         transition: 'all 0.3s',
                         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
                       }}>
