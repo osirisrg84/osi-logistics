@@ -1437,7 +1437,7 @@ export default function DriverPortal() {
               <button onClick={() => setShowNotifs(v => !v)} className="relative p-2 rounded-xl hover:bg-white/10 transition-colors">
                 <Bell className="w-4 h-4 text-slate-300" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center leading-none">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center leading-none">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
