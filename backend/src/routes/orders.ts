@@ -19,7 +19,14 @@ const REAL_ORDER_FILTER = `AND o.order_number NOT LIKE 'OSI-H%' AND (o.dispatche
 const getOrderFilter = (email?: string, role?: string, userId?: string, driverId?: string): string => {
   if (role === 'admin') return REAL_ORDER_FILTER;
   if (isDemo(email)) return DEMO_ORDER_FILTER;
-  if (role === 'driver') return driverId ? `${REAL_ORDER_FILTER} AND o.driver_id = '${driverId}'` : `${REAL_ORDER_FILTER} AND 1=0`;
+  // OR offered_to_driver_id: a real driver's own offer-recovery query
+  // (GET /orders?offered_to_driver_id=<self>&status=offered) was being
+  // silently zeroed out by this mandatory filter -- an offered-but-not-yet-
+  // accepted order has driver_id still NULL (it's only set on accept), so
+  // "see only my own driver_id" excluded every pending offer no matter what
+  // the caller asked for, making the offer unrecoverable after the live
+  // popup was missed for any non-demo driver account.
+  if (role === 'driver') return driverId ? `${REAL_ORDER_FILTER} AND (o.driver_id = '${driverId}' OR o.offered_to_driver_id = '${driverId}')` : `${REAL_ORDER_FILTER} AND 1=0`;
   return userId ? `${REAL_ORDER_FILTER} AND o.dispatcher_user_id = '${userId}'` : `${REAL_ORDER_FILTER} AND 1=0`;
 };
 
