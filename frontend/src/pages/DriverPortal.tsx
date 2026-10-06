@@ -918,21 +918,23 @@ export default function DriverPortal() {
   const playOfferSound = () => {
     try {
       const ctx = getSharedAudioContext();
-      // Alarma potente: patrón urgente de 3 pulsos dobles
-      const pattern = [880, 1174.66, 880, 1174.66, 880, 1174.66, 1318.51, 1568];
-      pattern.forEach((freq, i) => {
+      // Campanita suave de dos notas (tipo timbre), en vez de la sirena
+      // aguda de sawtooth que había antes -- sigue siendo notoria (se repite
+      // cada 8s mientras la oferta esté activa) pero ya no es desagradable.
+      const notes: Array<[number, number]> = [[987.77, 0], [1318.51, 0.17]];
+      notes.forEach(([freq, delay]) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.connect(gain); gain.connect(ctx.destination);
-        osc.type = 'sawtooth'; osc.frequency.value = freq;
-        const start = ctx.currentTime + i * 0.18;
+        osc.type = 'sine'; osc.frequency.value = freq;
+        const start = ctx.currentTime + delay;
         gain.gain.setValueAtTime(0, start);
-        gain.gain.linearRampToValueAtTime(0.6, start + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.28);
-        osc.start(start); osc.stop(start + 0.3);
+        gain.gain.linearRampToValueAtTime(0.4, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.9);
+        osc.start(start); osc.stop(start + 0.9);
       });
     } catch {}
-    navigator.vibrate?.([400, 150, 400, 150, 600, 300, 400, 150, 400]);
+    navigator.vibrate?.([250, 100, 250]);
   };
 
   const stopAlarm = () => {
