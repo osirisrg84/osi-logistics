@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Search, Edit2, Trash2, X, Shield, UserCheck, Truck, AlertTriangle, Clock, CheckCircle, XCircle, Mail } from 'lucide-react';
 import api from '../services/api';
 import { format } from 'date-fns';
+import { formatPhone } from '../utils/phone';
 
 interface User {
   id: string;
@@ -285,7 +286,7 @@ export default function UsersManagement() {
                       {u.role}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{u.email} {u.phone && `· ${u.phone}`} {u.city && `· ${u.city}`}</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{u.email} {u.phone && `· ${formatPhone(u.phone)}`} {u.city && `· ${u.city}`}</p>
                   {u.role === 'dispatcher' && u.years_experience > 0 && (
                     <p className="text-xs text-gray-400 dark:text-slate-500">{u.years_experience} {t('usersMgmt.yearsExpSuffix')} · {u.availability} {u.languages && `· ${u.languages}`}</p>
                   )}

@@ -9,6 +9,7 @@ import { DriverStatusBadge } from '../components/StatusBadge';
 import { EmptyState } from '../components/EmptyState';
 import { format, formatDistanceToNow } from 'date-fns';
 import { playSuccessChime } from '../utils/sounds';
+import { formatPhone } from '../utils/phone';
 
 const STATUS_OPTIONS: DriverStatus[] = ['available', 'busy', 'on_break', 'offline'];
 
@@ -259,7 +260,7 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
           <div className="space-y-2">
             <a href={`tel:${driver.phone}`} className="flex items-center gap-3 bg-gray-50 dark:bg-slate-900 rounded-xl p-3 hover:bg-gray-100 transition-colors">
               <Phone className="w-4 h-4 text-gray-400 dark:text-slate-500" />
-              <span className="text-sm text-gray-700 dark:text-slate-300">{driver.phone}</span>
+              <span className="text-sm text-gray-700 dark:text-slate-300">{formatPhone(driver.phone)}</span>
             </a>
             <a href={`mailto:${driver.email}`} className="flex items-center gap-3 bg-gray-50 dark:bg-slate-900 rounded-xl p-3 hover:bg-gray-100 transition-colors">
               <Mail className="w-4 h-4 text-gray-400 dark:text-slate-500" />
@@ -647,7 +648,7 @@ export default function Drivers() {
 
             <div className="space-y-1.5 text-xs">
               <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
-                <Phone className="w-3 h-3 text-gray-400 dark:text-slate-500" /> {driver.phone}
+                <Phone className="w-3 h-3 text-gray-400 dark:text-slate-500" /> {formatPhone(driver.phone)}
               </div>
               <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
                 <Mail className="w-3 h-3 text-gray-400 dark:text-slate-500" /> {driver.email}

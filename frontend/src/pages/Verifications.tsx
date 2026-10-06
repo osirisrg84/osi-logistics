@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import { format } from 'date-fns';
+import { formatPhone } from '../utils/phone';
 
 type CheckStatus = 'pending' | 'verified' | 'failed' | 'na';
 
@@ -486,7 +487,7 @@ export default function Verifications() {
                   userId={d.user_id}
                   approvalStatus={d.approval_status}
                   name={d.name}
-                  subtitle={`${d.email} · ${d.phone}`}
+                  subtitle={`${d.email} · ${formatPhone(d.phone)}`}
                   detail={`${d.equipment_type} · ${d.company_name}${d.mc_number ? ` · MC# ${d.mc_number}` : ''}`}
                   checks={dChecks}
                   checkNamespace="driverChecks"
@@ -521,7 +522,7 @@ export default function Verifications() {
                   userId={d.id}
                   approvalStatus={d.approval_status}
                   name={d.name}
-                  subtitle={`${d.email} · ${d.phone}`}
+                  subtitle={`${d.email} · ${formatPhone(d.phone)}`}
                   detail={`${d.city} · ${t('verifications.yearsExp', { count: d.years_experience })} · ${d.availability}`}
                   checks={dChecks}
                   checkNamespace="dispatcherChecks"

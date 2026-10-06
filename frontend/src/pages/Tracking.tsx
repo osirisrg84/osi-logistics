@@ -9,6 +9,7 @@ import { getSocket } from '../services/socket';
 import { DriverStatusBadge } from '../components/StatusBadge';
 import { formatDistanceToNow } from 'date-fns';
 import { formatLocation } from '../utils/location';
+import { formatPhone } from '../utils/phone';
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -225,7 +226,7 @@ export default function Tracking() {
                 </div>
                 {driver.phone && (
                   <p className="text-xs text-gray-600 mb-1">
-                    <a href={`tel:${driver.phone}`} className="hover:underline">{driver.phone}</a>
+                    <a href={`tel:${driver.phone}`} className="hover:underline">{formatPhone(driver.phone)}</a>
                   </p>
                 )}
                 {driver.current_address && (

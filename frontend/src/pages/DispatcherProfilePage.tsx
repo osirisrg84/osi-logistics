@@ -10,6 +10,7 @@ import {
 import { billingApi, userApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { formatPhone } from '../utils/phone';
 
 interface ProfileData {
   phone?: string;
@@ -305,7 +306,7 @@ export default function DispatcherProfilePage() {
               <div className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 ${dark ? 'bg-slate-700' : 'bg-gray-100'}`}>
                 <Phone className="w-2.5 h-2.5 text-gray-500 dark:text-slate-400" />
               </div>
-              <p className={`text-xs flex-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{profile.phone || '—'}</p>
+              <p className={`text-xs flex-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{profile.phone ? formatPhone(profile.phone) : '—'}</p>
               {profile.phone && (
                 profile.phone_verified
                   ? <span className="flex items-center gap-0.5 text-[10px] font-bold text-emerald-500 flex-shrink-0"><CheckCircle className="w-3 h-3" /> OK</span>
@@ -481,7 +482,7 @@ export default function DispatcherProfilePage() {
             <div className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
               <Phone className="w-4 h-4 flex-shrink-0 text-slate-400" />
               <div className="flex-1 min-w-0">
-                <p className={`text-xs font-medium ${dark ? 'text-white' : 'text-gray-800'}`}>{profile.phone || '—'}</p>
+                <p className={`text-xs font-medium ${dark ? 'text-white' : 'text-gray-800'}`}>{profile.phone ? formatPhone(profile.phone) : '—'}</p>
                 <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{t('profile.phoneLabel')}</p>
               </div>
               {profile.phone

@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import api from '../services/api';
 import { getSocket } from '../services/socket';
 import { format, formatDistanceToNow } from 'date-fns';
+import { formatPhone } from '../utils/phone';
 
 interface DispatcherProfile {
   id: string;
@@ -249,7 +250,7 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
             {dispatcher.phone ? (
               <a href={`tel:${dispatcher.phone}`} className="flex items-center gap-3 bg-gray-50 dark:bg-slate-900 rounded-xl p-3 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
                 <Phone className="w-4 h-4 text-gray-400 dark:text-slate-500" />
-                <span className="text-sm text-gray-700 dark:text-slate-300">{dispatcher.phone}</span>
+                <span className="text-sm text-gray-700 dark:text-slate-300">{formatPhone(dispatcher.phone)}</span>
               </a>
             ) : (
               <div className="flex items-center gap-3 bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
@@ -513,7 +514,7 @@ export default function DispatcherProfiles() {
                 <div className="space-y-1.5 text-xs mb-3">
                   <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
                     <Phone className="w-3 h-3 text-gray-400 dark:text-slate-500 flex-shrink-0" />
-                    <span>{d.phone || <span className="italic text-gray-300 dark:text-slate-600">{t('dispatcherProfiles.noPhone')}</span>}</span>
+                    <span>{d.phone ? formatPhone(d.phone) : <span className="italic text-gray-300 dark:text-slate-600">{t('dispatcherProfiles.noPhone')}</span>}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
                     <Mail className="w-3 h-3 text-gray-400 dark:text-slate-500 flex-shrink-0" />

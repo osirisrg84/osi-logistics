@@ -9,6 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { communityApi, analyticsApi, incidentsApi } from '../services/api';
 import { IncidentReportModal } from '../components/IncidentReportModal';
 import { formatDistanceToNow } from 'date-fns';
+import { formatPhone } from '../utils/phone';
 
 interface Post {
   id: string; author_name: string; author_role: string; message: string;
@@ -279,7 +280,7 @@ export default function DispatcherHub() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-                    <span className="text-[11px] font-mono font-bold whitespace-nowrap" style={{ color: accent }}>{c.phone}</span>
+                    <span className="text-[11px] font-mono font-bold whitespace-nowrap" style={{ color: accent }}>{formatPhone(c.phone)}</span>
                     <PhoneCall className="w-3 h-3 flex-shrink-0" style={{ color: accent }} />
                   </div>
                 </a>

@@ -14,6 +14,7 @@ import InstallAppButton from '../components/InstallAppButton';
 import InstallAppBanner from '../components/InstallAppBanner';
 import { setAppManifest, setThemeColor, DRIVER_MANIFEST, DISPATCH_MANIFEST, DRIVER_COLOR, DISPATCH_COLOR } from '../utils/appManifest';
 import { formatLocation } from '../utils/location';
+import { formatPhone } from '../utils/phone';
 import { useDriverAuth } from '../context/DriverAuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -312,7 +313,7 @@ function OrderCard({ order, onStatusUpdate, highlighted }: { order: Order; onSta
           {order.customer_name && <p className="text-sm font-semibold text-gray-900 dark:text-white">{order.customer_name}</p>}
           {order.customer_phone && (
             <a href={`tel:${order.customer_phone}`} className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 mt-1 hover:text-blue-700 dark:hover:text-blue-300">
-              <Phone className="w-3 h-3" /> {order.customer_phone}
+              <Phone className="w-3 h-3" /> {formatPhone(order.customer_phone)}
             </a>
           )}
         </div>
@@ -2247,7 +2248,7 @@ export default function DriverPortal() {
                   <div className="w-5 h-5 rounded-md bg-gray-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
                     <Phone className="w-2.5 h-2.5 text-gray-500 dark:text-slate-400" />
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-slate-400 flex-1">{driver.phone}</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400 flex-1">{formatPhone(driver.phone)}</p>
                   {phoneVerified
                     ? <span className="flex items-center gap-0.5 text-[9px] font-bold text-emerald-500 flex-shrink-0"><CheckCircle className="w-3 h-3" /> OK</span>
                     : <button onClick={() => { setVerifying('phone'); setCodeSent(false); setCodeInput(''); setVerifyMsg(''); }}
@@ -2679,7 +2680,7 @@ export default function DriverPortal() {
 
             {factoringCompany && !editingFactoring && (
               <div className="space-y-1 text-xs text-gray-500 dark:text-slate-400">
-                {factoringPhone && <p className="flex items-center gap-1"><Phone className="w-3 h-3 flex-shrink-0 text-indigo-400" />{factoringPhone}</p>}
+                {factoringPhone && <p className="flex items-center gap-1"><Phone className="w-3 h-3 flex-shrink-0 text-indigo-400" />{formatPhone(factoringPhone)}</p>}
                 {factoringEmail && <p className="flex items-center gap-1"><Mail className="w-3 h-3 flex-shrink-0 text-indigo-400" />{factoringEmail}</p>}
               </div>
             )}
@@ -3489,7 +3490,7 @@ export default function DriverPortal() {
                         <p className="text-[11px] text-gray-400 dark:text-slate-500 truncate">{c.desc}</p>
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
-                        <span className="text-xs font-mono font-bold text-blue-500 whitespace-nowrap">{c.phone}</span>
+                        <span className="text-xs font-mono font-bold text-blue-500 whitespace-nowrap">{formatPhone(c.phone)}</span>
                         <PhoneCall className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
                       </div>
                     </a>

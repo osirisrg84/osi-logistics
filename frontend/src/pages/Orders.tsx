@@ -13,6 +13,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { getSocket } from '../services/socket';
 import { playSuccessChime } from '../utils/sounds';
 import { formatLocation } from '../utils/location';
+import { formatPhone } from '../utils/phone';
 import { CITIES_BY_STATE } from '../data/usCities';
 import { useAuth } from '../context/AuthContext';
 
@@ -274,7 +275,7 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
                     <div className="grid grid-cols-3 gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-slate-400">
                       <div className="flex items-center gap-1 col-span-3">
                         <Phone className="w-3 h-3 flex-shrink-0 text-blue-400" />
-                        <span>{sel.phone || '—'}</span>
+                        <span>{sel.phone ? formatPhone(sel.phone) : '—'}</span>
                       </div>
                       <div className="flex items-center gap-1 col-span-3">
                         <Mail className="w-3 h-3 flex-shrink-0 text-blue-400" />
@@ -694,7 +695,7 @@ function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
                 <User className="w-4 h-4 text-orange-500" /> {t('orders.customerSectionTitle')}
               </div>
               {order.customer_name && <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">{t('orders.nameLabel')}</span> <span className="text-gray-900 font-medium">{order.customer_name}</span></div>}
-              {order.customer_phone && <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">{t('orders.phoneLabel')}</span> <span className="text-gray-900 dark:text-slate-100">{order.customer_phone}</span></div>}
+              {order.customer_phone && <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">{t('orders.phoneLabel')}</span> <span className="text-gray-900 dark:text-slate-100">{formatPhone(order.customer_phone)}</span></div>}
               {order.customer_email && <div className="text-sm"><span className="text-gray-500 dark:text-slate-400">{t('orders.emailLabel')}</span> <span className="text-gray-900 dark:text-slate-100">{order.customer_email}</span></div>}
             </div>
           )}
@@ -1119,7 +1120,7 @@ export default function Orders() {
                       </td>
                       <td className="px-4 py-3">
                         {order.customer_name && <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{order.customer_name}</p>}
-                        {order.customer_phone && <p className="text-xs text-gray-400 dark:text-slate-500">{order.customer_phone}</p>}
+                        {order.customer_phone && <p className="text-xs text-gray-400 dark:text-slate-500">{formatPhone(order.customer_phone)}</p>}
                         {!order.customer_name && !order.customer_phone && <p className="text-xs text-gray-300 dark:text-slate-600 italic">—</p>}
                       </td>
                       <td className="px-4 py-3">
