@@ -122,7 +122,7 @@ export default function DriverLogin() {
             <ArrowLeft className="w-3.5 h-3.5" /> {t('driverLogin.backToPortalSelect')}
           </Link>
           <button onClick={toggleLang} className="flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-slate-200 transition-colors">
-            <Languages className="w-4 h-4" /> {lang.toUpperCase()}
+            <Languages className="w-4 h-4 hidden sm:block" /> {lang.toUpperCase()}
           </button>
         </div>
         {/* Hero */}

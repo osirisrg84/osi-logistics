@@ -292,7 +292,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </div>
       )}
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         {/* Search — hidden on small screens */}
         <div className="relative hidden lg:block">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -330,8 +330,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
           className="px-2 py-2 rounded-lg text-xs font-bold text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1"
           title={lang === 'es' ? 'Switch to English' : 'Cambiar a Español'}
         >
-          <Languages className="w-4 h-4" />
-          <span className="hidden sm:inline">{lang.toUpperCase()}</span>
+          <Languages className="w-4 h-4 hidden sm:block" />
+          <span>{lang.toUpperCase()}</span>
         </button>
 
         {/* Notifications */}

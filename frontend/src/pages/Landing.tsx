@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Truck, ClipboardList, ArrowRight, MapPin } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
 import { setThemeColor, NEUTRAL_COLOR, DISPATCH_COLOR } from '../utils/appManifest';
 
 export default function Landing() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,33 +27,33 @@ export default function Landing() {
     {
       route: '/dispatcher',
       icon: ClipboardList,
-      title: 'Dispatcher Console',
-      subtitle: 'Operations Center',
-      description: 'Administra las operaciones diarias: órdenes, asignación de conductores, rastreo en vivo y monitoreo de entregas.',
-      features: ['Crear y asignar órdenes', 'Rastreo de flota en vivo', 'Reportes de operaciones'],
+      title: t('landing.dispatcherTitle'),
+      subtitle: t('landing.dispatcherSubtitle'),
+      description: t('landing.dispatcherDesc'),
+      features: [t('landing.dispatcherFeature1'), t('landing.dispatcherFeature2'), t('landing.dispatcherFeature3')],
       accentColor: 'text-orange-400',
       borderHover: 'hover:border-orange-500/50',
       shadowHover: 'hover:shadow-orange-500/10',
       iconBg: 'bg-orange-500/15 group-hover:bg-orange-500/25',
       iconColor: 'text-orange-400',
       ctaColor: 'text-orange-400',
-      ctaLabel: 'Access Console',
+      ctaLabel: t('landing.dispatcherCta'),
       dot: 'bg-orange-400',
     },
     {
       route: '/driver',
       icon: Truck,
-      title: 'Driver Portal',
-      subtitle: 'Mobile Access',
-      description: 'Consulta tus entregas asignadas, actualiza el estado de las órdenes y navega a tus destinos.',
-      features: ['Ver órdenes asignadas', 'Actualizar estado de entrega', 'Mapa de ruta en vivo'],
+      title: t('landing.driverTitle'),
+      subtitle: t('landing.driverSubtitle'),
+      description: t('landing.driverDesc'),
+      features: [t('landing.driverFeature1'), t('landing.driverFeature2'), t('landing.driverFeature3')],
       accentColor: 'text-blue-400',
       borderHover: 'hover:border-blue-500/50',
       shadowHover: 'hover:shadow-blue-500/10',
       iconBg: 'bg-blue-500/15 group-hover:bg-blue-500/25',
       iconColor: 'text-blue-400',
       ctaColor: 'text-blue-400',
-      ctaLabel: 'Access Portal',
+      ctaLabel: t('landing.driverCta'),
       dot: 'bg-blue-400',
     },
   ];
@@ -63,8 +65,8 @@ export default function Landing() {
         <a href="https://www.osilogistics.com/" target="_blank" rel="noopener noreferrer">
           <img src={osiLogo} alt="OSI Logistics" className="h-16 sm:h-20 w-auto object-contain mx-auto mb-7 sm:mb-5 rounded-2xl shadow-2xl shadow-black/40 hover:opacity-90 transition-opacity cursor-pointer" />
         </a>
-        <p className="text-slate-300 text-lg font-medium">Dispatch & Owner</p>
-        <p className="text-slate-500 text-sm mt-0.5">Management Platform</p>
+        <p className="text-slate-300 text-lg font-medium">{t('landing.tagline')}</p>
+        <p className="text-slate-500 text-sm mt-0.5">{t('landing.taglineSub')}</p>
       </div>
 
       {/* Portal cards */}
@@ -103,7 +105,7 @@ export default function Landing() {
       <div className="flex items-center gap-6 mt-10 text-xs text-slate-600">
         <div className="flex items-center gap-1.5">
           <div className="w-1.5 h-1.5 bg-green-400 rounded-full" />
-          All systems operational
+          {t('landing.systemsOperational')}
         </div>
         <div className="flex items-center gap-1.5">
           <MapPin className="w-3 h-3" />
@@ -115,7 +117,7 @@ export default function Landing() {
       {/* Footer */}
       <div className="mt-8 pt-6 border-t border-slate-800 text-center">
         <p className="text-xs text-slate-600">© 2026 OSI Logistics, Inc.</p>
-        <p className="text-xs text-slate-600 mt-0.5">Osiris Rodriguez &nbsp;|&nbsp; Founder & CEO</p>
+        <p className="text-xs text-slate-600 mt-0.5">Osiris Rodriguez &nbsp;|&nbsp; {t('landing.founderTitle')}</p>
       </div>
     </div>
   );

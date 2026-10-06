@@ -1431,7 +1431,7 @@ export default function DriverPortal() {
                 {dark ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-slate-300" />}
               </button>
               <button onClick={toggleLang} className="px-1.5 py-2 rounded-xl hover:bg-white/10 transition-colors flex items-center gap-0.5">
-                <Languages className="w-4 h-4 text-slate-300" />
+                <Languages className="w-4 h-4 text-slate-300 hidden sm:block" />
                 <span className="text-[10px] font-bold text-slate-300">{lang.toUpperCase()}</span>
               </button>
               <button onClick={() => setShowNotifs(v => !v)} className="relative p-2 rounded-xl hover:bg-white/10 transition-colors">
