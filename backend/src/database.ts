@@ -465,6 +465,14 @@ export async function initDatabase(): Promise<void> {
     await exec("DELETE FROM meta WHERE key = 'demo_refreshed_at'");
     await exec("INSERT OR REPLACE INTO meta (key, value) VALUES ('estimated_delivery_refetch_v1', '1')");
   }
+  // Mismo truco -- fuerza un refresh mas hoy para que la liquidacion de
+  // comisiones demo (ver refreshDemoData) se aplique de inmediato en vez de
+  // esperar al rollover de manana.
+  const settleFixFlag = await queryOne<{ value: string }>("SELECT value FROM meta WHERE key = 'demo_commissions_settle_v1'");
+  if (!settleFixFlag) {
+    await exec("DELETE FROM meta WHERE key = 'demo_refreshed_at'");
+    await exec("INSERT OR REPLACE INTO meta (key, value) VALUES ('demo_commissions_settle_v1', '1')");
+  }
   await refreshDemoData();
   await syncDemoDriverStatus();
 }
@@ -701,6 +709,25 @@ async function refreshDemoData(): Promise<void> {
       await exec("DELETE FROM commissions WHERE order_id=? AND status != 'settled'", [orders[i].id]);
     }
   }
+
+  // initCommissions() deja cada entrega demo en status 'pending' para
+  // siempre -- nunca se liquidan solas -- asi que tras unos dias de refresh
+  // un conductor demo "debe" miles de dolares acumulados en vez de los
+  // ultimos 1-2 pagos pendientes que tendria un conductor real. Liquida
+  // todo menos el mas reciente por conductor demo, cada vez que se corre
+  // este refresh (no solo una vez), para que no se vuelva a acumular.
+  await exec(`
+    UPDATE commissions SET status = 'settled', settled_at = COALESCE(settled_at, delivery_date, created_at)
+    WHERE status = 'pending'
+      AND driver_id IN (SELECT id FROM drivers WHERE email LIKE '%@osilogistics.com')
+      AND id NOT IN (
+        SELECT id FROM (
+          SELECT id, ROW_NUMBER() OVER (PARTITION BY driver_id ORDER BY delivery_date DESC, created_at DESC) as rn
+          FROM commissions
+          WHERE status = 'pending' AND driver_id IN (SELECT id FROM drivers WHERE email LIKE '%@osilogistics.com')
+        ) ranked WHERE rn <= 1
+      )
+  `);
 
   await exec("INSERT OR REPLACE INTO meta (key, value) VALUES ('demo_refreshed_at', ?)", [today]);
   console.log(`✅ Demo refreshed: ${DELIVERED_COUNT} delivered, ${total - DELIVERED_COUNT} active orders`);
