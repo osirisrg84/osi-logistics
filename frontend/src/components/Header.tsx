@@ -131,12 +131,13 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
   // ── Dispatcher strip state (shared mobile + desktop) ──────
   const [musicOn, setMusicOn] = useState(() => { try { return localStorage.getItem('osi_music_on') === '1'; } catch { return false; } });
-  const [notesOpen, setNotesOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(() => { try { return localStorage.getItem('osi_notes_open') === '1'; } catch { return false; } });
   const [dispActive, setDispActive] = useState(() => { try { return localStorage.getItem('osi_disp_active') === '1'; } catch { return false; } });
   const [notes, setNotes] = useState<Array<{id: string; text: string; time: string}>>(() => { try { return JSON.parse(localStorage.getItem('osi_dispatch_notes') || '[]'); } catch { return []; } });
   const [noteInput, setNoteInput] = useState('');
 
   useEffect(() => { if (isDispatcher) localStorage.setItem('osi_music_on', musicOn ? '1' : '0'); }, [musicOn, isDispatcher]);
+  useEffect(() => { if (isDispatcher) localStorage.setItem('osi_notes_open', notesOpen ? '1' : '0'); }, [notesOpen, isDispatcher]);
   useEffect(() => { if (isDispatcher) localStorage.setItem('osi_disp_active', dispActive ? '1' : '0'); }, [dispActive, isDispatcher]);
   useEffect(() => { if (isDispatcher) localStorage.setItem('osi_dispatch_notes', JSON.stringify(notes)); }, [notes, isDispatcher]);
 
