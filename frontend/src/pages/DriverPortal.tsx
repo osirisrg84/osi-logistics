@@ -3892,8 +3892,8 @@ export default function DriverPortal() {
                     <p className="text-[9px] text-slate-500 tracking-wider uppercase">{t('driverPortal.secureChannel')}</p>
                   </div>
 
-                  {/* Text input row */}
-                  <div className="flex gap-2 px-4 pb-3">
+                  {/* Text input row -- extra bottom padding so it clears the floating AI assistant button */}
+                  <div className="flex gap-2 px-4 pb-24">
                     <input
                       value={radioInput}
                       onChange={e => setRadioInput(e.target.value)}
