@@ -473,6 +473,14 @@ export async function initDatabase(): Promise<void> {
     await exec("DELETE FROM meta WHERE key = 'demo_refreshed_at'");
     await exec("INSERT OR REPLACE INTO meta (key, value) VALUES ('demo_commissions_settle_v1', '1')");
   }
+  // Mismo truco de nuevo -- el fix de arriba solo liquidaba el lado del
+  // driver; este flag nuevo fuerza un refresh mas hoy para que el lado del
+  // dispatcher (Maria Gonzalez) tambien se liquide de inmediato.
+  const settleDispFixFlag = await queryOne<{ value: string }>("SELECT value FROM meta WHERE key = 'demo_dispatcher_settle_v1'");
+  if (!settleDispFixFlag) {
+    await exec("DELETE FROM meta WHERE key = 'demo_refreshed_at'");
+    await exec("INSERT OR REPLACE INTO meta (key, value) VALUES ('demo_dispatcher_settle_v1', '1')");
+  }
   await refreshDemoData();
   await syncDemoDriverStatus();
 }
@@ -725,6 +733,26 @@ async function refreshDemoData(): Promise<void> {
           SELECT id, ROW_NUMBER() OVER (PARTITION BY driver_id ORDER BY delivery_date DESC, created_at DESC) as rn
           FROM commissions
           WHERE status = 'pending' AND driver_id IN (SELECT id FROM drivers WHERE email LIKE '%@osilogistics.com')
+        ) ranked WHERE rn <= 1
+      )
+  `);
+
+  // Mismo problema pero del lado del dispatcher -- dispatcher_status es un
+  // campo separado de status (uno trackea si el DRIVER ya cobro, el otro si
+  // el DISPATCHER ya cobro), asi que liquidar el lado del driver arriba no
+  // tocaba este. Maria Gonzalez (dispatcher demo) queda como
+  // dispatcher_user_id en casi todas las ordenes demo entregadas, asi que
+  // sin esto acumulaba el 4% de cientos de ordenes como "pendiente" para
+  // siempre.
+  await exec(`
+    UPDATE commissions SET dispatcher_status = 'settled', dispatcher_settled_at = COALESCE(dispatcher_settled_at, delivery_date, created_at)
+    WHERE dispatcher_status = 'pending'
+      AND dispatcher_user_id IN (SELECT id FROM users WHERE email LIKE '%@osilogistics.com')
+      AND id NOT IN (
+        SELECT id FROM (
+          SELECT id, ROW_NUMBER() OVER (PARTITION BY dispatcher_user_id ORDER BY delivery_date DESC, created_at DESC) as rn
+          FROM commissions
+          WHERE dispatcher_status = 'pending' AND dispatcher_user_id IN (SELECT id FROM users WHERE email LIKE '%@osilogistics.com')
         ) ranked WHERE rn <= 1
       )
   `);
