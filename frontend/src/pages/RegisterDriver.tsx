@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, Mail, Lock, Building2, Calendar, Hash, Clock, Send } from 'lucide-react';
 import api from '../services/api';
 
@@ -18,6 +19,7 @@ function Field({ label, required, children }: { label: string; required?: boolea
 }
 
 export default function RegisterDriver() {
+  const { t } = useTranslation();
   const [registered, setRegistered] = useState(false);
   const [registeredName, setRegisteredName] = useState('');
 
@@ -49,8 +51,8 @@ export default function RegisterDriver() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-    if (form.password !== form.confirm) { setError('Passwords do not match'); return; }
-    if (form.password.length < 8) { setError('Password must be at least 8 characters'); return; }
+    if (form.password !== form.confirm) { setError(t('registerDispatcher.errorPasswordMismatch')); return; }
+    if (form.password.length < 8) { setError(t('registerDispatcher.errorPasswordTooShort')); return; }
     setLoading(true);
     try {
       await api.post('/auth/register-driver', {
@@ -71,7 +73,7 @@ export default function RegisterDriver() {
       setRegistered(true);
       (window as any).fbq?.('track', 'CompleteRegistration', { content_name: 'driver_registration' });
     } catch (err: unknown) {
-      setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Registration failed. Please try again.');
+      setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error || t('registerDispatcher.errorRegistrationFailed'));
     } finally {
       setLoading(false);
     }
@@ -84,21 +86,20 @@ export default function RegisterDriver() {
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
             <CheckCircle2 className="w-10 h-10 text-green-500" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">¡Cuenta Creada!</h1>
-          <p className="text-gray-500 text-sm mb-1">Hola, <span className="font-semibold text-gray-800">{registeredName}</span></p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('registerDispatcher.successTitle')}</h1>
+          <p className="text-gray-500 text-sm mb-1">{t('registerDispatcher.successGreetingPrefix')} <span className="font-semibold text-gray-800">{registeredName}</span></p>
           <p className="text-gray-500 text-sm mb-6">
-            Tu cuenta de conductor fue registrada exitosamente. Un administrador de OSI Logistics la revisará y activará.
-            Recibirás acceso al Driver Portal en cuanto sea aprobada.
+            {t('registerDriver.successBody')}
           </p>
           <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-6 flex items-start gap-3 text-left">
             <Clock className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-amber-700">
-              <span className="font-semibold">Pendiente de aprobación.</span> Mientras tanto, no podrás iniciar sesión. El tiempo de revisión es normalmente menos de 24 horas.
+              <span className="font-semibold">{t('registerDispatcher.pendingApprovalLabel')}</span> {t('registerDispatcher.pendingApprovalBody')}
             </p>
           </div>
           <Link to="/driver/login"
             className="block w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-2xl transition-colors text-sm">
-            Volver al inicio de sesión
+            {t('registerDispatcher.backToLogin')}
           </Link>
         </div>
       </div>
@@ -110,7 +111,7 @@ export default function RegisterDriver() {
       <div className="w-full max-w-lg">
 
         <Link to="/driver/login" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm mb-6 transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> Volver al inicio de sesión
+          <ArrowLeft className="w-3.5 h-3.5" /> {t('registerDispatcher.backToLogin')}
         </Link>
 
         {/* Header */}
@@ -118,8 +119,8 @@ export default function RegisterDriver() {
           <div className="w-16 h-16 bg-blue-500 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-blue-500/30">
             <Truck className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Driver Registration</h1>
-          <p className="text-slate-400 text-sm mt-1">OSI Logistics · Crea tu cuenta de conductor</p>
+          <h1 className="text-2xl font-bold text-white">{t('registerDriver.heroTitle')}</h1>
+          <p className="text-slate-400 text-sm mt-1">{t('registerDriver.heroSubtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -134,30 +135,30 @@ export default function RegisterDriver() {
           <div className="bg-white rounded-2xl shadow-xl p-5 space-y-4">
             <div className="flex items-center gap-2 mb-1">
               <User className="w-4 h-4 text-blue-500" />
-              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Personal Info</h2>
+              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{t('registerDispatcher.sectionPersonalInfo')}</h2>
             </div>
 
-            <Field label="Nombre Completo" required>
+            <Field label={t('registerDispatcher.fullNameLabel')} required>
               <input className="input" type="text" placeholder="Diego Fuentes"
                 value={form.name} onChange={set('name')} required autoFocus />
             </Field>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Phone" required>
+              <Field label={t('registerDispatcher.phoneLabel')} required>
                 <input className="input" type="tel" placeholder="(305) 555-0000"
                   value={form.phone} onChange={set('phone')} required />
               </Field>
-              <Field label="Email" required>
+              <Field label={t('registerDispatcher.emailLabel')} required>
                 <input className="input" type="email" placeholder="driver@company.com"
                   value={form.email} onChange={set('email')} required />
               </Field>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Password" required>
+              <Field label={t('registerDispatcher.passwordLabel')} required>
                 <div className="relative">
                   <input className="input pr-9" type={showPw ? 'text' : 'password'}
-                    placeholder="Min. 8 characters" value={form.password}
+                    placeholder={t('registerDispatcher.passwordPlaceholderMin')} value={form.password}
                     onChange={set('password')} required />
                   <button type="button" onClick={() => setShowPw(v => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -176,10 +177,10 @@ export default function RegisterDriver() {
                   </div>
                 )}
               </Field>
-              <Field label="Confirm Password" required>
+              <Field label={t('registerDispatcher.confirmPasswordLabel')} required>
                 <div className="relative">
                   <input className="input pr-9" type={showPw ? 'text' : 'password'}
-                    placeholder="Repeat password" value={form.confirm}
+                    placeholder={t('registerDispatcher.confirmPasswordPlaceholder')} value={form.confirm}
                     onChange={set('confirm')} required />
                   {form.confirm && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -197,15 +198,15 @@ export default function RegisterDriver() {
           <div className="bg-white rounded-2xl shadow-xl p-5 space-y-4">
             <div className="flex items-center gap-2 mb-1">
               <Hash className="w-4 h-4 text-orange-500" />
-              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">CDL / License</h2>
+              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{t('registerDriver.sectionCdlLicense')}</h2>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label="CDL License #" required>
+              <Field label={t('registerDriver.cdlLicenseNumberLabel')} required>
                 <input className="input" type="text" placeholder="FL-CDL-000000"
                   value={form.license_number} onChange={set('license_number')} required />
               </Field>
-              <Field label="License Expiry" required>
+              <Field label={t('registerDriver.licenseExpiryLabel')} required>
                 <input className="input" type="date"
                   value={form.license_expiry} onChange={set('license_expiry')} required />
               </Field>
@@ -217,18 +218,18 @@ export default function RegisterDriver() {
           <div className="bg-white rounded-2xl shadow-xl p-5 space-y-4">
             <div className="flex items-center gap-2 mb-1">
               <Building2 className="w-4 h-4 text-green-500" />
-              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Company / Equipment</h2>
+              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{t('registerDriver.sectionCompanyEquipment')}</h2>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Tipo de Equipo">
+              <Field label={t('registerDriver.equipmentTypeLabel')}>
                 <select className="input" value={form.equipment_type} onChange={set('equipment_type')}>
-                  {EQUIPMENT_TYPES.map(t => <option key={t}>{t}</option>)}
+                  {EQUIPMENT_TYPES.map(eq => <option key={eq}>{eq}</option>)}
                 </select>
               </Field>
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1.5">
-                  Tipo de Autoridad
+                  {t('registerDriver.authorityTypeLabel')}
                 </label>
                 <div className="flex rounded-xl overflow-hidden border border-gray-200 h-[42px]">
                   {(['MC#', 'DOT#'] as const).map(type => (
@@ -252,23 +253,23 @@ export default function RegisterDriver() {
                 onChange={authorityType === 'MC#' ? set('mc_number') : set('dot_number')} />
             </Field>
 
-            <Field label="Company Name">
+            <Field label={t('registerDriver.companyNameLabel')}>
               <input className="input" type="text" placeholder="OSI Logistics INC"
                 value={form.company_name} onChange={set('company_name')} />
             </Field>
 
-            <Field label="Autoridad MC/DOT desde">
+            <Field label={t('registerDriver.authoritySinceLabel')}>
               <input className="input" type="date"
                 value={form.authority_since} onChange={set('authority_since')} />
             </Field>
 
-            <Field label="Correo para Rate Confirmation">
+            <Field label={t('registerDriver.rateConEmailLabel')}>
               <div className="relative">
                 <Send className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input className="input pl-9" type="email" placeholder="dispatch@tuempresa.com"
                   value={form.rate_con_email} onChange={set('rate_con_email')} />
               </div>
-              <p className="text-[10px] text-gray-400 mt-1">Los brokers enviarán el rate confirmation a este correo.</p>
+              <p className="text-[10px] text-gray-400 mt-1">{t('registerDriver.rateConEmailHint')}</p>
             </Field>
           </div>
 
@@ -290,7 +291,7 @@ export default function RegisterDriver() {
               </div>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Declaro que la información suministrada en este registro es <span className="text-slate-300 font-medium">veraz, completa y actualizada</span>. Autorizo la validación de los datos proporcionados con el fin de verificar su autenticidad y garantizar el correcto uso de los servicios ofrecidos por OSI Logistics.
+              {t('registerDispatcher.declaration')}
             </p>
           </label>
 
@@ -298,14 +299,14 @@ export default function RegisterDriver() {
           <button type="submit" disabled={loading || !declared}
             className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-2xl transition-colors flex items-center justify-center gap-2 text-base shadow-xl shadow-blue-500/20">
             {loading
-              ? <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Creating account...</>
-              : <><Lock className="w-4 h-4" /> Create Driver Account</>
+              ? <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {t('registerDispatcher.creatingAccount')}</>
+              : <><Lock className="w-4 h-4" /> {t('registerDriver.createAccountBtn')}</>
             }
           </button>
 
           <p className="text-xs text-center text-slate-500 pb-4">
-            ¿Ya tienes una cuenta?{' '}
-            <Link to="/driver/login" className="text-blue-400 hover:text-blue-300 font-medium">Inicia sesión aquí</Link>
+            {t('registerDispatcher.alreadyHaveAccount')}{' '}
+            <Link to="/driver/login" className="text-blue-400 hover:text-blue-300 font-medium">{t('registerDispatcher.signInHere')}</Link>
           </p>
         </form>
       </div>
