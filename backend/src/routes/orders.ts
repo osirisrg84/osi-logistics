@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { exec, query, queryOne, createCommission } from '../database';
+import { exec, query, queryOne, createCommission, getDb } from '../database';
 import { appEvents } from '../events';
 import { sendOfferEmail, sendOfferAcceptedEmail, sendOrderAssignedEmail, sendDeliveryEmail, sendDocumentEmail } from '../email';
 import { sendPushToDriver } from './push';
@@ -569,17 +569,29 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const order = await queryOne('SELECT * FROM orders WHERE id = ?', [req.params.id]);
     if (!order) return res.status(404).json({ error: 'Order not found' });
-    await exec('DELETE FROM order_history WHERE order_id = ?', [req.params.id]);
-    await exec('DELETE FROM tracking WHERE order_id = ?', [req.params.id]);
-    await exec('DELETE FROM commissions WHERE order_id = ?', [req.params.id]);
-    // order_documents/order_rate_cons antes quedaban huerfanos -- no rompian
-    // nada (no hay FK), pero se acumulaban filas muertas en la base para
-    // siempre cada vez que se borraba una orden con papeleo adjunto.
-    await exec('DELETE FROM order_documents WHERE order_id = ?', [req.params.id]);
-    await exec('DELETE FROM order_rate_cons WHERE order_id = ?', [req.params.id]);
-    await exec('DELETE FROM orders WHERE id = ?', [req.params.id]);
+    // Antes eran 6 round-trips HTTP independientes a Turso (uno por
+    // exec() await). Si cualquiera de esos 6 viajes de red tenia un
+    // tropiezo transitorio (mas facil en un movil con señal floja probando
+    // varias ordenes seguidas), el delete quedaba a medias -- algunas
+    // tablas limpias y otras no -- y el error generico no decia cual de
+    // los 6 habia fallado. batch() manda todo en un solo viaje, atomico.
+    await getDb().batch([
+      { sql: 'DELETE FROM order_history WHERE order_id = ?', args: [req.params.id] },
+      { sql: 'DELETE FROM tracking WHERE order_id = ?', args: [req.params.id] },
+      { sql: 'DELETE FROM commissions WHERE order_id = ?', args: [req.params.id] },
+      { sql: 'DELETE FROM order_documents WHERE order_id = ?', args: [req.params.id] },
+      { sql: 'DELETE FROM order_rate_cons WHERE order_id = ?', args: [req.params.id] },
+      { sql: 'DELETE FROM orders WHERE id = ?', args: [req.params.id] },
+    ], 'write');
     res.json({ success: true });
-  } catch { res.status(500).json({ error: 'Failed' }); }
+  } catch (e) {
+    // El catch tragaba el error real sin dejar rastro -- un borrado
+    // fallando en produccion no dejaba ninguna pista de POR QUE (sin FKs en
+    // el schema, no deberia fallar nunca por eso; esto es para ver la causa
+    // real la proxima vez en vez de seguir adivinando a ciegas).
+    console.error('[DELETE /orders/:id] Failed for', req.params.id, e);
+    res.status(500).json({ error: 'Failed' });
+  }
 });
 
 export default router;
