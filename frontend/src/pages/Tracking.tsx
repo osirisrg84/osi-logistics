@@ -8,6 +8,7 @@ import { Driver } from '../types';
 import { getSocket } from '../services/socket';
 import { DriverStatusBadge } from '../components/StatusBadge';
 import { formatDistanceToNow } from 'date-fns';
+import { parseServerDate } from '../utils/serverDate';
 import { formatLocation } from '../utils/location';
 import { formatPhone } from '../utils/phone';
 
@@ -255,7 +256,7 @@ export default function Tracking() {
                   <p className="text-xs text-gray-500 mt-0.5 pl-4">{formatLocation(driver.delivery_address, driver.delivery_contact)}</p>
                 )}
                 {driver.estimated_delivery && driver.status !== 'available' && (
-                  <p className="text-xs text-gray-500 mt-0.5 pl-4">ETA {formatDistanceToNow(new Date(driver.estimated_delivery), { addSuffix: true })}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 pl-4">ETA {formatDistanceToNow(parseServerDate(driver.estimated_delivery), { addSuffix: true })}</p>
                 )}
                 <p className="text-xs text-gray-400 mt-2">
                   ★ {driver.rating.toFixed(1)} · {(driver as typeof driver & { total_deliveries?: number }).total_deliveries ?? 0} {t('orders.tripsWord')}

@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { DriverStatusBadge } from '../components/StatusBadge';
 import { EmptyState } from '../components/EmptyState';
 import { format, formatDistanceToNow } from 'date-fns';
+import { parseServerDate } from '../utils/serverDate';
 import { playSuccessChime } from '../utils/sounds';
 import { formatPhone } from '../utils/phone';
 
@@ -473,7 +474,7 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
                         {order.status}
                       </span>
                       {order.delivered_at && (
-                        <span className="text-xs text-gray-400 dark:text-slate-500">{formatDistanceToNow(new Date(order.delivered_at), { addSuffix: true })}</span>
+                        <span className="text-xs text-gray-400 dark:text-slate-500">{formatDistanceToNow(parseServerDate(order.delivered_at), { addSuffix: true })}</span>
                       )}
                     </div>
                   </div>

@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import api from '../services/api';
 import { getSocket } from '../services/socket';
 import { format, formatDistanceToNow } from 'date-fns';
+import { parseServerDate } from '../utils/serverDate';
 import { formatPhone } from '../utils/phone';
 
 interface DispatcherProfile {
@@ -223,7 +224,7 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
               <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{t('dispatcherProfiles.memberSince', { date: format(new Date(dispatcher.created_at), 'MMM d, yyyy') })}</p>
               {dispatcher.shift_changed_at && (
                 <p className="text-xs text-gray-400 dark:text-slate-500">
-                  {t('dispatcherProfiles.sinceTime', { status: dispatcher.shift_active ? t('dispatcherProfiles.onShift') : t('dispatcherProfiles.free'), time: formatDistanceToNow(new Date(dispatcher.shift_changed_at), { addSuffix: true }) })}
+                  {t('dispatcherProfiles.sinceTime', { status: dispatcher.shift_active ? t('dispatcherProfiles.onShift') : t('dispatcherProfiles.free'), time: formatDistanceToNow(parseServerDate(dispatcher.shift_changed_at), { addSuffix: true }) })}
                 </p>
               )}
             </div>
@@ -488,7 +489,7 @@ export default function DispatcherProfiles() {
                       </span>
                       <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                         d.shift_active ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-400 dark:bg-slate-700 dark:text-slate-500'
-                      }`} title={d.shift_changed_at ? t('dispatcherProfiles.sinceLabel', { time: formatDistanceToNow(new Date(d.shift_changed_at), { addSuffix: true }) }) : undefined}>
+                      }`} title={d.shift_changed_at ? t('dispatcherProfiles.sinceLabel', { time: formatDistanceToNow(parseServerDate(d.shift_changed_at), { addSuffix: true }) }) : undefined}>
                         <Zap className="w-2.5 h-2.5" />
                         {d.shift_active ? t('dispatcherProfiles.onShift') : t('dispatcherProfiles.free')}
                       </span>

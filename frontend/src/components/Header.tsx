@@ -11,6 +11,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { formatDistanceToNow } from 'date-fns';
+import { parseServerDate } from '../utils/serverDate';
 import { playNotificationPing } from '../utils/sounds';
 
 const NOTIF_COLORS: Record<string, string> = {
@@ -375,7 +376,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                           {!n.read && <div className="w-1.5 h-1.5 bg-orange-500 rounded-full flex-shrink-0" />}
                         </div>
                         <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{n.message}</p>
-                        <p className="text-xs text-gray-400 mt-1">{formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}</p>
+                        <p className="text-xs text-gray-400 mt-1">{formatDistanceToNow(parseServerDate(n.created_at), { addSuffix: true })}</p>
                       </div>
                     </div>
                   </div>

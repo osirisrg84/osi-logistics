@@ -15,6 +15,7 @@ import InstallAppBanner from '../components/InstallAppBanner';
 import { setAppManifest, setThemeColor, DRIVER_MANIFEST, DISPATCH_MANIFEST, DRIVER_COLOR, DISPATCH_COLOR } from '../utils/appManifest';
 import { formatLocation } from '../utils/location';
 import { formatPhone } from '../utils/phone';
+import { parseServerDate } from '../utils/serverDate';
 import { useDriverAuth } from '../context/DriverAuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -360,7 +361,7 @@ function OrderCard({ order, onStatusUpdate, highlighted }: { order: Order; onSta
         </div>
         <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
           <p className="text-xs text-gray-400 dark:text-slate-500">{t('driverPortal.created')}</p>
-          <p className="text-xs font-medium text-gray-900 dark:text-slate-100 break-words">{formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}</p>
+          <p className="text-xs font-medium text-gray-900 dark:text-slate-100 break-words">{formatDistanceToNow(parseServerDate(order.created_at), { addSuffix: true })}</p>
         </div>
         <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2 text-center">
           <p className="text-xs text-gray-400 dark:text-slate-500">{t('driverPortal.eta')}</p>
@@ -1772,7 +1773,7 @@ export default function DriverPortal() {
                       <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{notif.message}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <p className="text-[10px] text-slate-600">
-                          {(() => { try { return formatDistanceToNow(new Date(notif.created_at), { addSuffix: true }); } catch { return ''; } })()}
+                          {(() => { try { return formatDistanceToNow(parseServerDate(notif.created_at), { addSuffix: true }); } catch { return ''; } })()}
                         </p>
                         {notif.type === 'offer' && (
                           <span className="text-[9px] font-bold text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded-full">
@@ -3388,7 +3389,7 @@ export default function DriverPortal() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{post.author_name}</p>
-                      <p className="text-[11px] text-gray-400 dark:text-slate-500">{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })} · {t('hub.osiTeam')}</p>
+                      <p className="text-[11px] text-gray-400 dark:text-slate-500">{formatDistanceToNow(parseServerDate(post.created_at), { addSuffix: true })} · {t('hub.osiTeam')}</p>
                     </div>
                     <span className="text-[10px] font-bold text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 rounded-full flex-shrink-0 capitalize">
                       {post.author_role === 'driver' ? t('hub.roleDriver') : post.author_role === 'admin' ? t('hub.roleAdmin') : t('hub.roleDispatcher')}

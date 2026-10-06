@@ -14,6 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import { DashboardStats } from '../types';
 import { OrderStatusBadge } from '../components/StatusBadge';
 import { formatDistanceToNow, format } from 'date-fns';
+import { parseServerDate } from '../utils/serverDate';
 
 const STATUS_COLORS: Record<string, string> = {
   pending: '#eab308',
@@ -342,7 +343,7 @@ export default function Dashboard() {
                     </p>
                   )}
                   <p className="text-xs text-gray-400 dark:text-slate-500">
-                    {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                    {formatDistanceToNow(parseServerDate(activity.timestamp), { addSuffix: true })}
                   </p>
                 </div>
               </div>

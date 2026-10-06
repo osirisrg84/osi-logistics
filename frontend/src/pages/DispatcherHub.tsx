@@ -9,6 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { communityApi, analyticsApi, incidentsApi } from '../services/api';
 import { IncidentReportModal } from '../components/IncidentReportModal';
 import { formatDistanceToNow } from 'date-fns';
+import { parseServerDate } from '../utils/serverDate';
 import { formatPhone } from '../utils/phone';
 
 interface Post {
@@ -163,7 +164,7 @@ export default function DispatcherHub() {
                       {post.author_role === 'driver' ? t('hub.roleDriver') : post.author_role === 'admin' ? t('hub.roleAdmin') : t('hub.roleDispatcher')}
                     </span>
                   </div>
-                  <p className={`text-[11px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })} · {t('hub.osiTeam')}</p>
+                  <p className={`text-[11px] ${dark ? 'text-slate-500' : 'text-gray-400'}`}>{formatDistanceToNow(parseServerDate(post.created_at), { addSuffix: true })} · {t('hub.osiTeam')}</p>
                 </div>
               </div>
 
