@@ -454,6 +454,7 @@ export async function initDatabase(): Promise<void> {
   await seedFavorites();
   await seedCommissions();
   await seedHistoricalOrders();
+  await fixRealDriversWithDemoOrders();
   await initCommissions();
   // Fuerza un refresh demo mas, una sola vez, para que el fix de
   // estimated_delivery (antes quedaba desfasado tras el primer refresh,
@@ -481,7 +482,11 @@ async function seedHistoricalOrders(): Promise<void> {
   const already = existing?.count ?? 0;
   if (already >= TARGET_TOTAL) return;
 
-  const drivers = await query<{ id: string }>('SELECT id FROM drivers ORDER BY id LIMIT 5');
+  // Debe quedar restringido a conductores demo -- antes tomaba los primeros 5
+  // conductores de la tabla sin importar si eran reales, por lo que cuentas
+  // reales (las primeras creadas en el sistema) terminaban con ordenes e
+  // comisiones demo pegadas a su perfil real para siempre.
+  const drivers = await query<{ id: string }>("SELECT id FROM drivers WHERE email LIKE '%@osilogistics.com' ORDER BY id LIMIT 5");
   if (drivers.length === 0) return;
 
   const customers = [
@@ -569,6 +574,35 @@ async function seedHistoricalOrders(): Promise<void> {
     }
   }
   console.log(`✅ ${counter - 1} historical orders seeded for analytics`);
+}
+
+// Reasigna las ordenes demo (OSI-H...) que quedaron pegadas a conductores
+// reales -- bug en seedHistoricalOrders() que elegia los primeros 5
+// conductores de la tabla sin filtrar por email demo, asi que las cuentas
+// reales mas antiguas del sistema terminaban con comisiones de ordenes de
+// prueba infladando su balance pendiente real. Corre una sola vez.
+async function fixRealDriversWithDemoOrders(): Promise<void> {
+  const flag = await queryOne<{ value: string }>("SELECT value FROM meta WHERE key = 'demo_orders_realdriver_fix_v1'");
+  if (flag) return;
+
+  const demoDrivers = await query<{ id: string }>("SELECT id FROM drivers WHERE email LIKE '%@osilogistics.com'");
+  if (demoDrivers.length > 0) {
+    const badOrders = await query<{ id: string }>(`
+      SELECT id FROM orders
+      WHERE order_number LIKE 'OSI-H%' AND driver_id IS NOT NULL
+        AND driver_id NOT IN (SELECT id FROM drivers WHERE email LIKE '%@osilogistics.com')
+    `);
+    for (let i = 0; i < badOrders.length; i++) {
+      const demoDriver = demoDrivers[i % demoDrivers.length];
+      await exec('UPDATE orders SET driver_id = ? WHERE id = ?', [demoDriver.id, badOrders[i].id]);
+      await exec('DELETE FROM commissions WHERE order_id = ?', [badOrders[i].id]);
+    }
+    if (badOrders.length > 0) {
+      console.log(`🔧 Reassigned ${badOrders.length} demo orders away from real driver accounts`);
+    }
+  }
+
+  await exec("INSERT OR REPLACE INTO meta (key, value) VALUES ('demo_orders_realdriver_fix_v1', '1')");
 }
 
 // Sincroniza el status "en vivo" (busy/available) de los drivers demo con
