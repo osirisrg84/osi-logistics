@@ -3650,7 +3650,26 @@ export default function DriverPortal() {
                   {/* PTT — OSI Fleet Radio PRO X7 v5 — compact */}
                   <div className="flex flex-col items-center pt-1 pb-3 px-4 gap-2">
 
-                    <div style={{ position: 'relative', width: 162, height: 318,
+                    <div style={{ position: 'relative', width: 162, height: 334 }}>
+
+                      {/* Ambient backdrop glow — breathing, color matches PTT/idle state */}
+                      <div style={{ position: 'absolute', left: '50%', top: '42%', width: 210, height: 210,
+                        transform: 'translate(-50%,-50%)', borderRadius: '50%', pointerEvents: 'none', zIndex: 0,
+                        background: isRecording
+                          ? 'radial-gradient(circle,rgba(239,68,68,0.3) 0%,rgba(239,68,68,0.1) 45%,transparent 72%)'
+                          : 'radial-gradient(circle,rgba(249,115,22,0.22) 0%,rgba(249,115,22,0.07) 45%,transparent 72%)',
+                        animation: 'radioAmbientGlow 3.2s ease-in-out infinite',
+                        filter: 'blur(2px)',
+                      }} />
+
+                      {/* Ground reflection — product-shot feel */}
+                      <div style={{ position: 'absolute', left: '50%', bottom: -6, width: 118, height: 14,
+                        transform: 'translateX(-50%)', borderRadius: '50%', pointerEvents: 'none', zIndex: 0,
+                        background: 'radial-gradient(ellipse,rgba(0,0,0,0.55) 0%,rgba(0,0,0,0.22) 55%,transparent 80%)',
+                        filter: 'blur(1.5px)',
+                      }} />
+
+                    <div style={{ position: 'relative', zIndex: 1, width: 162, height: 318,
                       filter: 'drop-shadow(0 18px 40px rgba(0,0,0,0.98)) drop-shadow(0 5px 12px rgba(0,0,0,0.85))' }}>
 
                       {/* ANTENNA */}
@@ -3710,7 +3729,8 @@ export default function DriverPortal() {
                             <div style={{ width: 11, height: 11, borderRadius: '50%',
                               background: isRecording ? 'radial-gradient(circle at 34% 30%,#fecaca 0%,#ef4444 50%,#7f1d1d 100%)' : 'radial-gradient(circle at 34% 30%,#bbf7d0 0%,#22c55e 50%,#14532d 100%)',
                               boxShadow: isRecording ? '0 0 0 2.5px rgba(239,68,68,0.18), 0 0 18px 5px rgba(239,68,68,0.94)' : '0 0 0 2.5px rgba(34,197,94,0.16), 0 0 18px 5px rgba(34,197,94,0.9)',
-                              transition: 'all 0.2s',
+                              animation: isRecording ? 'none' : 'radioLedBreathe 2.4s ease-in-out infinite',
+                              transition: 'background 0.2s',
                             }} />
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
@@ -3767,7 +3787,10 @@ export default function DriverPortal() {
                                   <div key={i} style={{ width: 3, height: h, borderRadius: '1px 1px 0 0',
                                     background: isRecording ? (i < 4 ? '#22c55e' : '#0a2a12') : (i < 3 ? '#22c55e' : '#0a2a12'),
                                     boxShadow: (isRecording ? i < 4 : i < 3) ? '0 0 4px rgba(34,197,94,0.6)' : 'none',
-                                    animation: isRecording && i < 4 ? `waveBar ${0.24+i*0.08}s ease-in-out infinite alternate` : 'none',
+                                    animation: isRecording && i < 4
+                                      ? `waveBar ${0.24+i*0.08}s ease-in-out infinite alternate`
+                                      : (!isRecording && i < 3 ? `radioIdleBars ${1.6+i*0.3}s ease-in-out infinite` : 'none'),
+                                    animationDelay: !isRecording && i < 3 ? `${i*0.25}s` : '0s',
                                     transition: 'background 0.22s',
                                   }} />
                                 ))}
@@ -3798,7 +3821,7 @@ export default function DriverPortal() {
                               </div>
                             </div>
                           </div>
-                          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'repeating-linear-gradient(0deg,rgba(0,0,0,0.2) 0px,rgba(0,0,0,0.2) 1px,transparent 1px,transparent 3px)' }} />
+                          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'repeating-linear-gradient(0deg,rgba(0,0,0,0.2) 0px,rgba(0,0,0,0.2) 1px,transparent 1px,transparent 3px)', animation: 'radioScanFlicker 6s linear infinite' }} />
                           <div style={{ position: 'absolute', top: 3, left: 5, width: 36, height: 12, borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(255,255,255,0.17) 0%,rgba(255,255,255,0.04) 55%,transparent 100%)', transform: 'rotate(-12deg)', pointerEvents: 'none' }} />
                         </div>
 
@@ -3853,6 +3876,7 @@ export default function DriverPortal() {
                           }}
                           className="select-none touch-none transition-transform active:scale-[0.955] block"
                           style={{
+                            position: 'relative', overflow: 'hidden',
                             margin: '0 8px 0', width: 'calc(100% - 16px)', height: 52,
                             borderRadius: 10, border: 'none', cursor: 'pointer',
                             background: isRecording
@@ -3865,12 +3889,19 @@ export default function DriverPortal() {
                             transition: 'all 0.15s',
                           }}
                         >
+                          {/* Glossy sheen sweep — idle only, realism pass */}
+                          {!isRecording && (
+                            <div style={{ position: 'absolute', top: 0, left: 0, width: '35%', height: '100%',
+                              background: 'linear-gradient(100deg,transparent 0%,rgba(255,255,255,0.4) 50%,transparent 100%)',
+                              animation: 'radioSheen 5s ease-in-out infinite', pointerEvents: 'none', zIndex: 0,
+                            }} />
+                          )}
                           {/* Left ridge */}
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
                             {[0,1,2,3].map(i => <div key={i} style={{ width: 3, height: 5, borderRadius: 1.5, background: 'rgba(255,255,255,0.28)' }} />)}
                           </div>
                           {/* Center content */}
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
                             {/* Signal dot */}
                             <div style={{ width: 7, height: 7, borderRadius: '50%',
                               background: isRecording ? '#fff' : 'rgba(255,255,255,0.7)',
@@ -3895,7 +3926,7 @@ export default function DriverPortal() {
                             </span>
                           </div>
                           {/* Right ridge */}
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
                             {[0,1,2,3].map(i => <div key={i} style={{ width: 3, height: 5, borderRadius: 1.5, background: 'rgba(255,255,255,0.28)' }} />)}
                           </div>
                         </button>
@@ -3927,6 +3958,7 @@ export default function DriverPortal() {
                       </div>
 
                     </div>{/* end drop-shadow wrapper */}
+                    </div>{/* end outer relative (glow + reflection) wrapper */}
                     <p className="text-[9px] text-slate-500 tracking-wider uppercase">{t('driverPortal.secureChannel')}</p>
                   </div>
 
