@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import {
   Plus, Search, Filter, X, ChevronDown, Package,
   MapPin, User, Truck, Clock, DollarSign, Eye, Edit2, Trash2, UserCheck, CheckCircle,
-  Building2, Phone, Mail, Hash, FileText, Upload, Square, CheckSquare, MinusSquare
+  Building2, Phone, Mail, Hash, FileText, Upload, Square, CheckSquare, MinusSquare,
+  AlertTriangle, Loader2
 } from 'lucide-react';
 import { Order, Driver, Truck as TruckType, OrderStatus } from '../types';
 import { ordersApi, driversApi, trucksApi } from '../services/api';
@@ -856,9 +857,11 @@ export default function Orders() {
   const [editOrder, setEditOrder] = useState<Order | null>(null);
   const [total, setTotal] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pageSize, setPageSize] = useState(50);
   const [page, setPage] = useState(1);
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
   const isAdmin = user?.role === 'admin';
   const toggleSelect = (id: string) =>
@@ -868,7 +871,8 @@ export default function Orders() {
   const toggleSelectAll = () =>
     setSelected(allSelected ? new Set() : new Set(orders.map(o => o.id)));
 
-  const showToast = (msg: string) => {
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+    setToastType(type);
     setToast(msg);
     setTimeout(() => setToast(null), 4500);
   };
@@ -910,26 +914,53 @@ export default function Orders() {
 
   const handleDelete = async (id: string, orderNumber: string) => {
     if (!confirm(t('orders.confirmDeleteOne', { orderNumber }))) return;
-    await ordersApi.delete(id);
-    setSelected(prev => { const n = new Set(prev); n.delete(id); return n; });
-    fetchOrders();
+    setDeletingIds(prev => new Set(prev).add(id));
+    try {
+      await ordersApi.delete(id);
+      setSelected(prev => { const n = new Set(prev); n.delete(id); return n; });
+      fetchOrders();
+    } catch {
+      // Antes esto no se atrapaba -- un 500 (o un cold start de Render que
+      // tarda y tira timeout) dejaba el boton "congelado" sin ningun aviso:
+      // la orden seguia en la lista y nada le decia al usuario que fallo,
+      // solo parecia que no paso nada al refrescar.
+      showToast(t('orders.deleteFailedToast', { orderNumber }), 'error');
+    } finally {
+      setDeletingIds(prev => { const n = new Set(prev); n.delete(id); return n; });
+    }
   };
 
   const handleBulkDelete = async () => {
-    const count = selected.size;
+    const ids = [...selected];
+    const count = ids.length;
     if (!confirm(t('orders.confirmDeleteBulk', { count }))) return;
-    await Promise.all([...selected].map(id => ordersApi.delete(id)));
-    setSelected(new Set());
+    setDeletingIds(prev => { const n = new Set(prev); ids.forEach(id => n.add(id)); return n; });
+    const results = await Promise.allSettled(ids.map(id => ordersApi.delete(id)));
+    const failedIds = ids.filter((_, i) => results[i].status === 'rejected');
+    const okIds = ids.filter((_, i) => results[i].status === 'fulfilled');
+    setDeletingIds(prev => { const n = new Set(prev); ids.forEach(id => n.delete(id)); return n; });
+    setSelected(new Set(failedIds));
     fetchOrders();
-    showToast(t('orders.deletedToast', { count }));
+    if (failedIds.length > 0) {
+      showToast(
+        okIds.length > 0
+          ? `${t('orders.deletedToast', { count: okIds.length })} · ${t('orders.deleteFailedBulkToast', { count: failedIds.length })}`
+          : t('orders.deleteFailedBulkToast', { count: failedIds.length }),
+        'error'
+      );
+    } else {
+      showToast(t('orders.deletedToast', { count: okIds.length }));
+    }
   };
 
   return (
     <div className="space-y-3 fade-in">
       {/* Toast notification */}
       {toast && (
-        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-green-600 text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-2xl shadow-green-600/30 animate-fade-in">
-          <CheckCircle className="w-5 h-5 flex-shrink-0" />
+        <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-2xl animate-fade-in ${
+          toastType === 'error' ? 'bg-red-600 shadow-red-600/30' : 'bg-green-600 shadow-green-600/30'
+        }`}>
+          {toastType === 'error' ? <AlertTriangle className="w-5 h-5 flex-shrink-0" /> : <CheckCircle className="w-5 h-5 flex-shrink-0" />}
           {toast}
         </div>
       )}
@@ -1064,9 +1095,9 @@ export default function Orders() {
                         <UserCheck className="w-4 h-4 text-blue-500" />
                       </button>
                     )}
-                    {(user?.role === 'admin' || ['pending', 'cancelled'].includes(order.status)) && (
-                      <button onClick={() => handleDelete(order.id, order.order_number)} className="p-1.5 hover:bg-red-50 rounded-lg" title={t('orders.deleteOrderTooltip')}>
-                        <Trash2 className="w-4 h-4 text-red-400" />
+                    {(user?.role === 'admin' || ['pending', 'offered', 'cancelled'].includes(order.status)) && (
+                      <button onClick={() => handleDelete(order.id, order.order_number)} disabled={deletingIds.has(order.id)} className="p-1.5 hover:bg-red-50 rounded-lg disabled:opacity-50" title={t('orders.deleteOrderTooltip')}>
+                        {deletingIds.has(order.id) ? <Loader2 className="w-4 h-4 text-red-400 animate-spin" /> : <Trash2 className="w-4 h-4 text-red-400" />}
                       </button>
                     )}
                   </div>
@@ -1156,9 +1187,9 @@ export default function Orders() {
                               <UserCheck className="w-3.5 h-3.5 text-blue-500" />
                             </button>
                           )}
-                          {(user?.role === 'admin' || ['pending', 'cancelled'].includes(order.status)) && (
-                            <button onClick={() => handleDelete(order.id, order.order_number)} className="p-1.5 hover:bg-red-50 rounded-lg" title={t('orders.deleteOrderTooltip')}>
-                              <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                          {(user?.role === 'admin' || ['pending', 'offered', 'cancelled'].includes(order.status)) && (
+                            <button onClick={() => handleDelete(order.id, order.order_number)} disabled={deletingIds.has(order.id)} className="p-1.5 hover:bg-red-50 rounded-lg disabled:opacity-50" title={t('orders.deleteOrderTooltip')}>
+                              {deletingIds.has(order.id) ? <Loader2 className="w-3.5 h-3.5 text-red-400 animate-spin" /> : <Trash2 className="w-3.5 h-3.5 text-red-400" />}
                             </button>
                           )}
                         </div>
