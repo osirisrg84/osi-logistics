@@ -3837,7 +3837,12 @@ export default function DriverPortal() {
                           <div style={{ position: 'absolute', top: 3, left: 5, width: 36, height: 12, borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(255,255,255,0.17) 0%,rgba(255,255,255,0.04) 55%,transparent 100%)', transform: 'rotate(-12deg)', pointerEvents: 'none' }} />
                         </div>
 
-                        {/* PTT BUTTON — GRABAR / DETENER */}
+                        {/* PTT BUTTON — GRABAR / DETENER — recessed bezel so the button reads as a real part sunk into the housing, not a flat sticker */}
+                        <div style={{
+                          margin: '0 8px 0', padding: 4, borderRadius: 13,
+                          background: 'linear-gradient(155deg,#050a12 0%,#0c1420 45%,#060b14 100%)',
+                          boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.92), inset 0 -1px 0 rgba(255,255,255,0.04), 0 1px 0 rgba(255,255,255,0.03)',
+                        }}>
                         <button
                           onClick={async () => {
                             if (isRecording) {
@@ -3886,18 +3891,28 @@ export default function DriverPortal() {
                               mr.start(); setMediaRecorder(mr); setIsRecording(true); setRecordingDuration(0);
                             } catch {}
                           }}
-                          className="select-none touch-none transition-transform active:scale-[0.955] block"
+                          className="select-none touch-none transition-transform active:scale-[0.97] block"
                           style={{
                             position: 'relative', overflow: 'hidden',
-                            margin: '0 8px 0', width: 'calc(100% - 16px)', height: 52,
-                            borderRadius: 10, border: 'none', cursor: 'pointer',
+                            width: '100%', height: 52,
+                            borderRadius: 10, cursor: 'pointer',
+                            border: isRecording ? '1px solid rgba(127,29,29,0.9)' : '1px solid rgba(146,64,14,0.9)',
                             background: isRecording
-                              ? ['repeating-linear-gradient(135deg,rgba(0,0,0,0.1) 0px,rgba(0,0,0,0.1) 2px,transparent 2px,transparent 6px)','linear-gradient(180deg,#f87171 0%,#ef4444 36%,#991b1b 100%)'].join(',')
-                              : ['repeating-linear-gradient(135deg,rgba(0,0,0,0.09) 0px,rgba(0,0,0,0.09) 2px,transparent 2px,transparent 6px)','linear-gradient(180deg,#fb923c 0%,#f97316 36%,#b45309 100%)'].join(','),
+                              ? [
+                                  'radial-gradient(ellipse 88% 65% at 50% -8%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 32%, transparent 62%)',
+                                  'repeating-linear-gradient(135deg,rgba(0,0,0,0.1) 0px,rgba(0,0,0,0.1) 2px,transparent 2px,transparent 6px)',
+                                  'linear-gradient(180deg,#f87171 0%,#ef4444 36%,#991b1b 100%)',
+                                ].join(',')
+                              : [
+                                  'radial-gradient(ellipse 88% 65% at 50% -8%, rgba(255,255,255,0.46) 0%, rgba(255,255,255,0.09) 32%, transparent 62%)',
+                                  'repeating-linear-gradient(135deg,rgba(0,0,0,0.09) 0px,rgba(0,0,0,0.09) 2px,transparent 2px,transparent 6px)',
+                                  'linear-gradient(180deg,#fb923c 0%,#f97316 36%,#b45309 100%)',
+                                ].join(','),
                             boxShadow: isRecording
-                              ? 'inset 0 -6px 16px rgba(0,0,0,0.65), inset 0 3px 8px rgba(255,100,100,0.18), 0 0 28px rgba(239,68,68,0.82), 0 4px 12px rgba(0,0,0,0.9)'
-                              : 'inset 0 -6px 16px rgba(0,0,0,0.55), inset 0 3px 8px rgba(255,185,100,0.14), 0 0 18px rgba(249,115,22,0.48), 0 4px 12px rgba(0,0,0,0.9)',
+                              ? 'inset 0 -7px 15px rgba(0,0,0,0.6), inset 0 3px 5px rgba(255,180,180,0.35), inset 0 0 0 1px rgba(0,0,0,0.25), 0 0 28px rgba(239,68,68,0.82), 0 3px 10px rgba(0,0,0,0.9)'
+                              : 'inset 0 -7px 15px rgba(0,0,0,0.5), inset 0 3px 5px rgba(255,210,160,0.3), inset 0 0 0 1px rgba(0,0,0,0.22), 0 0 18px rgba(249,115,22,0.48), 0 3px 10px rgba(0,0,0,0.9)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                            transform: isRecording ? 'translateY(0.5px)' : 'translateY(0)',
                             transition: 'all 0.15s',
                           }}
                         >
@@ -3908,9 +3923,9 @@ export default function DriverPortal() {
                               animation: 'radioSheen 5s ease-in-out infinite', pointerEvents: 'none', zIndex: 0,
                             }} />
                           )}
-                          {/* Left ridge */}
+                          {/* Left ridge — embossed rubber grip lines */}
                           <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            {[0,1,2,3].map(i => <div key={i} style={{ width: 3, height: 5, borderRadius: 1.5, background: 'rgba(255,255,255,0.28)' }} />)}
+                            {[0,1,2,3].map(i => <div key={i} style={{ width: 3, height: 5, borderRadius: 1.5, background: 'linear-gradient(180deg,rgba(255,255,255,0.45),rgba(255,255,255,0.15))', boxShadow: 'inset 0 1px 1px rgba(0,0,0,0.25), 0 0.5px 0 rgba(255,255,255,0.1)' }} />)}
                           </div>
                           {/* Center content */}
                           <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
@@ -3937,11 +3952,12 @@ export default function DriverPortal() {
                               {isRecording ? t('driverPortal.transmittingShort') : t('driverPortal.pushToTalk')}
                             </span>
                           </div>
-                          {/* Right ridge */}
+                          {/* Right ridge — embossed rubber grip lines */}
                           <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            {[0,1,2,3].map(i => <div key={i} style={{ width: 3, height: 5, borderRadius: 1.5, background: 'rgba(255,255,255,0.28)' }} />)}
+                            {[0,1,2,3].map(i => <div key={i} style={{ width: 3, height: 5, borderRadius: 1.5, background: 'linear-gradient(180deg,rgba(255,255,255,0.45),rgba(255,255,255,0.15))', boxShadow: 'inset 0 1px 1px rgba(0,0,0,0.25), 0 0.5px 0 rgba(255,255,255,0.1)' }} />)}
                           </div>
                         </button>
+                        </div>{/* end PTT bezel recess */}
 
                         {/* State label + brand */}
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 8, paddingTop: 4, gap: 3 }}>
