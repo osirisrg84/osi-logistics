@@ -1276,6 +1276,14 @@ export default function DriverPortal() {
 
   const setStatus = async (newStatus: DriverStatus) => {
     if (!user?.driver_id || togglingStatus) return;
+    // Mismo espiritu que el bloqueo de logout de arriba -- si el conductor
+    // tiene una orden asignada/recogida/en transito, ponerse offline lo
+    // saca de la app (y de recibir mas ofertas) a mitad de una entrega que
+    // todavia tiene que terminar.
+    if (newStatus === 'offline' && activeOrders.length > 0) {
+      alert('No puedes ponerte "Offline" mientras tengas una orden en curso.');
+      return;
+    }
     setTogglingStatus(true);
     try {
       await driversApi.update(user.driver_id, { status: newStatus });
