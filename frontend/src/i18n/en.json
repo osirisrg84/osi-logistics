@@ -243,6 +243,8 @@
     "pickupToDelivery": "Pickup to delivery",
     "customerRating": "Customer Rating",
     "avgSatisfaction": "Average satisfaction",
+    "activeDrivers": "Active Drivers",
+    "activeDriversSub": "{{active}} of {{total}} drivers",
     "revenueTrend": "Revenue Trend (7 days)",
     "deliveriesByHour": "Deliveries by Hour",
     "ordersByPriority": "Orders by Priority",

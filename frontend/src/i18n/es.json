@@ -243,6 +243,8 @@
     "pickupToDelivery": "De recogida a entrega",
     "customerRating": "Calificación de Clientes",
     "avgSatisfaction": "Satisfacción promedio",
+    "activeDrivers": "Conductores Activos",
+    "activeDriversSub": "{{active}} de {{total}} conductores",
     "revenueTrend": "Tendencia de Ingresos (7 días)",
     "deliveriesByHour": "Entregas por Hora",
     "ordersByPriority": "Órdenes por Prioridad",

@@ -104,6 +104,7 @@ export default function Reports() {
 
   const byHour = ((dashData as Record<string, unknown>)?.deliveryByHour as Array<{ hour: string; count: number }>) || [];
   const byPriority = ((dashData as Record<string, unknown>)?.ordersByPriority as Array<{ priority: string; count: number }>) || [];
+  const activeDriversCount = (driversReport as Array<{ status: string }>).filter(d => d.status !== 'offline').length;
 
   return (
     <div className="space-y-5 fade-in">
@@ -131,6 +132,13 @@ export default function Reports() {
             <KpiCard title={t('reports.onTimeRate')} value={`${((kpis?.on_time_rate || 0)).toFixed(1)}%`} sub={t('reports.overallPerformance')} icon={TrendingUp} color="bg-orange-100 text-orange-600" />
             <KpiCard title={t('reports.avgDelivery')} value={`${((kpis?.avg_delivery_hours || 0)).toFixed(1)}h`} sub={t('reports.pickupToDelivery')} icon={Clock} color="bg-purple-100 text-purple-600" />
             <KpiCard title={t('reports.customerRating')} value={`★ ${kpis?.customer_satisfaction?.toFixed(1) || '4.7'}`} sub={t('reports.avgSatisfaction')} icon={Star} color="bg-yellow-100 text-yellow-600" />
+            <KpiCard
+              title={t('reports.activeDrivers')}
+              value={`${activeDriversCount}`}
+              sub={t('reports.activeDriversSub', { active: activeDriversCount, total: driversReport.length })}
+              icon={Users}
+              color="bg-cyan-100 text-cyan-600"
+            />
           </div>
 
           {/* Charts */}
