@@ -954,6 +954,7 @@
     "verifyCodeIncorrect": "Código incorrecto o expirado",
     "offerExpiredTitle": "Esa oferta ya no está",
     "offerNotFoundDetail": "Esta oferta u orden ya no está disponible — probablemente expiró o fue tomada por otro conductor.",
+    "offerNotifTag": "Toca para ver la oferta",
     "musicLabel": "Música",
     "musicPlaying": "Sonando",
     "zellePlaceholder": "Número o email de Zelle",

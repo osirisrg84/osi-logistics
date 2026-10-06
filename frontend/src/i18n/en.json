@@ -954,6 +954,7 @@
     "verifyCodeIncorrect": "Incorrect or expired code",
     "offerExpiredTitle": "That offer is no longer available",
     "offerNotFoundDetail": "This offer or order is no longer available — it probably expired or was taken by another driver.",
+    "offerNotifTag": "Tap to view offer",
     "musicLabel": "Music",
     "musicPlaying": "Playing",
     "zellePlaceholder": "Zelle number or email",

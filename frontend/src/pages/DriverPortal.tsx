@@ -850,6 +850,28 @@ export default function DriverPortal() {
     return false;
   }, [activeOrders, deliveredToday, pendingOffer]);
 
+  // Reabre el overlay de Aceptar/Ignorar para una oferta que el conductor
+  // dejo pasar (p.ej. vino de tocar la notificacion en el campanario, no de
+  // la alerta en vivo) -- a diferencia de jumpToOrder(), que solo reconoce
+  // una oferta si YA es la pendingOffer en memoria, esto la vuelve a pedir
+  // al servidor por si sigue 'offered' aunque nunca se haya mostrado el
+  // popup en esta sesion.
+  const tryReopenOffer = useCallback(async (orderId: string): Promise<boolean> => {
+    if (!driverId) return false;
+    try {
+      const r = await ordersApi.getAll({ offered_to_driver_id: driverId, status: 'offered' });
+      const offer = (r.data.orders as Order[]).find(o => o.id === orderId);
+      if (!offer) return false;
+      setPendingOffer(offer);
+      const offeredAtMs = offer.offered_at ? new Date(offer.offered_at).getTime() : Date.now();
+      const elapsedSecs = Math.floor((Date.now() - offeredAtMs) / 1000);
+      setOfferCountdown(Math.max(0, 7200 - elapsedSecs));
+      return true;
+    } catch {
+      return false;
+    }
+  }, [driverId]);
+
   useEffect(() => {
     if (loading) return;
     const params = new URLSearchParams(window.location.search);
@@ -1709,18 +1731,21 @@ export default function DriverPortal() {
                         setDriverNotifs(prev => prev.map(n => n.id === notif.id ? { ...n, read: 1 } : n));
                       }
                       setShowNotifs(false);
-                      if (notif.related_id && !jumpToOrder(notif.related_id)) {
-                        setOrderNotFoundMsg(t('driverPortal.offerNotFoundDetail'));
-                      }
+                      if (!notif.related_id) return;
+                      if (jumpToOrder(notif.related_id)) return;
+                      if (notif.type === 'offer' && await tryReopenOffer(notif.related_id)) return;
+                      setOrderNotFoundMsg(t('driverPortal.offerNotFoundDetail'));
                     }}
                     className={`flex items-start gap-3 px-4 py-3.5 border-b border-white/5 cursor-pointer transition-colors ${
                       notif.read === 0 ? 'bg-blue-500/8 hover:bg-blue-500/12' : 'hover:bg-white/3'
                     }`}
                   >
                     <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                      notif.type === 'order' ? 'bg-blue-500/20' : 'bg-slate-700'
+                      notif.type === 'offer' ? 'bg-orange-500/20' : notif.type === 'order' ? 'bg-blue-500/20' : 'bg-slate-700'
                     }`}>
-                      {notif.type === 'order' ? <Package className="w-4 h-4 text-blue-400" /> : <Bell className="w-4 h-4 text-slate-400" />}
+                      {notif.type === 'offer'
+                        ? <Zap className="w-4 h-4 text-orange-400" />
+                        : notif.type === 'order' ? <Package className="w-4 h-4 text-blue-400" /> : <Bell className="w-4 h-4 text-slate-400" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
@@ -1728,9 +1753,16 @@ export default function DriverPortal() {
                         {notif.read === 0 && <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />}
                       </div>
                       <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{notif.message}</p>
-                      <p className="text-[10px] text-slate-600 mt-1">
-                        {(() => { try { return formatDistanceToNow(new Date(notif.created_at), { addSuffix: true }); } catch { return ''; } })()}
-                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-[10px] text-slate-600">
+                          {(() => { try { return formatDistanceToNow(new Date(notif.created_at), { addSuffix: true }); } catch { return ''; } })()}
+                        </p>
+                        {notif.type === 'offer' && (
+                          <span className="text-[9px] font-bold text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded-full">
+                            {t('driverPortal.offerNotifTag')}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))

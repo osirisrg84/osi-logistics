@@ -407,7 +407,11 @@ router.post('/:id/offer', async (req: Request, res: Response) => {
 
     const driverNotifId = uuidv4();
     const driverNotifMsg = `Tienes una nueva oferta: ${order.order_number}. Tienes 60 segundos para aceptar o ignorar.`;
-    await exec("INSERT INTO notifications (id, type, title, message, read, related_id, target_driver_id) VALUES (?, 'order', 'Nueva oferta de carga', ?, 0, ?, ?)",
+    // type='offer' (no 'order') para que el campanario del driver la pinte
+    // distinta -- antes se mezclaba con notificaciones informativas como
+    // "orden asignada"/"entrega completada" y no se veia como algo que
+    // todavia esperaba una respuesta.
+    await exec("INSERT INTO notifications (id, type, title, message, read, related_id, target_driver_id) VALUES (?, 'offer', 'Nueva oferta de carga', ?, 0, ?, ?)",
       [driverNotifId, driverNotifMsg, req.params.id, driver_id]);
 
     const updated = await queryOne(`
@@ -421,6 +425,13 @@ router.post('/:id/offer', async (req: Request, res: Response) => {
     appEvents.emit('driver:offer', {
       driverId: driver_id,
       offer: { ...updated, dispatcher_phone: dispPhone, dispatcher_email: dispEmail, dispatcher_name: dispName },
+    });
+    // Mismo patron que el aviso de "orden asignada" arriba -- sin esto, el
+    // campanario del driver solo se entera de la oferta en el proximo
+    // refetch (al volver a abrir la app), no al instante.
+    appEvents.emit('driver:notification', {
+      driverId: driver_id,
+      notification: { id: driverNotifId, type: 'offer', title: 'Nueva oferta de carga', message: driverNotifMsg, read: 0, related_id: req.params.id, target_driver_id: driver_id, created_at: now },
     });
     appEvents.emit('order:status_changed', { id: req.params.id, order_number: order.order_number, status: 'offered' });
 
