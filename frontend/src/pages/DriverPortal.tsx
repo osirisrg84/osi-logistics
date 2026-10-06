@@ -1733,7 +1733,12 @@ export default function DriverPortal() {
                       setShowNotifs(false);
                       if (!notif.related_id) return;
                       if (jumpToOrder(notif.related_id)) return;
-                      if (notif.type === 'offer' && await tryReopenOffer(notif.related_id)) return;
+                      // Intenta recuperarla del servidor sin importar el tipo --
+                      // notificaciones viejas (de antes de que existiera el tipo
+                      // 'offer') siguen siendo 'order', y de todas formas esto no
+                      // cuesta nada si no era una oferta: simplemente no encuentra
+                      // nada y cae al mensaje de abajo.
+                      if (await tryReopenOffer(notif.related_id)) return;
                       setOrderNotFoundMsg(t('driverPortal.offerNotFoundDetail'));
                     }}
                     className={`flex items-start gap-3 px-4 py-3.5 border-b border-white/5 cursor-pointer transition-colors ${
