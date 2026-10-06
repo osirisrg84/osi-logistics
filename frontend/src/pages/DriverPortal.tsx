@@ -6,7 +6,7 @@ import {
   Clock, Star, Navigation, LogOut, User, Activity,
   Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet, Building2, CreditCard,
   Lock, ShieldCheck, Send, Bell, BellOff, CheckCheck, Award, Edit3, Zap,
-  Headphones, Radio, Users, PhoneCall, MessageSquare, Heart, Trophy, DollarSign,
+  Headphones, Radio, Users, PhoneCall, MessageSquare, Heart, Trophy,
   FileText, Upload, Calendar, AlertCircle, Mail, Languages
 } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
@@ -671,14 +671,12 @@ export default function DriverPortal() {
   };
 
   interface LeaderDriver { id: string; name: string; rating: number; deliveries_30d: number; }
-  interface LeaderDispatcher { id: string; name: string; loads_30d: number; earned_30d: number; }
   const [topDrivers, setTopDrivers] = useState<LeaderDriver[]>([]);
-  const [topDispatchers, setTopDispatchers] = useState<LeaderDispatcher[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(true);
   useEffect(() => {
     if (hubSection !== 'leaderboard') return;
     analyticsApi.getLeaderboard()
-      .then(r => { setTopDrivers(r.data.topDrivers || []); setTopDispatchers(r.data.topDispatchers || []); })
+      .then(r => { setTopDrivers(r.data.topDrivers || []); })
       .catch(() => {})
       .finally(() => setLeaderboardLoading(false));
   }, [hubSection]);
@@ -3395,29 +3393,6 @@ export default function DriverPortal() {
                 )}
               </div>
 
-              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2 text-gray-500 dark:text-slate-400">
-                  <DollarSign className="w-3.5 h-3.5 text-blue-500" /> {t('hub.topDispatchers30')}
-                </p>
-                {leaderboardLoading ? (
-                  <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">{t('hub.loading')}</p>
-                ) : topDispatchers.length === 0 ? (
-                  <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">{t('hub.noDataYet')}</p>
-                ) : (
-                  <div className="space-y-2">
-                    {topDispatchers.map((d, i) => (
-                      <div key={d.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 dark:bg-slate-900/50">
-                        <span className="w-6 text-center font-bold text-sm" style={{ color: i === 0 ? '#eab308' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : '#3b82f6' }}>#{i + 1}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold truncate text-gray-800 dark:text-slate-200">{d.name}</p>
-                          <p className="text-[11px] text-gray-400 dark:text-slate-500">{d.loads_30d} {t('hub.deliveriesWord')}</p>
-                        </div>
-                        <span className="text-sm font-bold text-gray-900 dark:text-white">${d.earned_30d.toFixed(0)}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
             </div>
           )}
 
