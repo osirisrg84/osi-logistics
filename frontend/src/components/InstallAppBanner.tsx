@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Download, X, Share, MoreVertical } from 'lucide-react';
 import { useInstallPrompt } from '../hooks/useInstallPrompt';
 
@@ -8,6 +9,7 @@ interface InstallAppBannerProps {
 }
 
 export default function InstallAppBanner({ dismissKey, variant = 'light' }: InstallAppBannerProps) {
+  const { t } = useTranslation();
   const { canInstall, promptInstall, showManualFallback, needsManualInstall, isIOS, isDesktop } = useInstallPrompt();
   // En iOS, instalar la app NO es cosmetico: sin eso, Apple bloquea las notificaciones
   // push por completo y no hay forma de arreglarlo desde el codigo. Por eso ahi el
@@ -44,16 +46,16 @@ export default function InstallAppBanner({ dismissKey, variant = 'light' }: Inst
           <Download className="w-4 h-4" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-semibold ${title}`}>Instalar app</p>
-          <p className={`text-xs mt-0.5 ${body}`}>Agrega OSI Logistics a tu pantalla de inicio.</p>
+          <p className={`text-sm font-semibold ${title}`}>{t('common.install.title')}</p>
+          <p className={`text-xs mt-0.5 ${body}`}>{t('common.install.subtitle')}</p>
           <button
             onClick={async () => { const ok = await promptInstall(); if (ok) dismiss(); }}
             className={`mt-2 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${isDark ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-orange-500 text-white hover:bg-orange-600'}`}
           >
-            Instalar ahora
+            {t('common.install.installNowBtn')}
           </button>
         </div>
-        <button onClick={dismiss} className={`p-1 rounded flex-shrink-0 ${closeBtn}`} title="Descartar">
+        <button onClick={dismiss} className={`p-1 rounded flex-shrink-0 ${closeBtn}`} title={t('common.install.dismiss')}>
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -62,10 +64,10 @@ export default function InstallAppBanner({ dismissKey, variant = 'light' }: Inst
 
   // Chrome hasn't fired beforeinstallprompt yet — show manual guide
   const instructions = isIOS
-    ? <p className={`text-xs mt-0.5 ${body}`}>Necesario para recibir notificaciones de nuevas cargas: toca <Share className="w-3 h-3 inline -mt-0.5" /> Compartir y elige "Agregar a inicio".</p>
+    ? <p className={`text-xs mt-0.5 ${body}`}>{t('common.install.iosRequiredPrefix')} <Share className="w-3 h-3 inline -mt-0.5" /> {t('common.install.iosRequiredSuffix')}</p>
     : isDesktop
-      ? <p className={`text-xs mt-0.5 ${body}`}>Haz clic en el ícono <strong>⊕</strong> de la barra de dirección de Chrome para instalar.</p>
-      : <p className={`text-xs mt-0.5 ${body}`}>Toca el menú <MoreVertical className="w-3 h-3 inline -mt-0.5" /> del navegador y elige "Instalar" o "Agregar a pantalla de inicio".</p>;
+      ? <p className={`text-xs mt-0.5 ${body}`}>{t('common.install.desktopAddressBarInstructions')}</p>
+      : <p className={`text-xs mt-0.5 ${body}`}>{t('common.install.mobilePrefix')} <MoreVertical className="w-3 h-3 inline -mt-0.5" /> {t('common.install.mobileSuffix')}</p>;
 
   return (
     <div className={base}>
@@ -73,10 +75,10 @@ export default function InstallAppBanner({ dismissKey, variant = 'light' }: Inst
         <Download className="w-4 h-4" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-semibold ${title}`}>Instalar app</p>
+        <p className={`text-sm font-semibold ${title}`}>{t('common.install.title')}</p>
         {instructions}
       </div>
-      <button onClick={dismiss} className={`p-1 rounded flex-shrink-0 ${closeBtn}`} title="Descartar">
+      <button onClick={dismiss} className={`p-1 rounded flex-shrink-0 ${closeBtn}`} title={t('common.install.dismiss')}>
         <X className="w-4 h-4" />
       </button>
     </div>

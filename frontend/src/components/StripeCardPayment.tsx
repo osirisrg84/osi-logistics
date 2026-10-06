@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CardElement, Elements, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { ShieldCheck, Lock } from 'lucide-react';
@@ -19,6 +20,7 @@ interface CardFormProps {
 }
 
 function CardForm({ amount, onSuccess, onCancel }: CardFormProps) {
+  const { t } = useTranslation();
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
@@ -45,12 +47,12 @@ function CardForm({ amount, onSuccess, onCancel }: CardFormProps) {
       );
 
       if (stripeError) {
-        setError(stripeError.message || 'Error al procesar el pago');
+        setError(stripeError.message || t('driverPortal.errorProcessingPayment'));
       } else if (paymentIntent?.status === 'succeeded') {
         onSuccess();
       }
     } catch {
-      setError('Error al conectar con el servidor. Intenta de nuevo.');
+      setError(t('driverPortal.errorConnectingServer'));
     } finally {
       setProcessing(false);
     }
@@ -59,7 +61,7 @@ function CardForm({ amount, onSuccess, onCancel }: CardFormProps) {
   return (
     <div className="space-y-3">
       <div className="bg-slate-800 rounded-2xl px-4 py-4 border border-slate-700">
-        <p className="text-[11px] text-slate-400 mb-3 font-semibold uppercase tracking-wider">Datos de tarjeta</p>
+        <p className="text-[11px] text-slate-400 mb-3 font-semibold uppercase tracking-wider">{t('driverPortal.cardDataLabel')}</p>
         <CardElement
           options={{
             style: {
@@ -87,7 +89,7 @@ function CardForm({ amount, onSuccess, onCancel }: CardFormProps) {
 
       <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-400 dark:text-slate-500">
         <Lock className="w-3 h-3" />
-        Pagos seguros con <span className="font-semibold text-[#635bff]">Stripe</span>
+        {t('driverPortal.securePaymentsWith')} <span className="font-semibold text-[#635bff]">Stripe</span>
       </div>
 
       <div className="flex gap-3 pt-1">
@@ -95,7 +97,7 @@ function CardForm({ amount, onSuccess, onCancel }: CardFormProps) {
           onClick={onCancel}
           className="flex-1 py-3 rounded-2xl text-sm font-semibold text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
         >
-          Cancelar
+          {t('driverPortal.cancel')}
         </button>
         <button
           onClick={handlePay}
@@ -103,9 +105,9 @@ function CardForm({ amount, onSuccess, onCancel }: CardFormProps) {
           className="flex-1 py-3 rounded-2xl text-sm font-bold text-white bg-green-500 hover:bg-green-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
         >
           {processing ? (
-            <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Procesando...</>
+            <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {t('driverPortal.processingEllipsis')}</>
           ) : (
-            <><ShieldCheck className="w-4 h-4" /> Pagar ${amount.toFixed(2)}</>
+            <><ShieldCheck className="w-4 h-4" /> {t('driverPortal.payAmountBtn', { amount: amount.toFixed(2) })}</>
           )}
         </button>
       </div>

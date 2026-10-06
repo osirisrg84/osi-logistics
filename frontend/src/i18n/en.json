@@ -42,6 +42,23 @@
       "normal": "Normal",
       "high": "High",
       "urgent": "Urgent"
+    },
+    "install": {
+      "title": "Install App",
+      "subtitle": "Add OSI Logistics to your home screen.",
+      "installNowBtn": "Install now",
+      "installBtnShort": "Install",
+      "dismiss": "Dismiss",
+      "guideTitle": "Install OSI Logistics",
+      "desktopGuideBody": "Look at your browser's address bar — there's a ⊕ icon on the right. Click it to install the app.",
+      "desktopGuideHint": "If you don't see the icon, reload the page (F5) or open a new tab and come back.",
+      "desktopAddressBarInstructions": "Click the ⊕ icon in Chrome's address bar to install.",
+      "mobileIosInstructions": "Tap the Share button (□↑) and then \"Add to Home Screen\".",
+      "mobileAndroidInstructions": "Tap the ⋮ browser menu and select \"Install app\" or \"Add to Home Screen\".",
+      "iosRequiredPrefix": "Required to receive new load notifications: tap",
+      "iosRequiredSuffix": "Share and choose \"Add to Home Screen\".",
+      "mobilePrefix": "Tap the",
+      "mobileSuffix": "browser menu and choose \"Install\" or \"Add to Home Screen\"."
     }
   },
   "sidebar": {
@@ -833,6 +850,12 @@
     "noPayoutMethodSet": "You don't have a payment method set up",
     "setUpNow": "+ Set up now",
     "paymentHistory": "Payment History",
+    "cardDataLabel": "Card details",
+    "securePaymentsWith": "Secure payments with",
+    "processingEllipsis": "Processing...",
+    "payAmountBtn": "Pay ${{amount}}",
+    "errorProcessingPayment": "Error processing the payment",
+    "errorConnectingServer": "Error connecting to the server. Try again.",
     "allCaughtUp": "All caught up 👍",
     "chargesAppearHint": "Charges will appear here once you deliver loads",
     "ratePercent": "rate · 7% =",
@@ -1077,5 +1100,25 @@
     "rateConEmailLabel": "Rate Confirmation Email",
     "rateConEmailHint": "Brokers will send the rate confirmation to this email.",
     "createAccountBtn": "Create Driver Account"
+  },
+  "tracking": {
+    "toastOnlineSuffix": " is now online",
+    "toastOfflineSuffix": " went offline",
+    "driversCount": "Drivers ({{count}})",
+    "mapViewToggle": "Map view",
+    "liveFleetTitle": "Live Fleet",
+    "statBreak": "Break",
+    "updatedAgo": "Updated {{time}}",
+    "activeDriversTitle": "Active Drivers",
+    "onlineCount": "{{count}} online",
+    "noDriversOnline": "No drivers online",
+    "realTimeLocationTooltip": "Real-time location",
+    "nowAtLabel": "Now at",
+    "destinationLabel": "Destination · {{orderNumber}}",
+    "ratingLabel": "Rating",
+    "deliveriesLabel": "Deliveries",
+    "clearSelection": "Clear selection",
+    "unitLabel": "Unit {{plate}}",
+    "onTimeSuffix": " · {{pct}}% on-time"
   }
 }

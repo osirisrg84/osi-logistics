@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Users, MapPin, Navigation, Activity, RefreshCw, Wifi, WifiOff, Map as MapIcon, Truck } from 'lucide-react';
@@ -66,6 +67,7 @@ interface StatusEvent { id: string; name: string; status: string; lat: number; l
 interface StatusToast { id: string; name: string; online: boolean; }
 
 export default function Tracking() {
+  const { t } = useTranslation();
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
   const [driverPath, setDriverPath] = useState<[number, number][]>([]);
@@ -218,7 +220,7 @@ export default function Tracking() {
                   }`}>{driver.avatar}</div>
                   <div>
                     <p className="font-semibold text-sm">{driver.name}</p>
-                    <p className="text-xs text-gray-500 capitalize">{driver.status.replace('_', ' ')}</p>
+                    <p className="text-xs text-gray-500 capitalize">{t(`common.driverStatus.${driver.status}`)}</p>
                   </div>
                 </div>
                 {driver.phone && (
@@ -241,7 +243,7 @@ export default function Tracking() {
                   </p>
                 )}
                 {(driver.plate_number || driver.truck_number) && (
-                  <p className="text-xs text-gray-500 mb-1">Unidad {driver.plate_number || driver.truck_number}</p>
+                  <p className="text-xs text-gray-500 mb-1">{t('tracking.unitLabel', { plate: driver.plate_number || driver.truck_number })}</p>
                 )}
                 {driver.order_number && driver.status !== 'available' && (
                   <p className="text-xs text-blue-600 font-medium flex items-center gap-1">
@@ -255,8 +257,8 @@ export default function Tracking() {
                   <p className="text-xs text-gray-500 mt-0.5 pl-4">ETA {formatDistanceToNow(new Date(driver.estimated_delivery), { addSuffix: true })}</p>
                 )}
                 <p className="text-xs text-gray-400 mt-2">
-                  ★ {driver.rating.toFixed(1)} · {(driver as typeof driver & { total_deliveries?: number }).total_deliveries ?? 0} trips
-                  {driver.on_time_rate != null ? ` · ${driver.on_time_rate}% on-time` : ''}
+                  ★ {driver.rating.toFixed(1)} · {(driver as typeof driver & { total_deliveries?: number }).total_deliveries ?? 0} {t('orders.tripsWord')}
+                  {driver.on_time_rate != null ? t('tracking.onTimeSuffix', { pct: driver.on_time_rate }) : ''}
                 </p>
               </div>
             </Popup>
@@ -278,7 +280,7 @@ export default function Tracking() {
             toast.online ? 'bg-green-500 text-white' : 'bg-slate-700 text-slate-200'
           }`}>
             {toast.online ? <Wifi className="w-4 h-4 flex-shrink-0" /> : <WifiOff className="w-4 h-4 flex-shrink-0" />}
-            <span><span className="font-bold">{toast.name}</span>{toast.online ? ' is now online' : ' went offline'}</span>
+            <span><span className="font-bold">{toast.name}</span>{toast.online ? t('tracking.toastOnlineSuffix') : t('tracking.toastOfflineSuffix')}</span>
           </div>
         ))}
       </div>
@@ -293,7 +295,7 @@ export default function Tracking() {
               : 'text-gray-400 dark:text-slate-500'
           }`}
         >
-          <Users className="w-4 h-4" /> Drivers ({drivers.length})
+          <Users className="w-4 h-4" /> {t('tracking.driversCount', { count: drivers.length })}
         </button>
         <button
           onClick={() => setViewMode('map')}
@@ -303,7 +305,7 @@ export default function Tracking() {
               : 'text-gray-400 dark:text-slate-500'
           }`}
         >
-          <MapIcon className="w-4 h-4" /> Vista mapa
+          <MapIcon className="w-4 h-4" /> {t('tracking.mapViewToggle')}
         </button>
       </div>
 
@@ -319,7 +321,7 @@ export default function Tracking() {
           {/* Stats */}
           <div className="card p-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Live Fleet</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">{t('tracking.liveFleetTitle')}</h3>
               <button onClick={fetchLive} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
                 <RefreshCw className="w-3.5 h-3.5 text-gray-400" />
               </button>
@@ -327,37 +329,37 @@ export default function Tracking() {
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-2">
                 <p className="text-lg font-bold text-green-600">{statusCounts.available}</p>
-                <p className="text-xs text-gray-500 dark:text-slate-400">Available</p>
+                <p className="text-xs text-gray-500 dark:text-slate-400">{t('common.driverStatus.available')}</p>
               </div>
               <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-2">
                 <p className="text-lg font-bold text-orange-600">{statusCounts.busy}</p>
-                <p className="text-xs text-gray-500 dark:text-slate-400">Busy</p>
+                <p className="text-xs text-gray-500 dark:text-slate-400">{t('common.driverStatus.busy')}</p>
               </div>
               <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-2">
                 <p className="text-lg font-bold text-yellow-600">{statusCounts.on_break}</p>
-                <p className="text-xs text-gray-500 dark:text-slate-400">Break</p>
+                <p className="text-xs text-gray-500 dark:text-slate-400">{t('tracking.statBreak')}</p>
               </div>
             </div>
             <p className="text-xs text-gray-400 dark:text-slate-500 mt-2 text-center flex items-center justify-center gap-1">
-              <Activity className="w-3 h-3" /> Updated {formatDistanceToNow(lastUpdate, { addSuffix: true })}
+              <Activity className="w-3 h-3" /> {t('tracking.updatedAgo', { time: formatDistanceToNow(lastUpdate, { addSuffix: true }) })}
             </p>
           </div>
 
           {/* Driver list */}
           <div className="card p-0 flex-1 overflow-hidden flex flex-col">
             <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Active Drivers</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">{t('tracking.activeDriversTitle')}</h3>
               <span className="text-xs text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
-                {drivers.length} online
+                {t('tracking.onlineCount', { count: drivers.length })}
               </span>
             </div>
             <div className="flex-1 overflow-y-auto divide-y divide-gray-50 dark:divide-slate-700/50">
               {loading ? (
-                <div className="py-8 text-center text-gray-400 text-sm">Loading...</div>
+                <div className="py-8 text-center text-gray-400 text-sm">{t('orders.loadingEllipsis')}</div>
               ) : drivers.length === 0 ? (
                 <div className="py-10 text-center">
                   <Users className="w-8 h-8 text-gray-200 dark:text-slate-700 mx-auto mb-2" />
-                  <p className="text-sm text-gray-400 dark:text-slate-500">No drivers online</p>
+                  <p className="text-sm text-gray-400 dark:text-slate-500">{t('tracking.noDriversOnline')}</p>
                 </div>
               ) : drivers.map(driver => (
                 <button
@@ -384,7 +386,7 @@ export default function Tracking() {
                       driver.status === 'available' ? 'bg-green-400' :
                       driver.status === 'busy'      ? 'bg-red-400'   :
                       driver.status === 'on_break'  ? 'bg-yellow-400': 'bg-gray-400'
-                    }`} title="Ubicación en tiempo real" />
+                    }`} title={t('tracking.realTimeLocationTooltip')} />
                   </div>
 
                   {/* Current real-time location */}
@@ -392,7 +394,7 @@ export default function Tracking() {
                     <div className="mt-2 ml-12">
                       <div className="flex items-center gap-1 mb-0.5">
                         <Navigation className="w-3 h-3 text-blue-500 flex-shrink-0" />
-                        <span className="text-[10px] font-semibold text-blue-500 uppercase tracking-wide">Ahora en</span>
+                        <span className="text-[10px] font-semibold text-blue-500 uppercase tracking-wide">{t('tracking.nowAtLabel')}</span>
                       </div>
                       <p className="text-xs text-gray-600 dark:text-slate-300 truncate pl-4">{driver.current_address}</p>
                     </div>
@@ -403,7 +405,7 @@ export default function Tracking() {
                     <div className="mt-1.5 ml-12">
                       <div className="flex items-center gap-1 mb-0.5">
                         <MapPin className="w-3 h-3 text-orange-500 flex-shrink-0" />
-                        <span className="text-[10px] font-semibold text-orange-500 uppercase tracking-wide">Destino · {driver.order_number}</span>
+                        <span className="text-[10px] font-semibold text-orange-500 uppercase tracking-wide">{t('tracking.destinationLabel', { orderNumber: driver.order_number })}</span>
                       </div>
                       {driver.delivery_address && (
                         <p className="text-xs text-gray-500 dark:text-slate-400 truncate pl-4">{formatLocation(driver.delivery_address, driver.delivery_contact)}</p>
@@ -452,17 +454,17 @@ export default function Tracking() {
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs mb-2">
                 <div className="bg-slate-800 rounded-lg p-2">
-                  <p className="text-slate-400">Rating</p>
+                  <p className="text-slate-400">{t('tracking.ratingLabel')}</p>
                   <p className="font-semibold">★ {selectedDriver.rating.toFixed(1)}</p>
                 </div>
                 <div className="bg-slate-800 rounded-lg p-2">
-                  <p className="text-slate-400">Deliveries</p>
+                  <p className="text-slate-400">{t('tracking.deliveriesLabel')}</p>
                   <p className="font-semibold">{selectedDriver.total_deliveries}</p>
                 </div>
                 <div className="bg-slate-800 rounded-lg p-2 col-span-2">
                   <div className="flex items-center gap-1 mb-1">
                     <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-                    <p className="text-slate-400 text-[10px] uppercase tracking-wide">Ubicación en tiempo real</p>
+                    <p className="text-slate-400 text-[10px] uppercase tracking-wide">{t('tracking.realTimeLocationTooltip')}</p>
                   </div>
                   <p className="font-mono text-xs">{selectedDriver.current_lat.toFixed(5)}, {selectedDriver.current_lng.toFixed(5)}</p>
                 </div>
@@ -471,7 +473,7 @@ export default function Tracking() {
                 onClick={() => { setSelectedDriver(null); setDriverPath([]); }}
                 className="w-full text-xs text-slate-400 hover:text-white transition-colors"
               >
-                Limpiar selección
+                {t('tracking.clearSelection')}
               </button>
             </div>
           )}

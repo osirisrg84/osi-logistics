@@ -42,6 +42,23 @@
       "normal": "Normal",
       "high": "Alta",
       "urgent": "Urgente"
+    },
+    "install": {
+      "title": "Instalar App",
+      "subtitle": "Agrega OSI Logistics a tu pantalla de inicio.",
+      "installNowBtn": "Instalar ahora",
+      "installBtnShort": "Instalar",
+      "dismiss": "Descartar",
+      "guideTitle": "Instalar OSI Logistics",
+      "desktopGuideBody": "Mira la barra de dirección de tu navegador — hay un ícono ⊕ a la derecha. Haz clic ahí para instalar la app.",
+      "desktopGuideHint": "Si no ves el ícono, recarga la página (F5) o abre una pestaña nueva y vuelve a entrar.",
+      "desktopAddressBarInstructions": "Haz clic en el ícono ⊕ de la barra de dirección de Chrome para instalar.",
+      "mobileIosInstructions": "Toca el botón Compartir (□↑) y luego \"Agregar a pantalla de inicio\".",
+      "mobileAndroidInstructions": "Toca el menú ⋮ del navegador y selecciona \"Instalar app\" o \"Agregar a pantalla de inicio\".",
+      "iosRequiredPrefix": "Necesario para recibir notificaciones de nuevas cargas: toca",
+      "iosRequiredSuffix": "Compartir y elige \"Agregar a inicio\".",
+      "mobilePrefix": "Toca el menú",
+      "mobileSuffix": "del navegador y elige \"Instalar\" o \"Agregar a pantalla de inicio\"."
     }
   },
   "sidebar": {
@@ -833,6 +850,12 @@
     "noPayoutMethodSet": "No tienes un método de pago configurado",
     "setUpNow": "+ Configurar ahora",
     "paymentHistory": "Historial de pagos",
+    "cardDataLabel": "Datos de tarjeta",
+    "securePaymentsWith": "Pagos seguros con",
+    "processingEllipsis": "Procesando...",
+    "payAmountBtn": "Pagar ${{amount}}",
+    "errorProcessingPayment": "Error al procesar el pago",
+    "errorConnectingServer": "Error al conectar con el servidor. Intenta de nuevo.",
     "allCaughtUp": "Todo al día 👍",
     "chargesAppearHint": "Aquí aparecerán los cobros cuando entregues cargas",
     "ratePercent": "rate · 7% =",
@@ -1077,5 +1100,25 @@
     "rateConEmailLabel": "Correo para Rate Confirmation",
     "rateConEmailHint": "Los brokers enviarán el rate confirmation a este correo.",
     "createAccountBtn": "Crear Cuenta de Conductor"
+  },
+  "tracking": {
+    "toastOnlineSuffix": " ahora está en línea",
+    "toastOfflineSuffix": " se desconectó",
+    "driversCount": "Conductores ({{count}})",
+    "mapViewToggle": "Vista mapa",
+    "liveFleetTitle": "Flota en Vivo",
+    "statBreak": "Descanso",
+    "updatedAgo": "Actualizado {{time}}",
+    "activeDriversTitle": "Conductores Activos",
+    "onlineCount": "{{count}} en línea",
+    "noDriversOnline": "No hay conductores en línea",
+    "realTimeLocationTooltip": "Ubicación en tiempo real",
+    "nowAtLabel": "Ahora en",
+    "destinationLabel": "Destino · {{orderNumber}}",
+    "ratingLabel": "Calificación",
+    "deliveriesLabel": "Entregas",
+    "clearSelection": "Limpiar selección",
+    "unitLabel": "Unidad {{plate}}",
+    "onTimeSuffix": " · {{pct}}% a tiempo"
   }
 }
