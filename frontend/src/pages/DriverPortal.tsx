@@ -895,9 +895,20 @@ export default function DriverPortal() {
     // disparaba un falso "ya no esta disponible" para una oferta que en
     // realidad seguia esperando respuesta.
     if (!offerChecked) return;
-    setOrderNotFoundMsg(t('driverPortal.offerNotFoundDetail'));
-    clearParam();
-  }, [loading, jumpToOrder, offerChecked]);
+
+    // jumpToOrder() solo reconoce la oferta si checkActiveOffer() ya la puso
+    // en pendingOffer -- pero esa funcion solo guarda la PRIMERA oferta
+    // 'offered' que encuentra para este driver. Si hay mas de una activa (o
+    // si este efecto corrio una fraccion de segundo antes), el deep link del
+    // correo/push para una oferta que SI sigue esperando respuesta caia
+    // directo al mensaje de error sin intentar pedirla de nuevo -- mismo
+    // fallback que ya usa el tap en la campanita.
+    (async () => {
+      if (await tryReopenOffer(targetId)) { clearParam(); return; }
+      setOrderNotFoundMsg(t('driverPortal.offerNotFoundDetail'));
+      clearParam();
+    })();
+  }, [loading, jumpToOrder, offerChecked, tryReopenOffer]);
 
   useEffect(() => {
     if (driver?.status) setDriverStatus(driver.status as DriverStatus);

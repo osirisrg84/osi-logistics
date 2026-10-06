@@ -462,7 +462,11 @@ router.post('/:id/offer', async (req: Request, res: Response) => {
     sendPushToDriver(driver_id, {
       title: '🚛 Nueva oferta de carga',
       body: `${order.order_number as string} · $${offerPrice.toLocaleString('en-US')}${offerMiles ? ' · ' + offerMiles + ' mi' : ''}\n${order.pickup_address as string} → ${order.delivery_address as string}`,
-      url: '/driver',
+      // Antes solo '/driver' sin el id -- al tocar el push con el telefono
+      // bloqueado, la app abria en la pantalla normal sin intentar mostrar
+      // la oferta para nada (el deep link ?order= es lo unico que dispara el
+      // intento de recuperarla). Mismo patron que el link del correo.
+      url: '/driver?order=' + (req.params.id),
       tag: 'offer-' + (req.params.id),
       requireInteraction: true,
       driverId: driver_id,
