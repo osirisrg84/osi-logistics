@@ -1,10 +1,25 @@
-﻿import { useState, FormEvent } from 'react';
+﻿import { useState, FormEvent, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Shield, Eye, EyeOff, AlertCircle, ArrowLeft, Users, BarChart3, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import {
+  setAppManifest, setThemeColor, setFavicon,
+  ADMIN_MANIFEST, DISPATCH_MANIFEST, ADMIN_COLOR, DISPATCH_COLOR, ADMIN_FAVICON, DISPATCH_FAVICON,
+} from '../utils/appManifest';
 
 export default function AdminLogin() {
+  useEffect(() => {
+    setAppManifest(ADMIN_MANIFEST);
+    setThemeColor(ADMIN_COLOR);
+    setFavicon(ADMIN_FAVICON);
+    return () => {
+      setAppManifest(DISPATCH_MANIFEST);
+      setThemeColor(DISPATCH_COLOR);
+      setFavicon(DISPATCH_FAVICON);
+    };
+  }, []);
+
   const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
