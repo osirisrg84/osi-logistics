@@ -538,8 +538,8 @@ export async function sendPasswordResetEmail(to: string, name: string, code: str
           <p style="color:#374151;line-height:1.6;margin:0 0 28px;">
             Solicitaste restablecer tu contraseña. Usa este código para continuar:
           </p>
-          <div style="background:#2563eb;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
-            <span style="color:#fff;font-size:40px;font-weight:800;letter-spacing:10px;">${code}</span>
+          <div style="background:#2563eb;border-radius:12px;padding:20px 12px;text-align:center;margin-bottom:24px;">
+            <span style="color:#fff;font-size:28px;font-weight:800;letter-spacing:6px;white-space:nowrap;">${code}</span>
           </div>
           <p style="color:#6b7280;font-size:13px;text-align:center;margin:0;">
             Válido por <strong>15 minutos</strong>. Si no pediste este cambio, ignora este correo — tu contraseña actual sigue funcionando.
@@ -568,8 +568,8 @@ export async function sendVerificationCode(to: string, name: string, code: strin
           <p style="color:#374151;line-height:1.6;margin:0 0 28px;">
             Tu código para verificar tu <strong>${label}</strong>:
           </p>
-          <div style="background:${accent};border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
-            <span style="color:#fff;font-size:40px;font-weight:800;letter-spacing:10px;">${code}</span>
+          <div style="background:${accent};border-radius:12px;padding:20px 12px;text-align:center;margin-bottom:24px;">
+            <span style="color:#fff;font-size:28px;font-weight:800;letter-spacing:6px;white-space:nowrap;">${code}</span>
           </div>
           <p style="color:#6b7280;font-size:13px;text-align:center;margin:0;">
             Válido por <strong>10 minutos</strong>. No compartas este código con nadie.
