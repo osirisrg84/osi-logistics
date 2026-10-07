@@ -450,12 +450,27 @@ router.post('/:id/offer', async (req: Request, res: Response) => {
       sendOfferEmail(
         driverUser.email,
         driverUser.name || (driver.name as string),
-        order.order_number as string,
-        order.pickup_address as string,
-        order.delivery_address as string,
-        // Era `order.rate`, una columna que no existe en `orders` (la real es
-        // `price`) -- siempre mandaba $0 en el correo de oferta.
-        (order.price as number) || 0,
+        {
+          order_number: order.order_number as string,
+          pickup_address: order.pickup_address as string,
+          pickup_contact: order.pickup_contact as string,
+          delivery_address: order.delivery_address as string,
+          delivery_contact: order.delivery_contact as string,
+          // Era `order.rate`, una columna que no existe en `orders` (la real es
+          // `price`) -- siempre mandaba $0 en el correo de oferta.
+          price: (order.price as number) || 0,
+          distance_km: order.distance_km as number,
+          weight_kg: order.weight_kg as number,
+          volume_m3: order.volume_m3 as number,
+          equipment_type: order.equipment_type as string,
+          temperature: order.temperature as string,
+          priority: order.priority as string,
+          customer_name: order.customer_name as string,
+          customer_phone: order.customer_phone as string,
+          description: order.description as string,
+          notes: order.notes as string,
+          estimated_delivery: order.estimated_delivery as string,
+        },
         req.params.id,
       ).catch(e => console.error('[Email] Offer email failed:', e));
     }

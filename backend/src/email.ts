@@ -203,11 +203,56 @@ export async function sendActivationEmail(to: string, name: string, role: string
   });
 }
 
-export async function sendOfferEmail(to: string, driverName: string, orderNumber: string, pickup: string, delivery: string, rate: number, orderId: string) {
+interface OfferEmailOrder {
+  order_number: string;
+  pickup_address: string;
+  pickup_contact?: string | null;
+  delivery_address: string;
+  delivery_contact?: string | null;
+  price: number;
+  distance_km?: number | null;
+  weight_kg?: number | null;
+  volume_m3?: number | null;
+  equipment_type?: string | null;
+  temperature?: string | null;
+  priority?: string | null;
+  customer_name?: string | null;
+  customer_phone?: string | null;
+  description?: string | null;
+  notes?: string | null;
+  estimated_delivery?: string | null;
+}
+
+// Antes solo mandaba origen/destino/tarifa -- el driver tenia que entrar al
+// portal para ver el resto (peso, equipo, cliente, notas, etc.) antes de
+// decidir si aceptar. Ahora lleva toda la info de la carga que el correo
+// puede mostrar, salvo datos del dispatcher (eso solo se revela si acepta).
+export async function sendOfferEmail(to: string, driverName: string, order: OfferEmailOrder, orderId: string) {
+  const miles = order.distance_km ? Math.round(order.distance_km * 0.621371) : 0;
+  const lbs = order.weight_kg ? Math.round(order.weight_kg * 2.20462) : 0;
+  const cuft = order.volume_m3 ? Math.round(order.volume_m3 * 35.3147) : 0;
+  const priorityLabel: Record<string, string> = { low: 'Baja', normal: 'Normal', high: 'Alta', urgent: 'Urgente' };
+
+  const row = (label: string, value: string) =>
+    `<tr><td style="padding:4px 0;font-size:11px;color:#6b7280;width:38%;vertical-align:top;">${label}</td><td style="padding:4px 0;font-size:13px;color:#111827;font-weight:600;">${value}</td></tr>`;
+
+  const detailRows = [
+    order.equipment_type ? row('Equipo', order.equipment_type + (order.temperature ? ` · 🌡️ ${order.temperature}` : '')) : '',
+    lbs ? row('Peso', `${lbs.toLocaleString('en-US')} lbs`) : '',
+    cuft ? row('Volumen', `${cuft.toLocaleString('en-US')} ft³`) : '',
+    miles ? row('Distancia', `${miles.toLocaleString('en-US')} mi`) : '',
+    order.priority ? row('Prioridad', priorityLabel[order.priority] || order.priority) : '',
+    order.customer_name ? row('Cliente', order.customer_name) : '',
+    order.customer_phone ? row('Tel. cliente', order.customer_phone) : '',
+    order.estimated_delivery ? row('Entrega estimada', new Date(order.estimated_delivery).toLocaleString('es-US', { dateStyle: 'medium', timeStyle: 'short' })) : '',
+    order.description ? row('Descripción', order.description) : '',
+    order.notes ? row('Notas', order.notes) : '',
+  ].filter(Boolean).join('');
+
   await sendEmail({
     from: FROM,
     to,
-    subject: `🚛 Nueva oferta de carga — ${orderNumber}`,
+    subject: `🚛 Nueva oferta de carga — ${order.order_number}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#f8f9fa;padding:32px;border-radius:16px;">
         <div style="text-align:center;margin-bottom:24px;">
@@ -218,21 +263,23 @@ export async function sendOfferEmail(to: string, driverName: string, orderNumber
           <h2 style="color:#111827;margin:0 0 4px;">¡Hola, ${driverName}!</h2>
           <p style="color:#6b7280;margin:0 0 20px;font-size:14px;">Tienes una nueva oferta de carga esperando tu respuesta.</p>
 
-          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px;margin-bottom:20px;">
-            <p style="margin:0 0 8px;font-size:12px;font-weight:bold;color:#3b82f6;text-transform:uppercase;letter-spacing:1px;">Orden ${orderNumber}</p>
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px;margin-bottom:16px;">
+            <p style="margin:0 0 8px;font-size:12px;font-weight:bold;color:#3b82f6;text-transform:uppercase;letter-spacing:1px;">Orden ${order.order_number}</p>
             <div style="display:flex;flex-direction:column;gap:8px;">
               <div style="display:flex;align-items:flex-start;gap:8px;">
                 <span style="color:#10b981;font-size:16px;margin-top:2px;">●</span>
-                <div><p style="margin:0;font-size:11px;color:#6b7280;">Origen</p><p style="margin:0;font-size:14px;font-weight:600;color:#111827;">${pickup}</p></div>
+                <div><p style="margin:0;font-size:11px;color:#6b7280;">Origen</p><p style="margin:0;font-size:14px;font-weight:600;color:#111827;">${order.pickup_address}${order.pickup_contact ? ` — ${order.pickup_contact}` : ''}</p></div>
               </div>
               <div style="border-left:2px dashed #bfdbfe;margin-left:7px;height:12px;"></div>
               <div style="display:flex;align-items:flex-start;gap:8px;">
                 <span style="color:#ef4444;font-size:16px;margin-top:2px;">●</span>
-                <div><p style="margin:0;font-size:11px;color:#6b7280;">Destino</p><p style="margin:0;font-size:14px;font-weight:600;color:#111827;">${delivery}</p></div>
+                <div><p style="margin:0;font-size:11px;color:#6b7280;">Destino</p><p style="margin:0;font-size:14px;font-weight:600;color:#111827;">${order.delivery_address}${order.delivery_contact ? ` — ${order.delivery_contact}` : ''}</p></div>
               </div>
             </div>
-            ${rate ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #bfdbfe;"><p style="margin:0;font-size:18px;font-weight:bold;color:#10b981;">$${rate.toLocaleString('en-US', {minimumFractionDigits:2})}</p><p style="margin:0;font-size:11px;color:#6b7280;">Tarifa de carga</p></div>` : ''}
+            ${order.price ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #bfdbfe;"><p style="margin:0;font-size:18px;font-weight:bold;color:#10b981;">$${order.price.toLocaleString('en-US', {minimumFractionDigits:2})}</p><p style="margin:0;font-size:11px;color:#6b7280;">Tarifa de carga</p></div>` : ''}
           </div>
+
+          ${detailRows ? `<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:20px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">${detailRows}</table></div>` : ''}
 
           <p style="color:#6b7280;font-size:13px;margin:0 0 20px;">Inicia sesión en el Driver Portal para aceptar o rechazar la oferta.</p>
 
