@@ -915,6 +915,27 @@ export default function DriverPortal() {
     if (driver?.status) setDriverStatus(driver.status as DriverStatus);
   }, [driver?.status]);
 
+  // Un par de parpadeos del flash de la camara trasera junto al sonido/
+  // vibracion de la oferta -- solo funciona en Chrome Android (la API de
+  // "torch" no existe en iOS Safari), y el primer uso le pide permiso de
+  // camara al conductor. Si no hay soporte o lo rechaza, falla en silencio
+  // sin afectar el resto de la alarma.
+  const flashTorch = async (times = 2) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      const track = stream.getVideoTracks()[0];
+      const caps = track.getCapabilities?.() as MediaTrackCapabilities & { torch?: boolean };
+      if (!caps?.torch) { track.stop(); return; }
+      for (let i = 0; i < times; i++) {
+        await track.applyConstraints({ advanced: [{ torch: true }] } as unknown as MediaTrackConstraints);
+        await new Promise(r => setTimeout(r, 180));
+        await track.applyConstraints({ advanced: [{ torch: false }] } as unknown as MediaTrackConstraints);
+        if (i < times - 1) await new Promise(r => setTimeout(r, 150));
+      }
+      track.stop();
+    } catch {}
+  };
+
   const playOfferSound = () => {
     try {
       const ctx = getSharedAudioContext();
@@ -935,6 +956,7 @@ export default function DriverPortal() {
       });
     } catch {}
     navigator.vibrate?.([250, 100, 250]);
+    flashTorch();
   };
 
   const stopAlarm = () => {
