@@ -567,15 +567,12 @@ router.post('/:id/ignore', async (_req: Request, res: Response) => {
 
 router.delete('/:id', async (req: AuthRequest, res: Response) => {
   try {
-    const order = await queryOne('SELECT * FROM orders WHERE id = ?', [req.params.id]);
-    if (!order) return res.status(404).json({ error: 'Order not found' });
-    // Antes eran 6 round-trips HTTP independientes a Turso (uno por
-    // exec() await). Si cualquiera de esos 6 viajes de red tenia un
-    // tropiezo transitorio (mas facil en un movil con señal floja probando
-    // varias ordenes seguidas), el delete quedaba a medias -- algunas
-    // tablas limpias y otras no -- y el error generico no decia cual de
-    // los 6 habia fallado. batch() manda todo en un solo viaje, atomico.
-    await getDb().batch([
+    // Antes esto era un SELECT para comprobar que existe + 6 DELETE
+    // separados = 7 round-trips HTTP a Turso. Un solo batch() manda las 6
+    // sentencias en un unico viaje (atomico, no se puede quedar a medias si
+    // una falla a mitad de camino), y el 404 se decide con el rowsAffected
+    // de la ultima sentencia en vez de pedir la orden primero aparte.
+    const results = await getDb().batch([
       { sql: 'DELETE FROM order_history WHERE order_id = ?', args: [req.params.id] },
       { sql: 'DELETE FROM tracking WHERE order_id = ?', args: [req.params.id] },
       { sql: 'DELETE FROM commissions WHERE order_id = ?', args: [req.params.id] },
@@ -583,6 +580,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
       { sql: 'DELETE FROM order_rate_cons WHERE order_id = ?', args: [req.params.id] },
       { sql: 'DELETE FROM orders WHERE id = ?', args: [req.params.id] },
     ], 'write');
+    if (results[results.length - 1].rowsAffected === 0) return res.status(404).json({ error: 'Order not found' });
     res.json({ success: true });
   } catch (e) {
     // El catch tragaba el error real sin dejar rastro -- un borrado
@@ -590,6 +588,36 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
     // el schema, no deberia fallar nunca por eso; esto es para ver la causa
     // real la proxima vez en vez de seguir adivinando a ciegas).
     console.error('[DELETE /orders/:id] Failed for', req.params.id, e);
+    res.status(500).json({ error: 'Failed' });
+  }
+});
+
+// Borrado en bloque -- el frontend antes mandaba una peticion DELETE por
+// cada orden seleccionada (una conexion/round-trip a Turso por cada una),
+// asi que borrar un puñado de ordenes a la vez se sentia notoriamente lento
+// aun con el servidor ya despierto (plan pago, sin cold start). Un solo
+// batch() con las 6 sentencias por cada id manda todo en un unico viaje de
+// red sin importar cuantas ordenes sean.
+router.post('/bulk-delete', async (req: AuthRequest, res: Response) => {
+  try {
+    const { ids } = req.body as { ids?: string[] };
+    if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ error: 'ids array is required' });
+
+    const statements: { sql: string; args: string[] }[] = [];
+    for (const id of ids) {
+      statements.push(
+        { sql: 'DELETE FROM order_history WHERE order_id = ?', args: [id] },
+        { sql: 'DELETE FROM tracking WHERE order_id = ?', args: [id] },
+        { sql: 'DELETE FROM commissions WHERE order_id = ?', args: [id] },
+        { sql: 'DELETE FROM order_documents WHERE order_id = ?', args: [id] },
+        { sql: 'DELETE FROM order_rate_cons WHERE order_id = ?', args: [id] },
+        { sql: 'DELETE FROM orders WHERE id = ?', args: [id] },
+      );
+    }
+    await getDb().batch(statements, 'write');
+    res.json({ success: true, count: ids.length });
+  } catch (e) {
+    console.error('[POST /orders/bulk-delete] Failed for', req.body?.ids, e);
     res.status(500).json({ error: 'Failed' });
   }
 });

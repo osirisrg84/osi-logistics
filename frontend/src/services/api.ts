@@ -52,6 +52,7 @@ export const ordersApi = {
   updateStatus: (id: string, data: { status: string; notes?: string; lat?: number; lng?: number }) =>
     api.post(`/orders/${id}/status`, data),
   delete: (id: string) => api.delete(`/orders/${id}`),
+  bulkDelete: (ids: string[]) => api.post('/orders/bulk-delete', { ids }),
   getRateCon: (id: string) => api.get(`/orders/${id}/rate-con`),
   uploadRateCon: (id: string, data: { filename: string; data: string }) => api.post(`/orders/${id}/rate-con`, data),
   deleteRateCon: (id: string) => api.delete(`/orders/${id}/rate-con`),

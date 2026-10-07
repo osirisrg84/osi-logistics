@@ -941,21 +941,19 @@ export default function Orders() {
     const count = ids.length;
     if (!confirm(t('orders.confirmDeleteBulk', { count }))) return;
     setDeletingIds(prev => { const n = new Set(prev); ids.forEach(id => n.add(id)); return n; });
-    const results = await Promise.allSettled(ids.map(id => ordersApi.delete(id)));
-    const failedIds = ids.filter((_, i) => results[i].status === 'rejected');
-    const okIds = ids.filter((_, i) => results[i].status === 'fulfilled');
-    setDeletingIds(prev => { const n = new Set(prev); ids.forEach(id => n.delete(id)); return n; });
-    setSelected(new Set(failedIds));
-    fetchOrders();
-    if (failedIds.length > 0) {
-      showToast(
-        okIds.length > 0
-          ? `${t('orders.deletedToast', { count: okIds.length })} · ${t('orders.deleteFailedBulkToast', { count: failedIds.length })}`
-          : t('orders.deleteFailedBulkToast', { count: failedIds.length }),
-        'error'
-      );
-    } else {
-      showToast(t('orders.deletedToast', { count: okIds.length }));
+    try {
+      // Antes era una peticion DELETE por orden (N round-trips a la base,
+      // uno por cada una) -- con varias decenas seleccionadas se sentia
+      // notoriamente lento aunque el servidor estuviera despierto. Un solo
+      // POST /orders/bulk-delete manda todo en un unico viaje de red.
+      await ordersApi.bulkDelete(ids);
+      setSelected(new Set());
+      showToast(t('orders.deletedToast', { count }));
+    } catch {
+      showToast(t('orders.deleteFailedBulkToast', { count }), 'error');
+    } finally {
+      setDeletingIds(prev => { const n = new Set(prev); ids.forEach(id => n.delete(id)); return n; });
+      fetchOrders();
     }
   };
 
