@@ -35,6 +35,11 @@
     'https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', '1026065173789855');
     fbq('track', 'PageView');
+    // El ad set "OSI Driver Portal 3.0 - Landing Page View" esta configurado
+    // en Meta para contar el evento ViewContent (promoted_object.custom_event_type
+    // = CONTENT_VIEW), no el PageView de arriba -- sin esto, las visitas reales
+    // nunca se registraban en esa campana por mas trafico real que llegara.
+    fbq('track', 'ViewContent');
     </script>
     <!-- End Meta Pixel Code -->
 
