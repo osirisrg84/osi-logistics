@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, X, Send, Mic, Square } from 'lucide-react';
+import { Bot, X, Send, Mic, Square } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 interface ChatMessage { role: 'user' | 'assistant'; content: string; }
@@ -109,14 +109,14 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
         className={buttonClassName ?? 'fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform'}
         aria-label="OSI IA"
       >
-        {open ? <X className="w-6 h-6" /> : <Sparkles className="w-6 h-6" />}
+        {open ? <X className="w-6 h-6" /> : <Bot className="w-6 h-6" />}
       </button>
 
       {open && (
         <div className={panelClassName ?? 'fixed bottom-24 right-4 left-4 sm:left-auto z-40 sm:w-96 max-h-[70vh] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col overflow-hidden fade-in'}>
           <div className={`flex items-center justify-between gap-2 px-4 py-3 border-b border-gray-100 dark:border-slate-700 text-white flex-shrink-0 ${accentClasses.header}`}>
             <div className="flex items-center gap-2 min-w-0">
-              <Sparkles className="w-4 h-4 flex-shrink-0" />
+              <Bot className="w-4 h-4 flex-shrink-0" />
               <p className="text-sm font-bold truncate">{title}</p>
             </div>
             <button

@@ -122,6 +122,8 @@ function BottomNav({ onMoreClick }: { onMoreClick: () => void }) {
 }
 
 export default function Layout() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     const flag = sessionStorage.getItem('open_sidebar');
     if (flag) { sessionStorage.removeItem('open_sidebar'); return true; }
@@ -195,14 +197,16 @@ export default function Layout() {
         </div>
       )}
 
-      {/* AI Dispatch Assistant */}
-      <AiAssistantPanel
-        chat={assistantApi.chat}
-        title="Asistente IA OSI"
-        greeting="Pregúntame por órdenes, conductores o tus comisiones."
-        buttonClassName="fixed bottom-20 md:bottom-6 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
-        panelClassName="fixed bottom-36 md:bottom-24 right-4 left-4 sm:left-auto z-40 sm:w-96 max-h-[70vh] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col overflow-hidden fade-in"
-      />
+      {/* AI Dispatch Assistant — dispatcher only, not shown to admin */}
+      {!isAdmin && (
+        <AiAssistantPanel
+          chat={assistantApi.chat}
+          title="Asistente IA OSI"
+          greeting="Pregúntame por órdenes, conductores o tus comisiones."
+          buttonClassName="fixed bottom-20 md:bottom-6 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+          panelClassName="fixed bottom-36 md:bottom-24 right-4 left-4 sm:left-auto z-40 sm:w-96 max-h-[70vh] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col overflow-hidden fade-in"
+        />
+      )}
     </div>
   );
 }
