@@ -273,7 +273,7 @@ router.delete('/:id/documents/:docId', async (req: Request, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;
   try {
-    const order = await queryOne<{ dispatcher_user_id: string | null }>('SELECT * FROM orders WHERE id = ?', [req.params.id]);
+    const order = await queryOne<{ dispatcher_user_id: string | null; price: number; order_number: string }>('SELECT * FROM orders WHERE id = ?', [req.params.id]);
     if (!order) return res.status(404).json({ error: 'Order not found' });
     const isOwner = !order.dispatcher_user_id || order.dispatcher_user_id === authReq.user?.id;
     if (authReq.user?.role !== 'admin' && !isOwner) {
@@ -284,6 +284,15 @@ router.put('/:id', async (req: Request, res: Response) => {
     if (fields.length === 0) return res.status(400).json({ error: 'No fields to update' });
     const setClause = fields.map(f => `${f} = ?`).join(', ');
     await exec(`UPDATE orders SET ${setClause} WHERE id = ?`, [...fields.map(f => updates[f] ?? null), req.params.id]);
+    // Audit trail: this endpoint accepts any field the client sends, including price —
+    // log every change to it so a wrong amount can always be traced back to who/when,
+    // instead of silently vanishing into an UPDATE with no record.
+    if ('price' in updates && Number(updates.price) !== Number(order.price)) {
+      await exec(
+        "INSERT INTO order_history (id, order_id, status, notes, created_by) VALUES (?, ?, 'price_changed', ?, ?)",
+        [uuidv4(), req.params.id, `Precio cambiado de $${order.price} a $${updates.price}`, authReq.user?.name || authReq.user?.id || 'unknown']
+      );
+    }
     res.json(await queryOne('SELECT * FROM orders WHERE id = ?', [req.params.id]));
   } catch { res.status(500).json({ error: 'Failed' }); }
 });

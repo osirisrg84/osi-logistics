@@ -370,6 +370,35 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
       .finally(() => setLoadingRateCon(false));
   }, [order.id]);
 
+  // The `order` prop can be a stale copy from the dispatcher's local list (e.g. the modal
+  // was already open when the order changed in the background — an offer sent/ignored,
+  // another dispatcher's edit, etc). Re-pull the live row from the server as soon as the
+  // modal opens so the form — price above all — starts from what's actually in the DB,
+  // not from whatever was in memory when this component mounted.
+  useEffect(() => {
+    ordersApi.getById(order.id)
+      .then(({ data }) => {
+        const fresh = data as typeof order;
+        setForm(f => ({
+          ...f,
+          pickup_name: fresh.pickup_contact || '',
+          pickup_address: fresh.pickup_address || '',
+          delivery_name: fresh.delivery_contact || '',
+          delivery_address: fresh.delivery_address || '',
+          weight_kg: fresh.weight_kg ? String(Math.round(fresh.weight_kg * 2.20462)) : '',
+          commodity: fresh.description || '',
+          notes: fresh.notes || '',
+          price: fresh.price ? String(fresh.price) : '',
+          distance_mi: fresh.distance_km ? String(Math.round(fresh.distance_km * 0.621371 * 10) / 10) : '',
+          estimated_delivery: fresh.estimated_delivery ? fresh.estimated_delivery.slice(0, 16) : '',
+          equipment_type: fresh.equipment_type || 'Dry Van',
+          temperature: fresh.temperature || '',
+        }));
+      })
+      .catch(() => { /* keep the prop-seeded values if the refetch fails */ });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order.id]);
+
   const handleRateConUpload = async (file: File) => {
     setRateConError('');
     if (file.size > 8 * 1024 * 1024) {

@@ -510,6 +510,11 @@ export default function DriverPortal() {
   const [pendingOffer, setPendingOffer] = useState<Order | null>(null);
   const [offerChecked, setOfferChecked] = useState(false);
   const [offerCountdown, setOfferCountdown] = useState(60);
+  // Mirrors pendingOffer.id so code running inside a long-lived effect (e.g. a
+  // socket-reconnect handler fired long after mount) can read the CURRENT
+  // pending offer without closing over a stale value — see checkActiveOffer below.
+  const pendingOfferIdRef = useRef<string | null>(null);
+  useEffect(() => { pendingOfferIdRef.current = pendingOffer?.id ?? null; }, [pendingOffer]);
 
   // ── Favorites ────────────────────────────────────────────
   interface Favorite { id: string; name: string; address: string; type: 'home' | 'work' | 'frequent' | 'other'; }
@@ -1048,8 +1053,15 @@ export default function DriverPortal() {
       if (!driverId) return;
       ordersApi.getAll({ offered_to_driver_id: driverId, status: 'offered' })
         .then(r => {
-          const active = (r.data.orders as Order[])[0];
-          if (!active) { setOfferChecked(true); return; }
+          const offers = r.data.orders as Order[];
+          if (offers.length === 0) { setOfferChecked(true); return; }
+          // Nothing stops a dispatcher from having more than one order offered
+          // to the same driver at once. If the driver is already looking at a
+          // specific offer, re-verifying on reconnect must keep showing THAT
+          // one, not silently swap it for whichever order the query happens
+          // to return first — otherwise the driver could see one order's price
+          // flip to a different order's price with no explanation.
+          const active = offers.find(o => o.id === pendingOfferIdRef.current) ?? offers[0];
           setPendingOffer(active);
           const offeredAtMs = active.offered_at ? new Date(active.offered_at).getTime() : Date.now();
           const elapsedSecs = Math.floor((Date.now() - offeredAtMs) / 1000);
