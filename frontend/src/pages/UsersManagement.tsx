@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Search, Edit2, Trash2, X, Shield, UserCheck, Truck, AlertTriangle, Clock, CheckCircle, XCircle, Mail } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, X, Shield, UserCheck, Truck, AlertTriangle, Clock, CheckCircle, XCircle, Mail, Eye, EyeOff } from 'lucide-react';
 import api from '../services/api';
 import { format } from 'date-fns';
 import { formatPhone } from '../utils/phone';
@@ -72,6 +72,7 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,10 +120,16 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
           </div>
           <div>
             <label className="label">{user ? 'New Password (leave blank to keep)' : 'Password *'}</label>
-            <input className="input" type="password" value={form.password}
-              onChange={e => setForm({...form, password: e.target.value})}
-              placeholder={user ? 'Leave blank to keep current' : 'Min. 8 characters'}
-              required={!user} />
+            <div className="relative">
+              <input className="input pr-10" type={showPassword ? 'text' : 'password'} value={form.password}
+                onChange={e => setForm({...form, password: e.target.value})}
+                placeholder={user ? 'Leave blank to keep current' : 'Min. 8 characters'}
+                required={!user} />
+              <button type="button" onClick={() => setShowPassword(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
           <div>
             <label className="label">Role *</label>
