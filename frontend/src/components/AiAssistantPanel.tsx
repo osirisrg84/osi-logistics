@@ -37,15 +37,23 @@ const ACCENT_CLASSES = {
     header: 'bg-gradient-to-r from-orange-500 to-orange-400',
     userBubble: 'bg-orange-500',
     sendButton: 'bg-orange-500 hover:bg-orange-400',
+    listenBg: 'bg-orange-500/10',
+    listenBar: 'bg-orange-500',
+    listenText: 'text-orange-500',
   },
   blue: {
     header: 'bg-gradient-to-r from-blue-500 to-blue-400',
     userBubble: 'bg-blue-500',
     sendButton: 'bg-blue-500 hover:bg-blue-400',
+    listenBg: 'bg-blue-500/10',
+    listenBar: 'bg-blue-500',
+    listenText: 'text-blue-500',
   },
 } as const;
 
-export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title = 'Asistente IA OSI', placeholder = 'Pregunta algo...', greeting, accent = 'orange' }: AiAssistantPanelProps) {
+const LISTEN_BAR_HEIGHTS = [8, 14, 20, 13, 22, 16, 9, 18, 24, 15, 11, 19, 14, 8];
+
+export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title = 'Asistente OSI', placeholder = 'Pregunta algo...', greeting, accent = 'orange' }: AiAssistantPanelProps) {
   const accentClasses = ACCENT_CLASSES[accent];
   const { lang } = useLanguage();
   const [open, setOpen] = useState(false);
@@ -128,7 +136,26 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
             </button>
           </div>
 
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-[200px]">
+          <div ref={scrollRef} className="relative flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-[200px]">
+            {listening && (
+              <div className={`absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 backdrop-blur-sm ${accentClasses.listenBg}`}>
+                <div className="flex items-end gap-[3px] h-8">
+                  {LISTEN_BAR_HEIGHTS.map((h, i) => (
+                    <div
+                      key={i}
+                      className={`w-[3px] rounded-full ${accentClasses.listenBar}`}
+                      style={{
+                        height: h,
+                        transformOrigin: 'center',
+                        animation: `waveBar ${0.3 + (i % 6) * 0.07}s ease-in-out infinite alternate`,
+                        animationDelay: `${i * 0.05}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+                <p className={`text-xs font-semibold ${accentClasses.listenText}`}>Escuchando...</p>
+              </div>
+            )}
             {messages.length === 0 && (
               <p className="text-xs text-gray-400 dark:text-slate-500 text-center py-6">
                 {greeting ?? '¿En qué te puedo ayudar?'}
