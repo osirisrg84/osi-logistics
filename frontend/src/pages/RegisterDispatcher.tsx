@@ -36,7 +36,7 @@ export default function RegisterDispatcher() {
 
   const [form, setForm] = useState({
     name: '', date_of_birth: '', phone: '', email: '',
-    city: '', password: '', confirm: '',
+    city: '', country: '', password: '', confirm: '',
     years_experience: '', availability: 'full-time',
   });
   const [companies, setCompanies] = useState<string[]>(['']);
@@ -92,6 +92,7 @@ export default function RegisterDispatcher() {
         phone:                form.phone,
         date_of_birth:        form.date_of_birth,
         city:                 form.city,
+        country:              form.country,
         years_experience:     parseInt(form.years_experience) || 0,
         previous_companies,
         languages:            languages.join(', '),
@@ -171,16 +172,26 @@ export default function RegisterDispatcher() {
                 value={form.name} onChange={set('name')} required autoFocus />
             </Field>
 
+            <Field label={t('registerDispatcher.dobLabel')} required>
+              <input className="input" type="date"
+                value={form.date_of_birth} onChange={set('date_of_birth')} required />
+            </Field>
+
+            {/* Sin restriccion a EEUU -- texto libre para que cualquier pais
+                (Colombia, Mexico, etc.) pueda registrarse sin problema. */}
             <div className="grid grid-cols-2 gap-3">
-              <Field label={t('registerDispatcher.dobLabel')} required>
-                <input className="input" type="date"
-                  value={form.date_of_birth} onChange={set('date_of_birth')} required />
-              </Field>
               <Field label={t('registerDispatcher.cityLabel')}>
                 <div className="relative">
                   <MapPin className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input className="input pl-8" type="text" placeholder="Miami, FL"
+                  <input className="input pl-8" type="text" placeholder="Bogotá"
                     value={form.city} onChange={set('city')} />
+                </div>
+              </Field>
+              <Field label={t('registerDispatcher.countryLabel')}>
+                <div className="relative">
+                  <Globe className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input className="input pl-8" type="text" placeholder="Colombia"
+                    value={form.country} onChange={set('country')} />
                 </div>
               </Field>
             </div>

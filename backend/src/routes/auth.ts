@@ -65,7 +65,7 @@ router.post('/register', async (req: Request, res: Response) => {
   try {
     const {
       name, email, password, role = 'dispatcher', driver_id = null,
-      phone = '', date_of_birth = '', city = '',
+      phone = '', date_of_birth = '', city = '', country = '',
       years_experience = 0, previous_companies = '', languages = '', availability = 'full-time',
       equipment_experience = '',
     } = req.body;
@@ -96,11 +96,11 @@ router.post('/register', async (req: Request, res: Response) => {
 
     await exec(`INSERT INTO users
       (id, name, email, password_hash, salt, role, driver_id,
-       phone, date_of_birth, city, years_experience, previous_companies, languages, availability, equipment_experience, dispatcher_code,
+       phone, date_of_birth, city, country, years_experience, previous_companies, languages, availability, equipment_experience, dispatcher_code,
        active, approval_status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending')`,
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending')`,
       [id, name, email.toLowerCase(), passwordHash, salt, role, driver_id,
-       phone, date_of_birth, city, years_experience, previous_companies, languages, availability, equipment_experience, dispatcher_code]);
+       phone, date_of_birth, city, country, years_experience, previous_companies, languages, availability, equipment_experience, dispatcher_code]);
 
     await exec("INSERT INTO notifications (id, type, title, message, read) VALUES (?, 'system', 'Nueva Cuenta Pendiente de Aprobación', ?, 0)",
       [uuidv4(), `${name} (${role}) se registró y está esperando aprobación.`]);
@@ -212,12 +212,12 @@ router.get('/profile', async (req: Request, res: Response) => {
     const row = await queryOne<{
       payout_method: string; payout_details: string; ssn: string; dispatcher_code: string;
       phone: string; availability: string; languages: string; years_experience: number;
-      city: string; date_of_birth: string; previous_companies: string; equipment_experience: string;
+      city: string; country: string; date_of_birth: string; previous_companies: string; equipment_experience: string;
       shift_active: number; email_verified: number; phone_verified: number;
     }>(`
       SELECT u.payout_method, u.payout_details, u.ssn, u.dispatcher_code,
              u.phone, u.availability, u.languages, u.years_experience,
-             u.city, u.date_of_birth, u.previous_companies, u.equipment_experience,
+             u.city, u.country, u.date_of_birth, u.previous_companies, u.equipment_experience,
              u.shift_active, u.email_verified, u.phone_verified
       FROM sessions s JOIN users u ON s.user_id = u.id
       WHERE s.token = ? AND s.expires_at > datetime('now')
@@ -233,6 +233,7 @@ router.get('/profile', async (req: Request, res: Response) => {
       languages:            row.languages,
       years_experience:     row.years_experience,
       city:                 row.city,
+      country:              row.country,
       date_of_birth:        row.date_of_birth,
       previous_companies:   row.previous_companies,
       equipment_experience: row.equipment_experience,
@@ -252,7 +253,7 @@ router.put('/profile', async (req: Request, res: Response) => {
     const {
       payout_method, payout_details, ssn,
       phone, availability, languages, years_experience,
-      city, date_of_birth, previous_companies, equipment_experience,
+      city, country, date_of_birth, previous_companies, equipment_experience,
     } = req.body;
     const updates: string[] = [];
     const vals: unknown[] = [];
@@ -264,6 +265,7 @@ router.put('/profile', async (req: Request, res: Response) => {
     if (languages            !== undefined) { updates.push('languages = ?');            vals.push(languages); }
     if (years_experience     !== undefined) { updates.push('years_experience = ?');     vals.push(years_experience); }
     if (city                 !== undefined) { updates.push('city = ?');                 vals.push(city); }
+    if (country              !== undefined) { updates.push('country = ?');              vals.push(country); }
     if (date_of_birth        !== undefined) { updates.push('date_of_birth = ?');        vals.push(date_of_birth); }
     if (previous_companies   !== undefined) { updates.push('previous_companies = ?');   vals.push(previous_companies); }
     if (equipment_experience !== undefined) { updates.push('equipment_experience = ?'); vals.push(equipment_experience); }

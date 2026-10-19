@@ -19,7 +19,7 @@ interface CommissionRow {
   delivery_date: string | null;
   status: 'pending' | 'settled';
   settled_at: string | null;
-  // Si OSI ya le pago al dispatcher su 4% -- independiente de `status`, que
+  // Si OSI ya le pago al dispatcher su 3% -- independiente de `status`, que
   // es si el DRIVER ya pago su 7% (dos pagos distintos, misma orden).
   dispatcher_status: 'pending' | 'settled';
   dispatcher_settled_at: string | null;
@@ -257,7 +257,7 @@ export default function DispatcherCommissions() {
         <div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t('commissions.title')}</h1>
           <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-            {t('commissions.subtitlePrefix')} <span className="font-semibold text-blue-600">4%</span> {t('commissions.subtitleSuffix')}
+            {t('commissions.subtitlePrefix')} <span className="font-semibold text-blue-600">3%</span> {t('commissions.subtitleSuffix')}
           </p>
         </div>
         <button onClick={load} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">

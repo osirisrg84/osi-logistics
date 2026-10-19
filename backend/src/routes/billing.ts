@@ -104,7 +104,7 @@ router.put('/driver/:driverId/settle-all', async (req: Request, res: Response) =
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
-// Marca que OSI ya le pago al dispatcher su 4% -- independiente de si el
+// Marca que OSI ya le pago al dispatcher su 3% -- independiente de si el
 // driver de esa misma orden ya pago su 7% o no (son dos pagos distintos que
 // antes compartian un solo campo `status`, dando numeros erroneos en "Mis
 // Comisiones" del dispatcher). Solo admin paga dispatchers.

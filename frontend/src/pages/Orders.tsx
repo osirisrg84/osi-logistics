@@ -683,9 +683,21 @@ interface DetailModalProps {
   onRefresh: () => void;
 }
 
-function DetailModal({ order, onClose, onRefresh }: DetailModalProps) {
+function DetailModal({ order: initialOrder, onClose, onRefresh }: DetailModalProps) {
   const { t } = useTranslation();
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  // Same staleness risk as EditOrderModal above: `order` can be a stale copy
+  // from the dispatcher's local list (an offer sent/ignored, another
+  // dispatcher's edit, a price recalculation, etc. while this modal was
+  // already open). Re-pull the live row as soon as it opens so price/status/
+  // everything else shown here reflects what's actually in the DB.
+  const [order, setOrder] = useState(initialOrder);
+  useEffect(() => {
+    ordersApi.getById(initialOrder.id)
+      .then(({ data }) => setOrder(data as typeof initialOrder))
+      .catch(() => { /* keep the prop-seeded values if the refetch fails */ });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialOrder.id]);
 
   const nextStatus: Record<string, string> = {
     assigned: 'picked_up',

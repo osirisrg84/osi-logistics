@@ -197,8 +197,8 @@ export default function Billing() {
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t('billing.title')}</h1>
           <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
             {t('billing.subtitleDriversPay')} <span className="font-semibold text-red-600">7%</span> · {t('billing.subtitleDispatchGets')}{' '}
-            <span className="font-semibold text-blue-600">4%</span> · {t('billing.subtitleOsiNet')}{' '}
-            <span className="font-semibold text-green-600">3%</span>
+            <span className="font-semibold text-blue-600">3%</span> · {t('billing.subtitleOsiNet')}{' '}
+            <span className="font-semibold text-green-600">4%</span>
           </p>
         </div>
         <button onClick={load} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">

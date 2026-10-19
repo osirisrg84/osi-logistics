@@ -22,6 +22,7 @@ interface ProfileData {
   languages?: string;
   availability?: string;
   city?: string;
+  country?: string;
   date_of_birth?: string;
   previous_companies?: string;
   equipment_experience?: string;
@@ -59,7 +60,7 @@ export default function DispatcherProfilePage() {
 
   const [editingPersonal, setEditingPersonal] = useState(false);
   const [savingPersonal,  setSavingPersonal]  = useState(false);
-  const [personalForm, setPersonalForm] = useState({ city: '', date_of_birth: '' });
+  const [personalForm, setPersonalForm] = useState({ city: '', country: '', date_of_birth: '' });
 
   const [editingProfile, setEditingProfile] = useState(false);
   const [savingProfile,  setSavingProfile]  = useState(false);
@@ -143,6 +144,7 @@ export default function DispatcherProfilePage() {
       setContactForm({ phone: p.phone || '' });
       setPersonalForm({
         city:          p.city          || '',
+        country:       p.country       || '',
         date_of_birth: p.date_of_birth || '',
       });
       setProfileForm({
@@ -168,8 +170,8 @@ export default function DispatcherProfilePage() {
   const savePersonal = async () => {
     setSavingPersonal(true);
     try {
-      await userApi.updateProfile({ city: personalForm.city, date_of_birth: personalForm.date_of_birth });
-      setProfile(prev => ({ ...prev, city: personalForm.city, date_of_birth: personalForm.date_of_birth }));
+      await userApi.updateProfile({ city: personalForm.city, country: personalForm.country, date_of_birth: personalForm.date_of_birth });
+      setProfile(prev => ({ ...prev, city: personalForm.city, country: personalForm.country, date_of_birth: personalForm.date_of_birth }));
       setEditingPersonal(false);
     } finally { setSavingPersonal(false); }
   };
@@ -530,8 +532,14 @@ export default function DispatcherProfilePage() {
           <div className="space-y-3">
             <div>
               <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{t('profile.cityLabel')}</label>
-              <input type="text" placeholder="Miami, FL" value={personalForm.city}
+              <input type="text" placeholder="Bogotá" value={personalForm.city}
                 onChange={e => setPersonalForm(f => ({ ...f, city: e.target.value }))}
+                className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-blue-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`} />
+            </div>
+            <div>
+              <label className={`block text-[10px] font-semibold mb-1 ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{t('profile.countryLabel')}</label>
+              <input type="text" placeholder="Colombia" value={personalForm.country}
+                onChange={e => setPersonalForm(f => ({ ...f, country: e.target.value }))}
                 className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-blue-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`} />
             </div>
             <div>
@@ -545,6 +553,7 @@ export default function DispatcherProfilePage() {
           <div className="space-y-2">
             {([
               { icon: MapPin,   label: profile.city || '—',          sub: t('profile.cityLabel') },
+              { icon: Globe,    label: profile.country || '—',       sub: t('profile.countryLabel') },
               { icon: Calendar, label: profile.date_of_birth || '—', sub: t('profile.dobLabel') },
             ] as { icon: React.ComponentType<{ className?: string }>; label: string; sub: string }[]).filter(row => row.label && row.label !== '—').map(row => (
               <div key={row.sub} className={`flex items-center gap-3 p-2.5 rounded-xl ${dark ? 'bg-slate-700/40' : 'bg-gray-50'}`}>

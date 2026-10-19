@@ -234,6 +234,7 @@ export async function initDatabase(): Promise<void> {
   await addColumnIfMissing('users', 'ssn',                  "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('users', 'date_of_birth',        "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('users', 'city',                 "TEXT NOT NULL DEFAULT ''");
+  await addColumnIfMissing('users', 'country',               "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('users', 'years_experience',     "INTEGER NOT NULL DEFAULT 0");
   await addColumnIfMissing('users', 'previous_companies',   "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('users', 'languages',            "TEXT NOT NULL DEFAULT ''");
@@ -742,7 +743,7 @@ async function refreshDemoData(): Promise<void> {
   // el DISPATCHER ya cobro), asi que liquidar el lado del driver arriba no
   // tocaba este. Maria Gonzalez (dispatcher demo) queda como
   // dispatcher_user_id en casi todas las ordenes demo entregadas, asi que
-  // sin esto acumulaba el 4% de cientos de ordenes como "pendiente" para
+  // sin esto acumulaba el 3% de cientos de ordenes como "pendiente" para
   // siempre.
   await exec(`
     UPDATE commissions SET dispatcher_status = 'settled', dispatcher_settled_at = COALESCE(dispatcher_settled_at, delivery_date, created_at)
@@ -769,7 +770,7 @@ export async function createCommission(
   const existing = await queryOne('SELECT id FROM commissions WHERE order_id = ?', [orderId]);
   if (existing) return;
   const driverCharge  = Math.round(orderPrice * 0.07 * 100) / 100;
-  const dispatcherPay = Math.round(orderPrice * 0.04 * 100) / 100;
+  const dispatcherPay = Math.round(orderPrice * 0.03 * 100) / 100;
   const netOsi        = Math.round((driverCharge - dispatcherPay) * 100) / 100;
   await exec(`
     INSERT INTO commissions
@@ -798,7 +799,7 @@ async function initCommissions(): Promise<void> {
 
   for (const o of delivered) {
     const driverCharge = Math.round(o.price * 0.07 * 100) / 100;
-    const dispPay      = Math.round(o.price * 0.04 * 100) / 100;
+    const dispPay      = Math.round(o.price * 0.03 * 100) / 100;
     const netOsi       = Math.round((driverCharge - dispPay) * 100) / 100;
     await exec(`
       INSERT OR IGNORE INTO commissions
@@ -841,8 +842,8 @@ async function seedCommissions(): Promise<void> {
     [sofia.id,  'Sofia Hernandez',  3100, '2026-06-07', 'pending', null],
   ] as [string, string, number, string, string, string | null][]) {
     const dc = Math.round(price * 0.07 * 100) / 100;
-    const dp = Math.round(price * 0.04 * 100) / 100;
-    const no = Math.round(price * 0.03 * 100) / 100;
+    const dp = Math.round(price * 0.03 * 100) / 100;
+    const no = Math.round(price * 0.04 * 100) / 100;
     await exec(`INSERT OR IGNORE INTO commissions
       (id, order_id, order_number, driver_id, driver_name, dispatcher_user_id, dispatcher_name,
        order_price, driver_charge, dispatcher_pay, net_osi, delivery_date, status, settled_at)

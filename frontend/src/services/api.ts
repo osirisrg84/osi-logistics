@@ -126,7 +126,7 @@ export const userApi = {
   updateProfile: (data: {
     payout_method?: string; payout_details?: string; ssn?: string;
     phone?: string; availability?: string; languages?: string; years_experience?: number;
-    city?: string; date_of_birth?: string; previous_companies?: string; equipment_experience?: string;
+    city?: string; country?: string; date_of_birth?: string; previous_companies?: string; equipment_experience?: string;
   }) => api.put('/auth/profile', data),
   sendVerification:    (type: 'email' | 'phone') => api.post('/auth/send-verification', { type }),
   verifyCode:          (type: 'email' | 'phone', code: string) => api.post('/auth/verify-code', { type, code }),
