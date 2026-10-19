@@ -14,6 +14,7 @@
       "billing": "Billing",
       "users": "Users",
       "verifications": "Verifications",
+      "documents": "Documents",
       "settings": "Settings"
     },
     "orderStatus": {
@@ -637,6 +638,20 @@
     "equipmentExperience": "Equipment experience",
     "idDocument": "ID Document",
     "viewIdDocument": "View document"
+  },
+  "documents": {
+    "title": "Documents",
+    "subtitle": "Every document uploaded by dispatchers and drivers, in one place",
+    "refresh": "Refresh",
+    "statAll": "All",
+    "typeDispatcherId": "Dispatcher ID",
+    "typeDriverLicense": "Driver License",
+    "typeDriverCoi": "Driver COI",
+    "filterAll": "All",
+    "searchPlaceholder": "Search by name or email...",
+    "loadingDocuments": "Loading documents...",
+    "noDocumentsFound": "No documents found",
+    "view": "View"
   },
   "hub": {
     "tabCommunity": "Community",

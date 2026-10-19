@@ -73,6 +73,14 @@ export const driversApi = {
   getLicenseDocument: (id: string) => api.get(`/drivers/${id}/license-document`),
   uploadLicenseDocument: (id: string, data: { filename: string; data: string }) => api.post(`/drivers/${id}/license-document`, data),
   deleteLicenseDocument: (id: string) => api.delete(`/drivers/${id}/license-document`),
+  getCoiDocument: (id: string) => api.get(`/drivers/${id}/coi-document`),
+  uploadCoiDocument: (id: string, data: { filename: string; data: string }) => api.post(`/drivers/${id}/coi-document`, data),
+  deleteCoiDocument: (id: string) => api.delete(`/drivers/${id}/coi-document`),
+};
+
+export const adminApi = {
+  getDocuments: () => api.get('/admin/documents'),
+  getDispatcherIdDocument: (id: string) => api.get(`/admin/dispatchers/${id}/id-document`),
 };
 
 export const trucksApi = {

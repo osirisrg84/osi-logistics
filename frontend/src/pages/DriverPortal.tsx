@@ -820,6 +820,8 @@ export default function DriverPortal() {
   const [coiFileName, setCoiFileName] = useState('');
   const [coiExpiry, setCoiExpiry] = useState('');
   const [coiEditing, setCoiEditing] = useState(false);
+  const [uploadingCoi, setUploadingCoi] = useState(false);
+  const [coiError, setCoiError] = useState('');
   const [licenseFileName, setLicenseFileName] = useState('');
   const [licenseEditing, setLicenseEditing] = useState(false);
   const [uploadingLicense, setUploadingLicense] = useState(false);
@@ -2699,7 +2701,9 @@ export default function DriverPortal() {
                       <p className="text-xs text-gray-500 dark:text-slate-400 mb-1.5">{t('driverPortal.fileLabel')}</p>
                       <label className="flex items-center gap-2 cursor-pointer min-w-0">
                         <div className="flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-dashed border-blue-300 dark:border-blue-700 hover:border-blue-400 transition-colors flex-1 min-w-0 overflow-hidden">
-                          <Upload className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                          {uploadingCoi
+                            ? <div className="w-4 h-4 border-2 border-blue-300 border-t-blue-500 rounded-full animate-spin flex-shrink-0" />
+                            : <Upload className="w-4 h-4 text-blue-400 flex-shrink-0" />}
                           <span className="text-xs text-gray-500 dark:text-slate-400 truncate min-w-0">
                             {coiFileName || t('driverPortal.selectFile')}
                           </span>
@@ -2707,12 +2711,27 @@ export default function DriverPortal() {
                         <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden"
                           onChange={async e => {
                             const f = e.target.files?.[0];
-                            if (f && driverId) {
+                            if (!f || !driverId) return;
+                            setCoiError('');
+                            if (f.size > 8 * 1024 * 1024) { setCoiError(t('driverPortal.errorFileTooLarge')); return; }
+                            setUploadingCoi(true);
+                            try {
+                              const base64 = await new Promise<string>((resolve, reject) => {
+                                const reader = new FileReader();
+                                reader.onload = () => resolve(reader.result as string);
+                                reader.onerror = () => reject(reader.error);
+                                reader.readAsDataURL(f);
+                              });
+                              await driversApi.uploadCoiDocument(driverId, { filename: f.name, data: base64 });
                               setCoiFileName(f.name);
-                              await driversApi.update(driverId, { coi_filename: f.name }).catch(() => {});
+                            } catch {
+                              setCoiError(t('driverPortal.errorUploadingFile'));
+                            } finally {
+                              setUploadingCoi(false);
                             }
                           }} />
                       </label>
+                      {coiError && <p className="text-xs text-red-500 mt-1">{coiError}</p>}
                     </div>
                     {/* Expiry date */}
                     <div>
@@ -2725,7 +2744,13 @@ export default function DriverPortal() {
                         className="input text-sm w-full" />
                     </div>
                     {(coiFileName || coiExpiry) && (
-                      <button onClick={async () => { setCoiFileName(''); setCoiExpiry(''); setCoiEditing(false); if (driverId) await driversApi.update(driverId, { coi_filename: '', coi_expiry: '' }).catch(() => {}); }}
+                      <button onClick={async () => {
+                        setCoiFileName(''); setCoiExpiry(''); setCoiEditing(false);
+                        if (driverId) {
+                          await driversApi.deleteCoiDocument(driverId).catch(() => {});
+                          await driversApi.update(driverId, { coi_expiry: '' }).catch(() => {});
+                        }
+                      }}
                         className="text-xs text-red-400 hover:text-red-500 font-medium">
                         {t('driverPortal.deleteCoi')}
                       </button>

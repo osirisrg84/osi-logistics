@@ -14,6 +14,7 @@
       "billing": "Facturación",
       "users": "Usuarios",
       "verifications": "Verificaciones",
+      "documents": "Documentos",
       "settings": "Ajustes"
     },
     "orderStatus": {
@@ -637,6 +638,20 @@
     "equipmentExperience": "Experiencia en equipo",
     "idDocument": "Identificación",
     "viewIdDocument": "Ver documento"
+  },
+  "documents": {
+    "title": "Documentos",
+    "subtitle": "Todos los documentos subidos por dispatchers y drivers, en un solo lugar",
+    "refresh": "Actualizar",
+    "statAll": "Todos",
+    "typeDispatcherId": "Identificación Dispatcher",
+    "typeDriverLicense": "Licencia Driver",
+    "typeDriverCoi": "COI Driver",
+    "filterAll": "Todos",
+    "searchPlaceholder": "Buscar por nombre o email...",
+    "loadingDocuments": "Cargando documentos...",
+    "noDocumentsFound": "No se encontraron documentos",
+    "view": "Ver"
   },
   "hub": {
     "tabCommunity": "Comunidad",

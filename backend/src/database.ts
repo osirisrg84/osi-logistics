@@ -290,6 +290,17 @@ export async function initDatabase(): Promise<void> {
     uploaded_at TEXT NOT NULL
   )`);
 
+  // Certificate of Insurance photo/scan -- replaces the old coi_filename
+  // column (which only ever stored a filename string, never the real file).
+  // coi_filename/coi_expiry stay on `drivers` as before (expiry is a plain
+  // date, not a file), this table only holds the actual document.
+  await exec(`CREATE TABLE IF NOT EXISTS driver_coi_documents (
+    driver_id   TEXT PRIMARY KEY,
+    filename    TEXT NOT NULL,
+    data        TEXT NOT NULL,
+    uploaded_at TEXT NOT NULL
+  )`);
+
   // Dispatcher ID document (photo of a government ID), captured at registration
   // so the identity-verification admin check has something real to compare the
   // declared date_of_birth against. Kept in its own table, not a column on

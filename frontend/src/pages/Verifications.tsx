@@ -41,6 +41,7 @@ interface DriverEntity {
   active: number;
   approval_status: string;
   has_license_document: number;
+  has_coi_document: number;
 }
 
 interface DispatcherEntity {
@@ -527,7 +528,19 @@ export default function Verifications() {
                       </span>
                     )}
                   </div>
-                  <InfoRow label={t('verifications.coi')} value={d.coi_filename || t('verifications.notUploaded')} warn={!d.coi_filename} />
+                  <div>
+                    <span className="text-xs text-gray-500 dark:text-slate-400">{t('verifications.coi')}: </span>
+                    {d.has_coi_document ? (
+                      <button type="button" onClick={() => openDocument(d.id, d.name, `/drivers/${d.id}/coi-document`)} disabled={idDocLoading === d.id}
+                        className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50">
+                        {idDocLoading === d.id ? '...' : t('verifications.viewIdDocument')}
+                      </button>
+                    ) : (
+                      <span className="text-xs font-medium text-red-600 dark:text-red-400">
+                        <AlertTriangle className="w-3 h-3 inline mr-0.5 -mt-0.5" /> {t('verifications.notUploaded')}
+                      </span>
+                    )}
+                  </div>
                   <InfoRow label={t('verifications.coiExpires')} value={d.coi_expiry ? format(new Date(d.coi_expiry), 'MMM d, yyyy') : '—'} warn={!!d.coi_expiry && new Date(d.coi_expiry) < new Date(Date.now() + 90*24*3600*1000)} />
                   <InfoRow label={t('verifications.hireDate')} value={d.hire_date ? format(new Date(d.hire_date), 'MMM d, yyyy') : '—'} />
                   <InfoRow label={t('verifications.driverCode')} value={d.driver_code} />

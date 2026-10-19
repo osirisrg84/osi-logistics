@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import osiLogo from '../assets/osi-logo.jpeg';
 import {
   LayoutDashboard, Package, MapPin, Users, Truck,
-  BarChart3, Settings, Zap, Shield, ClipboardList, UserCog, X, Receipt, TrendingUp, Headset, Layers, ShieldCheck, UserCircle
+  BarChart3, Settings, Zap, Shield, ClipboardList, UserCog, X, Receipt, TrendingUp, Headset, Layers, ShieldCheck, UserCircle, FolderOpen
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -36,6 +36,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
     { to: '/billing',       icon: Receipt,     label: t('common.nav.billing')       },
     { to: '/users',         icon: UserCog,     label: t('common.nav.users')         },
     { to: '/verifications', icon: ShieldCheck, label: t('common.nav.verifications') },
+    { to: '/documents',     icon: FolderOpen,  label: t('common.nav.documents')     },
     { to: '/profile',       icon: UserCircle,  label: t('common.nav.profile')       },
     { to: '/settings',      icon: Settings,    label: t('common.nav.settings')      },
   ];
