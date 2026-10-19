@@ -637,6 +637,7 @@
     "previousCompanies": "Previous companies",
     "equipmentExperience": "Equipment experience",
     "idDocument": "ID Document",
+    "equipmentPhoto": "Equipment Photo",
     "viewIdDocument": "View document"
   },
   "documents": {
@@ -647,6 +648,7 @@
     "typeDispatcherId": "Dispatcher ID",
     "typeDriverLicense": "Driver License",
     "typeDriverCoi": "Driver COI",
+    "typeDriverEquipment": "Equipment Photo",
     "filterAll": "All",
     "searchPlaceholder": "Search by name or email...",
     "loadingDocuments": "Loading documents...",
@@ -804,6 +806,8 @@
     "expiryDate": "Expiry date",
     "deleteCoi": "Delete COI",
     "licenseDocTitle": "Driver's License",
+    "equipmentPhotoTitle": "Equipment Photo",
+    "equipmentPhotoHint": "One photo showing the truck, trailer, and equipment together.",
     "errorFileTooLarge": "File is too large (max ~8MB)",
     "errorUploadingFile": "There was an error uploading the file",
     "factoring": "Factoring",

@@ -76,6 +76,9 @@ export const driversApi = {
   getCoiDocument: (id: string) => api.get(`/drivers/${id}/coi-document`),
   uploadCoiDocument: (id: string, data: { filename: string; data: string }) => api.post(`/drivers/${id}/coi-document`, data),
   deleteCoiDocument: (id: string) => api.delete(`/drivers/${id}/coi-document`),
+  getEquipmentDocument: (id: string) => api.get(`/drivers/${id}/equipment-document`),
+  uploadEquipmentDocument: (id: string, data: { filename: string; data: string }) => api.post(`/drivers/${id}/equipment-document`, data),
+  deleteEquipmentDocument: (id: string) => api.delete(`/drivers/${id}/equipment-document`),
 };
 
 export const adminApi = {

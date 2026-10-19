@@ -239,6 +239,41 @@ router.delete('/:id/coi-document', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
+// Single photo showing truck + trailer + equipment together.
+router.get('/:id/equipment-document', async (req: Request, res: Response) => {
+  try {
+    const doc = await queryOne<{ filename: string; data: string; uploaded_at: string }>(
+      'SELECT filename, data, uploaded_at FROM driver_equipment_documents WHERE driver_id = ?', [req.params.id]);
+    if (!doc) return res.status(404).json({ error: 'No equipment photo uploaded' });
+    res.json(doc);
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.post('/:id/equipment-document', async (req: Request, res: Response) => {
+  try {
+    const { filename, data } = req.body;
+    if (!filename || !data) return res.status(400).json({ error: 'filename and data are required' });
+    if (data.length > 12_000_000) return res.status(413).json({ error: 'File too large (max ~8MB)' });
+
+    const driver = await queryOne('SELECT id FROM drivers WHERE id = ?', [req.params.id]);
+    if (!driver) return res.status(404).json({ error: 'Driver not found' });
+
+    const uploadedAt = new Date().toISOString();
+    await exec(`INSERT INTO driver_equipment_documents (driver_id, filename, data, uploaded_at) VALUES (?, ?, ?, ?)
+      ON CONFLICT(driver_id) DO UPDATE SET filename = excluded.filename, data = excluded.data, uploaded_at = excluded.uploaded_at`,
+      [req.params.id, filename, data, uploadedAt]);
+
+    res.json({ filename, uploaded_at: uploadedAt });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.delete('/:id/equipment-document', async (req: Request, res: Response) => {
+  try {
+    await exec('DELETE FROM driver_equipment_documents WHERE driver_id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
 router.post('/:id/location', async (req: Request, res: Response) => {
   try {
     const { lat, lng, speed = 0, heading = 0, address = '' } = req.body;

@@ -259,7 +259,8 @@ router.get('/verifications', async (_req: Request, res: Response) => {
              d.coi_expiry, d.hire_date, d.avatar, d.driver_code,
              u.id as user_id, u.active, u.approval_status,
              EXISTS(SELECT 1 FROM driver_license_documents WHERE driver_id = d.id) as has_license_document,
-             EXISTS(SELECT 1 FROM driver_coi_documents WHERE driver_id = d.id) as has_coi_document
+             EXISTS(SELECT 1 FROM driver_coi_documents WHERE driver_id = d.id) as has_coi_document,
+             EXISTS(SELECT 1 FROM driver_equipment_documents WHERE driver_id = d.id) as has_equipment_document
       FROM drivers d
       INNER JOIN users u ON u.driver_id = d.id
       WHERE u.approval_status IN ('pending', 'approved')
@@ -305,7 +306,7 @@ router.get('/dispatchers/:id/id-document', async (req: Request, res: Response) =
 // clicks to view it.
 router.get('/documents', async (_req: Request, res: Response) => {
   try {
-    const [dispatcherIds, licenses, cois] = await Promise.all([
+    const [dispatcherIds, licenses, cois, equipmentPhotos] = await Promise.all([
       query<Record<string, unknown>>(`
         SELECT 'dispatcher_id' as doc_type, u.id as entity_id, u.name, u.email,
                dd.filename, dd.uploaded_at
@@ -324,8 +325,14 @@ router.get('/documents', async (_req: Request, res: Response) => {
         FROM driver_coi_documents dc
         JOIN drivers d ON d.id = dc.driver_id
       `),
+      query<Record<string, unknown>>(`
+        SELECT 'driver_equipment' as doc_type, d.id as entity_id, d.name, d.email,
+               de.filename, de.uploaded_at
+        FROM driver_equipment_documents de
+        JOIN drivers d ON d.id = de.driver_id
+      `),
     ]);
-    const all = [...dispatcherIds, ...licenses, ...cois]
+    const all = [...dispatcherIds, ...licenses, ...cois, ...equipmentPhotos]
       .sort((a, b) => String(b.uploaded_at).localeCompare(String(a.uploaded_at)));
     res.json(all);
   } catch { res.status(500).json({ error: 'Failed' }); }

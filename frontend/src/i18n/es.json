@@ -637,6 +637,7 @@
     "previousCompanies": "Empresas anteriores",
     "equipmentExperience": "Experiencia en equipo",
     "idDocument": "Identificación",
+    "equipmentPhoto": "Foto de Equipo",
     "viewIdDocument": "Ver documento"
   },
   "documents": {
@@ -647,6 +648,7 @@
     "typeDispatcherId": "Identificación Dispatcher",
     "typeDriverLicense": "Licencia Driver",
     "typeDriverCoi": "COI Driver",
+    "typeDriverEquipment": "Foto de Equipo",
     "filterAll": "Todos",
     "searchPlaceholder": "Buscar por nombre o email...",
     "loadingDocuments": "Cargando documentos...",
@@ -804,6 +806,8 @@
     "expiryDate": "Fecha de vencimiento",
     "deleteCoi": "Eliminar COI",
     "licenseDocTitle": "Licencia de Conducir",
+    "equipmentPhotoTitle": "Foto del Equipo",
+    "equipmentPhotoHint": "Una sola foto que muestre el camión, el trailer y el equipo juntos.",
     "errorFileTooLarge": "El archivo es demasiado grande (máx. ~8MB)",
     "errorUploadingFile": "Hubo un error al subir el archivo",
     "factoring": "Factoring",

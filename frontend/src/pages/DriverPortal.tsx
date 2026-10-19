@@ -759,7 +759,33 @@ export default function DriverPortal() {
     driversApi.getLicenseDocument(driverId)
       .then(({ data }) => setLicenseFileName(data.filename))
       .catch(() => setLicenseFileName(''));
+    driversApi.getEquipmentDocument(driverId)
+      .then(({ data }) => setEquipmentPhotoPreview(data.data))
+      .catch(() => setEquipmentPhotoPreview(''));
   }, [driverId]);
+
+  const handleEquipmentPhotoUpload = async (file: File) => {
+    setEquipmentPhotoError('');
+    if (file.size > 8 * 1024 * 1024) {
+      setEquipmentPhotoError(t('driverPortal.errorFileTooLarge'));
+      return;
+    }
+    setUploadingEquipmentPhoto(true);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      await driversApi.uploadEquipmentDocument(driverId, { filename: file.name, data: base64 });
+      setEquipmentPhotoPreview(base64);
+    } catch {
+      setEquipmentPhotoError(t('driverPortal.errorUploadingFile'));
+    } finally {
+      setUploadingEquipmentPhoto(false);
+    }
+  };
 
   const handleLicenseUpload = async (file: File) => {
     setLicenseError('');
@@ -822,6 +848,10 @@ export default function DriverPortal() {
   const [coiEditing, setCoiEditing] = useState(false);
   const [uploadingCoi, setUploadingCoi] = useState(false);
   const [coiError, setCoiError] = useState('');
+  const [equipmentPhotoPreview, setEquipmentPhotoPreview] = useState('');
+  const [equipmentPhotoEditing, setEquipmentPhotoEditing] = useState(false);
+  const [uploadingEquipmentPhoto, setUploadingEquipmentPhoto] = useState(false);
+  const [equipmentPhotoError, setEquipmentPhotoError] = useState('');
   const [licenseFileName, setLicenseFileName] = useState('');
   const [licenseEditing, setLicenseEditing] = useState(false);
   const [uploadingLicense, setUploadingLicense] = useState(false);
@@ -2625,6 +2655,48 @@ export default function DriverPortal() {
                     </div>
                   </>
                 )}
+              </div>
+            )}
+          </div>
+
+          {/* Equipment photo — single photo showing truck + trailer + equipment together */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Truck className="w-4 h-4 text-emerald-500" />
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('driverPortal.equipmentPhotoTitle')}</h3>
+              </div>
+              <button onClick={() => setEquipmentPhotoEditing(v => !v)}
+                className="text-xs text-blue-500 hover:text-blue-600 font-semibold flex items-center gap-1">
+                <Edit3 className="w-3 h-3" /> {equipmentPhotoEditing ? t('driverPortal.close') : t('driverPortal.edit')}
+              </button>
+            </div>
+            <p className="text-[11px] text-gray-400 dark:text-slate-500 mb-3">{t('driverPortal.equipmentPhotoHint')}</p>
+
+            {equipmentPhotoPreview ? (
+              <img src={equipmentPhotoPreview} alt={t('driverPortal.equipmentPhotoTitle')} className="w-full rounded-xl mb-3" />
+            ) : (
+              <div className="flex items-center justify-between py-2 border-b border-gray-50 dark:border-slate-700 mb-1">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm text-gray-700 dark:text-slate-300">{t('driverPortal.noFile')}</span>
+                </div>
+              </div>
+            )}
+
+            {equipmentPhotoEditing && (
+              <div className="mt-2 space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer min-w-0">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-dashed border-blue-300 dark:border-blue-700 hover:border-blue-400 transition-colors flex-1 min-w-0 overflow-hidden">
+                    {uploadingEquipmentPhoto
+                      ? <div className="w-4 h-4 border-2 border-blue-300 border-t-blue-500 rounded-full animate-spin flex-shrink-0" />
+                      : <Upload className="w-4 h-4 text-blue-400 flex-shrink-0" />}
+                    <span className="text-xs text-gray-500 dark:text-slate-400 truncate min-w-0">{t('driverPortal.selectFile')}</span>
+                  </div>
+                  <input type="file" accept=".jpg,.jpeg,.png" className="hidden"
+                    onChange={e => e.target.files?.[0] && handleEquipmentPhotoUpload(e.target.files[0])} />
+                </label>
+                {equipmentPhotoError && <p className="text-xs text-red-500">{equipmentPhotoError}</p>}
               </div>
             )}
           </div>

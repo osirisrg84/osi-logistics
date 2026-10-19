@@ -301,6 +301,14 @@ export async function initDatabase(): Promise<void> {
     uploaded_at TEXT NOT NULL
   )`);
 
+  // Single photo showing the driver's truck, trailer, and equipment together.
+  await exec(`CREATE TABLE IF NOT EXISTS driver_equipment_documents (
+    driver_id   TEXT PRIMARY KEY,
+    filename    TEXT NOT NULL,
+    data        TEXT NOT NULL,
+    uploaded_at TEXT NOT NULL
+  )`);
+
   // Dispatcher ID document (photo of a government ID), captured at registration
   // so the identity-verification admin check has something real to compare the
   // declared date_of_birth against. Kept in its own table, not a column on

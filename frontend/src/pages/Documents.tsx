@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FolderOpen, Search, RefreshCw, XCircle, FileBadge, Contact, ShieldCheck } from 'lucide-react';
+import { FolderOpen, Search, RefreshCw, XCircle, FileBadge, Contact, ShieldCheck, Truck } from 'lucide-react';
 import { format } from 'date-fns';
 import api, { adminApi } from '../services/api';
 
-type DocType = 'dispatcher_id' | 'driver_license' | 'driver_coi';
+type DocType = 'dispatcher_id' | 'driver_license' | 'driver_coi' | 'driver_equipment';
 
 interface DocumentRow {
   doc_type: DocType;
@@ -19,18 +19,21 @@ const TYPE_ENDPOINT: Record<DocType, (id: string) => string> = {
   dispatcher_id: id => `/admin/dispatchers/${id}/id-document`,
   driver_license: id => `/drivers/${id}/license-document`,
   driver_coi: id => `/drivers/${id}/coi-document`,
+  driver_equipment: id => `/drivers/${id}/equipment-document`,
 };
 
 const TYPE_ICON: Record<DocType, React.ReactNode> = {
   dispatcher_id: <Contact className="w-4 h-4" />,
   driver_license: <FileBadge className="w-4 h-4" />,
   driver_coi: <ShieldCheck className="w-4 h-4" />,
+  driver_equipment: <Truck className="w-4 h-4" />,
 };
 
 const TYPE_COLOR: Record<DocType, string> = {
   dispatcher_id: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
   driver_license: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
   driver_coi: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  driver_equipment: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
 };
 
 export default function Documents() {
@@ -39,6 +42,7 @@ export default function Documents() {
     dispatcher_id: t('documents.typeDispatcherId'),
     driver_license: t('documents.typeDriverLicense'),
     driver_coi: t('documents.typeDriverCoi'),
+    driver_equipment: t('documents.typeDriverEquipment'),
   };
 
   const [docs, setDocs] = useState<DocumentRow[]>([]);
@@ -99,12 +103,13 @@ export default function Documents() {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {[
           { label: t('documents.statAll'), value: docs.length, filter: 'all' as const, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/20' },
           { label: t('documents.typeDispatcherId'), value: countFor('dispatcher_id'), filter: 'dispatcher_id' as const, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/20' },
           { label: t('documents.typeDriverLicense'), value: countFor('driver_license'), filter: 'driver_license' as const, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
           { label: t('documents.typeDriverCoi'), value: countFor('driver_coi'), filter: 'driver_coi' as const, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+          { label: t('documents.typeDriverEquipment'), value: countFor('driver_equipment'), filter: 'driver_equipment' as const, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
         ].map(s => (
           <button key={s.label} onClick={() => setFilter(s.filter)}
             className={`card ${s.bg} p-4 text-left transition-all ${filter === s.filter ? 'ring-2 ring-purple-400' : ''}`}>
@@ -122,6 +127,7 @@ export default function Documents() {
             ['dispatcher_id', t('documents.typeDispatcherId')],
             ['driver_license', t('documents.typeDriverLicense')],
             ['driver_coi', t('documents.typeDriverCoi')],
+            ['driver_equipment', t('documents.typeDriverEquipment')],
           ] as const).map(([v, l]) => (
             <button key={v} onClick={() => setFilter(v)}
               className={`px-3 py-2 transition-colors ${filter === v ? 'bg-purple-600 text-white' : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'} ${v !== 'all' ? 'border-l border-gray-200 dark:border-slate-700' : ''}`}
