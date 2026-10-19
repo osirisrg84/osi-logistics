@@ -754,6 +754,36 @@ export default function DriverPortal() {
   // Use driver.id as the primary ID — it comes directly from the loaded driverProfile
   const driverId = driver?.id ?? user?.driver_id ?? '';
 
+  useEffect(() => {
+    if (!driverId) return;
+    driversApi.getLicenseDocument(driverId)
+      .then(({ data }) => setLicenseFileName(data.filename))
+      .catch(() => setLicenseFileName(''));
+  }, [driverId]);
+
+  const handleLicenseUpload = async (file: File) => {
+    setLicenseError('');
+    if (file.size > 8 * 1024 * 1024) {
+      setLicenseError(t('driverPortal.errorFileTooLarge'));
+      return;
+    }
+    setUploadingLicense(true);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      await driversApi.uploadLicenseDocument(driverId, { filename: file.name, data: base64 });
+      setLicenseFileName(file.name);
+    } catch {
+      setLicenseError(t('driverPortal.errorUploadingFile'));
+    } finally {
+      setUploadingLicense(false);
+    }
+  };
+
   const addFavorite = async () => {
     if (!newFav.name.trim() || !newFav.address.trim() || !driverId) return;
     setSavingFav(true);
@@ -790,6 +820,10 @@ export default function DriverPortal() {
   const [coiFileName, setCoiFileName] = useState('');
   const [coiExpiry, setCoiExpiry] = useState('');
   const [coiEditing, setCoiEditing] = useState(false);
+  const [licenseFileName, setLicenseFileName] = useState('');
+  const [licenseEditing, setLicenseEditing] = useState(false);
+  const [uploadingLicense, setUploadingLicense] = useState(false);
+  const [licenseError, setLicenseError] = useState('');
 
   // Factoring
   const [factoringCompany, setFactoringCompany] = useState('');
@@ -2701,6 +2735,54 @@ export default function DriverPortal() {
               </div>
             );
           })()}
+
+          {/* Driver's License photo */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-indigo-500" />
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('driverPortal.licenseDocTitle')}</h3>
+              </div>
+              <button onClick={() => setLicenseEditing(v => !v)}
+                className="text-xs text-blue-500 hover:text-blue-600 font-semibold flex items-center gap-1">
+                <Edit3 className="w-3 h-3" /> {licenseEditing ? t('driverPortal.close') : t('driverPortal.edit')}
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between py-2 border-b border-gray-50 dark:border-slate-700">
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4" style={{ color: licenseFileName ? '#22c55e' : '#94a3b8' }} />
+                <span className="text-sm text-gray-700 dark:text-slate-300 truncate max-w-[160px]">
+                  {licenseFileName || t('driverPortal.noFile')}
+                </span>
+              </div>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{
+                background: licenseFileName ? '#22c55e18' : '#94a3b818',
+                color: licenseFileName ? '#22c55e' : '#94a3b8',
+              }}>
+                {licenseFileName ? t('driverPortal.coiValid') : t('driverPortal.coiNotUploaded')}
+              </span>
+            </div>
+
+            {licenseEditing && (
+              <div className="mt-3 space-y-2">
+                <p className="text-xs text-gray-500 dark:text-slate-400 mb-1.5">{t('driverPortal.fileLabel')}</p>
+                <label className="flex items-center gap-2 cursor-pointer min-w-0">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-dashed border-blue-300 dark:border-blue-700 hover:border-blue-400 transition-colors flex-1 min-w-0 overflow-hidden">
+                    {uploadingLicense
+                      ? <div className="w-4 h-4 border-2 border-blue-300 border-t-blue-500 rounded-full animate-spin flex-shrink-0" />
+                      : <Upload className="w-4 h-4 text-blue-400 flex-shrink-0" />}
+                    <span className="text-xs text-gray-500 dark:text-slate-400 truncate min-w-0">
+                      {licenseFileName || t('driverPortal.selectFile')}
+                    </span>
+                  </div>
+                  <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden"
+                    onChange={e => e.target.files?.[0] && handleLicenseUpload(e.target.files[0])} />
+                </label>
+                {licenseError && <p className="text-xs text-red-500">{licenseError}</p>}
+              </div>
+            )}
+          </div>
 
           {/* Factoring */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-4">

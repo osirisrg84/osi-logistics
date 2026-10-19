@@ -59,6 +59,9 @@ export const driversApi = {
     api.post(`/drivers/${id}/favorites`, data),
   deleteFavorite: (driverId: string, favId: string) =>
     api.delete(`/drivers/${driverId}/favorites/${favId}`),
+  getLicenseDocument: (id: string) => api.get(`/drivers/${id}/license-document`),
+  uploadLicenseDocument: (id: string, data: { filename: string; data: string }) =>
+    api.post(`/drivers/${id}/license-document`, data),
 };
 
 export const billingApi = {

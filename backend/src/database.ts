@@ -280,6 +280,28 @@ export async function initDatabase(): Promise<void> {
   )`);
   await exec(`CREATE INDEX IF NOT EXISTS idx_order_documents_order_id ON order_documents(order_id)`);
 
+  // Driver's license photo, uploaded by the driver themselves from their own
+  // profile (not at registration) -- same base64-in-side-table approach as
+  // the other document tables, so it never rides along on `SELECT d.*`.
+  await exec(`CREATE TABLE IF NOT EXISTS driver_license_documents (
+    driver_id   TEXT PRIMARY KEY,
+    filename    TEXT NOT NULL,
+    data        TEXT NOT NULL,
+    uploaded_at TEXT NOT NULL
+  )`);
+
+  // Dispatcher ID document (photo of a government ID), captured at registration
+  // so the identity-verification admin check has something real to compare the
+  // declared date_of_birth against. Kept in its own table, not a column on
+  // `users`, for the same reason as order_rate_cons/order_documents: the base64
+  // blob must never ride along on a `SELECT u.*`/`SELECT * FROM users` query.
+  await exec(`CREATE TABLE IF NOT EXISTS dispatcher_id_documents (
+    user_id     TEXT PRIMARY KEY,
+    filename    TEXT NOT NULL,
+    data        TEXT NOT NULL,
+    uploaded_at TEXT NOT NULL
+  )`);
+
   // Web Push subscriptions. driver_id is set when a driver subscribes (so we can push a
   // specific offer straight to them); NULL when a dispatcher subscribes for broadcast-only
   // alerts like "driver online". Persisted (not in-memory) so subscriptions survive restarts.

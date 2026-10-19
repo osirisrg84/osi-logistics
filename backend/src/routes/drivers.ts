@@ -162,6 +162,43 @@ router.put('/:id', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
+// Driver's license photo — uploaded by the driver from their own profile,
+// kept in its own table for the same reason as order_rate_cons (the base64
+// blob must never ride along on a `SELECT d.*` list/detail query).
+router.get('/:id/license-document', async (req: Request, res: Response) => {
+  try {
+    const doc = await queryOne<{ filename: string; data: string; uploaded_at: string }>(
+      'SELECT filename, data, uploaded_at FROM driver_license_documents WHERE driver_id = ?', [req.params.id]);
+    if (!doc) return res.status(404).json({ error: 'No license document uploaded' });
+    res.json(doc);
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.post('/:id/license-document', async (req: Request, res: Response) => {
+  try {
+    const { filename, data } = req.body;
+    if (!filename || !data) return res.status(400).json({ error: 'filename and data are required' });
+    if (data.length > 12_000_000) return res.status(413).json({ error: 'File too large (max ~8MB)' });
+
+    const driver = await queryOne('SELECT id FROM drivers WHERE id = ?', [req.params.id]);
+    if (!driver) return res.status(404).json({ error: 'Driver not found' });
+
+    const uploadedAt = new Date().toISOString();
+    await exec(`INSERT INTO driver_license_documents (driver_id, filename, data, uploaded_at) VALUES (?, ?, ?, ?)
+      ON CONFLICT(driver_id) DO UPDATE SET filename = excluded.filename, data = excluded.data, uploaded_at = excluded.uploaded_at`,
+      [req.params.id, filename, data, uploadedAt]);
+
+    res.json({ filename, uploaded_at: uploadedAt });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.delete('/:id/license-document', async (req: Request, res: Response) => {
+  try {
+    await exec('DELETE FROM driver_license_documents WHERE driver_id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
 router.post('/:id/location', async (req: Request, res: Response) => {
   try {
     const { lat, lng, speed = 0, heading = 0, address = '' } = req.body;

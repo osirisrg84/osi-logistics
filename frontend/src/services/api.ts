@@ -70,6 +70,9 @@ export const driversApi = {
   getFavorites: (id: string) => api.get(`/drivers/${id}/favorites`),
   addFavorite: (id: string, data: { name: string; address: string; type: string }) => api.post(`/drivers/${id}/favorites`, data),
   deleteFavorite: (driverId: string, favId: string) => api.delete(`/drivers/${driverId}/favorites/${favId}`),
+  getLicenseDocument: (id: string) => api.get(`/drivers/${id}/license-document`),
+  uploadLicenseDocument: (id: string, data: { filename: string; data: string }) => api.post(`/drivers/${id}/license-document`, data),
+  deleteLicenseDocument: (id: string) => api.delete(`/drivers/${id}/license-document`),
 };
 
 export const trucksApi = {

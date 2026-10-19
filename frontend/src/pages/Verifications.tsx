@@ -40,6 +40,7 @@ interface DriverEntity {
   user_id: string;
   active: number;
   approval_status: string;
+  has_license_document: number;
 }
 
 interface DispatcherEntity {
@@ -57,6 +58,7 @@ interface DispatcherEntity {
   dispatcher_code: string;
   active: number;
   approval_status: string;
+  has_id_document: number;
 }
 
 const STATUS_STYLES: Record<CheckStatus, string> = {
@@ -344,6 +346,20 @@ export default function Verifications() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'pending' | 'issues'>('all');
+  const [idDocLoading, setIdDocLoading] = useState<string | null>(null);
+  const [idDocModal, setIdDocModal] = useState<{ name: string; filename: string; data: string } | null>(null);
+
+  const openDocument = async (entityId: string, name: string, url: string) => {
+    setIdDocLoading(entityId);
+    try {
+      const { data } = await api.get(url);
+      setIdDocModal({ name, filename: data.filename, data: data.data });
+    } catch {
+      // no document on file, or fetch failed — silently no-op
+    } finally {
+      setIdDocLoading(null);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -498,6 +514,19 @@ export default function Verifications() {
                 >
                   <InfoRow label={t('verifications.licenseNumber')} value={d.license_number} />
                   <InfoRow label={t('verifications.expires')} value={d.license_expiry ? format(new Date(d.license_expiry), 'MMM d, yyyy') : '—'} warn={!!d.license_expiry && new Date(d.license_expiry) < new Date(Date.now() + 90*24*3600*1000)} />
+                  <div>
+                    <span className="text-xs text-gray-500 dark:text-slate-400">{t('verifications.licensePhoto')}: </span>
+                    {d.has_license_document ? (
+                      <button type="button" onClick={() => openDocument(d.id, d.name, `/drivers/${d.id}/license-document`)} disabled={idDocLoading === d.id}
+                        className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50">
+                        {idDocLoading === d.id ? '...' : t('verifications.viewIdDocument')}
+                      </button>
+                    ) : (
+                      <span className="text-xs font-medium text-red-600 dark:text-red-400">
+                        <AlertTriangle className="w-3 h-3 inline mr-0.5 -mt-0.5" /> {t('verifications.notUploaded')}
+                      </span>
+                    )}
+                  </div>
                   <InfoRow label={t('verifications.coi')} value={d.coi_filename || t('verifications.notUploaded')} warn={!d.coi_filename} />
                   <InfoRow label={t('verifications.coiExpires')} value={d.coi_expiry ? format(new Date(d.coi_expiry), 'MMM d, yyyy') : '—'} warn={!!d.coi_expiry && new Date(d.coi_expiry) < new Date(Date.now() + 90*24*3600*1000)} />
                   <InfoRow label={t('verifications.hireDate')} value={d.hire_date ? format(new Date(d.hire_date), 'MMM d, yyyy') : '—'} />
@@ -532,6 +561,19 @@ export default function Verifications() {
                   onArchive={handleArchive}
                 >
                   <InfoRow label={t('verifications.dob')} value={d.date_of_birth || '—'} />
+                  <div>
+                    <span className="text-xs text-gray-500 dark:text-slate-400">{t('verifications.idDocument')}: </span>
+                    {d.has_id_document ? (
+                      <button type="button" onClick={() => openDocument(d.id, d.name, `/admin/dispatchers/${d.id}/id-document`)} disabled={idDocLoading === d.id}
+                        className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50">
+                        {idDocLoading === d.id ? '...' : t('verifications.viewIdDocument')}
+                      </button>
+                    ) : (
+                      <span className="text-xs font-medium text-red-600 dark:text-red-400">
+                        <AlertTriangle className="w-3 h-3 inline mr-0.5 -mt-0.5" /> {t('verifications.notUploaded')}
+                      </span>
+                    )}
+                  </div>
                   <InfoRow label={t('verifications.city')} value={d.city || '—'} />
                   <InfoRow label={t('verifications.experience')} value={t('verifications.yearsExp', { count: d.years_experience })} />
                   <InfoRow label={t('verifications.availability')} value={d.availability} />
@@ -554,6 +596,24 @@ export default function Verifications() {
             })}
           </div>
         )
+      )}
+
+      {idDocModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setIdDocModal(null)}>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full max-h-[85vh] overflow-auto p-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{idDocModal.name} — {t('verifications.idDocument')}</p>
+              <button onClick={() => setIdDocModal(null)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
+                <XCircle className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+            {idDocModal.data.startsWith('data:application/pdf') ? (
+              <a href={idDocModal.data} download={idDocModal.filename} className="text-sm text-blue-500 underline">{idDocModal.filename}</a>
+            ) : (
+              <img src={idDocModal.data} alt={idDocModal.filename} className="w-full rounded-xl" />
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

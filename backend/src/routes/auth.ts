@@ -68,10 +68,17 @@ router.post('/register', async (req: Request, res: Response) => {
       phone = '', date_of_birth = '', city = '', country = '',
       years_experience = 0, previous_companies = '', languages = '', availability = 'full-time',
       equipment_experience = '',
+      id_document_filename = '', id_document_data = '',
     } = req.body;
 
     if (!name || !email || !password) return res.status(400).json({ error: 'Name, email, and password are required' });
     if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    if (role === 'dispatcher' && (!id_document_filename || !id_document_data)) {
+      return res.status(400).json({ error: 'A government ID photo is required to register as a dispatcher' });
+    }
+    if (id_document_data && id_document_data.length > 12_000_000) {
+      return res.status(413).json({ error: 'ID photo too large (max ~8MB)' });
+    }
 
     const existing = await queryOne('SELECT id FROM users WHERE email = ?', [email.toLowerCase()]);
     if (existing) return res.status(409).json({ error: 'An account with this email already exists' });
@@ -101,6 +108,11 @@ router.post('/register', async (req: Request, res: Response) => {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending')`,
       [id, name, email.toLowerCase(), passwordHash, salt, role, driver_id,
        phone, date_of_birth, city, country, years_experience, previous_companies, languages, availability, equipment_experience, dispatcher_code]);
+
+    if (id_document_filename && id_document_data) {
+      await exec(`INSERT INTO dispatcher_id_documents (user_id, filename, data, uploaded_at) VALUES (?, ?, ?, ?)`,
+        [id, id_document_filename, id_document_data, new Date().toISOString()]);
+    }
 
     await exec("INSERT INTO notifications (id, type, title, message, read) VALUES (?, 'system', 'Nueva Cuenta Pendiente de Aprobación', ?, 0)",
       [uuidv4(), `${name} (${role}) se registró y está esperando aprobación.`]);

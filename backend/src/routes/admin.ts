@@ -257,7 +257,8 @@ router.get('/verifications', async (_req: Request, res: Response) => {
       SELECT d.id, d.name, d.email, d.phone, d.license_number, d.license_expiry,
              d.equipment_type, d.company_name, d.mc_number, d.coi_filename,
              d.coi_expiry, d.hire_date, d.avatar, d.driver_code,
-             u.id as user_id, u.active, u.approval_status
+             u.id as user_id, u.active, u.approval_status,
+             EXISTS(SELECT 1 FROM driver_license_documents WHERE driver_id = d.id) as has_license_document
       FROM drivers d
       INNER JOIN users u ON u.driver_id = d.id
       WHERE u.approval_status IN ('pending', 'approved')
@@ -270,7 +271,8 @@ router.get('/verifications', async (_req: Request, res: Response) => {
       SELECT u.id, u.name, u.email, u.phone, u.city, u.years_experience,
              u.previous_companies, u.languages, u.availability,
              u.equipment_experience, u.date_of_birth, u.dispatcher_code,
-             u.active, u.approval_status
+             u.active, u.approval_status,
+             EXISTS(SELECT 1 FROM dispatcher_id_documents WHERE user_id = u.id) as has_id_document
       FROM users u
       WHERE u.role = 'dispatcher' AND u.approval_status IN ('pending', 'approved')
       ORDER BY u.active ASC, u.name ASC
@@ -282,6 +284,15 @@ router.get('/verifications', async (_req: Request, res: Response) => {
     `);
 
     res.json({ drivers, dispatchers, checks: allChecks });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.get('/dispatchers/:id/id-document', async (req: Request, res: Response) => {
+  try {
+    const doc = await queryOne<{ filename: string; data: string; uploaded_at: string }>(
+      'SELECT filename, data, uploaded_at FROM dispatcher_id_documents WHERE user_id = ?', [req.params.id]);
+    if (!doc) return res.status(404).json({ error: 'No ID document uploaded' });
+    res.json(doc);
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 

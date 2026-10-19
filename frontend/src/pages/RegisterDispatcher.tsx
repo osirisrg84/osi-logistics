@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ClipboardList, Eye, EyeOff, AlertCircle, CheckCircle2,
   ArrowLeft, User, Phone, Mail, Lock, MapPin, Briefcase,
-  Plus, X, Globe, Clock,
+  Plus, X, Globe, Clock, FileBadge, UploadCloud,
 } from 'lucide-react';
 import { authApi } from '../services/api';
 
@@ -46,6 +46,9 @@ export default function RegisterDispatcher() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [declared, setDeclared] = useState(false);
+  const [idDocument, setIdDocument] = useState<{ filename: string; data: string } | null>(null);
+  const [idDocError, setIdDocError] = useState('');
+  const [uploadingIdDoc, setUploadingIdDoc] = useState(false);
 
   const set = (field: keyof typeof form) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -76,11 +79,34 @@ export default function RegisterDispatcher() {
       prev.includes(eq) ? prev.filter(e => e !== eq) : [...prev, eq]
     );
 
+  const handleIdDocUpload = async (file: File) => {
+    setIdDocError('');
+    if (file.size > 8 * 1024 * 1024) {
+      setIdDocError(t('registerDispatcher.errorFileTooLarge'));
+      return;
+    }
+    setUploadingIdDoc(true);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      setIdDocument({ filename: file.name, data: base64 });
+    } catch {
+      setIdDocError(t('registerDispatcher.errorUploadingFile'));
+    } finally {
+      setUploadingIdDoc(false);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     if (form.password !== form.confirm) { setError(t('registerDispatcher.errorPasswordMismatch')); return; }
     if (form.password.length < 8) { setError(t('registerDispatcher.errorPasswordTooShort')); return; }
+    if (!idDocument) { setError(t('registerDispatcher.errorIdDocumentRequired')); return; }
     setLoading(true);
     try {
       const previous_companies = companies.filter(c => c.trim()).join(', ');
@@ -98,6 +124,8 @@ export default function RegisterDispatcher() {
         languages:            languages.join(', '),
         availability:         form.availability,
         equipment_experience: equipmentExp.join(', '),
+        id_document_filename: idDocument?.filename,
+        id_document_data:     idDocument?.data,
       });
       setRegisteredName(form.name);
       setRegistered(true);
@@ -175,6 +203,37 @@ export default function RegisterDispatcher() {
             <Field label={t('registerDispatcher.dobLabel')} required>
               <input className="input" type="date"
                 value={form.date_of_birth} onChange={set('date_of_birth')} required />
+            </Field>
+
+            <Field label={t('registerDispatcher.idDocumentLabel')} required>
+              <p className="text-[11px] text-gray-400 mb-1.5">{t('registerDispatcher.idDocumentHint')}</p>
+              {idDocument ? (
+                <div className="flex items-center justify-between gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileBadge className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                    <span className="text-xs text-gray-600 truncate">
+                      {t('registerDispatcher.idDocumentUploaded')} <span className="font-medium">{idDocument.filename}</span>
+                    </span>
+                  </div>
+                  <label className="text-xs text-orange-500 hover:text-orange-600 font-semibold cursor-pointer flex-shrink-0">
+                    {t('registerDispatcher.idDocumentChange')}
+                    <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={e => e.target.files?.[0] && handleIdDocUpload(e.target.files[0])} />
+                  </label>
+                </div>
+              ) : (
+                <label className={`flex items-center justify-center gap-2 border-2 border-dashed rounded-xl px-3 py-4 cursor-pointer transition-colors ${
+                  idDocError ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-orange-300 bg-gray-50'
+                }`}>
+                  <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={e => e.target.files?.[0] && handleIdDocUpload(e.target.files[0])} />
+                  {uploadingIdDoc
+                    ? <div className="w-4 h-4 border-2 border-orange-300 border-t-orange-500 rounded-full animate-spin" />
+                    : <UploadCloud className="w-4 h-4 text-gray-400" />}
+                  <span className="text-xs text-gray-500 font-medium">{t('registerDispatcher.idDocumentUploadCta')}</span>
+                </label>
+              )}
+              {idDocError && <p className="text-[11px] text-red-500 mt-1">{idDocError}</p>}
             </Field>
 
             {/* Sin restriccion a EEUU -- texto libre para que cualquier pais
@@ -395,7 +454,7 @@ export default function RegisterDispatcher() {
           </label>
 
           {/* Submit */}
-          <button type="submit" disabled={loading || !declared}
+          <button type="submit" disabled={loading || uploadingIdDoc || !declared}
             className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-2xl transition-colors flex items-center justify-center gap-2 text-base shadow-xl shadow-orange-500/20">
             {loading
               ? <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {t('registerDispatcher.creatingAccount')}</>
