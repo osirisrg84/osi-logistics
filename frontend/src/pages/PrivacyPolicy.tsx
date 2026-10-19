@@ -21,7 +21,7 @@ export default function PrivacyPolicy() {
 
         <div className="bg-white rounded-3xl shadow-2xl p-8">
           <div className="flex items-center gap-3 mb-1">
-            <img src={osiLogo} alt="OSI Logistics" className="w-10 h-10 rounded-xl object-cover" />
+            <img src={osiLogo} alt="OSI Logistics" className="h-10 w-auto object-contain rounded-md" />
             <div>
               <h1 className="text-xl font-bold text-gray-900">Política de Privacidad</h1>
               <p className="text-xs text-gray-400">OSI Logistics · Última actualización: octubre de 2026</p>
