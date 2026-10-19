@@ -28,6 +28,7 @@ import DispatcherHub from './pages/DispatcherHub';
 import DispatcherProfilePage from './pages/DispatcherProfilePage';
 import DriverPortal from './pages/DriverPortal';
 import SetupAdmin from './pages/SetupAdmin';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 function Spinner() {
   return (
@@ -110,6 +111,7 @@ function AppRoutes() {
       <Route path="/"    element={<PublicOnly><Landing /></PublicOnly>} />
       <Route path="/app" element={<PublicOnly><Landing /></PublicOnly>} />
       <Route path="/setup-admin" element={<SetupAdmin />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
 
       {/* Portal logins */}
       <Route path="/admin"      element={<PublicOnly><AdminLogin /></PublicOnly>} />
