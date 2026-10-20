@@ -220,7 +220,7 @@ export default function Login() {
 
         <p className="text-xs text-slate-600 mt-6 text-center">
           {t('login.driverPrompt')}{' '}
-          <Link to="/driver/login" className="text-blue-400 hover:text-blue-300 font-medium">{t('login.driverPortalLink')}</Link>
+          <a href="https://www.osilogistics.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 font-medium">{t('login.driverPortalLink')}</a>
         </p>
       </div>
     </div>

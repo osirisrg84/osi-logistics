@@ -351,7 +351,7 @@ export default function DriverLogin() {
 
         <p className="text-xs text-slate-600 mt-6 text-center">
           {t('driverLogin.isDispatcher')}{' '}
-          <Link to="/dispatcher" className="text-orange-400 hover:text-orange-300 font-medium">{t('driverLogin.dispatcherPortal')}</Link>
+          <a href="https://www.osilogistics.com/" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 font-medium">{t('driverLogin.dispatcherPortal')}</a>
         </p>
       </div>
     </div>

@@ -523,6 +523,37 @@ export async function initDatabase(): Promise<void> {
     await exec("DELETE FROM meta WHERE key = 'demo_refreshed_at'");
     await exec("INSERT OR REPLACE INTO meta (key, value) VALUES ('demo_dispatcher_settle_v1', '1')");
   }
+  // commissions.dispatcher_name es una copia desnormalizada tomada al crear
+  // la fila, no un join en vivo -- seedCommissions() escribia el literal
+  // 'Dispatcher OSI' en vez del nombre real del usuario, asi que las 3
+  // comisiones de ejemplo originales de Maria Gonzalez aparecian agrupadas
+  // aparte (GROUP BY dispatcher_user_id, dispatcher_name en /billing/by-dispatcher),
+  // partiendo sus ganancias reportadas en dos filas en vez de una. Sincroniza
+  // una sola vez cualquier fila cuyo nombre guardado ya no coincida con el
+  // nombre actual del usuario.
+  const dispNameFixFlag = await queryOne<{ value: string }>("SELECT value FROM meta WHERE key = 'dispatcher_name_sync_v1'");
+  if (!dispNameFixFlag) {
+    await exec(`
+      UPDATE commissions SET dispatcher_name = (SELECT name FROM users WHERE users.id = commissions.dispatcher_user_id)
+      WHERE dispatcher_user_id IS NOT NULL
+        AND dispatcher_name IS NOT (SELECT name FROM users WHERE users.id = commissions.dispatcher_user_id)
+    `);
+    await exec("INSERT OR REPLACE INTO meta (key, value) VALUES ('dispatcher_name_sync_v1', '1')");
+  }
+  // drivers.total_deliveries y on_time_rate son numeros estaticos puestos
+  // por el seed inicial (driverData mas abajo) -- nunca se recalculaban, asi
+  // que al crecer el volumen de ordenes historicas demo (seedHistoricalOrders)
+  // terminaron completamente desalineados con la actividad real: James Wilson
+  // mostraba 68 "total" pero 87 entregas reales en los ultimos 30 dias (mas
+  // reciente que total, imposible), y la mayoria de los demas mostraban un
+  // total muy por encima de su actividad real. Fuerza un refresh hoy para
+  // que el recalculo que se agrega abajo en refreshDemoData() se aplique de
+  // inmediato.
+  const driverStatsFixFlag = await queryOne<{ value: string }>("SELECT value FROM meta WHERE key = 'demo_driver_stats_sync_v1'");
+  if (!driverStatsFixFlag) {
+    await exec("DELETE FROM meta WHERE key = 'demo_refreshed_at'");
+    await exec("INSERT OR REPLACE INTO meta (key, value) VALUES ('demo_driver_stats_sync_v1', '1')");
+  }
   await refreshDemoData();
   await syncDemoDriverStatus();
 }
@@ -799,6 +830,24 @@ async function refreshDemoData(): Promise<void> {
       )
   `);
 
+  // Mantiene total_deliveries/on_time_rate de los drivers demo alineados con
+  // su historial real de ordenes -- antes eran numeros fijos del seed inicial
+  // que nunca se tocaban de nuevo, asi que cada refresh diario (que SI mueve
+  // fechas y reparte ordenes) los dejaba cada vez mas desalineados. Recalcula
+  // en cada refresh para que nunca puedan volver a desincronizarse.
+  await exec(`
+    UPDATE drivers SET
+      total_deliveries = (
+        SELECT COUNT(*) FROM orders WHERE orders.driver_id = drivers.id AND orders.status = 'delivered'
+      ),
+      on_time_rate = (
+        SELECT ROUND(COALESCE(AVG(CASE WHEN delivered_at <= estimated_delivery THEN 100.0 ELSE 0 END), 0), 1)
+        FROM orders
+        WHERE orders.driver_id = drivers.id AND orders.status = 'delivered' AND estimated_delivery IS NOT NULL
+      )
+    WHERE email LIKE '%@osilogistics.com'
+  `);
+
   await exec("INSERT OR REPLACE INTO meta (key, value) VALUES ('demo_refreshed_at', ?)", [today]);
   console.log(`✅ Demo refreshed: ${DELIVERED_COUNT} delivered, ${total - DELIVERED_COUNT} active orders`);
 }
@@ -874,7 +923,7 @@ async function seedCommissions(): Promise<void> {
   const carlos   = await queryOne<{ id: string }>("SELECT id FROM drivers WHERE email = 'carlos.r@osilogistics.com' LIMIT 1");
   const marcus   = await queryOne<{ id: string }>("SELECT id FROM drivers WHERE email = 'marcus.j@osilogistics.com' LIMIT 1");
   const sofia    = await queryOne<{ id: string }>("SELECT id FROM drivers WHERE email = 'sofia.h@osilogistics.com' LIMIT 1");
-  const dispUser = await queryOne<{ id: string }>("SELECT id FROM users WHERE email = 'dispatcher@osilogistics.com' LIMIT 1");
+  const dispUser = await queryOne<{ id: string; name: string }>("SELECT id, name FROM users WHERE email = 'dispatcher@osilogistics.com' LIMIT 1");
   if (!carlos || !marcus || !sofia) return;
 
   for (const [driver, driverName, price, date, status, settled] of [
@@ -890,7 +939,7 @@ async function seedCommissions(): Promise<void> {
        order_price, driver_charge, dispatcher_pay, net_osi, delivery_date, status, settled_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [uuidv4(), uuidv4(), `OSI-SEED-${driver.slice(0,4)}`, driver, driverName,
-       dispUser?.id ?? null, dispUser ? 'Dispatcher OSI' : null,
+       dispUser?.id ?? null, dispUser?.name ?? null,
        price, dc, dp, no, date, status, settled]);
   }
   console.log('   💰 3 example commissions seeded');
