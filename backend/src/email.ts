@@ -252,8 +252,8 @@ export async function sendActivationEmail(to: string, name: string, role: string
                           <div style="width:28px;height:28px;background:#fff7ed;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#f97316;">2</div>
                         </td>
                         <td style="padding:10px 0 10px 8px;vertical-align:top;">
-                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Explora el Dashboard y Órdenes</p>
-                          <p style="margin:0;font-size:13px;color:#6b7280;">Familiarízate con el panel de control, la lista de órdenes y el rastreo en vivo de la flota.</p>
+                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Completa tu perfil</p>
+                          <p style="margin:0;font-size:13px;color:#6b7280;">Agrega tu método de pago y tus datos de contacto desde la sección Mi Perfil.</p>
                         </td>
                       </tr>
                       <tr><td colspan="2" style="padding:0 0 2px 0;"><div style="height:1px;background:#f3f4f6;margin-left:36px;"></div></td></tr>
@@ -291,7 +291,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
               <!-- FOOTER -->
               <tr><td style="background:#f9fafb;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 16px 16px;padding:20px 32px;text-align:center;">
                 <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:#374151;">OSI Logistics INC</p>
-                <p style="margin:0 0 12px;font-size:11px;color:#9ca3af;">Miami, FL · operations@osilogistics.com</p>
+                <p style="margin:0 0 12px;font-size:11px;color:#9ca3af;">Miami, FL · admin@osilogistics.com</p>
                 <p style="margin:0;font-size:11px;color:#d1d5db;">Si no solicitaste esta cuenta, ignora este mensaje.</p>
               </td></tr>
 
