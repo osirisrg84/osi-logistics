@@ -193,6 +193,7 @@ interface EntityCardProps {
   detail: string;
   checks: VerificationCheck[];
   checkNamespace: 'driverChecks' | 'dispatcherChecks';
+  isDemo?: boolean;
   onUpdate: (entityId: string, checkName: string, status: CheckStatus, notes: string) => Promise<void>;
   onApprove: (userId: string) => Promise<void>;
   onReject: (userId: string) => Promise<void>;
@@ -206,7 +207,7 @@ const STATUS_BANNER: Record<string, { bg: string; border: string; iconColor: str
   archived: { bg: 'bg-gray-100 dark:bg-slate-800/60',  border: 'border-gray-200 dark:border-slate-600/40',   iconColor: 'text-gray-400' },
 };
 
-function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtitle, detail, checks, checkNamespace, onUpdate, onApprove, onReject, onArchive, children }: EntityCardProps) {
+function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtitle, detail, checks, checkNamespace, isDemo, onUpdate, onApprove, onReject, onArchive, children }: EntityCardProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [acting, setAct] = useState<'approve' | 'reject' | 'archive' | null>(null);
@@ -299,6 +300,7 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{name}</p>
+            {isDemo && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400 border border-purple-200 dark:border-purple-700/40">{t('verifications.demo')}</span>}
             {approvalStatus === 'pending'  && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border border-amber-200 dark:border-amber-700/40">{t('verifications.pending')}</span>}
             {approvalStatus === 'rejected' && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border border-red-200 dark:border-red-700/40">{t('verifications.rejected')}</span>}
             {approvalStatus === 'archived' && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400 border border-gray-200 dark:border-slate-600">{t('verifications.archived')}</span>}
@@ -509,6 +511,7 @@ export default function Verifications() {
                   detail={`${d.equipment_type} · ${d.company_name}${d.mc_number ? ` · MC# ${d.mc_number.replace(/^(MC-|DOT-)/i, '')}` : ''}`}
                   checks={dChecks}
                   checkNamespace="driverChecks"
+                  isDemo={d.email?.endsWith('@osilogistics.com')}
                   onUpdate={handleUpdate}
                   onApprove={handleApprove}
                   onReject={handleReject}
@@ -582,6 +585,7 @@ export default function Verifications() {
                   detail={`${d.city} · ${t('verifications.yearsExp', { count: d.years_experience })} · ${d.availability}`}
                   checks={dChecks}
                   checkNamespace="dispatcherChecks"
+                  isDemo={d.email?.endsWith('@osilogistics.com')}
                   onUpdate={handleUpdate}
                   onApprove={handleApprove}
                   onReject={handleReject}
