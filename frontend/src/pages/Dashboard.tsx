@@ -43,7 +43,7 @@ function StatCard({ title, value, sub, icon: Icon, color, trend, onClick }: Stat
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="text-xs sm:text-sm text-gray-500 font-medium truncate">{title}</p>
+          <p className="text-xs sm:text-sm text-gray-500 font-medium">{title}</p>
           <p className="text-sm sm:text-2xl font-bold text-gray-900 dark:text-white mt-1 leading-tight whitespace-nowrap overflow-hidden">{value}</p>
           {sub && <p className="text-xs text-gray-400 mt-1 truncate">{sub}</p>}
           {trend !== undefined && (

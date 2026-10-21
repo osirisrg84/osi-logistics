@@ -257,12 +257,12 @@ export default function Fleet() {
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-auto">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
-            <input className="input pl-9 w-48" placeholder={t('fleet.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
+            <input className="input pl-9 w-full sm:w-48" placeholder={t('fleet.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
           </div>
-          <select className="input w-36" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+          <select className="input w-full sm:w-36" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
             <option value="">{t('fleet.allStatus')}</option>
             <option value="active">{t('fleet.status.active')}</option>
             <option value="maintenance">{t('fleet.status.maintenance')}</option>

@@ -306,7 +306,7 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
               <span className="bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{pendingCount}</span>
             )}
           </div>
-          <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{subtitle}</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400 break-words">{subtitle}</p>
           <p className="text-xs text-gray-400 dark:text-slate-500">{detail}</p>
         </div>
         <div className="flex-shrink-0 text-right">
@@ -318,7 +318,7 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
       {open && (
         <div className="border-t border-gray-100 dark:border-slate-700 px-5 py-4 space-y-3">
           {children && (
-            <div className="bg-gray-50 dark:bg-slate-900/50 rounded-xl p-4 grid grid-cols-2 gap-x-6 gap-y-1.5 mb-4">
+            <div className="bg-gray-50 dark:bg-slate-900/50 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mb-4">
               {children}
             </div>
           )}
