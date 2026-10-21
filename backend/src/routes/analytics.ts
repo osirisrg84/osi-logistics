@@ -89,6 +89,10 @@ router.get('/leaderboard', async (req: Request, res: Response) => {
 
 router.get('/reports/orders', async (req: Request, res: Response) => {
   try {
+    // Reportes de toda la empresa -- solo dispatcher/admin, nunca un driver.
+    // A diferencia de /dashboard y /leaderboard (arriba), estos tres no
+    // aplicaban NINGUN filtro de rol/demo-real.
+    if (req.user?.role === 'driver') return res.status(403).json({ error: 'No autorizado' });
     const { start_date, end_date, group_by = 'day' } = req.query;
     let dateFormat = '%Y-%m-%d';
     if (group_by === 'week') dateFormat = '%Y-W%W';
@@ -111,8 +115,9 @@ router.get('/reports/orders', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
-router.get('/reports/drivers', async (_req: Request, res: Response) => {
+router.get('/reports/drivers', async (req: Request, res: Response) => {
   try {
+    if (req.user?.role === 'driver') return res.status(403).json({ error: 'No autorizado' });
     const data = await query(`
       SELECT d.name, d.rating, d.total_deliveries, d.on_time_rate, d.status,
              COUNT(o.id) as orders_this_month,
@@ -126,8 +131,9 @@ router.get('/reports/drivers', async (_req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
-router.get('/reports/fleet', async (_req: Request, res: Response) => {
+router.get('/reports/fleet', async (req: Request, res: Response) => {
   try {
+    if (req.user?.role === 'driver') return res.status(403).json({ error: 'No autorizado' });
     const data = await query(`
       SELECT t.*, COUNT(o.id) as total_trips,
              COALESCE(SUM(o.distance_km), 0) as total_km,

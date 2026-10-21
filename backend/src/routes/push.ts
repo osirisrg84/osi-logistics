@@ -3,12 +3,22 @@ import webpush from 'web-push';
 import { v4 as uuidv4 } from 'uuid';
 import { exec, query } from '../database';
 
-export const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY
-  || 'BBeTA9aza6pqeFv37MnvyZEGMB1trlftrwmgSVM_qxkg7WmBmvWqfAy4TMcHly4tWsXCv9n9DVtGeemajEPC2YE';
-const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY
-  || 'sQXlHYlrucJRWRB-yCA2ionf9vTpYzTM7YoM_j5ctxU';
+// Antes, si VAPID_PUBLIC_KEY/VAPID_PRIVATE_KEY no estaban configuradas, caia
+// en un par de claves REAL hardcodeado en el codigo fuente (publico en el
+// repo) sin avisar a nadie -- el push quedaba "funcionando" con una
+// identidad de aplicacion que cualquiera con el codigo podia reusar para
+// mandar notificaciones falsas a los suscriptores reales. Ahora, si faltan,
+// el push queda deshabilitado explicitamente (con un error visible en los
+// logs) en vez de usar una clave comprometida en silencio.
+export const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY || '';
+const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || '';
+const PUSH_ENABLED = !!(VAPID_PUBLIC && VAPID_PRIVATE);
 
-webpush.setVapidDetails('mailto:admin@osilogistics.com', VAPID_PUBLIC, VAPID_PRIVATE);
+if (PUSH_ENABLED) {
+  webpush.setVapidDetails('mailto:admin@osilogistics.com', VAPID_PUBLIC, VAPID_PRIVATE);
+} else {
+  console.error('[Push] VAPID_PUBLIC_KEY/VAPID_PRIVATE_KEY no configuradas -- push notifications deshabilitadas.');
+}
 
 type StoredSub = { endpoint: string; p256dh: string; auth: string };
 
@@ -17,6 +27,7 @@ type StoredSub = { endpoint: string; p256dh: string; auth: string };
 // invalido, limite de tamano excedido, etc.). Ahora cada intento se loguea con
 // su resultado para poder diagnosticar desde los logs de Render.
 async function sendToSubscriptions(subs: StoredSub[], payload: object): Promise<void> {
+  if (!PUSH_ENABLED) return;
   if (subs.length === 0) {
     console.warn('[Push] No hay suscripciones registradas para este envio -- el driver nunca activo las notificaciones push (o su suscripcion se invalido).');
     return;
@@ -57,6 +68,7 @@ export async function sendPushToDriver(driverId: string, payload: object): Promi
 const router = Router();
 
 router.get('/vapid-public-key', (_req, res) => {
+  if (!PUSH_ENABLED) return res.status(503).json({ error: 'Push not configured' });
   res.json({ key: VAPID_PUBLIC });
 });
 

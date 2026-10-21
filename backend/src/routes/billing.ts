@@ -3,8 +3,9 @@ import { exec, query, queryOne } from '../database';
 
 const router = Router();
 
-router.get('/summary', async (_req: Request, res: Response) => {
+router.get('/summary', async (req: Request, res: Response) => {
   try {
+    if (req.user?.role === 'driver') return res.status(403).json({ error: 'No autorizado' });
     const [total_orders, total_driver_charges, total_dispatcher_pay, total_net_osi,
            pending_driver, settled_driver, pending_count, settled_count] = await Promise.all([
       queryOne<{v:number}>('SELECT COUNT(*) as v FROM commissions'),
@@ -31,7 +32,12 @@ router.get('/summary', async (_req: Request, res: Response) => {
 
 router.get('/records', async (req: Request, res: Response) => {
   try {
-    const { driver_id, dispatcher_user_id, status, dispatcher_status, search, limit = 50, offset = 0 } = req.query;
+    const { dispatcher_user_id, status, dispatcher_status, search, limit = 50, offset = 0 } = req.query;
+    // Un driver solo puede ver sus propios records -- nunca el driver_id que
+    // mande en el query string. Si no manda ninguno (como hacia antes) esto
+    // devolvía la tabla de comisiones COMPLETA de toda la empresa.
+    const driver_id = req.user?.role === 'driver' ? req.user.driver_id : req.query.driver_id;
+    if (req.user?.role === 'driver' && !driver_id) return res.json({ records: [], total: 0 });
     const filters: string[] = [];
     const p: unknown[] = [];
     if (driver_id)          { filters.push('driver_id = ?');          p.push(driver_id); }
@@ -53,8 +59,9 @@ router.get('/records', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
-router.get('/by-driver', async (_req: Request, res: Response) => {
+router.get('/by-driver', async (req: Request, res: Response) => {
   try {
+    if (req.user?.role === 'driver') return res.status(403).json({ error: 'No autorizado' });
     res.json(await query(`
       SELECT driver_id, driver_name,
              COUNT(*) as total_orders,
@@ -69,8 +76,9 @@ router.get('/by-driver', async (_req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
-router.get('/by-dispatcher', async (_req: Request, res: Response) => {
+router.get('/by-dispatcher', async (req: Request, res: Response) => {
   try {
+    if (req.user?.role === 'driver') return res.status(403).json({ error: 'No autorizado' });
     res.json(await query(`
       SELECT dispatcher_user_id,
              COALESCE(dispatcher_name, 'Sin asignar') as dispatcher_name,
@@ -88,6 +96,10 @@ router.get('/by-dispatcher', async (_req: Request, res: Response) => {
 
 router.put('/:id/settle', async (req: Request, res: Response) => {
   try {
+    // Ningun driver llama esto (solo lo usa Billing.tsx, dispatcher/admin) --
+    // antes cualquier driver podia marcar CUALQUIER comision como pagada sin
+    // que mediara ningun pago real.
+    if (req.user?.role === 'driver') return res.status(403).json({ error: 'No autorizado' });
     const row = await queryOne('SELECT id FROM commissions WHERE id = ?', [req.params.id]);
     if (!row) return res.status(404).json({ error: 'Commission not found' });
     await exec("UPDATE commissions SET status='settled', settled_at=? WHERE id=?",
@@ -98,6 +110,12 @@ router.put('/:id/settle', async (req: Request, res: Response) => {
 
 router.put('/driver/:driverId/settle-all', async (req: Request, res: Response) => {
   try {
+    // Un driver solo puede liquidar su PROPIO balance (flujo legitimo: pago
+    // con tarjeta via Stripe en su portal). Antes podia mandar cualquier
+    // driverId y marcarle a otro conductor su deuda como pagada sin pagar.
+    if (req.user?.role === 'driver' && req.user.driver_id !== req.params.driverId) {
+      return res.status(403).json({ error: 'No autorizado' });
+    }
     await exec("UPDATE commissions SET status='settled', settled_at=? WHERE driver_id=? AND status='pending'",
       [new Date().toISOString(), req.params.driverId]);
     res.json({ success: true });

@@ -1,13 +1,13 @@
-import * as admin from 'firebase-admin';
+import { initializeApp, cert, type App } from 'firebase-admin/app';
+import { getAuth, type Auth } from 'firebase-admin/auth';
 
-let ready = false;
+let app: App | null = null;
 
-export function getFirebaseAdmin() {
-  if (!ready) {
+export function getFirebaseAdmin(): Auth {
+  if (!app) {
     const sa = process.env.FIREBASE_SERVICE_ACCOUNT;
     if (!sa) throw new Error('FIREBASE_SERVICE_ACCOUNT not configured');
-    admin.initializeApp({ credential: admin.credential.cert(JSON.parse(sa)) });
-    ready = true;
+    app = initializeApp({ credential: cert(JSON.parse(sa)) });
   }
-  return admin;
+  return getAuth(app);
 }

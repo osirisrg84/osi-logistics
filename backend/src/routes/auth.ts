@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { scryptSync, randomBytes, timingSafeEqual } from 'node:crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne } from '../database';
@@ -8,6 +9,28 @@ import { sendSmsCode } from '../sms';
 import { getFirebaseAdmin } from '../firebase-admin';
 
 const router = Router();
+
+// Nada frenaba intentos de login repetidos -- scrypt le pone algo de costo a
+// cada intento, pero nada impedia scriptear fuerza bruta/credential-stuffing
+// contra /login sin friccion. 20 intentos / 15 min por IP+email es holgado
+// para un usuario real que se equivoca, pero corta un ataque automatizado.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req: Request) => `${ipKeyGenerator(req.ip || '')}:${(req.body?.email || '').toLowerCase()}`,
+  message: { error: 'Demasiados intentos. Intenta de nuevo en unos minutos.' },
+});
+// Mismo criterio para las rutas que crean/recuperan cuentas -- objetivos
+// igual de atractivos para scripting automatizado.
+const sensitiveLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos. Intenta de nuevo en unos minutos.' },
+});
 
 function hashPassword(password: string, salt: string): string {
   return scryptSync(password, salt, 64).toString('hex');
@@ -28,7 +51,7 @@ async function createSession(userId: string): Promise<string> {
   return token;
 }
 
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', loginLimiter, async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
@@ -61,7 +84,7 @@ router.post('/login', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Login failed' }); }
 });
 
-router.post('/register', async (req: Request, res: Response) => {
+router.post('/register', sensitiveLimiter, async (req: Request, res: Response) => {
   try {
     const {
       name, email, password, role = 'dispatcher', driver_id = null,
@@ -156,7 +179,7 @@ router.post('/logout', async (req: Request, res: Response) => {
   res.json({ success: true });
 });
 
-router.post('/register-driver', async (req: Request, res: Response) => {
+router.post('/register-driver', sensitiveLimiter, async (req: Request, res: Response) => {
   try {
     const {
       name, email, password, phone,
@@ -310,7 +333,7 @@ router.put('/shift', async (req: Request, res: Response) => {
 });
 
 // ── Send verification code ──────────────────────────────────────────
-router.post('/send-verification', async (req: Request, res: Response) => {
+router.post('/send-verification', sensitiveLimiter, async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: 'No token' });
@@ -359,7 +382,7 @@ router.post('/send-verification', async (req: Request, res: Response) => {
 });
 
 // ── Verify code ────────────────────────────────────────────────────
-router.post('/verify-code', async (req: Request, res: Response) => {
+router.post('/verify-code', sensitiveLimiter, async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: 'No token' });
@@ -437,7 +460,7 @@ router.put('/change-password', async (req: Request, res: Response) => {
 // ── Forgot password (logged out, no session yet) ──────────────────
 // Siempre responde igual exista o no la cuenta, para no filtrar que emails
 // estan registrados.
-router.post('/forgot-password', async (req: Request, res: Response) => {
+router.post('/forgot-password', sensitiveLimiter, async (req: Request, res: Response) => {
   try {
     const { email } = req.body as { email?: string };
     if (!email) return res.status(400).json({ error: 'Email requerido' });
@@ -460,7 +483,7 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
 });
 
 // ── Reset password with the emailed code ───────────────────────────
-router.post('/reset-password', async (req: Request, res: Response) => {
+router.post('/reset-password', sensitiveLimiter, async (req: Request, res: Response) => {
   try {
     const { email, code, new_password } = req.body as { email?: string; code?: string; new_password?: string };
     if (!email || !code || !new_password) return res.status(400).json({ error: 'Completa todos los campos' });
@@ -487,16 +510,17 @@ router.post('/reset-password', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Error al restablecer la contraseña' }); }
 });
 
-// One-time admin creation — no secret needed if zero admins exist, otherwise requires ADMIN_SETUP_SECRET
-router.post('/setup-admin', async (req: Request, res: Response) => {
+// One-time admin creation — always requires ADMIN_SETUP_SECRET.
+// El admin@osilogistics.com sembrado en cada boot (database.ts) ES la cuenta
+// admin real de producción (usa ADMIN_PASSWORD), no una cuenta demo descartable
+// -- excluirla de este conteo dejaba el endpoint SIN secret para siempre en
+// producción (admin existente != 0 nunca se cumplía), permitiendo que
+// cualquiera sin autenticar se creara una cuenta admin propia con un POST.
+router.post('/setup-admin', sensitiveLimiter, async (req: Request, res: Response) => {
   try {
     const { secret, name, email, password } = req.body;
-    const realAdmins = await queryOne<{ c: number }>("SELECT COUNT(*) as c FROM users WHERE role='admin' AND active=1 AND email != 'admin@osilogistics.com'");
-    const hasRealAdmin = (realAdmins?.c ?? 0) > 0;
-    if (hasRealAdmin) {
-      const expected = process.env.ADMIN_SETUP_SECRET;
-      if (!expected || secret !== expected) return res.status(403).json({ error: 'Ya existe un admin real. Se requiere el secret.' });
-    }
+    const expected = process.env.ADMIN_SETUP_SECRET;
+    if (!expected || secret !== expected) return res.status(403).json({ error: 'Se requiere el secret.' });
     if (!name || !email || !password || password.length < 8)
       return res.status(400).json({ error: 'name, email y password (mín. 8 chars) son requeridos' });
 
@@ -533,7 +557,7 @@ router.post('/confirm-phone-verified', async (req: Request, res: Response) => {
 
     const { firebaseToken } = req.body;
     const firebase = getFirebaseAdmin();
-    const decoded = await firebase.auth().verifyIdToken(firebaseToken);
+    const decoded = await firebase.verifyIdToken(firebaseToken);
 
     const normalize = (p: string) => {
       const d = p.replace(/\D/g, '');
@@ -550,10 +574,14 @@ router.post('/confirm-phone-verified', async (req: Request, res: Response) => {
   }
 });
 
+// Publico a proposito -- Register.tsx lo usa ANTES de iniciar sesion para
+// que un driver nuevo elija su perfil ya precargado por el admin. Pero antes
+// devolvia tambien email/mc_number/company_name de TODA la flota a cualquiera
+// en internet sin autenticar; se recorta a solo lo que el selector usa.
 router.get('/drivers-list', async (_req: Request, res: Response) => {
   try {
     const drivers = await query(`
-      SELECT d.id, d.name, d.email, d.equipment_type, d.company_name, d.mc_number,
+      SELECT d.id, d.name, d.phone, d.email,
              (SELECT COUNT(*) FROM users WHERE driver_id = d.id) as has_account
       FROM drivers d ORDER BY d.name ASC
     `);

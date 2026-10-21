@@ -32,6 +32,11 @@ router.get('/live', async (req: Request, res: Response) => {
 
 router.get('/driver/:id/history', async (req: Request, res: Response) => {
   try {
+    // Sin esto cualquier driver podia pedir el historial GPS completo de
+    // cualquier otro driver con solo cambiar el id en la URL.
+    if (req.user?.role === 'driver' && req.user.driver_id !== req.params.id) {
+      return res.status(403).json({ error: 'No autorizado' });
+    }
     const { hours = 24 } = req.query;
     const points = await query(
       `SELECT lat, lng, speed, heading, timestamp FROM tracking WHERE driver_id = ? AND timestamp >= datetime('now', '-${Number(hours)} hours') ORDER BY timestamp ASC`,
@@ -43,7 +48,7 @@ router.get('/driver/:id/history', async (req: Request, res: Response) => {
 
 router.get('/order/:id', async (req: Request, res: Response) => {
   try {
-    const order = await queryOne(`
+    const order = await queryOne<Record<string, unknown>>(`
       SELECT o.*, d.name as driver_name, d.phone as driver_phone,
              d.current_lat, d.current_lng, d.status as driver_status,
              t.plate_number, t.make, t.model
@@ -51,6 +56,13 @@ router.get('/order/:id', async (req: Request, res: Response) => {
       WHERE o.id = ?
     `, [req.params.id]);
     if (!order) return res.status(404).json({ error: 'Order not found' });
+    // Mismo chequeo que orders.ts GET /:id -- admin, el dispatcher dueño
+    // (o nadie-dueño-aun), o el driver asignado/al que se le ofreció.
+    const user = req.user;
+    const canAccess = user?.role === 'admin'
+      || (user?.role === 'driver' && !!user.driver_id && (user.driver_id === order.driver_id || user.driver_id === order.offered_to_driver_id))
+      || (user?.role !== 'driver' && (!order.dispatcher_user_id || order.dispatcher_user_id === user?.id));
+    if (!canAccess) return res.status(403).json({ error: 'No autorizado' });
 
     const [history, trackingPoints] = await Promise.all([
       query('SELECT status, timestamp, notes, lat, lng FROM order_history WHERE order_id = ? ORDER BY timestamp ASC', [req.params.id]),

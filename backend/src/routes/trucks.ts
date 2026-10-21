@@ -54,8 +54,15 @@ router.get('/:id', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
+const TRUCK_EDITABLE_FIELDS = [
+  'plate_number', 'make', 'model', 'year', 'type', 'capacity_kg', 'capacity_m3',
+  'status', 'mileage', 'fuel_level', 'last_maintenance', 'next_maintenance', 'vin', 'color',
+];
+
 router.post('/', async (req: Request, res: Response) => {
   try {
+    // Gestion de flota es cosa de dispatcher/admin -- un driver nunca crea/edita/borra trucks.
+    if (req.user?.role === 'driver') return res.status(403).json({ error: 'No autorizado' });
     const id = uuidv4();
     const {
       plate_number, make, model, year, type = 'Box Truck',
@@ -75,10 +82,11 @@ router.post('/', async (req: Request, res: Response) => {
 
 router.put('/:id', async (req: Request, res: Response) => {
   try {
+    if (req.user?.role === 'driver') return res.status(403).json({ error: 'No autorizado' });
     const truck = await queryOne('SELECT * FROM trucks WHERE id = ?', [req.params.id]);
     if (!truck) return res.status(404).json({ error: 'Truck not found' });
     const updates = req.body;
-    const fields = Object.keys(updates).filter(k => !['id', 'created_at'].includes(k));
+    const fields = Object.keys(updates).filter(k => TRUCK_EDITABLE_FIELDS.includes(k));
     if (fields.length === 0) return res.status(400).json({ error: 'No fields to update' });
     await exec(`UPDATE trucks SET ${fields.map(f => `${f} = ?`).join(', ')} WHERE id = ?`,
       [...fields.map(f => updates[f] ?? null), req.params.id]);
@@ -88,6 +96,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
+    if (req.user?.role === 'driver') return res.status(403).json({ error: 'No autorizado' });
     const truck = await queryOne('SELECT * FROM trucks WHERE id = ?', [req.params.id]);
     if (!truck) return res.status(404).json({ error: 'Truck not found' });
     const active = await queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders WHERE truck_id = ? AND status NOT IN ('delivered','cancelled')`, [req.params.id]);

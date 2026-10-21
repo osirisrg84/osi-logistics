@@ -30,6 +30,29 @@ const getOrderFilter = (email?: string, role?: string, userId?: string, driverId
   return userId ? `${REAL_ORDER_FILTER} AND o.dispatcher_user_id = '${userId}'` : `${REAL_ORDER_FILTER} AND 1=0`;
 };
 
+// Puede VER esta orden: admin, el dispatcher dueño (o nadie-dueño-aun), o el
+// driver asignado/al que se le ofreció. Antes GET /:id y los endpoints de
+// documentos/rate-con no chequeaban nada -- cualquier usuario autenticado
+// (incluido un driver ajeno) podia leer el detalle, precio y documentos de
+// CUALQUIER orden con solo adivinar/obtener el id.
+const canAccessOrder = (authReq: AuthRequest, order: { dispatcher_user_id?: unknown; driver_id?: unknown; offered_to_driver_id?: unknown }): boolean => {
+  const user = authReq.user;
+  if (!user) return false;
+  if (user.role === 'admin') return true;
+  if (user.role === 'driver') return (!!user.driver_id && (user.driver_id === order.driver_id || user.driver_id === order.offered_to_driver_id));
+  return !order.dispatcher_user_id || order.dispatcher_user_id === user.id;
+};
+
+// Puede GESTIONAR esta orden (asignar/ofertar): admin o el dispatcher dueño
+// (o nadie-dueño-aun). Un driver nunca puede -- asignar/ofertar es una accion
+// de dispatcher, no del driver que la recibe.
+const canManageOrder = (authReq: AuthRequest, order: { dispatcher_user_id?: unknown }): boolean => {
+  const user = authReq.user;
+  if (!user || user.role === 'driver') return false;
+  if (user.role === 'admin') return true;
+  return !order.dispatcher_user_id || order.dispatcher_user_id === user.id;
+};
+
 const DOCUMENT_TYPES = ['unsigned_bol', 'signed_bol', 'lumper', 'gate_pass', 'fuel_receipt', 'scale_receipt', 'other'];
 const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   unsigned_bol: 'Unsigned BOL', signed_bol: 'Signed BOL', lumper: 'Lumper',
@@ -115,8 +138,9 @@ router.get('/stats', async (req: Request, res: Response) => {
 });
 
 router.get('/:id', async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
-    const order = await queryOne(`
+    const order = await queryOne<Record<string, unknown>>(`
       SELECT o.*,
              d.name as driver_name, d.phone as driver_phone, d.email as driver_email,
              t.plate_number, t.make, t.model, t.type as truck_type,
@@ -130,6 +154,7 @@ router.get('/:id', async (req: Request, res: Response) => {
       WHERE o.id = ?
     `, [req.params.id]);
     if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (!canAccessOrder(authReq, order)) return res.status(403).json({ error: 'No autorizado' });
 
     const [history, tracking] = await Promise.all([
       query('SELECT * FROM order_history WHERE order_id = ? ORDER BY timestamp ASC', [req.params.id]),
@@ -142,6 +167,9 @@ router.get('/:id', async (req: Request, res: Response) => {
 router.post('/', async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;
   try {
+    // Crear ordenes es cosa de dispatcher/admin -- un driver nunca lo hace
+    // (driverApi.ts no tiene ni siquiera un metodo create).
+    if (authReq.user?.role === 'driver') return res.status(403).json({ error: 'No autorizado' });
     const id = uuidv4();
     const countRow = await queryOne<{c:number}>('SELECT COUNT(*) as c FROM orders');
     const orderNumber = `OSI-${String(2024100 + (countRow?.c ?? 0) + 1).padStart(7, '0')}`;
@@ -175,7 +203,11 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 router.get('/:id/rate-con', async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
+    const order = await queryOne<Record<string, unknown>>('SELECT dispatcher_user_id, driver_id, offered_to_driver_id FROM orders WHERE id = ?', [req.params.id]);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (!canAccessOrder(authReq, order)) return res.status(403).json({ error: 'No autorizado' });
     const rateCon = await queryOne<{ filename: string; data: string; uploaded_at: string }>(
       'SELECT filename, data, uploaded_at FROM order_rate_cons WHERE order_id = ?', [req.params.id]);
     if (!rateCon) return res.status(404).json({ error: 'No rate confirmation uploaded' });
@@ -184,13 +216,15 @@ router.get('/:id/rate-con', async (req: Request, res: Response) => {
 });
 
 router.post('/:id/rate-con', async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
     const { filename, data } = req.body;
     if (!filename || !data) return res.status(400).json({ error: 'filename and data are required' });
     if (data.length > 12_000_000) return res.status(413).json({ error: 'File too large (max ~8MB)' });
 
-    const order = await queryOne('SELECT id FROM orders WHERE id = ?', [req.params.id]);
+    const order = await queryOne<Record<string, unknown>>('SELECT id, dispatcher_user_id, driver_id, offered_to_driver_id FROM orders WHERE id = ?', [req.params.id]);
     if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (!canAccessOrder(authReq, order)) return res.status(403).json({ error: 'No autorizado' });
 
     const uploadedAt = new Date().toISOString();
     await exec(`INSERT INTO order_rate_cons (order_id, filename, data, uploaded_at) VALUES (?, ?, ?, ?)
@@ -202,7 +236,11 @@ router.post('/:id/rate-con', async (req: Request, res: Response) => {
 });
 
 router.delete('/:id/rate-con', async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
+    const order = await queryOne<Record<string, unknown>>('SELECT dispatcher_user_id, driver_id, offered_to_driver_id FROM orders WHERE id = ?', [req.params.id]);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (!canAccessOrder(authReq, order)) return res.status(403).json({ error: 'No autorizado' });
     await exec('DELETE FROM order_rate_cons WHERE order_id = ?', [req.params.id]);
     res.json({ success: true });
   } catch { res.status(500).json({ error: 'Failed' }); }
@@ -211,14 +249,22 @@ router.delete('/:id/rate-con', async (req: Request, res: Response) => {
 // Driver-uploaded paperwork (Unsigned/Signed BOL, Lumper, Gate Pass, Fuel/Scale Receipt, Other).
 // List endpoint omits `data` so the base64 payload never gets pulled into the list view.
 router.get('/:id/documents', async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
+    const order = await queryOne<Record<string, unknown>>('SELECT dispatcher_user_id, driver_id, offered_to_driver_id FROM orders WHERE id = ?', [req.params.id]);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (!canAccessOrder(authReq, order)) return res.status(403).json({ error: 'No autorizado' });
     const docs = await query('SELECT id, type, filename, uploaded_at FROM order_documents WHERE order_id = ? ORDER BY uploaded_at DESC', [req.params.id]);
     res.json(docs);
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
 router.get('/:id/documents/:docId', async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
+    const order = await queryOne<Record<string, unknown>>('SELECT dispatcher_user_id, driver_id, offered_to_driver_id FROM orders WHERE id = ?', [req.params.id]);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (!canAccessOrder(authReq, order)) return res.status(403).json({ error: 'No autorizado' });
     const doc = await queryOne('SELECT id, type, filename, data, uploaded_at FROM order_documents WHERE id = ? AND order_id = ?', [req.params.docId, req.params.id]);
     if (!doc) return res.status(404).json({ error: 'Document not found' });
     res.json(doc);
@@ -276,11 +322,23 @@ router.put('/:id', async (req: Request, res: Response) => {
     const order = await queryOne<{ dispatcher_user_id: string | null; price: number; order_number: string }>('SELECT * FROM orders WHERE id = ?', [req.params.id]);
     if (!order) return res.status(404).json({ error: 'Order not found' });
     const isOwner = !order.dispatcher_user_id || order.dispatcher_user_id === authReq.user?.id;
-    if (authReq.user?.role !== 'admin' && !isOwner) {
+    if (authReq.user?.role === 'driver' || (authReq.user?.role !== 'admin' && !isOwner)) {
       return res.status(403).json({ error: 'Solo el dispatcher que creó esta orden puede editarla' });
     }
     const updates = req.body;
-    const fields = Object.keys(updates).filter(k => !['id', 'order_number', 'created_at'].includes(k));
+    // Allow-list, no deny-list -- antes cualquier key del body se volcaba
+    // directo a una columna SQL (incluyendo el NOMBRE de columna sin
+    // parametrizar), permitiendo tanto sobreescribir campos internos
+    // (dispatcher_user_id, driver_id, status...) por fuera de /assign,
+    // /offer y /status, como inyectar SQL vía una key maliciosa en el body.
+    const EDITABLE_ORDER_FIELDS = [
+      'pickup_address', 'pickup_contact', 'pickup_lat', 'pickup_lng',
+      'delivery_address', 'delivery_contact', 'delivery_lat', 'delivery_lng',
+      'customer_name', 'customer_phone', 'customer_email',
+      'weight_kg', 'volume_m3', 'description', 'notes', 'price', 'distance_km',
+      'estimated_delivery', 'equipment_type', 'temperature', 'priority',
+    ];
+    const fields = Object.keys(updates).filter(k => EDITABLE_ORDER_FIELDS.includes(k));
     if (fields.length === 0) return res.status(400).json({ error: 'No fields to update' });
     const setClause = fields.map(f => `${f} = ?`).join(', ');
     await exec(`UPDATE orders SET ${setClause} WHERE id = ?`, [...fields.map(f => updates[f] ?? null), req.params.id]);
@@ -308,6 +366,7 @@ router.post('/:id/assign', async (req: Request, res: Response) => {
       queryOne<Record<string,unknown>>('SELECT * FROM drivers WHERE id = ?', [driver_id]),
     ]);
     if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (!canManageOrder(authReq, order)) return res.status(403).json({ error: 'No autorizado' });
     if (!driver) return res.status(404).json({ error: 'Driver not found' });
 
     await exec(`UPDATE orders SET status = 'assigned', driver_id = ?, truck_id = ?, assigned_at = ?,
@@ -337,11 +396,13 @@ router.post('/:id/assign', async (req: Request, res: Response) => {
 });
 
 router.post('/:id/status', async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
     const { status, notes = '', lat, lng } = req.body;
     const now = new Date().toISOString();
     const order = await queryOne<Record<string,unknown>>('SELECT * FROM orders WHERE id = ?', [req.params.id]);
     if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (!canAccessOrder(authReq, order)) return res.status(403).json({ error: 'No autorizado' });
 
     const updates: Record<string, unknown> = { status };
     if (status === 'picked_up') updates.picked_up_at = now;
@@ -412,6 +473,7 @@ router.post('/:id/offer', async (req: Request, res: Response) => {
       queryOne<Record<string,unknown>>('SELECT * FROM drivers WHERE id = ?', [driver_id]),
     ]);
     if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (!canManageOrder(authReq, order)) return res.status(403).json({ error: 'No autorizado' });
     if (!['pending', 'offered'].includes(order.status as string)) return res.status(400).json({ error: 'Order is not available to offer' });
     if (!driver) return res.status(404).json({ error: 'Driver not found' });
 
@@ -575,9 +637,11 @@ router.post('/:id/accept', async (req: Request, res: Response) => {
 });
 
 router.post('/:id/ignore', async (_req: Request, res: Response) => {
+  const authReq = _req as AuthRequest;
   try {
     const order = await queryOne<Record<string,unknown>>('SELECT * FROM orders WHERE id = ?', [_req.params.id]);
     if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (!canAccessOrder(authReq, order)) return res.status(403).json({ error: 'No autorizado' });
     if (order.status !== 'offered') return res.status(400).json({ error: 'Order is not in offered state' });
 
     await exec("UPDATE orders SET status = 'pending', offered_to_driver_id = NULL, offered_to_truck_id = NULL, offered_at = NULL WHERE id = ?", [_req.params.id]);
@@ -589,8 +653,19 @@ router.post('/:id/ignore', async (_req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
-router.delete('/:id', async (req: AuthRequest, res: Response) => {
+router.delete('/:id', async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
+    // No habia ningun chequeo de rol/ownership aqui -- cualquier usuario
+    // autenticado (incluido un driver) podia borrar cualquier orden. Mismo
+    // criterio que PUT /:id: admin o el dispatcher dueño (o nadie-dueño-aun).
+    const existing = await queryOne<{ dispatcher_user_id: string | null }>('SELECT dispatcher_user_id FROM orders WHERE id = ?', [req.params.id]);
+    if (!existing) return res.status(404).json({ error: 'Order not found' });
+    const isOwner = !existing.dispatcher_user_id || existing.dispatcher_user_id === authReq.user?.id;
+    if (authReq.user?.role !== 'admin' && !isOwner) {
+      return res.status(403).json({ error: 'No autorizado para borrar esta orden' });
+    }
+
     // Antes esto era un SELECT para comprobar que existe + 6 DELETE
     // separados = 7 round-trips HTTP a Turso. Un solo batch() manda las 6
     // sentencias en un unico viaje (atomico, no se puede quedar a medias si
@@ -622,13 +697,28 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
 // aun con el servidor ya despierto (plan pago, sin cold start). Un solo
 // batch() con las 6 sentencias por cada id manda todo en un unico viaje de
 // red sin importar cuantas ordenes sean.
-router.post('/bulk-delete', async (req: AuthRequest, res: Response) => {
+router.post('/bulk-delete', async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
     const { ids } = req.body as { ids?: string[] };
     if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ error: 'ids array is required' });
 
+    // Mismo gap que en DELETE /:id: sin esto, cualquier usuario autenticado
+    // podia borrar en bloque ordenes que no eran suyas. Solo pasan las que
+    // el caller tiene permiso de borrar (admin o dueño/sin-dueño-aun).
+    let allowedIds = ids;
+    if (authReq.user?.role !== 'admin') {
+      const owned = await query<{ id: string; dispatcher_user_id: string | null }>(
+        `SELECT id, dispatcher_user_id FROM orders WHERE id IN (${ids.map(() => '?').join(',')})`, ids
+      );
+      allowedIds = owned
+        .filter(o => !o.dispatcher_user_id || o.dispatcher_user_id === authReq.user?.id)
+        .map(o => o.id);
+    }
+    if (allowedIds.length === 0) return res.status(403).json({ error: 'No autorizado para borrar estas órdenes' });
+
     const statements: { sql: string; args: string[] }[] = [];
-    for (const id of ids) {
+    for (const id of allowedIds) {
       statements.push(
         { sql: 'DELETE FROM order_history WHERE order_id = ?', args: [id] },
         { sql: 'DELETE FROM tracking WHERE order_id = ?', args: [id] },
@@ -639,7 +729,7 @@ router.post('/bulk-delete', async (req: AuthRequest, res: Response) => {
       );
     }
     await getDb().batch(statements, 'write');
-    res.json({ success: true, count: ids.length });
+    res.json({ success: true, count: allowedIds.length });
   } catch (e) {
     console.error('[POST /orders/bulk-delete] Failed for', req.body?.ids, e);
     res.status(500).json({ error: 'Failed' });

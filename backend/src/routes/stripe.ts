@@ -10,7 +10,10 @@ type AuthRequest = Request & { user?: { id: string; name: string; email?: string
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
-  return new Stripe(key, { apiVersion: '2025-06-30.basil' });
+  // Pinned a proposito a la version con la que esto fue probado contra Stripe;
+  // el cast es solo para el tipo literal que el SDK espera (bump de @types en
+  // una version mas nueva del paquete) -- no cambia el comportamiento real.
+  return new Stripe(key, { apiVersion: '2025-06-30.basil' as Stripe.LatestApiVersion });
 }
 
 // Create a Stripe Checkout session to collect a commission payment
@@ -75,15 +78,19 @@ router.post('/create-payment-intent', authenticate, async (req: Request, res: Re
 router.post('/webhook', async (req: Request, res: Response) => {
   const sig = req.headers['stripe-signature'] as string;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  // Sin STRIPE_WEBHOOK_SECRET no hay forma de verificar que esto vino
+  // realmente de Stripe -- antes, si faltaba, se confiaba en el JSON tal
+  // cual, dejando que cualquiera marcara una comision como pagada con un
+  // POST falso de 'payment_intent.succeeded'. Mejor rechazar que confiar.
+  if (!webhookSecret) {
+    console.error('[Stripe webhook] STRIPE_WEBHOOK_SECRET no configurado -- rechazando el evento.');
+    return res.status(503).send('Webhook not configured');
+  }
 
   let event: Stripe.Event;
   try {
     const stripe = getStripe();
-    if (webhookSecret) {
-      event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-    } else {
-      event = JSON.parse(req.body.toString()) as Stripe.Event;
-    }
+    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
   } catch {
     return res.status(400).send('Webhook signature error');
   }

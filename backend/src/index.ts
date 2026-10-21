@@ -20,7 +20,7 @@ import chatRouter from './routes/chat';
 import communityRouter from './routes/community';
 import incidentsRouter from './routes/incidents';
 import assistantRouter from './routes/assistant';
-import { authenticate } from './middleware/auth';
+import { authenticate, resolveSessionUser, AuthUser } from './middleware/auth';
 
 const PORT = process.env.PORT || 3001;
 
@@ -54,7 +54,29 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: corsOptions });
 
+// Antes el handshake no verificaba nada: cualquiera podia conectarse por
+// socket.io y emitir driver:subscribe con el id de CUALQUIER driver para
+// recibir en vivo sus ofertas/notificaciones privadas. Ahora requiere la
+// misma sesion valida que ya exige la API REST.
+io.use(async (socket, next) => {
+  try {
+    const token = socket.handshake.auth?.token as string | undefined;
+    const user = await resolveSessionUser(token);
+    if (!user) return next(new Error('unauthorized'));
+    (socket.data as { user: AuthUser }).user = user;
+    next();
+  } catch {
+    next(new Error('unauthorized'));
+  }
+});
+
 app.use(cors(corsOptions));
+// El webhook de Stripe necesita el body CRUDO (Buffer) para verificar la
+// firma -- si pasa primero por express.json() ya llega parseado como objeto
+// y stripe.webhooks.constructEvent() no puede validarlo. Se monta raw() para
+// esta ruta exacta antes del parser global; una vez un body-parser corre,
+// express.json() de mas abajo lo detecta y no lo vuelve a tocar.
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json({ limit: '12mb' }));
 
 // Public routes
@@ -71,50 +93,6 @@ app.get('/api/health', async (_req, res) => {
                userCount: userRow?.c ?? 0, driverCount: driverRow?.c ?? 0 });
   } catch {
     res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '2.5.0' });
-  }
-});
-
-app.post('/api/setup', async (_req, res) => {
-  try {
-    const { scryptSync, randomBytes } = await import('node:crypto');
-
-    function hashPw(pw: string, salt: string) {
-      return scryptSync(pw, salt, 64).toString('hex');
-    }
-
-    const users = [
-      { name: 'Admin OSI',      email: 'admin@osilogistics.com',      pw: 'Admin123!',    role: 'admin' },
-      { name: 'Dispatcher OSI', email: 'dispatcher@osilogistics.com', pw: 'Dispatch123!', role: 'dispatcher' },
-    ];
-
-    const created: string[] = [];
-    for (const u of users) {
-      const exists = await queryOne('SELECT id FROM users WHERE email = ?', [u.email]);
-      if (!exists) {
-        const salt = randomBytes(16).toString('hex');
-        await exec('INSERT INTO users (id,name,email,password_hash,salt,role,driver_id) VALUES (?,?,?,?,?,?,?)',
-          [uuidv4(), u.name, u.email, hashPw(u.pw, salt), salt, u.role, null]);
-        created.push(u.email);
-      }
-    }
-
-    const driverUser = await queryOne("SELECT id FROM users WHERE email='carlos.r@osilogistics.com'");
-    if (!driverUser) {
-      const driver = await queryOne<{id:string;name:string;email:string}>(
-        "SELECT id,name,email FROM drivers WHERE email='carlos.r@osilogistics.com' LIMIT 1"
-      );
-      if (driver) {
-        const salt = randomBytes(16).toString('hex');
-        await exec('INSERT OR IGNORE INTO users (id,name,email,password_hash,salt,role,driver_id) VALUES (?,?,?,?,?,?,?)',
-          [uuidv4(), driver.name, driver.email, hashPw('Driver123!', salt), salt, 'driver', driver.id]);
-        created.push(driver.email);
-      }
-    }
-
-    const allUsers = await query('SELECT id, name, email, role, active FROM users');
-    res.json({ created, allUsers });
-  } catch (err) {
-    res.status(500).json({ error: String(err) });
   }
 });
 
@@ -139,7 +117,11 @@ io.on('connection', (socket) => {
   socket.on('subscribe_tracking',    () => socket.join('tracking'));
   socket.on('subscribe_orders',      () => socket.join('orders'));
   socket.on('subscribe_dispatchers', () => socket.join('dispatchers'));
-  socket.on('driver:subscribe', (driverId: string) => socket.join(`driver:${driverId}`));
+  socket.on('driver:subscribe', (driverId: string) => {
+    const user = (socket.data as { user?: AuthUser }).user;
+    if (user?.role === 'driver' && user.driver_id !== driverId) return;
+    socket.join(`driver:${driverId}`);
+  });
   socket.on('radio:join', () => socket.join('osi_radio'));
 
   socket.on('radio:msg', (data: { name: string; msg: string }) => {

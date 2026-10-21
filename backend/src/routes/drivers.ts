@@ -16,6 +16,30 @@ const isDemo = (email?: string) => (email ?? '').endsWith('@osilogistics.com');
 const DEMO_FILTER = "AND d.email NOT LIKE '%@osilogistics.com'";
 const DEMO_ONLY_FILTER = "AND d.email LIKE '%@osilogistics.com'";
 
+// true si el caller es ese MISMO driver, o un dispatcher/admin (staff).
+// Ningun endpoint de aqui en adelante dejaba que un driver tocara SU PROPIO
+// perfil/documentos sin tambien dejar que tocara los de CUALQUIER OTRO
+// driver -- no habia ningun chequeo de "es su id" en absoluto.
+const isSelfOrStaff = (req: Request, driverId: string): boolean =>
+  req.user?.role !== 'driver' || req.user.driver_id === driverId;
+
+// Campos que un driver puede editar de SU PROPIO perfil via PUT /:id (lo que
+// realmente manda DriverPortal.tsx). rating/total_deliveries/truck_id/
+// license_number/mc_number/etc quedan fuera a proposito -- son campos que
+// dependen de verificacion por un dispatcher/admin, no auto-editables.
+const DRIVER_SELF_FIELDS = [
+  'status', 'truck_number', 'trailer_number', 'equipment_type', 'truck_make',
+  'equip_length', 'equip_width', 'load_capacity', 'gps_active', 'rate_con_email',
+  'coi_expiry', 'factoring_company', 'factoring_phone', 'factoring_email', 'factoring_noa',
+];
+// Lo que puede editar un dispatcher/admin (el form completo de Drivers.tsx,
+// mas lo mismo que ya puede un driver sobre si mismo).
+const STAFF_EDITABLE_FIELDS = [
+  ...DRIVER_SELF_FIELDS,
+  'name', 'phone', 'email', 'license_number', 'license_expiry', 'hire_date',
+  'company_name', 'mc_number', 'dot_number', 'authority_since',
+];
+
 router.get('/', async (req: Request, res: Response) => {
   try {
     const { status, search } = req.query;
@@ -82,6 +106,10 @@ router.get('/:id', async (req: Request, res: Response) => {
     if (req.user?.role !== 'admin' && isDemo(req.user?.email) !== isDemo(driver.email)) {
       return res.status(404).json({ error: 'Driver not found' });
     }
+    // Faltaba el mismo chequeo que ya tiene el resto del archivo -- un driver
+    // podia pedir el perfil COMPLETO de cualquier otro (payout_method/
+    // payout_details incluidos) con solo cambiar el id.
+    if (!isSelfOrStaff(req, req.params.id)) return res.status(403).json({ error: 'No autorizado' });
 
     const [recentOrders, trackingHistory] = await Promise.all([
       query('SELECT id, order_number, customer_name, status, delivery_address, created_at, delivered_at FROM orders WHERE driver_id = ? ORDER BY created_at DESC LIMIT 10', [req.params.id]),
@@ -93,6 +121,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 
 router.post('/', async (req: Request, res: Response) => {
   try {
+    if (req.user?.role === 'driver') return res.status(403).json({ error: 'No autorizado' });
     const id = uuidv4();
     const {
       name, phone, email, license_number, license_expiry,
@@ -123,9 +152,11 @@ router.put('/:id', async (req: Request, res: Response) => {
   try {
     const driver = await queryOne('SELECT * FROM drivers WHERE id = ?', [req.params.id]);
     if (!driver) return res.status(404).json({ error: 'Driver not found' });
+    if (!isSelfOrStaff(req, req.params.id)) return res.status(403).json({ error: 'No autorizado' });
 
     const updates = req.body;
-    const fields = Object.keys(updates).filter(k => !['id', 'created_at'].includes(k));
+    const allowed = req.user?.role === 'driver' ? DRIVER_SELF_FIELDS : STAFF_EDITABLE_FIELDS;
+    const fields = Object.keys(updates).filter(k => allowed.includes(k));
     if (fields.length === 0) return res.status(400).json({ error: 'No fields to update' });
 
     const setClause = fields.map(f => `${f} = ?`).join(', ');
@@ -167,6 +198,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 // blob must never ride along on a `SELECT d.*` list/detail query).
 router.get('/:id/license-document', async (req: Request, res: Response) => {
   try {
+    if (!isSelfOrStaff(req, req.params.id)) return res.status(403).json({ error: 'No autorizado' });
     const doc = await queryOne<{ filename: string; data: string; uploaded_at: string }>(
       'SELECT filename, data, uploaded_at FROM driver_license_documents WHERE driver_id = ?', [req.params.id]);
     if (!doc) return res.status(404).json({ error: 'No license document uploaded' });
@@ -176,6 +208,7 @@ router.get('/:id/license-document', async (req: Request, res: Response) => {
 
 router.post('/:id/license-document', async (req: Request, res: Response) => {
   try {
+    if (!isSelfOrStaff(req, req.params.id)) return res.status(403).json({ error: 'No autorizado' });
     const { filename, data } = req.body;
     if (!filename || !data) return res.status(400).json({ error: 'filename and data are required' });
     if (data.length > 12_000_000) return res.status(413).json({ error: 'File too large (max ~8MB)' });
@@ -194,6 +227,7 @@ router.post('/:id/license-document', async (req: Request, res: Response) => {
 
 router.delete('/:id/license-document', async (req: Request, res: Response) => {
   try {
+    if (!isSelfOrStaff(req, req.params.id)) return res.status(403).json({ error: 'No autorizado' });
     await exec('DELETE FROM driver_license_documents WHERE driver_id = ?', [req.params.id]);
     res.json({ success: true });
   } catch { res.status(500).json({ error: 'Failed' }); }
@@ -204,6 +238,7 @@ router.delete('/:id/license-document', async (req: Request, res: Response) => {
 // file); this table only holds the actual uploaded document.
 router.get('/:id/coi-document', async (req: Request, res: Response) => {
   try {
+    if (!isSelfOrStaff(req, req.params.id)) return res.status(403).json({ error: 'No autorizado' });
     const doc = await queryOne<{ filename: string; data: string; uploaded_at: string }>(
       'SELECT filename, data, uploaded_at FROM driver_coi_documents WHERE driver_id = ?', [req.params.id]);
     if (!doc) return res.status(404).json({ error: 'No COI document uploaded' });
@@ -213,6 +248,7 @@ router.get('/:id/coi-document', async (req: Request, res: Response) => {
 
 router.post('/:id/coi-document', async (req: Request, res: Response) => {
   try {
+    if (!isSelfOrStaff(req, req.params.id)) return res.status(403).json({ error: 'No autorizado' });
     const { filename, data } = req.body;
     if (!filename || !data) return res.status(400).json({ error: 'filename and data are required' });
     if (data.length > 12_000_000) return res.status(413).json({ error: 'File too large (max ~8MB)' });
@@ -233,6 +269,7 @@ router.post('/:id/coi-document', async (req: Request, res: Response) => {
 
 router.delete('/:id/coi-document', async (req: Request, res: Response) => {
   try {
+    if (!isSelfOrStaff(req, req.params.id)) return res.status(403).json({ error: 'No autorizado' });
     await exec('DELETE FROM driver_coi_documents WHERE driver_id = ?', [req.params.id]);
     await exec('UPDATE drivers SET coi_filename = ? WHERE id = ?', ['', req.params.id]);
     res.json({ success: true });
@@ -242,6 +279,7 @@ router.delete('/:id/coi-document', async (req: Request, res: Response) => {
 // Single photo showing truck + trailer + equipment together.
 router.get('/:id/equipment-document', async (req: Request, res: Response) => {
   try {
+    if (!isSelfOrStaff(req, req.params.id)) return res.status(403).json({ error: 'No autorizado' });
     const doc = await queryOne<{ filename: string; data: string; uploaded_at: string }>(
       'SELECT filename, data, uploaded_at FROM driver_equipment_documents WHERE driver_id = ?', [req.params.id]);
     if (!doc) return res.status(404).json({ error: 'No equipment photo uploaded' });
@@ -251,6 +289,7 @@ router.get('/:id/equipment-document', async (req: Request, res: Response) => {
 
 router.post('/:id/equipment-document', async (req: Request, res: Response) => {
   try {
+    if (!isSelfOrStaff(req, req.params.id)) return res.status(403).json({ error: 'No autorizado' });
     const { filename, data } = req.body;
     if (!filename || !data) return res.status(400).json({ error: 'filename and data are required' });
     if (data.length > 12_000_000) return res.status(413).json({ error: 'File too large (max ~8MB)' });
@@ -269,6 +308,7 @@ router.post('/:id/equipment-document', async (req: Request, res: Response) => {
 
 router.delete('/:id/equipment-document', async (req: Request, res: Response) => {
   try {
+    if (!isSelfOrStaff(req, req.params.id)) return res.status(403).json({ error: 'No autorizado' });
     await exec('DELETE FROM driver_equipment_documents WHERE driver_id = ?', [req.params.id]);
     res.json({ success: true });
   } catch { res.status(500).json({ error: 'Failed' }); }
@@ -276,6 +316,7 @@ router.delete('/:id/equipment-document', async (req: Request, res: Response) => 
 
 router.post('/:id/location', async (req: Request, res: Response) => {
   try {
+    if (!isSelfOrStaff(req, req.params.id)) return res.status(403).json({ error: 'No autorizado' });
     const { lat, lng, speed = 0, heading = 0, address = '' } = req.body;
     if (address) {
       await exec('UPDATE drivers SET current_lat = ?, current_lng = ?, current_address = ? WHERE id = ?',
@@ -299,6 +340,7 @@ router.post('/:id/location', async (req: Request, res: Response) => {
 
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
+    if (req.user?.role === 'driver') return res.status(403).json({ error: 'No autorizado' });
     const driver = await queryOne('SELECT * FROM drivers WHERE id = ?', [req.params.id]);
     if (!driver) return res.status(404).json({ error: 'Driver not found' });
     const active = await queryOne<{c:number}>(`SELECT COUNT(*) as c FROM orders WHERE driver_id = ? AND status NOT IN ('delivered','cancelled')`, [req.params.id]);
@@ -320,12 +362,14 @@ router.delete('/:id', async (req: Request, res: Response) => {
 
 router.get('/:id/favorites', async (req: Request, res: Response) => {
   try {
+    if (!isSelfOrStaff(req, req.params.id)) return res.status(403).json({ error: 'No autorizado' });
     res.json(await query('SELECT * FROM driver_favorites WHERE driver_id = ? ORDER BY created_at ASC', [req.params.id]));
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
 router.post('/:id/favorites', async (req: Request, res: Response) => {
   try {
+    if (!isSelfOrStaff(req, req.params.id)) return res.status(403).json({ error: 'No autorizado' });
     const { name, address, type = 'other' } = req.body;
     if (!name || !address) return res.status(400).json({ error: 'name and address required' });
     const count = await queryOne<{c:number}>('SELECT COUNT(*) as c FROM driver_favorites WHERE driver_id = ?', [req.params.id]);
@@ -339,6 +383,7 @@ router.post('/:id/favorites', async (req: Request, res: Response) => {
 
 router.delete('/:id/favorites/:favId', async (req: Request, res: Response) => {
   try {
+    if (!isSelfOrStaff(req, req.params.id)) return res.status(403).json({ error: 'No autorizado' });
     const fav = await queryOne('SELECT id FROM driver_favorites WHERE id = ? AND driver_id = ?', [req.params.favId, req.params.id]);
     if (!fav) return res.status(404).json({ error: 'Favorite not found' });
     await exec('DELETE FROM driver_favorites WHERE id = ?', [req.params.favId]);
