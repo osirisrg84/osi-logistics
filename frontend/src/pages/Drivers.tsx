@@ -7,6 +7,7 @@ import { driversApi, trucksApi, ordersApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { DriverStatusBadge } from '../components/StatusBadge';
 import { EmptyState } from '../components/EmptyState';
+import { OnlineSince } from '../components/OnlineSince';
 import { format, formatDistanceToNow } from 'date-fns';
 import { parseServerDate } from '../utils/serverDate';
 import { playSuccessChime } from '../utils/sounds';
@@ -208,7 +209,10 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
                   </span>
                 )}
               </div>
-              <DriverStatusBadge status={driver.status} className="mt-1" />
+              <div className="flex items-center gap-2 mt-1">
+                <DriverStatusBadge status={driver.status} />
+                {driver.status === 'available' && <OnlineSince since={driver.online_since} />}
+              </div>
               <p className="text-xs text-gray-400 mt-1">Hired {format(new Date(driver.hire_date), 'MMM d, yyyy')}</p>
             </div>
           </div>
@@ -624,6 +628,7 @@ export default function Drivers() {
                   )}
                   <div className="flex flex-col items-start gap-1.5 mt-0.5">
                     <DriverStatusBadge status={driver.status} />
+                    {driver.status === 'available' && <OnlineSince since={driver.online_since} />}
                     {driver.approval_status === 'pending' && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700/50">
                         <Clock className="w-3 h-3" /> Pendiente aprobación

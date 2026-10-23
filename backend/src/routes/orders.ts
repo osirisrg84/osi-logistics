@@ -372,7 +372,7 @@ router.post('/:id/assign', async (req: Request, res: Response) => {
     await exec(`UPDATE orders SET status = 'assigned', driver_id = ?, truck_id = ?, assigned_at = ?,
       dispatcher_user_id = COALESCE(dispatcher_user_id, ?) WHERE id = ?`,
       [driver_id, truck_id, now, authReq.user?.id || null, req.params.id]);
-    await exec("UPDATE drivers SET status = 'busy', truck_id = ? WHERE id = ?", [truck_id, driver_id]);
+    await exec("UPDATE drivers SET status = 'busy', truck_id = ?, online_since = NULL WHERE id = ?", [truck_id, driver_id]);
     await exec("INSERT INTO order_history (id, order_id, status, notes, created_by) VALUES (?, ?, 'assigned', ?, 'dispatcher')",
       [uuidv4(), req.params.id, `Assigned to driver ${driver.name}`]);
     await exec("INSERT INTO notifications (id, type, title, message, read, related_id) VALUES (?, 'order', 'Order Assigned', ?, 0, ?)",
@@ -411,7 +411,7 @@ router.post('/:id/status', async (req: Request, res: Response) => {
       updates.delivered_at = now;
       updates.actual_delivery = now;
       if (order.driver_id) {
-        await exec("UPDATE drivers SET status = 'available', total_deliveries = total_deliveries + 1 WHERE id = ?", [order.driver_id]);
+        await exec("UPDATE drivers SET status = 'available', total_deliveries = total_deliveries + 1, online_since = ? WHERE id = ?", [now, order.driver_id]);
         if ((order.price as number) > 0) {
           const [drv, disp] = await Promise.all([
             queryOne<{name:string}>('SELECT name FROM drivers WHERE id = ?', [order.driver_id as string]),
@@ -425,7 +425,7 @@ router.post('/:id/status', async (req: Request, res: Response) => {
       }
     }
     if (status === 'cancelled' && order.driver_id) {
-      await exec("UPDATE drivers SET status = 'available' WHERE id = ?", [order.driver_id]);
+      await exec("UPDATE drivers SET status = 'available', online_since = ? WHERE id = ?", [now, order.driver_id]);
     }
 
     const fields = Object.keys(updates);
@@ -586,7 +586,7 @@ router.post('/:id/accept', async (req: Request, res: Response) => {
     await exec(`UPDATE orders SET status = 'assigned', driver_id = ?, truck_id = ?, assigned_at = ?,
       offered_to_driver_id = NULL, offered_to_truck_id = NULL, offered_at = NULL WHERE id = ?`,
       [driverId, truckId, now, req.params.id]);
-    await exec("UPDATE drivers SET status = 'busy', truck_id = ? WHERE id = ?", [truckId, driverId]);
+    await exec("UPDATE drivers SET status = 'busy', truck_id = ?, online_since = NULL WHERE id = ?", [truckId, driverId]);
     await exec("INSERT INTO order_history (id, order_id, status, notes, created_by) VALUES (?, ?, 'assigned', 'Conductor aceptó la oferta', 'driver')", [uuidv4(), req.params.id]);
     await exec("INSERT INTO notifications (id, type, title, message, read, related_id) VALUES (?, 'order', '✅ Oferta Aceptada', ?, 0, ?)",
       [uuidv4(), `El conductor aceptó la orden ${order.order_number}`, req.params.id]);

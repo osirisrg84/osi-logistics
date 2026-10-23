@@ -424,6 +424,10 @@ export async function initDatabase(): Promise<void> {
   await addColumnIfMissing('drivers', 'load_capacity',     "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('drivers', 'dot_number',        "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('drivers', 'rate_con_email',    "TEXT NOT NULL DEFAULT ''");
+  // Marca desde cuando el driver esta "disponible" sin carga asignada --
+  // se pone al pasar a 'available' y se limpia (NULL) al tomar una carga o
+  // salir de disponible. Deja calcular "lleva X tiempo en línea" en el admin.
+  await addColumnIfMissing('drivers', 'online_since',      "TEXT");
 
   // Migrations for commissions -- `status` tracks whether the DRIVER paid
   // their 7% to OSI; it was being reused on the dispatcher side too as if it

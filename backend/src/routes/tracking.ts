@@ -14,7 +14,7 @@ router.get('/live', async (req: Request, res: Response) => {
     const drivers = await query(`
       SELECT d.id, d.name, d.status, d.current_lat, d.current_lng, d.current_address,
              d.avatar, d.truck_id, d.rating, d.gps_active, d.phone, d.on_time_rate,
-             d.equipment_type, d.total_deliveries, d.truck_make, d.truck_number,
+             d.equipment_type, d.total_deliveries, d.truck_make, d.truck_number, d.online_since,
              t.plate_number, t.make, t.model, t.type as truck_type,
              o.id as order_id, o.order_number, o.delivery_address, o.delivery_contact,
              o.status as order_status, o.estimated_delivery

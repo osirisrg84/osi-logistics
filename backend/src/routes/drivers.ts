@@ -159,6 +159,16 @@ router.put('/:id', async (req: Request, res: Response) => {
     const fields = Object.keys(updates).filter(k => allowed.includes(k));
     if (fields.length === 0) return res.status(400).json({ error: 'No fields to update' });
 
+    // online_since: arranca el conteo al pasar a 'available' (si no estaba
+    // ya disponible -- no reiniciar el reloj por un ping repetido del mismo
+    // estado), y se limpia al salir de disponible (offline/busy/on_break).
+    if (fields.includes('status')) {
+      fields.push('online_since');
+      updates.online_since = updates.status === 'available'
+        ? ((driver as { status?: string; online_since?: string | null }).status === 'available' ? (driver as { online_since?: string | null }).online_since : new Date().toISOString())
+        : null;
+    }
+
     const setClause = fields.map(f => `${f} = ?`).join(', ');
     await exec(`UPDATE drivers SET ${setClause} WHERE id = ?`,
       [...fields.map(f => updates[f] ?? null), req.params.id]);

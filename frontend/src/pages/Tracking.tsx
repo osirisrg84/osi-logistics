@@ -7,6 +7,7 @@ import { trackingApi, driversApi } from '../services/api';
 import { Driver } from '../types';
 import { getSocket } from '../services/socket';
 import { DriverStatusBadge } from '../components/StatusBadge';
+import { OnlineSince } from '../components/OnlineSince';
 import { formatDistanceToNow } from 'date-fns';
 import { parseServerDate } from '../utils/serverDate';
 import { formatLocation } from '../utils/location';
@@ -223,6 +224,7 @@ export default function Tracking() {
                   <div>
                     <p className="font-semibold text-sm">{driver.name}</p>
                     <p className="text-xs text-gray-500 capitalize">{t(`common.driverStatus.${driver.status}`)}</p>
+                    {driver.status === 'available' && <OnlineSince since={driver.online_since} />}
                   </div>
                 </div>
                 {driver.phone && (
@@ -381,7 +383,10 @@ export default function Tracking() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">{driver.name}</p>
-                      <DriverStatusBadge status={driver.status as never} className="mt-0.5" />
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <DriverStatusBadge status={driver.status as never} />
+                        {driver.status === 'available' && <OnlineSince since={driver.online_since} />}
+                      </div>
                     </div>
                     {/* Live indicator */}
                     <span className={`w-2 h-2 rounded-full animate-pulse flex-shrink-0 ${

@@ -241,12 +241,12 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
   return (
     <div className={`card p-0 overflow-hidden ${cardBorder}`}>
       {showBanner && (
-        <div className={`flex items-center justify-between px-5 py-2.5 ${banner.bg} border-b ${banner.border}`}>
+        <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-5 py-2.5 ${banner.bg} border-b ${banner.border}`}>
           <div className="flex items-center gap-2">
             <Clock className={`w-4 h-4 ${banner.iconColor} flex-shrink-0`} />
             <span className={`text-xs font-semibold ${banner.iconColor}`}>{bannerLabel}</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {approvalStatus !== 'pending' && (
               <button
                 onClick={e => act(e, 'approve')}
@@ -298,8 +298,8 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
           {name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{name}</p>
+          <p className="text-sm font-semibold text-gray-900 dark:text-slate-100 break-words">{name}</p>
+          <div className="flex items-center gap-2 flex-wrap mt-1">
             {isDemo && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400 border border-purple-200 dark:border-purple-700/40">{t('verifications.demo')}</span>}
             {approvalStatus === 'pending'  && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border border-amber-200 dark:border-amber-700/40">{t('verifications.pending')}</span>}
             {approvalStatus === 'rejected' && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border border-red-200 dark:border-red-700/40">{t('verifications.rejected')}</span>}

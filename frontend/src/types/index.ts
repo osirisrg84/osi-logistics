@@ -43,6 +43,7 @@ export interface Driver {
   truck_make?: string;
   driver_code?: string;
   active_orders?: number;
+  online_since?: string | null;
   approval_status?: string;
   order_id?: string;
   order_number?: string;
