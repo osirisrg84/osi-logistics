@@ -178,18 +178,23 @@ export default function Documents() {
 
       {modal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setModal(null)}>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full max-h-[85vh] overflow-auto p-4" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{modal.name}</p>
-              <button onClick={() => setModal(null)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
+          {/* Header sticky -- con una foto muy alta el boton de cerrar se
+              iba fuera de vista al hacer scroll y no habia forma de volver
+              a encontrarlo. La imagen tambien queda limitada en alto. */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full max-h-[85vh] overflow-auto" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 z-10 flex items-center justify-between gap-2 bg-white dark:bg-slate-800 border-b border-gray-100 dark:border-slate-700 px-4 py-3">
+              <p className="text-sm font-semibold text-gray-900 dark:text-slate-100 truncate">{modal.name}</p>
+              <button onClick={() => setModal(null)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg flex-shrink-0">
                 <XCircle className="w-5 h-5 text-gray-400" />
               </button>
             </div>
-            {modal.data.startsWith('data:application/pdf') ? (
-              <a href={modal.data} download={modal.filename} className="text-sm text-blue-500 underline">{modal.filename}</a>
-            ) : (
-              <img src={modal.data} alt={modal.filename} className="w-full rounded-xl" />
-            )}
+            <div className="p-4">
+              {modal.data.startsWith('data:application/pdf') ? (
+                <a href={modal.data} download={modal.filename} className="text-sm text-blue-500 underline">{modal.filename}</a>
+              ) : (
+                <img src={modal.data} alt={modal.filename} className="w-full max-h-[70vh] object-contain rounded-xl mx-auto" />
+              )}
+            </div>
           </div>
         </div>
       )}

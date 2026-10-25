@@ -635,18 +635,27 @@ export default function Verifications() {
 
       {idDocModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setIdDocModal(null)}>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full max-h-[85vh] overflow-auto p-4" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{idDocModal.name} — {t('verifications.idDocument')}</p>
-              <button onClick={() => setIdDocModal(null)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
+          {/* El header con el boton de cerrar queda "sticky" arriba del
+              contenedor con scroll -- antes, con una foto de documento muy
+              alta (comun en fotos de camara de celular), el header se iba
+              hacia arriba del scroll y el boton de cerrar quedaba fuera de
+              vista sin poder encontrarlo. La imagen tambien queda limitada
+              en alto (max-h-[70vh] + object-contain) para que en la mayoria
+              de los casos ni siquiera haga falta hacer scroll. */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full max-h-[85vh] overflow-auto" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 z-10 flex items-center justify-between gap-2 bg-white dark:bg-slate-800 border-b border-gray-100 dark:border-slate-700 px-4 py-3">
+              <p className="text-sm font-semibold text-gray-900 dark:text-slate-100 truncate">{idDocModal.name} — {t('verifications.idDocument')}</p>
+              <button onClick={() => setIdDocModal(null)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg flex-shrink-0">
                 <XCircle className="w-5 h-5 text-gray-400" />
               </button>
             </div>
-            {idDocModal.data.startsWith('data:application/pdf') ? (
-              <a href={idDocModal.data} download={idDocModal.filename} className="text-sm text-blue-500 underline">{idDocModal.filename}</a>
-            ) : (
-              <img src={idDocModal.data} alt={idDocModal.filename} className="w-full rounded-xl" />
-            )}
+            <div className="p-4">
+              {idDocModal.data.startsWith('data:application/pdf') ? (
+                <a href={idDocModal.data} download={idDocModal.filename} className="text-sm text-blue-500 underline">{idDocModal.filename}</a>
+              ) : (
+                <img src={idDocModal.data} alt={idDocModal.filename} className="w-full max-h-[70vh] object-contain rounded-xl mx-auto" />
+              )}
+            </div>
           </div>
         </div>
       )}
