@@ -428,6 +428,13 @@ export async function initDatabase(): Promise<void> {
   // se pone al pasar a 'available' y se limpia (NULL) al tomar una carga o
   // salir de disponible. Deja calcular "lleva X tiempo en línea" en el admin.
   await addColumnIfMissing('drivers', 'online_since',      "TEXT");
+  // Backfill: drivers que YA estaban 'available' antes de que esta columna
+  // existiera se quedaban con online_since en NULL para siempre (el codigo
+  // solo lo setea en un CAMBIO de estado, no al arrancar) -- el badge de
+  // "tiempo en línea" nunca les aparecía. Se arranca el conteo desde ahora
+  // para esos casos; es un idempotente (solo toca filas NULL, no vuelve a
+  // tocar nada despues del primer boot con esta migracion).
+  await exec("UPDATE drivers SET online_since = datetime('now') WHERE status = 'available' AND online_since IS NULL");
 
   // Migrations for commissions -- `status` tracks whether the DRIVER paid
   // their 7% to OSI; it was being reused on the dispatcher side too as if it

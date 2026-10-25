@@ -246,14 +246,18 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
             <Clock className={`w-4 h-4 ${banner.iconColor} flex-shrink-0`} />
             <span className={`text-xs font-semibold ${banner.iconColor}`}>{bannerLabel}</span>
           </div>
-          <div className="flex items-center gap-1.5 flex-wrap">
+          {/* Los 3 botones deben caber en una sola fila incluso en celulares
+              angostos -- texto y relleno reducidos a propósito (antes
+              "Aprobar cuenta" + relleno mas grande hacia que Archivar no
+              entrara y se fuera a su propia línea). */}
+          <div className="flex items-center gap-1 flex-nowrap">
             {approvalStatus !== 'pending' && (
               <button
                 onClick={e => act(e, 'approve')}
                 disabled={!!acting}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white text-xs font-bold transition-colors"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white text-[11px] font-bold whitespace-nowrap transition-colors"
               >
-                <UserCheck className="w-3 h-3" />
+                <UserCheck className="w-3 h-3 flex-shrink-0" />
                 {acting === 'approve' ? '...' : t('verifications.approve')}
               </button>
             )}
@@ -261,19 +265,19 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
               <button
                 onClick={e => act(e, 'approve')}
                 disabled={!!acting}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white text-xs font-bold transition-colors"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white text-[11px] font-bold whitespace-nowrap transition-colors"
               >
-                <UserCheck className="w-3.5 h-3.5" />
-                {acting === 'approve' ? t('verifications.approving') : t('verifications.approveAccount')}
+                <UserCheck className="w-3 h-3 flex-shrink-0" />
+                {acting === 'approve' ? t('verifications.approving') : t('verifications.approve')}
               </button>
             )}
             {approvalStatus !== 'rejected' && (
               <button
                 onClick={e => act(e, 'reject')}
                 disabled={!!acting}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white text-xs font-bold transition-colors"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white text-[11px] font-bold whitespace-nowrap transition-colors"
               >
-                <Ban className="w-3 h-3" />
+                <Ban className="w-3 h-3 flex-shrink-0" />
                 {acting === 'reject' ? '...' : t('verifications.reject')}
               </button>
             )}
@@ -281,9 +285,9 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
               <button
                 onClick={e => act(e, 'archive')}
                 disabled={!!acting}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-400 hover:bg-gray-500 dark:bg-slate-600 dark:hover:bg-slate-500 disabled:opacity-50 text-white text-xs font-bold transition-colors"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-gray-400 hover:bg-gray-500 dark:bg-slate-600 dark:hover:bg-slate-500 disabled:opacity-50 text-white text-[11px] font-bold whitespace-nowrap transition-colors"
               >
-                <Archive className="w-3 h-3" />
+                <Archive className="w-3 h-3 flex-shrink-0" />
                 {acting === 'archive' ? '...' : t('verifications.archive')}
               </button>
             )}
