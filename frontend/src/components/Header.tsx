@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Bell, Search, RefreshCw, X, Check, LogOut, ChevronDown, Shield, Truck, ClipboardList, Sun, Moon, Zap, StickyNote, Headphones, Plus, Pin, Languages } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
 import InstallAppButton from './InstallAppButton';
-import api, { notificationsApi } from '../services/api';
+import api, { notificationsApi, userApi } from '../services/api';
 import { Notification } from '../types';
 import { getSocket } from '../services/socket';
 import { useAuth } from '../context/AuthContext';
@@ -133,13 +133,23 @@ export default function Header({ onMenuClick }: HeaderProps) {
   // ── Dispatcher strip state (shared mobile + desktop) ──────
   const [musicOn, setMusicOn] = useState(() => { try { return localStorage.getItem('osi_music_on') === '1'; } catch { return false; } });
   const [notesOpen, setNotesOpen] = useState(() => { try { return localStorage.getItem('osi_notes_open') === '1'; } catch { return false; } });
-  const [dispActive, setDispActive] = useState(() => { try { return localStorage.getItem('osi_disp_active') === '1'; } catch { return false; } });
+  // No se inicializa desde localStorage -- esa clave vive por NAVEGADOR, no
+  // por usuario, asi que si dos dispatchers distintos probaban su cuenta en
+  // el mismo dispositivo, el segundo heredaba el "Activo" encendido del
+  // primero con solo iniciar sesion, sin tocar el switch. La fuente real es
+  // siempre el shift_active del servidor para la cuenta que esta logueada.
+  const [dispActive, setDispActive] = useState(false);
+  useEffect(() => {
+    if (!isDispatcher) return;
+    userApi.getProfile()
+      .then(({ data }) => setDispActive(!!data.shift_active))
+      .catch(() => {});
+  }, [isDispatcher]);
   const [notes, setNotes] = useState<Array<{id: string; text: string; time: string}>>(() => { try { return JSON.parse(localStorage.getItem('osi_dispatch_notes') || '[]'); } catch { return []; } });
   const [noteInput, setNoteInput] = useState('');
 
   useEffect(() => { if (isDispatcher) localStorage.setItem('osi_music_on', musicOn ? '1' : '0'); }, [musicOn, isDispatcher]);
   useEffect(() => { if (isDispatcher) localStorage.setItem('osi_notes_open', notesOpen ? '1' : '0'); }, [notesOpen, isDispatcher]);
-  useEffect(() => { if (isDispatcher) localStorage.setItem('osi_disp_active', dispActive ? '1' : '0'); }, [dispActive, isDispatcher]);
   useEffect(() => { if (isDispatcher) localStorage.setItem('osi_dispatch_notes', JSON.stringify(notes)); }, [notes, isDispatcher]);
 
   function addNote() {
