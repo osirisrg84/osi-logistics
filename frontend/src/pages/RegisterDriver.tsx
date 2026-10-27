@@ -1,7 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, Mail, Lock, Building2, Calendar, Hash, Clock, Send } from 'lucide-react';
+import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, Mail, Lock, Building2, Calendar, Hash, Clock, Send, DollarSign, KeyRound, ShieldCheck } from 'lucide-react';
 import api from '../services/api';
 
 const EQUIPMENT_TYPES = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'];
@@ -26,10 +26,22 @@ export default function RegisterDriver() {
   const [form, setForm] = useState({
     name: '', phone: '', email: '', password: '', confirm: '',
     license_number: '', license_expiry: '',
-    equipment_type: 'Dry Van', mc_number: '', dot_number: '', company_name: '', authority_since: '',
+    equipment_type: '', mc_number: '', dot_number: '', company_name: '', authority_since: '',
     rate_con_email: '',
   });
+  // Equipment picked first drives everything below: DOT_TYPES (Van, Box
+  // Truck, Hotshot) are commonly run under 26,001 lbs GVWR/GCWR, so they
+  // don't require a CDL -- a regular driver's license is enough -- and in
+  // practice they register under a DOT# rather than an MC#. The other five
+  // (Dry Van, Reefer, Power Only, Flatbed, Tanker) are tractor-trailer
+  // combinations well over that threshold and always require a CDL.
+  const requiresCdl = form.equipment_type !== '' && !DOT_TYPES.includes(form.equipment_type);
   const [authorityType, setAuthorityType] = useState<'MC#' | 'DOT#'>('MC#');
+  const handleEquipmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setForm(f => ({ ...f, equipment_type: value }));
+    setAuthorityType(DOT_TYPES.includes(value) ? 'DOT#' : 'MC#');
+  };
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -123,6 +135,27 @@ export default function RegisterDriver() {
           <p className="text-slate-400 text-sm mt-1">{t('registerDriver.heroSubtitle')}</p>
         </div>
 
+        {/* Trust band -- the two angles the Oct-2026 research/creative round
+            validated (transparency on the 93/7 split, no forced dispatch)
+            plus 24/7 support. Added because Meta Insights showed real
+            drop-off exactly here: visitors reached this page and left
+            without starting the form -- a bare form with no reason to
+            trust OSI wasn't converting, regardless of ad spend. */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-6">
+          <div className="bg-white/5 border border-white/10 rounded-2xl px-3.5 py-3 flex items-start gap-2.5">
+            <DollarSign className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-slate-300 leading-snug">{t('registerDriver.trustEarnings')}</p>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-2xl px-3.5 py-3 flex items-start gap-2.5">
+            <KeyRound className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-slate-300 leading-snug">{t('registerDriver.trustControl')}</p>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-2xl px-3.5 py-3 flex items-start gap-2.5">
+            <Clock className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-slate-300 leading-snug">{t('registerDriver.trustSupport')}</p>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-5">
 
           {error && (
@@ -130,6 +163,30 @@ export default function RegisterDriver() {
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" /> {error}
             </div>
           )}
+
+          {/* Equipment first -- a single tap, no typing, decides which
+              license field and which authority type show up next. */}
+          <div className="bg-white rounded-2xl shadow-xl p-5 space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Truck className="w-4 h-4 text-blue-500" />
+              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{t('registerDriver.sectionEquipmentFirst')}</h2>
+            </div>
+            <Field label={t('registerDriver.equipmentTypeLabel')} required>
+              <select className="input" value={form.equipment_type} onChange={handleEquipmentChange} required>
+                <option value="" disabled>{t('registerDriver.equipmentTypePlaceholder')}</option>
+                {EQUIPMENT_TYPES.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+              </select>
+            </Field>
+            {form.equipment_type && (
+              <p className="text-[11px] text-gray-400 flex items-start gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-gray-300 flex-shrink-0 mt-0.5" />
+                {requiresCdl ? t('registerDriver.cdlRequiredNote') : t('registerDriver.noCdlNote')}
+              </p>
+            )}
+          </div>
+
+          {form.equipment_type && (
+          <>
 
           {/* Personal info */}
           <div className="bg-white rounded-2xl shadow-xl p-5 space-y-4">
@@ -198,12 +255,16 @@ export default function RegisterDriver() {
           <div className="bg-white rounded-2xl shadow-xl p-5 space-y-4">
             <div className="flex items-center gap-2 mb-1">
               <Hash className="w-4 h-4 text-orange-500" />
-              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{t('registerDriver.sectionCdlLicense')}</h2>
+              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{requiresCdl ? t('registerDriver.sectionCdlLicense') : t('registerDriver.sectionDriverLicense')}</h2>
             </div>
+            <p className="text-[11px] text-gray-400 -mt-2 flex items-start gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-gray-300 flex-shrink-0 mt-0.5" />
+              {t('registerDriver.whyWeAskNote')}
+            </p>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label={t('registerDriver.cdlLicenseNumberLabel')} required>
-                <input className="input" type="text" placeholder="FL-CDL-000000"
+              <Field label={requiresCdl ? t('registerDriver.cdlLicenseNumberLabel') : t('registerDriver.driverLicenseNumberLabel')} required>
+                <input className="input" type="text" placeholder={requiresCdl ? "FL-CDL-000000" : "FL-DL-000000"}
                   value={form.license_number} onChange={set('license_number')} required />
               </Field>
               <Field label={t('registerDriver.licenseExpiryLabel')} required>
@@ -221,29 +282,22 @@ export default function RegisterDriver() {
               <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{t('registerDriver.sectionCompanyEquipment')}</h2>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Field label={t('registerDriver.equipmentTypeLabel')}>
-                <select className="input" value={form.equipment_type} onChange={set('equipment_type')}>
-                  {EQUIPMENT_TYPES.map(eq => <option key={eq}>{eq}</option>)}
-                </select>
-              </Field>
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1.5">
-                  {t('registerDriver.authorityTypeLabel')}
-                </label>
-                <div className="flex rounded-xl overflow-hidden border border-gray-200 h-[42px]">
-                  {(['MC#', 'DOT#'] as const).map(type => (
-                    <button key={type} type="button"
-                      onClick={() => setAuthorityType(type)}
-                      className={`flex-1 text-xs font-bold transition-colors ${
-                        authorityType === type
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-white text-gray-500 hover:bg-gray-50'
-                      }`}>
-                      {type}
-                    </button>
-                  ))}
-                </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5">
+                {t('registerDriver.authorityTypeLabel')}
+              </label>
+              <div className="flex rounded-xl overflow-hidden border border-gray-200 h-[42px] max-w-[200px]">
+                {(['MC#', 'DOT#'] as const).map(type => (
+                  <button key={type} type="button"
+                    onClick={() => setAuthorityType(type)}
+                    className={`flex-1 text-xs font-bold transition-colors ${
+                      authorityType === type
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-white text-gray-500 hover:bg-gray-50'
+                    }`}>
+                    {type}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -303,6 +357,14 @@ export default function RegisterDriver() {
               : <><Lock className="w-4 h-4" /> {t('registerDriver.createAccountBtn')}</>
             }
           </button>
+
+          <p className="text-[11px] text-center text-slate-500 -mt-2 flex items-center justify-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 flex-shrink-0" />
+            {t('registerDriver.privacyNote')}
+          </p>
+
+          </>
+          )}
 
           <p className="text-xs text-center text-slate-500 pb-4">
             {t('registerDispatcher.alreadyHaveAccount')}{' '}
