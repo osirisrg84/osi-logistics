@@ -109,6 +109,7 @@ export const userApi = {
     api.post('/auth/verify-code', { type, code }),
   confirmPhoneVerified: (firebaseToken: string) =>
     api.post('/auth/confirm-phone-verified', { firebaseToken }),
+  deleteAccount: (password: string) => api.delete('/auth/account', { data: { password } }),
 };
 
 export default api;

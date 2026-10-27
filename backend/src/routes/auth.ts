@@ -457,6 +457,57 @@ router.put('/change-password', async (req: Request, res: Response) => {
   } catch { res.status(500).json({ error: 'Error al cambiar contraseña' }); }
 });
 
+// ── Delete account ─────────────────────────────────────────────────
+// Soft-delete: a hard DELETE would orphan driver_id/user_id references
+// still live-joined from orders, tracking and commissions history (e.g.
+// orders.driver_id -> drivers.name for "delivered by" on past orders).
+// Instead: deactivate the account, kill every session so no token keeps
+// working, and scrub the PII fields that aren't needed to keep historical
+// records legible. drivers.name/license/equipment are left alone on
+// purpose -- those are what past completed orders still display.
+router.delete('/account', async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ error: 'No token' });
+    const session = await queryOne<{ user_id: string }>(
+      "SELECT user_id FROM sessions WHERE token = ? AND expires_at > datetime('now')", [token]
+    );
+    if (!session) return res.status(401).json({ error: 'Sesión inválida' });
+
+    const { password } = req.body;
+    if (!password) return res.status(400).json({ error: 'Ingresa tu contraseña para confirmar' });
+
+    const user = await queryOne<{ id: string; password_hash: string; salt: string; role: string; driver_id: string | null }>(
+      'SELECT id, password_hash, salt, role, driver_id FROM users WHERE id = ?', [session.user_id]
+    );
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (!verifyPassword(password, user.salt, user.password_hash))
+      return res.status(400).json({ error: 'Contraseña incorrecta' });
+
+    const tombstoneEmail = `deleted-${user.id}@deleted.osilogistics.local`;
+    const randomSalt = randomBytes(16).toString('hex');
+    const randomHash = hashPassword(randomBytes(32).toString('hex'), randomSalt);
+
+    await exec(
+      `UPDATE users SET active = 0, email = ?, password_hash = ?, salt = ?, name = 'Deleted User',
+       phone = '', ssn = '', date_of_birth = '', city = '', previous_companies = '',
+       languages = '', payout_method = '', payout_details = '', equipment_experience = ''
+       WHERE id = ?`,
+      [tombstoneEmail, randomHash, randomSalt, user.id]
+    );
+
+    if (user.role === 'driver' && user.driver_id) {
+      await exec('UPDATE drivers SET phone = ?, email = ? WHERE id = ?',
+        ['000-000-0000', tombstoneEmail, user.driver_id]);
+      await exec('DELETE FROM push_subscriptions WHERE driver_id = ?', [user.driver_id]);
+    }
+
+    await exec('DELETE FROM sessions WHERE user_id = ?', [user.id]);
+
+    res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Error al eliminar la cuenta' }); }
+});
+
 // ── Forgot password (logged out, no session yet) ──────────────────
 // Siempre responde igual exista o no la cuenta, para no filtrar que emails
 // estan registrados.

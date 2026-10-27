@@ -558,6 +558,26 @@ export default function DriverPortal() {
   const recaptchaRef = useRef<RecaptchaVerifier | null>(null);
   const [profilePhone, setProfilePhone] = useState('');
 
+  // ── Delete account -- kept collapsed behind a small link, not a
+  // visible button, since this is a destructive, rarely-used action ──
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const [deletePw, setDeletePw]         = useState('');
+  const [deleteStatus, setDeleteStatus] = useState<'idle'|'deleting'|'error'>('idle');
+  const [deleteMsg, setDeleteMsg]       = useState('');
+
+  const deleteAccount = async () => {
+    if (!deletePw) { setDeleteMsg(t('driverPortal.deleteAccountPasswordRequired')); setDeleteStatus('error'); return; }
+    setDeleteStatus('deleting'); setDeleteMsg('');
+    try {
+      await userApi.deleteAccount(deletePw);
+      logout();
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { error?: string } } };
+      setDeleteMsg(err?.response?.data?.error || t('driverPortal.deleteAccountError'));
+      setDeleteStatus('error');
+    }
+  };
+
   const handleSendCode = async (type: 'email' | 'phone') => {
     setSendingCode(true); setVerifyMsg('');
     try {
@@ -3170,6 +3190,44 @@ export default function DriverPortal() {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* ── Account ── */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm p-4">
+            {!showDeleteAccount ? (
+              <button type="button" onClick={() => setShowDeleteAccount(true)}
+                className="text-xs text-gray-400 dark:text-slate-500 hover:text-red-500 transition-colors">
+                {t('driverPortal.deleteAccountLink')}
+              </button>
+            ) : (
+              <div>
+                <h4 className="text-sm font-semibold text-red-600 mb-1.5">{t('driverPortal.deleteAccountTitle')}</h4>
+                <p className="text-xs text-gray-500 dark:text-slate-400 mb-3">{t('driverPortal.deleteAccountWarning')}</p>
+                <input
+                  type="password"
+                  className="input mb-2"
+                  placeholder={t('driverPortal.deleteAccountPasswordLabel')}
+                  value={deletePw}
+                  onChange={e => { setDeletePw(e.target.value); setDeleteStatus('idle'); }}
+                />
+                {deleteStatus === 'error' && (
+                  <div className="flex items-center gap-2 text-sm rounded-xl px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-800 mb-2">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" /> {deleteMsg}
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <button type="button" onClick={deleteAccount} disabled={deleteStatus === 'deleting'}
+                    className="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors disabled:opacity-50">
+                    {deleteStatus === 'deleting' ? t('driverPortal.deleting') : t('driverPortal.deleteAccountConfirm')}
+                  </button>
+                  <button type="button"
+                    onClick={() => { setShowDeleteAccount(false); setDeletePw(''); setDeleteStatus('idle'); }}
+                    className="text-sm text-gray-500 dark:text-slate-400 px-4 py-2">
+                    {t('driverPortal.cancel')}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

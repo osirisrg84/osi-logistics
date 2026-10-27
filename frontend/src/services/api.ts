@@ -145,6 +145,7 @@ export const userApi = {
   sendVerification:    (type: 'email' | 'phone') => api.post('/auth/send-verification', { type }),
   verifyCode:          (type: 'email' | 'phone', code: string) => api.post('/auth/verify-code', { type, code }),
   confirmPhoneVerified:(firebaseToken: string) => api.post('/auth/confirm-phone-verified', { firebaseToken }),
+  deleteAccount: (password: string) => api.delete('/auth/account', { data: { password } }),
 };
 
 export const notificationsApi = {

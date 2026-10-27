@@ -67,6 +67,28 @@ export default function Settings() {
     }
   };
 
+  // Delete account -- kept collapsed behind a small link rather than a
+  // visible button, since this is a destructive, rarely-used action.
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const [deletePw, setDeletePw]         = useState('');
+  const [deleteStatus, setDeleteStatus] = useState<'idle'|'deleting'|'error'>('idle');
+  const [deleteMsg, setDeleteMsg]       = useState('');
+
+  const deleteAccount = async () => {
+    if (!deletePw) { setDeleteMsg(t('settings.deleteAccountPasswordRequired')); setDeleteStatus('error'); return; }
+    setDeleteStatus('deleting'); setDeleteMsg('');
+    try {
+      await api.delete('/auth/account', { data: { password: deletePw } });
+      localStorage.removeItem('osi_token');
+      localStorage.removeItem('osi_user');
+      window.location.href = '/';
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { error?: string } } };
+      setDeleteMsg(err?.response?.data?.error || t('settings.deleteAccountError'));
+      setDeleteStatus('error');
+    }
+  };
+
   const [companySettings, setCompanySettings] = useState({
     company_name: 'OSI Logistics',
     company_email: 'dispatch@osilogistics.com',
@@ -458,6 +480,44 @@ export default function Settings() {
                     : <><Save className="w-4 h-4" /> {t('settings.savePassword')}</>}
                 </button>
               </div>
+              </div>
+
+              <div className="border-t border-gray-100 dark:border-slate-700 pt-5 mt-5">
+                {!showDeleteAccount ? (
+                  <button type="button" onClick={() => setShowDeleteAccount(true)}
+                    className="text-xs text-gray-400 hover:text-red-500 transition-colors">
+                    {t('settings.deleteAccountLink')}
+                  </button>
+                ) : (
+                  <div className="max-w-sm">
+                    <h4 className="text-sm font-semibold text-red-600 mb-1.5">{t('settings.deleteAccountTitle')}</h4>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-3">{t('settings.deleteAccountWarning')}</p>
+                    <label className="label">{t('settings.deleteAccountPasswordLabel')}</label>
+                    <input
+                      type="password"
+                      className="input mb-2"
+                      placeholder="••••••••"
+                      value={deletePw}
+                      onChange={e => { setDeletePw(e.target.value); setDeleteStatus('idle'); }}
+                    />
+                    {deleteStatus === 'error' && (
+                      <div className="flex items-center gap-2 text-sm rounded-xl px-3 py-2 bg-red-50 text-red-600 border border-red-100 mb-2">
+                        <AlertCircle className="w-4 h-4 flex-shrink-0" /> {deleteMsg}
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <button type="button" onClick={deleteAccount} disabled={deleteStatus === 'deleting'}
+                        className="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors disabled:opacity-50">
+                        {deleteStatus === 'deleting' ? t('settings.deleting') : t('settings.deleteAccountConfirm')}
+                      </button>
+                      <button type="button"
+                        onClick={() => { setShowDeleteAccount(false); setDeletePw(''); setDeleteStatus('idle'); }}
+                        className="text-sm text-gray-500 px-4 py-2">
+                        {t('settings.cancel')}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

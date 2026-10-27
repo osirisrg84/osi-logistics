@@ -9,7 +9,7 @@ const DOT_TYPES = ['Van', 'Box Truck', 'Hotshot'];
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <div>
+    <div className="min-w-0">
       <label className="block text-xs font-semibold text-gray-500 mb-1.5">
         {label} {required && <span className="text-red-400">*</span>}
       </label>
@@ -142,16 +142,22 @@ export default function RegisterDriver() {
             without starting the form -- a bare form with no reason to
             trust OSI wasn't converting, regardless of ad spend. */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-6">
-          <div className="bg-white/5 border border-white/10 rounded-2xl px-3.5 py-3 flex items-start gap-2.5">
-            <DollarSign className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+          <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
+              <DollarSign className="w-5 h-5 text-emerald-400" />
+            </div>
             <p className="text-xs text-slate-300 leading-snug">{t('registerDriver.trustEarnings')}</p>
           </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl px-3.5 py-3 flex items-start gap-2.5">
-            <KeyRound className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+          <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-blue-500/15 flex items-center justify-center flex-shrink-0">
+              <KeyRound className="w-5 h-5 text-blue-400" />
+            </div>
             <p className="text-xs text-slate-300 leading-snug">{t('registerDriver.trustControl')}</p>
           </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl px-3.5 py-3 flex items-start gap-2.5">
-            <Clock className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
+          <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-cyan-500/15 flex items-center justify-center flex-shrink-0">
+              <Clock className="w-5 h-5 text-cyan-400" />
+            </div>
             <p className="text-xs text-slate-300 leading-snug">{t('registerDriver.trustSupport')}</p>
           </div>
         </div>
@@ -167,8 +173,10 @@ export default function RegisterDriver() {
           {/* Equipment first -- a single tap, no typing, decides which
               license field and which authority type show up next. */}
           <div className="bg-white rounded-2xl shadow-xl p-5 space-y-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Truck className="w-4 h-4 text-blue-500" />
+            <div className="flex items-center gap-2.5 mb-1">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <Truck className="w-[18px] h-[18px] text-blue-500" />
+              </div>
               <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{t('registerDriver.sectionEquipmentFirst')}</h2>
             </div>
             <Field label={t('registerDriver.equipmentTypeLabel')} required>
@@ -178,8 +186,8 @@ export default function RegisterDriver() {
               </select>
             </Field>
             {form.equipment_type && (
-              <p className="text-[11px] text-gray-400 flex items-start gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-gray-300 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-gray-400 flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-gray-300 flex-shrink-0 mt-0.5" />
                 {requiresCdl ? t('registerDriver.cdlRequiredNote') : t('registerDriver.noCdlNote')}
               </p>
             )}
@@ -190,8 +198,10 @@ export default function RegisterDriver() {
 
           {/* Personal info */}
           <div className="bg-white rounded-2xl shadow-xl p-5 space-y-4">
-            <div className="flex items-center gap-2 mb-1">
-              <User className="w-4 h-4 text-blue-500" />
+            <div className="flex items-center gap-2.5 mb-1">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <User className="w-[18px] h-[18px] text-blue-500" />
+              </div>
               <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{t('registerDispatcher.sectionPersonalInfo')}</h2>
             </div>
 
@@ -253,12 +263,14 @@ export default function RegisterDriver() {
 
           {/* CDL */}
           <div className="bg-white rounded-2xl shadow-xl p-5 space-y-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Hash className="w-4 h-4 text-orange-500" />
+            <div className="flex items-center gap-2.5 mb-1">
+              <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                <Hash className="w-[18px] h-[18px] text-orange-500" />
+              </div>
               <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{requiresCdl ? t('registerDriver.sectionCdlLicense') : t('registerDriver.sectionDriverLicense')}</h2>
             </div>
-            <p className="text-[11px] text-gray-400 -mt-2 flex items-start gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-gray-300 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-gray-400 -mt-2 flex items-start gap-2">
+              <ShieldCheck className="w-4 h-4 text-gray-300 flex-shrink-0 mt-0.5" />
               {t('registerDriver.whyWeAskNote')}
             </p>
 
@@ -277,8 +289,10 @@ export default function RegisterDriver() {
 
           {/* Company / Equipment */}
           <div className="bg-white rounded-2xl shadow-xl p-5 space-y-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Building2 className="w-4 h-4 text-green-500" />
+            <div className="flex items-center gap-2.5 mb-1">
+              <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+                <Building2 className="w-[18px] h-[18px] text-green-500" />
+              </div>
               <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{t('registerDriver.sectionCompanyEquipment')}</h2>
             </div>
 
@@ -358,8 +372,8 @@ export default function RegisterDriver() {
             }
           </button>
 
-          <p className="text-[11px] text-center text-slate-500 -mt-2 flex items-center justify-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 flex-shrink-0" />
+          <p className="text-xs text-center text-slate-500 -mt-2 flex items-center justify-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 flex-shrink-0" />
             {t('registerDriver.privacyNote')}
           </p>
 
