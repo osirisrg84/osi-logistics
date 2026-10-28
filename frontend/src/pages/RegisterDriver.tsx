@@ -31,7 +31,7 @@ function DateField({ value, onChange, required, placeholder }: {
       <Calendar className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
       <input className="input pl-9" type="date" value={value} onChange={onChange} required={required} />
       {!value && (
-        <span className="absolute left-9 top-1/2 -translate-y-1/2 text-sm text-gray-400 pointer-events-none">
+        <span className="absolute left-9 top-1/2 -translate-y-1/2 text-sm text-gray-400 pointer-events-none whitespace-nowrap overflow-hidden text-ellipsis max-w-[calc(100%-2.75rem)]">
           {placeholder}
         </span>
       )}
