@@ -7,6 +7,7 @@ import {
   Plus, X, Globe, Clock, FileBadge, UploadCloud,
 } from 'lucide-react';
 import { authApi } from '../services/api';
+import osiLogo from '../assets/osi-logo.jpeg';
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
@@ -173,6 +174,7 @@ export default function RegisterDispatcher() {
 
         {/* Header */}
         <div className="text-center mb-7">
+          <img src={osiLogo} alt="OSI Logistics" className="h-10 w-auto object-contain mx-auto mb-4 rounded-xl shadow-lg shadow-black/30" />
           <div className="w-16 h-16 bg-orange-500 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-orange-500/30">
             <ClipboardList className="w-8 h-8 text-white" />
           </div>
