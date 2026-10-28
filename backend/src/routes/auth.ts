@@ -477,12 +477,26 @@ router.delete('/account', async (req: Request, res: Response) => {
     const { password } = req.body;
     if (!password) return res.status(400).json({ error: 'Ingresa tu contraseña para confirmar' });
 
-    const user = await queryOne<{ id: string; password_hash: string; salt: string; role: string; driver_id: string | null }>(
-      'SELECT id, password_hash, salt, role, driver_id FROM users WHERE id = ?', [session.user_id]
+    const user = await queryOne<{ id: string; email: string; password_hash: string; salt: string; role: string; driver_id: string | null }>(
+      'SELECT id, email, password_hash, salt, role, driver_id FROM users WHERE id = ?', [session.user_id]
     );
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
     if (!verifyPassword(password, user.salt, user.password_hash))
       return res.status(400).json({ error: 'Contraseña incorrecta' });
+
+    // Shared demo accounts (same '%@osilogistics.com' convention used
+    // everywhere else in this codebase to scope demo data) are reachable by
+    // any visitor -- the delete-account flow stays fully visible and
+    // functional up through real password verification above, so the
+    // feature itself is genuinely demonstrable, but the account must survive
+    // for the next visitor. Rejected with an honest explanation rather than
+    // a silent fake-success, matching this project's no-fake-functionality
+    // stance elsewhere (CLAUDE.md).
+    if (user.email.endsWith('@osilogistics.com')) {
+      return res.status(403).json({
+        error: 'Esta es una cuenta de demostración compartida y no se puede eliminar, para que otros visitantes también puedan probarla. En tu cuenta real, este botón sí elimina la cuenta de forma permanente.',
+      });
+    }
 
     const tombstoneEmail = `deleted-${user.id}@deleted.osilogistics.local`;
     const randomSalt = randomBytes(16).toString('hex');

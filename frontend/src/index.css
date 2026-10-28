@@ -45,6 +45,13 @@
   }
 }
 
+/* Hides the browser's own native date-input placeholder text ("mm/dd/yyyy"
+   segments) while the field is empty, so it can't visually overlap with the
+   custom placeholder overlay rendered on top of it (DateField, RegisterDriver.tsx) --
+   see the comment there for why both can otherwise render at once. */
+input[type="date"].date-empty::-webkit-datetime-edit { color: transparent; }
+input[type="date"].date-empty::-webkit-datetime-edit-fields-wrapper { color: transparent; }
+
 .leaflet-container { border-radius: 0.75rem; z-index: 0; }
 .leaflet-popup-content-wrapper {
   border-radius: 12px !important;

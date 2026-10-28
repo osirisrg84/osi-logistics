@@ -7,7 +7,8 @@ import {
   Power, Coffee, AlertTriangle, Sun, Moon, Plus, X, Home, Briefcase, Wallet, Building2, CreditCard,
   Lock, ShieldCheck, Send, Bell, BellOff, CheckCheck, Award, Edit3, Zap,
   Headphones, Radio, Users, PhoneCall, MessageSquare, Heart, Trophy,
-  FileText, Upload, Calendar, AlertCircle, Mail, Languages
+  FileText, Upload, Calendar, AlertCircle, Mail, Languages,
+  Settings, ChevronRight, ChevronLeft
 } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
 import InstallAppButton from '../components/InstallAppButton';
@@ -438,7 +439,7 @@ function getStatusConfig(t: (key: string) => string): Record<DriverStatus, { lab
   };
 }
 
-type Tab = 'active' | 'delivered' | 'map' | 'profile' | 'payments' | 'hub';
+type Tab = 'active' | 'delivered' | 'map' | 'profile' | 'payments' | 'hub' | 'settings';
 
 // Avisa cuando el driver bloqueo el permiso de notificaciones del navegador. A
 // diferencia de InstallAppBanner, esto NO se puede descartar -- registerDriverPush()
@@ -3190,6 +3191,48 @@ export default function DriverPortal() {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* ── Settings entry point — the actual settings (theme, language,
+              delete account) live in their own tab now, not buried at the
+              bottom of this scrolling profile page. ── */}
+          <button type="button" onClick={() => setTab('settings')}
+            className="w-full bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm p-4 flex items-center gap-3 hover:border-gray-200 dark:hover:border-slate-600 transition-colors">
+            <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
+              <Settings className="w-[18px] h-[18px] text-gray-500 dark:text-slate-300" />
+            </div>
+            <span className="text-sm font-semibold text-gray-700 dark:text-slate-200 flex-1 text-left">{t('driverPortal.settingsLink')}</span>
+            <ChevronRight className="w-4 h-4 text-gray-300 dark:text-slate-600" />
+          </button>
+        </div>
+      )}
+
+      {/* ── Settings tab ── */}
+      {tab === 'settings' && (
+        <div className="max-w-lg mx-auto px-4 py-5 space-y-4">
+          <button type="button" onClick={() => setTab('profile')}
+            className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition-colors">
+            <ChevronLeft className="w-4 h-4" /> {t('driverPortal.backToProfile')}
+          </button>
+
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('driverPortal.settingsTitle')}</h2>
+
+          {/* ── Preferences ── */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm divide-y divide-gray-100 dark:divide-slate-700">
+            <button type="button" onClick={toggleTheme} className="w-full p-4 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
+                {dark ? <Sun className="w-[18px] h-[18px] text-yellow-400" /> : <Moon className="w-[18px] h-[18px] text-gray-500" />}
+              </div>
+              <span className="text-sm font-semibold text-gray-700 dark:text-slate-200 flex-1 text-left">{t('driverPortal.settingsTheme')}</span>
+              <span className="text-xs text-gray-400 dark:text-slate-500">{dark ? t('driverPortal.settingsThemeDark') : t('driverPortal.settingsThemeLight')}</span>
+            </button>
+            <button type="button" onClick={toggleLang} className="w-full p-4 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
+                <Languages className="w-[18px] h-[18px] text-gray-500 dark:text-slate-300" />
+              </div>
+              <span className="text-sm font-semibold text-gray-700 dark:text-slate-200 flex-1 text-left">{t('driverPortal.settingsLanguage')}</span>
+              <span className="text-xs text-gray-400 dark:text-slate-500">{lang === 'en' ? 'English' : 'Español'}</span>
+            </button>
           </div>
 
           {/* ── Account ── */}

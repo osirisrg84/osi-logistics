@@ -634,7 +634,13 @@ async function seedHistoricalOrders(): Promise<void> {
       const pu       = pickups[j % pickups.length];
       const del      = deliveries[j % deliveries.length];
       const driver   = drivers[j % drivers.length];
-      const price    = Math.round((1200 + Math.random() * 4300) / 100) * 100;
+      // Range tuned 2026-10-28 so the demo dispatcher (Maria Gonzalez, whose
+      // account picks up ~all delivered demo orders) doesn't accumulate an
+      // unrealistically large commission total -- the previous $1200-$5500
+      // range summed to ~$16.7k across her linked commissions, which read as
+      // excessive for a small-business demo. $700-$3000 brings that down to
+      // a more modest, still-active-looking total.
+      const price    = Math.round((700 + Math.random() * 2300) / 50) * 50;
       const dist     = Math.round((10 + Math.random() * 55) * 10) / 10;
       const weight   = Math.round((400 + Math.random() * 4600) * 10) / 10;
       const volume   = Math.round(weight / 280 * 10) / 10;

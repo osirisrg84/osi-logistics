@@ -18,18 +18,21 @@ function Field({ label, required, children }: { label: string; required?: boolea
   );
 }
 
-// Empty <input type="date"> renders with no "mm/dd/yyyy" hint on some
-// Android Chrome versions -- next to a text field with a visible
-// placeholder it looks like a blank unlabeled box. The calendar icon plus
-// an overlay hint (hidden once a value is picked) fixes that without
-// fighting the native date picker.
+// Whether an empty <input type="date"> shows a native "mm/dd/yyyy" hint
+// varies by browser/OS/theme -- some render nothing (looks like a blank
+// unlabeled box), others render it in a light color that, in dark mode,
+// sits directly behind our own overlay hint below and visually overlaps
+// into illegible double text. The `date-empty` class (toggled by the same
+// `!value` check that shows our overlay) makes the native placeholder
+// transparent only while empty, so exactly one hint is ever visible --
+// ours -- regardless of what a given browser would have shown on its own.
 function DateField({ value, onChange, required, placeholder }: {
   value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; required?: boolean; placeholder: string;
 }) {
   return (
     <div className="relative">
       <Calendar className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
-      <input className="input pl-9" type="date" value={value} onChange={onChange} required={required} />
+      <input className={`input pl-9 ${!value ? 'date-empty' : ''}`} type="date" value={value} onChange={onChange} required={required} />
       {!value && (
         <span className="absolute left-9 top-1/2 -translate-y-1/2 text-sm text-gray-400 pointer-events-none whitespace-nowrap overflow-hidden text-ellipsis max-w-[calc(100%-2.75rem)]">
           {placeholder}
@@ -163,19 +166,19 @@ export default function RegisterDriver() {
             without starting the form -- a bare form with no reason to
             trust OSI wasn't converting, regardless of ad spend. */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-6">
-          <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 flex items-center gap-3">
+          <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 flex items-center gap-3 sm:flex-col sm:text-center sm:gap-2">
             <div className="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
               <DollarSign className="w-5 h-5 text-emerald-400" />
             </div>
             <p className="text-xs text-slate-300 leading-snug">{t('registerDriver.trustEarnings')}</p>
           </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 flex items-center gap-3">
+          <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 flex items-center gap-3 sm:flex-col sm:text-center sm:gap-2">
             <div className="w-9 h-9 rounded-xl bg-blue-500/15 flex items-center justify-center flex-shrink-0">
               <KeyRound className="w-5 h-5 text-blue-400" />
             </div>
             <p className="text-xs text-slate-300 leading-snug">{t('registerDriver.trustControl')}</p>
           </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 flex items-center gap-3">
+          <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 flex items-center gap-3 sm:flex-col sm:text-center sm:gap-2">
             <div className="w-9 h-9 rounded-xl bg-cyan-500/15 flex items-center justify-center flex-shrink-0">
               <Clock className="w-5 h-5 text-cyan-400" />
             </div>
