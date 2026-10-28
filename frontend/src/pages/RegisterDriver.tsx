@@ -18,6 +18,27 @@ function Field({ label, required, children }: { label: string; required?: boolea
   );
 }
 
+// Empty <input type="date"> renders with no "mm/dd/yyyy" hint on some
+// Android Chrome versions -- next to a text field with a visible
+// placeholder it looks like a blank unlabeled box. The calendar icon plus
+// an overlay hint (hidden once a value is picked) fixes that without
+// fighting the native date picker.
+function DateField({ value, onChange, required, placeholder }: {
+  value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; required?: boolean; placeholder: string;
+}) {
+  return (
+    <div className="relative">
+      <Calendar className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
+      <input className="input pl-9" type="date" value={value} onChange={onChange} required={required} />
+      {!value && (
+        <span className="absolute left-9 top-1/2 -translate-y-1/2 text-sm text-gray-400 pointer-events-none">
+          {placeholder}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function RegisterDriver() {
   const { t } = useTranslation();
   const [registered, setRegistered] = useState(false);
@@ -280,8 +301,8 @@ export default function RegisterDriver() {
                   value={form.license_number} onChange={set('license_number')} required />
               </Field>
               <Field label={t('registerDriver.licenseExpiryLabel')} required>
-                <input className="input" type="date"
-                  value={form.license_expiry} onChange={set('license_expiry')} required />
+                <DateField value={form.license_expiry} onChange={set('license_expiry')} required
+                  placeholder={t('registerDriver.selectDate')} />
               </Field>
             </div>
 
@@ -327,8 +348,8 @@ export default function RegisterDriver() {
             </Field>
 
             <Field label={t('registerDriver.authoritySinceLabel')}>
-              <input className="input" type="date"
-                value={form.authority_since} onChange={set('authority_since')} />
+              <DateField value={form.authority_since} onChange={set('authority_since')}
+                placeholder={t('registerDriver.selectDate')} />
             </Field>
 
             <Field label={t('registerDriver.rateConEmailLabel')}>
