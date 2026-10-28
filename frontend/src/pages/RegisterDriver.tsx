@@ -153,7 +153,7 @@ export default function RegisterDriver() {
 
         {/* Header */}
         <div className="text-center mb-7">
-          <img src={osiLogo} alt="OSI Logistics" className="h-20 w-auto object-contain mx-auto mb-4 rounded-xl shadow-lg shadow-black/30" />
+          <img src={osiLogo} alt="OSI Logistics" className="h-[60px] w-auto object-contain mx-auto mb-4 rounded-xl shadow-lg shadow-black/30" />
           <div className="w-16 h-16 bg-blue-500 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-blue-500/30">
             <Truck className="w-8 h-8 text-white" />
           </div>
