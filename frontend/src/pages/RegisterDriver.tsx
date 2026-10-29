@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, Mail, Lock, Building2, Calendar, Hash, Clock, Send, DollarSign, KeyRound, ShieldCheck } from 'lucide-react';
 import api from '../services/api';
 import osiLogo from '../assets/osi-logo.jpeg';
-import driverHero from '../assets/driver-hero.png';
+import driverHero from '../assets/driver-hero.jpg';
 
 const EQUIPMENT_TYPES = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'];
 const DOT_TYPES = ['Van', 'Box Truck', 'Hotshot'];
