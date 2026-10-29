@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, Mail, Lock, Building2, Calendar, Hash, Clock, Send, DollarSign, KeyRound, ShieldCheck } from 'lucide-react';
 import api from '../services/api';
 import osiLogo from '../assets/osi-logo.jpeg';
+import driverHero from '../assets/driver-hero.png';
 
 const EQUIPMENT_TYPES = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'];
 const DOT_TYPES = ['Van', 'Box Truck', 'Hotshot'];
@@ -154,8 +155,12 @@ export default function RegisterDriver() {
         {/* Header */}
         <div className="text-center mb-7">
           <img src={osiLogo} alt="OSI Logistics" className="h-[60px] w-auto object-contain mx-auto mb-4 rounded-xl shadow-lg shadow-black/30" />
-          <div className="w-16 h-16 bg-blue-500 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-blue-500/30">
-            <Truck className="w-8 h-8 text-white" />
+          <div className="relative rounded-3xl overflow-hidden mb-4 shadow-2xl shadow-black/40">
+            <img src={driverHero} alt="Happy OSI Logistics truck driver" className="w-full h-48 object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/10 to-transparent" />
+            <p className="absolute bottom-3 left-4 right-4 text-white font-bold text-base leading-snug text-left drop-shadow-md">
+              {t('registerDriver.heroPersuasion')}
+            </p>
           </div>
           <h1 className="text-2xl font-bold text-white">{t('registerDriver.heroTitle')}</h1>
           <p className="text-slate-400 text-sm mt-1">{t('registerDriver.heroSubtitle')}</p>

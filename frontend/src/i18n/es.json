@@ -1153,6 +1153,7 @@
   "registerDriver": {
     "heroTitle": "Registro de Conductor",
     "heroSubtitle": "OSI Logistics · Crea tu cuenta de conductor",
+    "heroPersuasion": "Conductores de verdad. Libertad de verdad. Regístrate en minutos y maneja a tu manera.",
     "successBody": "Tu cuenta de conductor fue registrada exitosamente. Un administrador de OSI Logistics la revisará y activará. Recibirás acceso al Driver Portal en cuanto sea aprobada.",
     "sectionEquipmentFirst": "Empieza Aquí — ¿Qué Manejas?",
     "equipmentTypePlaceholder": "Selecciona tu tipo de equipo",
@@ -1172,7 +1173,7 @@
     "rateConEmailLabel": "Correo para Rate Confirmation",
     "rateConEmailHint": "Los brokers enviarán el rate confirmation a este correo.",
     "createAccountBtn": "Crear Cuenta de Conductor",
-    "trustEarnings": "Te quedas con el 93% — comisión transparente del 7%, visible en cada carga",
+    "trustEarnings": "Comisión transparente del 7%, visible en cada carga",
     "trustControl": "Sin dispatch forzado — tú eliges cada carga, siempre",
     "trustSupport": "Equipo de dispatch real, 24/7 — no solo horario de oficina",
     "whyWeAskNote": "Pedimos tu CDL y datos de autoridad para verificarte y activar tu cuenta rápido.",

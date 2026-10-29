@@ -1153,6 +1153,7 @@
   "registerDriver": {
     "heroTitle": "Driver Registration",
     "heroSubtitle": "OSI Logistics · Create your driver account",
+    "heroPersuasion": "Real drivers. Real freedom. Register in minutes and start driving on your terms.",
     "successBody": "Your driver account was registered successfully. An OSI Logistics administrator will review and activate it. You'll get access to the Driver Portal as soon as it's approved.",
     "sectionEquipmentFirst": "Start Here — What Do You Drive?",
     "equipmentTypePlaceholder": "Select your equipment type",
@@ -1172,7 +1173,7 @@
     "rateConEmailLabel": "Rate Confirmation Email",
     "rateConEmailHint": "Brokers will send the rate confirmation to this email.",
     "createAccountBtn": "Create Driver Account",
-    "trustEarnings": "You keep 93% — a transparent 7% fee, visible on every load",
+    "trustEarnings": "A transparent 7% fee, visible on every load",
     "trustControl": "No forced dispatch — you choose every load, always",
     "trustSupport": "Real dispatch team, 24/7 — not just office hours",
     "whyWeAskNote": "We ask for your CDL and authority info to verify you and get your account active fast.",
