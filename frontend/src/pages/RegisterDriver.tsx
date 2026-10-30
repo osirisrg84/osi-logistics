@@ -154,7 +154,9 @@ export default function RegisterDriver() {
 
         {/* Header */}
         <div className="text-center mb-7">
-          <img src={osiLogo} alt="OSI Logistics" className="h-[60px] w-auto object-contain mx-auto mb-4 rounded-xl shadow-lg shadow-black/30" />
+          <a href="https://osilogistics.com" target="_blank" rel="noopener noreferrer" className="inline-block mb-4">
+            <img src={osiLogo} alt="OSI Logistics" className="h-[60px] w-auto object-contain mx-auto rounded-xl shadow-lg shadow-black/30" />
+          </a>
           <div className="relative rounded-3xl overflow-hidden mb-4 shadow-2xl shadow-black/40">
             <img src={driverHero} alt="Happy OSI Logistics truck driver" className="w-full h-72 object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/10 to-transparent" />
