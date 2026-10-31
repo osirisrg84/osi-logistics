@@ -1153,7 +1153,7 @@
   "registerDriver": {
     "heroTitle": "Driver Registration",
     "heroSubtitle": "OSI Logistics · Create your driver account",
-    "heroPersuasion": "Real drivers. Real freedom. Register in minutes and start driving on your terms.",
+    "heroPersuasion": "Real drivers. Register in minutes and start driving on your terms.",
     "successBody": "Your driver account was registered successfully. An OSI Logistics administrator will review and activate it. You'll get access to the Driver Portal as soon as it's approved.",
     "sectionEquipmentFirst": "Start Here — What Do You Drive?",
     "equipmentTypePlaceholder": "Select your equipment type",
