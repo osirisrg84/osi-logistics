@@ -1,8 +1,9 @@
 import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, Mail, Lock, Building2, Calendar, Hash, Clock, Send, DollarSign, KeyRound, ShieldCheck } from 'lucide-react';
+import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, Mail, Lock, Building2, Calendar, Hash, Clock, Send, DollarSign, KeyRound, ShieldCheck, Languages } from 'lucide-react';
 import api from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 import osiLogo from '../assets/osi-logo.jpeg';
 import driverHero from '../assets/driver-hero.jpg';
 
@@ -46,6 +47,7 @@ function DateField({ value, onChange, required, placeholder }: {
 
 export default function RegisterDriver() {
   const { t } = useTranslation();
+  const { lang, toggle: toggleLang } = useLanguage();
   const [registered, setRegistered] = useState(false);
   const [registeredName, setRegisteredName] = useState('');
 
@@ -148,9 +150,14 @@ export default function RegisterDriver() {
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col items-center justify-start px-4 py-8">
       <div className="w-full max-w-lg">
 
-        <Link to="/driver/login" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm mb-6 transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> {t('registerDispatcher.backToLogin')}
-        </Link>
+        <div className="flex items-center justify-between mb-6">
+          <Link to="/driver/login" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" /> {t('registerDispatcher.backToLogin')}
+          </Link>
+          <button onClick={toggleLang} className="flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-slate-200 transition-colors">
+            <Languages className="w-4 h-4 hidden sm:block" /> {lang.toUpperCase()}
+          </button>
+        </div>
 
         {/* Header */}
         <div className="text-center mb-7">

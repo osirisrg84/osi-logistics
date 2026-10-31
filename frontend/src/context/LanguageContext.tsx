@@ -14,7 +14,12 @@ const LanguageContext = createContext<LanguageContextValue>({ lang: 'es', setLan
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(() => {
     const saved = localStorage.getItem('osi_lang');
-    return saved === 'en' || saved === 'es' ? saved : 'es';
+    if (saved === 'en' || saved === 'es') return saved;
+    // No saved preference yet (first visit) -- default to the device/browser
+    // language instead of always Spanish, so an English-language ad or
+    // phone doesn't land someone on a Spanish page with no visible way to
+    // switch (registration pages didn't expose the toggle until now).
+    return navigator.language?.toLowerCase().startsWith('en') ? 'en' : 'es';
   });
 
   useEffect(() => {

@@ -4,10 +4,11 @@ import { useTranslation } from 'react-i18next';
 import {
   ClipboardList, Eye, EyeOff, AlertCircle, CheckCircle2,
   ArrowLeft, User, Phone, Mail, Lock, MapPin, Briefcase,
-  Plus, X, Globe, Clock, FileBadge, UploadCloud,
+  Plus, X, Globe, Clock, FileBadge, UploadCloud, Languages,
 } from 'lucide-react';
 import { authApi } from '../services/api';
 import osiLogo from '../assets/osi-logo.jpeg';
+import { useLanguage } from '../context/LanguageContext';
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
@@ -25,6 +26,7 @@ const EQUIPMENT_TYPES = ['Dry Van', 'Reefer', 'Flatbed', 'Box Truck', 'Power Onl
 
 export default function RegisterDispatcher() {
   const { t } = useTranslation();
+  const { lang, toggle: toggleLang } = useLanguage();
   const LANGUAGE_LABELS: Record<string, string> = { English: t('registerDispatcher.languageEnglish'), Spanish: t('registerDispatcher.languageSpanish') };
   const AVAILABILITY_OPTIONS = [
     { value: 'full-time',  label: t('registerDispatcher.availabilityFullTime') },
@@ -168,9 +170,14 @@ export default function RegisterDispatcher() {
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col items-center justify-start px-4 py-8">
       <div className="w-full max-w-lg">
 
-        <Link to="/dispatcher" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm mb-6 transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> {t('registerDispatcher.backToLogin')}
-        </Link>
+        <div className="flex items-center justify-between mb-6">
+          <Link to="/dispatcher" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" /> {t('registerDispatcher.backToLogin')}
+          </Link>
+          <button onClick={toggleLang} className="flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-slate-200 transition-colors">
+            <Languages className="w-4 h-4 hidden sm:block" /> {lang.toUpperCase()}
+          </button>
+        </div>
 
         {/* Header */}
         <div className="text-center mb-7">
