@@ -8,6 +8,7 @@ interface AuthUser {
   email: string;
   role: 'admin' | 'dispatcher' | 'driver';
   driver_id: string | null;
+  shift_active?: boolean;
 }
 
 interface AuthContextValue {

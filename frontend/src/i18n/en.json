@@ -214,6 +214,9 @@
     "loading": "Loading...",
     "emptyTitle": "No drivers found",
     "emptyHint": "Try changing the filters or add a new one",
+    "mustGoOnShiftTitle": "Go on shift to see available drivers",
+    "mustGoOnShiftHint": "Driver status and availability are only shown while you're on shift.",
+    "goOnShiftBtn": "Go on shift",
     "confirmDelete": "Delete {{name}}? This cannot be undone.",
     "deleteFailed": "Could not delete the driver",
     "status": { "available": "Available", "busy": "On Delivery", "on_break": "On Break", "offline": "Offline" }

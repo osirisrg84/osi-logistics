@@ -78,7 +78,7 @@ router.post('/login', loginLimiter, async (req: Request, res: Response) => {
 
     res.json({
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role, driver_id: user.driver_id },
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, driver_id: user.driver_id, shift_active: !!user.shift_active },
       driverProfile,
     });
   } catch { res.status(500).json({ error: 'Login failed' }); }
@@ -154,7 +154,7 @@ router.get('/me', async (req: Request, res: Response) => {
     if (!token) return res.status(401).json({ error: 'No token provided' });
 
     const session = await queryOne<Record<string, unknown>>(`
-      SELECT s.*, u.id as uid, u.name, u.email, u.role, u.driver_id, u.active
+      SELECT s.*, u.id as uid, u.name, u.email, u.role, u.driver_id, u.active, u.shift_active
       FROM sessions s JOIN users u ON s.user_id = u.id
       WHERE s.token = ? AND s.expires_at > datetime('now')
     `, [token]);
@@ -167,7 +167,7 @@ router.get('/me', async (req: Request, res: Response) => {
     }
 
     res.json({
-      user: { id: session.uid, name: session.name, email: session.email, role: session.role, driver_id: session.driver_id },
+      user: { id: session.uid, name: session.name, email: session.email, role: session.role, driver_id: session.driver_id, shift_active: !!session.shift_active },
       driverProfile,
     });
   } catch { res.status(500).json({ error: 'Failed to get user' }); }

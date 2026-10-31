@@ -245,6 +245,7 @@ export async function initDatabase(): Promise<void> {
   await addColumnIfMissing('users', 'dispatcher_code',      "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('users', 'shift_active',         "INTEGER NOT NULL DEFAULT 0");
   await addColumnIfMissing('users', 'shift_changed_at',     "TEXT");
+  await addColumnIfMissing('users', 'last_activity_at',     "TEXT");
   await addColumnIfMissing('users', 'approval_status',      "TEXT NOT NULL DEFAULT 'approved'");
   await addColumnIfMissing('users', 'email_verified',       "INTEGER NOT NULL DEFAULT 0");
   await addColumnIfMissing('users', 'phone_verified',       "INTEGER NOT NULL DEFAULT 0");

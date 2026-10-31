@@ -323,6 +323,24 @@ function startKeepAlive(): void {
   }, 14 * 60 * 1000);
 }
 
+// A dispatcher who goes "on shift" and then never touches the app again
+// (no authenticated request, so last_activity_at stops advancing) gets
+// auto-flipped back off after 2 days -- otherwise they'd stay "on shift"
+// (and keep showing up as available to see drivers) indefinitely.
+function startIdleDispatcherCheck(): void {
+  setInterval(async () => {
+    try {
+      const idle = await query<{ id: string; name: string }>(
+        "SELECT id, name FROM users WHERE shift_active = 1 AND last_activity_at IS NOT NULL AND last_activity_at < datetime('now', '-2 days')"
+      );
+      for (const u of idle) {
+        await exec("UPDATE users SET shift_active = 0, shift_changed_at = datetime('now') WHERE id = ?", [u.id]);
+        appEvents.emit('dispatcher:shift_changed', { id: u.id, name: u.name, active: false });
+      }
+    } catch { /* non-critical */ }
+  }, 30 * 60 * 1000);
+}
+
 (async () => {
   const tursoUrl = process.env.TURSO_URL?.trim();
   const tursoToken = process.env.TURSO_AUTH_TOKEN?.trim();
@@ -373,6 +391,7 @@ function startKeepAlive(): void {
 
   await startSimulation();
   startKeepAlive();
+  startIdleDispatcherCheck();
 })();
 
 export { io };

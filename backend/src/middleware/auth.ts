@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { queryOne } from '../database';
+import { exec, queryOne } from '../database';
 
 export interface AuthUser {
   id: string;
@@ -8,6 +8,7 @@ export interface AuthUser {
   phone: string;
   role: string;
   driver_id: string | null;
+  shift_active: boolean;
 }
 
 declare global {
@@ -24,14 +25,18 @@ declare global {
 // ninguna sesion valida.
 export async function resolveSessionUser(token: string | undefined): Promise<AuthUser | null> {
   if (!token) return null;
-  const session = await queryOne<AuthUser & { active: number }>(`
-    SELECT s.user_id, u.id, u.name, u.email, u.phone, u.role, u.driver_id, u.active
+  const session = await queryOne<Omit<AuthUser, 'shift_active'> & { active: number; shift_active: number }>(`
+    SELECT s.user_id, u.id, u.name, u.email, u.phone, u.role, u.driver_id, u.active, u.shift_active
     FROM sessions s
     JOIN users u ON s.user_id = u.id
     WHERE s.token = ? AND s.expires_at > datetime('now')
   `, [token]);
   if (!session || !session.active) return null;
-  return { id: session.id as string, name: session.name as string, email: session.email as string, phone: (session.phone as string) || '', role: session.role as string, driver_id: session.driver_id as string | null };
+  return {
+    id: session.id as string, name: session.name as string, email: session.email as string,
+    phone: (session.phone as string) || '', role: session.role as string, driver_id: session.driver_id as string | null,
+    shift_active: !!session.shift_active,
+  };
 }
 
 export async function authenticate(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -42,6 +47,10 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
     const user = await resolveSessionUser(token);
     if (!user) { res.status(401).json({ error: 'Invalid or expired session' }); return; }
     req.user = user;
+    // Fire-and-forget -- "being on shift and doing things in the app" is
+    // measured by this timestamp advancing; a slow/failed write here must
+    // never block the actual request.
+    exec("UPDATE users SET last_activity_at = datetime('now') WHERE id = ?", [user.id]).catch(() => {});
     next();
   } catch {
     res.status(500).json({ error: 'Auth error' });

@@ -40,8 +40,14 @@ const STAFF_EDITABLE_FIELDS = [
   'company_name', 'mc_number', 'dot_number', 'authority_since',
 ];
 
+// Un dispatcher (no admin) debe ponerse "en turno" para ver quienes estan
+// disponibles -- ver drivers/stats sin estar en turno no tiene sentido
+// operativo, y el switch de turno ya existe (Header.tsx) para esto.
+const mustGoOnShift = (req: Request): boolean => req.user?.role === 'dispatcher' && !req.user.shift_active;
+
 router.get('/', async (req: Request, res: Response) => {
   try {
+    if (mustGoOnShift(req)) return res.json([]);
     const { status, search } = req.query;
     const demo = req.user?.role !== 'admin' && isDemo(req.user?.email);
     let sql = `
@@ -68,6 +74,9 @@ router.get('/', async (req: Request, res: Response) => {
 
 router.get('/stats', async (req: Request, res: Response) => {
   try {
+    if (mustGoOnShift(req)) {
+      return res.json({ total: 0, available: 0, busy: 0, on_break: 0, offline: 0, avg_rating: 0, top_driver: null });
+    }
     const demo = req.user?.role !== 'admin' && isDemo(req.user?.email);
     const f = demo ? DEMO_ONLY_FILTER : DEMO_FILTER;
     const activeF = `AND (u.id IS NULL OR u.approval_status NOT IN ('rejected', 'archived'))`;

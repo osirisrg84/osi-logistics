@@ -214,6 +214,9 @@
     "loading": "Cargando...",
     "emptyTitle": "No se encontraron conductores",
     "emptyHint": "Prueba a cambiar los filtros o agrega uno nuevo",
+    "mustGoOnShiftTitle": "Ponte en turno para ver los drivers disponibles",
+    "mustGoOnShiftHint": "El estado y la disponibilidad de los conductores solo se muestra mientras estás en turno.",
+    "goOnShiftBtn": "Ponerme en turno",
     "confirmDelete": "¿Eliminar a {{name}}? Esta acción no se puede deshacer.",
     "deleteFailed": "No se pudo eliminar el conductor",
     "status": { "available": "Disponible", "busy": "En Entrega", "on_break": "En Descanso", "offline": "Desconectado" }

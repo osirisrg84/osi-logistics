@@ -1,9 +1,9 @@
 ﻿import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin, Building2, Clock, Wallet, ShieldCheck, FileText, Calendar, AlertCircle, CheckCircle, TrendingUp } from 'lucide-react';
+import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin, Building2, Clock, Wallet, ShieldCheck, FileText, Calendar, AlertCircle, CheckCircle, TrendingUp, Zap } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Driver, DriverStatus } from '../types';
-import { driversApi, trucksApi, ordersApi } from '../services/api';
+import api, { driversApi, trucksApi, ordersApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { DriverStatusBadge } from '../components/StatusBadge';
 import { EmptyState } from '../components/EmptyState';
@@ -494,8 +494,18 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
 
 export default function Drivers() {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const isAdmin = user?.role === 'admin';
+  const mustGoOnShift = user?.role === 'dispatcher' && !user.shift_active;
+  const [goingOnShift, setGoingOnShift] = useState(false);
+  const goOnShift = async () => {
+    setGoingOnShift(true);
+    try {
+      await api.put('/auth/shift', { active: true });
+      updateUser({ shift_active: true });
+    } catch { /* ignore, button just stays clickable */ }
+    finally { setGoingOnShift(false); }
+  };
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [stats, setStats] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -528,7 +538,7 @@ export default function Drivers() {
     }
   };
 
-  useEffect(() => { fetchDrivers(); }, [statusFilter, search]);
+  useEffect(() => { fetchDrivers(); }, [statusFilter, search, user?.shift_active]);
 
   const handleDelete = async (driver: Driver) => {
     if (!confirm(t('drivers.confirmDelete', { name: driver.name }))) return;
@@ -552,6 +562,25 @@ export default function Drivers() {
       }
     }
   };
+
+  if (mustGoOnShift) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center fade-in">
+        <div className="w-14 h-14 rounded-2xl bg-green-50 dark:bg-green-500/10 flex items-center justify-center mb-3">
+          <Zap className="w-6 h-6 text-green-500" />
+        </div>
+        <p className="text-sm font-medium text-gray-700 dark:text-slate-200">{t('drivers.mustGoOnShiftTitle')}</p>
+        <p className="text-xs text-gray-400 dark:text-slate-500 mt-1 max-w-xs">{t('drivers.mustGoOnShiftHint')}</p>
+        <button
+          onClick={goOnShift}
+          disabled={goingOnShift}
+          className="mt-4 inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 disabled:opacity-60 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-green-500/20 transition-colors"
+        >
+          <Zap className="w-4 h-4" /> {t('drivers.goOnShiftBtn')}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 fade-in">
