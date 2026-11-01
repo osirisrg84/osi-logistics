@@ -1185,11 +1185,27 @@
     "rateConEmailLabel": "Rate Confirmation Email",
     "rateConEmailHint": "Brokers will send the rate confirmation to this email.",
     "createAccountBtn": "Create Driver Account",
-    "trustEarnings": "A transparent 7% fee, visible on every load",
+    "trustEarnings": "A transparent fee, from 7% down to 0% as you refer drivers.",
+    "trustEarningsMore": "See how",
     "trustControl": "No forced dispatch — you choose every load, always",
     "trustSupport": "Real dispatch team, 24/7 — not just office hours",
     "whyWeAskNote": "We ask for your CDL and authority info to verify you and get your account active fast.",
     "privacyNote": "No contracts. Cancel anytime. Your information is only used to set up your account — never sold or shared."
+  },
+  "referralInfo": {
+    "back": "Back",
+    "title": "Refer drivers, pay less",
+    "subtitle": "The more active drivers you bring in, the lower your commission.",
+    "step1Title": "Get your link",
+    "step1Text": "Once your account is approved, you'll find your personal referral link in the Driver Portal under Profile.",
+    "step2Title": "Share it",
+    "step2Text": "Send it to other drivers. Anyone who registers through your link is linked to you automatically.",
+    "step3Title": "They deliver, you save",
+    "step3Text": "Each referred driver who completes at least 1 load in a given week counts as active that week — and drops your commission 1 point.",
+    "step4Title": "Up to 0% commission",
+    "step4Text": "7% is the starting rate. With 7 active referrals in the same week, you pay 0% on your loads that week.",
+    "example": "Example: 3 of your referred drivers each deliver a load this week → your commission this week is 4% instead of 7%.",
+    "registerBtn": "Register as a driver"
   },
   "tracking": {
     "toastOnlineSuffix": " is now online",

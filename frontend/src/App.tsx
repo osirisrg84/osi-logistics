@@ -11,6 +11,7 @@ import DriverLogin from './pages/DriverLogin';
 import Register from './pages/Register';
 import RegisterDispatcher from './pages/RegisterDispatcher';
 import RegisterDriver from './pages/RegisterDriver';
+import ReferralInfo from './pages/ReferralInfo';
 import Dashboard from './pages/Dashboard';
 import Orders from './pages/Orders';
 import Tracking from './pages/Tracking';
@@ -121,6 +122,7 @@ function AppRoutes() {
       {/* Registration */}
       <Route path="/dispatcher/register" element={<PublicOnly><RegisterDispatcher /></PublicOnly>} />
       <Route path="/driver/register"     element={<PublicOnly><RegisterDriver /></PublicOnly>} />
+      <Route path="/driver/referral-info" element={<PublicOnly><ReferralInfo /></PublicOnly>} />
       <Route path="/register"            element={<PublicOnly><RegisterRoot /></PublicOnly>} />
 
       {/* Driver — login + portal under the same clean URL /driver */}

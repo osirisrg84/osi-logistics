@@ -169,10 +169,6 @@ export default function RegisterDriver() {
           </a>
           <div className="relative rounded-3xl overflow-hidden mb-4 shadow-2xl shadow-black/40">
             <img src={driverHero} alt="Happy OSI Logistics truck driver" className="w-full h-56 object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/10 to-transparent" />
-            <p className="absolute bottom-3 left-4 right-4 text-white font-bold text-base leading-snug text-left drop-shadow-md">
-              {t('registerDriver.heroPersuasion')}
-            </p>
           </div>
           <h1 className="text-2xl font-bold text-white">{t('registerDriver.heroTitle')}</h1>
           <p className="text-slate-400 text-sm mt-1">{t('registerDriver.heroSubtitle')}</p>
@@ -189,7 +185,12 @@ export default function RegisterDriver() {
             <div className="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
               <DollarSign className="w-5 h-5 text-emerald-400" />
             </div>
-            <p className="text-xs text-slate-300 leading-snug">{t('registerDriver.trustEarnings')}</p>
+            <p className="text-xs text-slate-300 leading-snug">
+              {t('registerDriver.trustEarnings')}{' '}
+              <Link to="/driver/referral-info" className="text-emerald-400 font-semibold underline underline-offset-2 hover:text-emerald-300">
+                {t('registerDriver.trustEarningsMore')}
+              </Link>
+            </p>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 flex items-center gap-3 sm:flex-col sm:text-center sm:gap-2">
             <div className="w-9 h-9 rounded-xl bg-blue-500/15 flex items-center justify-center flex-shrink-0">
