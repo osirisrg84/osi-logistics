@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es" translate="no">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Evita que Chrome traduzca la pagina automaticamente -- el traductor
+    confundio "Susmary" (nombre real de una dispatcher) con un typo de
+    "summary" y lo mostro como "Resumen", y antes hizo lo mismo con la marca
+    "Stripe" mostrandola como "Raya". Nombres, precios y otros datos reales
+    nunca deben pasar por una traduccion automatica. -->
+    <meta name="google" content="notranslate" />
+    <!-- Driver-branded twin of index.html -- served only on driver.osilogistics.com
+    (see root vercel.json's host-conditioned rewrite) so link previews (WhatsApp,
+    Facebook, etc. -- which never execute JS, only read these static tags) show
+    the driver icon/title instead of the dispatch-branded ones. Keep this file's
+    scripts/structure in sync with index.html; only branding tags below differ. -->
+    <link rel="icon" type="image/png" href="/icons/icon-192-driver.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-driver.png" />
+    <link rel="manifest" href="/manifest-driver.webmanifest" />
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="OSI Driver Portal" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OSI Logistics — Driver Portal</title>
+
+    <!-- Open Graph / link-preview tags (WhatsApp, Facebook, iMessage, etc.) -->
+    <meta property="og:title" content="OSI Logistics — Driver Portal" />
+    <meta property="og:description" content="Join OSI Logistics as a driver. Real dispatch, transparent pay, register in minutes." />
+    <meta property="og:image" content="https://driver.osilogistics.com/icons/icon-512-driver.png" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Meta Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1026065173789855');
+    fbq('track', 'PageView');
+    // El ad set "OSI Driver Portal 3.0 - Landing Page View" esta configurado
+    // en Meta para contar el evento ViewContent (promoted_object.custom_event_type
+    // = CONTENT_VIEW), no el PageView de arriba -- sin esto, las visitas reales
+    // nunca se registraban en esa campana por mas trafico real que llegara.
+    fbq('track', 'ViewContent');
+    </script>
+    <!-- End Meta Pixel Code -->
+
+    <!-- Google Analytics 4 (OSI Logistics - App) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V95GQZFEGY"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-V95GQZFEGY');
+    </script>
+    <!-- End Google Analytics 4 -->
+  <style>
+    #pre-loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;z-index:99999;transition:opacity .25s}
+    #pre-loader.done{opacity:0;pointer-events:none}
+    .pre-spin{width:40px;height:40px;border:3px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:pspin .7s linear infinite}
+    @keyframes pspin{to{transform:rotate(360deg)}}
+  </style>
+  </head>
+  <body>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1026065173789855&ev=PageView&noscript=1"
+    /></noscript>
+    <div id="pre-loader"><div class="pre-spin"></div></div>
+    <div id="root"></div>
+    <script>
+      new MutationObserver(function(_, obs){
+        var r=document.getElementById('root');
+        if(r && r.firstChild){
+          var l=document.getElementById('pre-loader');
+          if(l){l.classList.add('done');setTimeout(function(){l.remove()},300);}
+          obs.disconnect();
+        }
+      }).observe(document.getElementById('root'),{childList:true});
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
