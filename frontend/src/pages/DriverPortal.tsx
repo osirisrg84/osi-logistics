@@ -8,7 +8,7 @@ import {
   Lock, ShieldCheck, Send, Bell, BellOff, CheckCheck, Award, Edit3, Zap,
   Headphones, Radio, Users, PhoneCall, MessageSquare, Heart, Trophy,
   FileText, Upload, Calendar, AlertCircle, Mail, Languages,
-  Settings, ChevronRight, ChevronLeft
+  Settings, ChevronRight, ChevronLeft, Share2, Copy,
 } from 'lucide-react';
 import osiLogo from '../assets/osi-logo.jpeg';
 import InstallAppButton from '../components/InstallAppButton';
@@ -863,6 +863,27 @@ export default function DriverPortal() {
   const [billingRows, setBillingRows] = useState<DriverBillingRow[]>([]);
   const [billingSummary, setBillingSummary] = useState<DriverBillingSummary | null>(null);
 
+  // Referral program
+  interface ReferralStats { driverCode: string | null; referralLink: string | null; totalReferrals: number; activeReferrals: number; currentRate: number | null; }
+  const [referralStats, setReferralStats] = useState<ReferralStats | null>(null);
+  const [referralCopied, setReferralCopied] = useState(false);
+  const fetchReferralStats = useCallback(() => {
+    driverAxios.get('/auth/referrals').then(r => setReferralStats(r.data)).catch(() => {});
+  }, []);
+  const shareReferralLink = async () => {
+    const link = referralStats?.referralLink;
+    if (!link) return;
+    const shareText = t('driverPortal.referralShareText');
+    if (navigator.share) {
+      try { await navigator.share({ title: 'OSI Logistics', text: shareText, url: link }); return; } catch { /* user cancelled or unsupported, fall through to copy */ }
+    }
+    try {
+      await navigator.clipboard.writeText(link);
+      setReferralCopied(true);
+      setTimeout(() => setReferralCopied(false), 2000);
+    } catch {}
+  };
+
   // COI — Certificate of Insurance
   const [coiFileName, setCoiFileName] = useState('');
   const [coiExpiry, setCoiExpiry] = useState('');
@@ -1121,6 +1142,7 @@ export default function DriverPortal() {
         .then(r => setFavorites(r.data as Favorite[]))
         .catch(() => {});
       fetchBilling();
+      fetchReferralStats();
     }
     if (driverId) {
       notificationsApi.getDriverNotifs(driverId)
@@ -2456,6 +2478,42 @@ export default function DriverPortal() {
             </div>
           )}
 
+          {/* ── Referral program ── */}
+          {referralStats?.referralLink && (
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
+              <div className="flex items-center gap-2 mb-1">
+                <Users className="w-4 h-4 text-orange-500" />
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('driverPortal.referralTitle')}</h3>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-slate-400 mb-3">{t('driverPortal.referralHint')}</p>
+
+              <div className="flex items-center gap-2 bg-gray-50 dark:bg-slate-700/60 rounded-xl px-3 py-2.5 mb-3">
+                <p className="text-xs text-gray-600 dark:text-slate-300 flex-1 truncate font-mono">{referralStats.referralLink}</p>
+                <button onClick={shareReferralLink} className="flex-shrink-0 flex items-center gap-1 text-xs font-bold text-orange-500 hover:text-orange-600">
+                  {referralCopied ? <><CheckCircle className="w-3.5 h-3.5" /> {t('driverPortal.referralCopied')}</> : <><Share2 className="w-3.5 h-3.5" /> {t('driverPortal.referralShare')}</>}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-gray-50 dark:bg-slate-700/60 rounded-xl p-3">
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400 font-medium mb-1">{t('driverPortal.referralActiveCount')}</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">{referralStats.activeReferrals} / 7</p>
+                </div>
+                <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3">
+                  <p className="text-[11px] text-orange-600 dark:text-orange-400 font-medium mb-1">{t('driverPortal.referralCurrentRate')}</p>
+                  <p className="text-lg font-bold text-orange-600 dark:text-orange-400">
+                    {referralStats.currentRate !== null ? `${(referralStats.currentRate * 100).toFixed(0)}%` : '—'}
+                  </p>
+                </div>
+              </div>
+              {referralStats.totalReferrals > referralStats.activeReferrals && (
+                <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-2">
+                  {t('driverPortal.referralInactiveNote', { count: referralStats.totalReferrals - referralStats.activeReferrals })}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Empresa / Autoridad */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5">
             <div className="flex items-center gap-2 mb-3">
@@ -3288,7 +3346,7 @@ export default function DriverPortal() {
             }`}>
               <p className={`text-base font-semibold mb-1 ${dark ? 'text-slate-300' : 'text-slate-600'}`}>{t('driverPortal.pendingBalance')}</p>
               <p className={`text-3xl font-bold ${dark ? 'text-yellow-400' : 'text-orange-500'}`}>${billingSummary.pending.toFixed(2)}</p>
-              <p className={`text-xs mt-2 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>{t('driverPortal.osiTakesOnly')} <span className={`font-semibold ${dark ? 'text-slate-300' : 'text-slate-600'}`}>7%</span></p>
+              <p className={`text-xs mt-2 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>{t('driverPortal.osiTakesOnly')} <span className={`font-semibold ${dark ? 'text-slate-300' : 'text-slate-600'}`}>{referralStats?.currentRate !== null && referralStats?.currentRate !== undefined ? `${(referralStats.currentRate * 100).toFixed(0)}%` : '7%'}</span>{referralStats && referralStats.activeReferrals > 0 && <span className="ml-1">{t('driverPortal.referralRateNote')}</span>}</p>
               <div className="mt-4 space-y-1.5">
                 <div className="flex justify-between text-xs">
                   <span className={dark ? 'text-slate-400' : 'text-slate-500'}>{t('driverPortal.paymentProgress')}</span>

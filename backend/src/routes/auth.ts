@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { scryptSync, randomBytes, timingSafeEqual } from 'node:crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { exec, query, queryOne } from '../database';
+import { exec, query, queryOne, getDriverCommissionRate } from '../database';
 import { appEvents } from '../events';
 import { sendVerificationCode, sendNewDriverRegistrationEmail, sendPasswordResetEmail } from '../email';
 import { sendSmsCode } from '../sms';
@@ -187,6 +187,7 @@ router.post('/register-driver', sensitiveLimiter, async (req: Request, res: Resp
       hire_date = new Date().toISOString().split('T')[0],
       equipment_type = 'Dry Van', company_name = 'OSI Logistics INC',
       mc_number = '', dot_number = '', authority_since = '', rate_con_email = '',
+      referral_code = '',
     } = req.body;
 
     if (!name || !email || !password || !phone || !license_number || !license_expiry) {
@@ -210,15 +211,25 @@ router.post('/register-driver', sensitiveLimiter, async (req: Request, res: Resp
     };
     const driver_code = await genDriverCode();
 
+    // Referral program: the code travels in the registration link as
+    // ?ref=<driver_code>. A bad/unknown code is just ignored -- never block
+    // registration over a broken referral link, and never let someone refer
+    // themselves.
+    let referred_by_driver_id: string | null = null;
+    if (referral_code) {
+      const referrer = await queryOne<{ id: string }>('SELECT id FROM drivers WHERE driver_code = ?', [String(referral_code).trim()]);
+      if (referrer && referrer.id !== driverId) referred_by_driver_id = referrer.id;
+    }
+
     await exec(`INSERT INTO drivers
       (id, name, phone, email, license_number, license_expiry, status,
        current_lat, current_lng, current_address,
        rating, total_deliveries, on_time_rate, avatar, hire_date,
-       equipment_type, company_name, mc_number, dot_number, authority_since, rate_con_email, driver_code)
+       equipment_type, company_name, mc_number, dot_number, authority_since, rate_con_email, driver_code, referred_by_driver_id)
       VALUES (?, ?, ?, ?, ?, ?, 'offline', 25.7617, -80.1918, 'Miami, FL',
-              5.0, 0, 100.0, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              5.0, 0, 100.0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [driverId, name, phone, email.toLowerCase(), license_number, license_expiry,
-       initials, hire_date, equipment_type, company_name, mc_number, dot_number, authority_since, rate_con_email, driver_code]);
+       initials, hire_date, equipment_type, company_name, mc_number, dot_number, authority_since, rate_con_email, driver_code, referred_by_driver_id]);
 
     const salt = randomBytes(16).toString('hex');
     const passwordHash = hashPassword(password, salt);
@@ -329,6 +340,48 @@ router.put('/shift', async (req: Request, res: Response) => {
     if (user) appEvents.emit('dispatcher:shift_changed', { id: user.id, name: user.name, active });
 
     res.json({ success: true });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+// Referral program: a driver's own code/link + how many referred drivers
+// count as "active" right now (delivered at least once in the trailing 7
+// days) + the resulting commission rate they're currently paying. Driver-only
+// -- a dispatcher/admin hitting this just gets nulls, there's no referral
+// program for them.
+router.get('/referrals', async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ error: 'No token' });
+    const session = await queryOne<{ user_id: string; role: string; driver_id: string | null }>(
+      "SELECT u.id as user_id, u.role, u.driver_id FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.token = ? AND s.expires_at > datetime('now')",
+      [token]
+    );
+    if (!session) return res.status(401).json({ error: 'Invalid session' });
+    if (session.role !== 'driver' || !session.driver_id) {
+      return res.json({ driverCode: null, referralLink: null, activeReferrals: 0, totalReferrals: 0, currentRate: null });
+    }
+
+    const driver = await queryOne<{ driver_code: string }>('SELECT driver_code FROM drivers WHERE id = ?', [session.driver_id]);
+    const totalRow = await queryOne<{ c: number }>('SELECT COUNT(*) as c FROM drivers WHERE referred_by_driver_id = ?', [session.driver_id]);
+    const activeRow = await queryOne<{ c: number }>(`
+      SELECT COUNT(DISTINCT rd.id) as c
+      FROM drivers rd
+      WHERE rd.referred_by_driver_id = ?
+        AND EXISTS (
+          SELECT 1 FROM orders o
+          WHERE o.driver_id = rd.id AND o.status = 'delivered'
+            AND o.delivered_at >= datetime('now', '-7 days')
+        )
+    `, [session.driver_id]);
+    const currentRate = await getDriverCommissionRate(session.driver_id, null);
+
+    res.json({
+      driverCode: driver?.driver_code ?? null,
+      referralLink: driver?.driver_code ? `https://driver.osilogistics.com/register?ref=${driver.driver_code}` : null,
+      totalReferrals: totalRow?.c ?? 0,
+      activeReferrals: activeRow?.c ?? 0,
+      currentRate,
+    });
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 

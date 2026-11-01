@@ -429,6 +429,12 @@ export async function initDatabase(): Promise<void> {
   // se pone al pasar a 'available' y se limpia (NULL) al tomar una carga o
   // salir de disponible. Deja calcular "lleva X tiempo en línea" en el admin.
   await addColumnIfMissing('drivers', 'online_since',      "TEXT");
+  // Referral program: set once at registration from the driver_code in the
+  // ?ref= link, never changed after. Not a per-driver commission_rate column
+  // on purpose -- the rate is computed fresh per order from live delivery
+  // activity (getDriverCommissionRate below), so it can go up or down week
+  // to week, not a value that gets stored and goes stale.
+  await addColumnIfMissing('drivers', 'referred_by_driver_id', "TEXT");
   // Backfill: drivers que YA estaban 'available' antes de que esta columna
   // existiera se quedaban con online_since en NULL para siempre (el codigo
   // solo lo setea en un CAMBIO de estado, no al arrancar) -- el badge de
@@ -870,6 +876,33 @@ async function refreshDemoData(): Promise<void> {
   console.log(`✅ Demo refreshed: ${DELIVERED_COUNT} delivered, ${total - DELIVERED_COUNT} active orders`);
 }
 
+// Referral program: a driver's commission rate starts at 7% and drops 1
+// point for every OTHER driver they referred (drivers.referred_by_driver_id
+// points at them) who is "active" -- defined as having at least one
+// delivered order in the 7 days trailing `asOf` (the order being billed
+// right now), not a one-time lifetime unlock. Floor is 0% (confirmed with
+// the user, who accepts OSI can run a loss on the dispatcher's fixed 3% cut
+// at the max tier -- it only happens in weeks where 7 referred drivers each
+// genuinely deliver at least once, not from someone gaming a single
+// lifetime delivery per referral).
+export async function getDriverCommissionRate(driverId: string, asOf: string | null): Promise<number> {
+  const anchor = asOf ?? new Date().toISOString();
+  const row = await queryOne<{ c: number }>(`
+    SELECT COUNT(DISTINCT rd.id) as c
+    FROM drivers rd
+    WHERE rd.referred_by_driver_id = ?
+      AND EXISTS (
+        SELECT 1 FROM orders o
+        WHERE o.driver_id = rd.id
+          AND o.status = 'delivered'
+          AND o.delivered_at >= datetime(?, '-7 days')
+          AND o.delivered_at <= ?
+      )
+  `, [driverId, anchor, anchor]);
+  const activeReferrals = row?.c ?? 0;
+  return Math.max(0, 0.07 - 0.01 * activeReferrals);
+}
+
 export async function createCommission(
   orderId: string, orderNumber: string, driverId: string, driverName: string,
   dispatcherUserId: string | null, dispatcherName: string | null,
@@ -877,7 +910,8 @@ export async function createCommission(
 ): Promise<void> {
   const existing = await queryOne('SELECT id FROM commissions WHERE order_id = ?', [orderId]);
   if (existing) return;
-  const driverCharge  = Math.round(orderPrice * 0.07 * 100) / 100;
+  const driverRate     = await getDriverCommissionRate(driverId, deliveryDate);
+  const driverCharge  = Math.round(orderPrice * driverRate * 100) / 100;
   const dispatcherPay = Math.round(orderPrice * 0.03 * 100) / 100;
   const netOsi        = Math.round((driverCharge - dispatcherPay) * 100) / 100;
   await exec(`
@@ -906,7 +940,8 @@ async function initCommissions(): Promise<void> {
   `);
 
   for (const o of delivered) {
-    const driverCharge = Math.round(o.price * 0.07 * 100) / 100;
+    const driverRate   = await getDriverCommissionRate(o.driver_id, o.delivered_at);
+    const driverCharge = Math.round(o.price * driverRate * 100) / 100;
     const dispPay      = Math.round(o.price * 0.03 * 100) / 100;
     const netOsi       = Math.round((driverCharge - dispPay) * 100) / 100;
     await exec(`

@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, Mail, Lock, Building2, Calendar, Hash, Clock, Send, DollarSign, KeyRound, ShieldCheck, Languages } from 'lucide-react';
 import api from '../services/api';
@@ -48,6 +48,8 @@ function DateField({ value, onChange, required, placeholder }: {
 export default function RegisterDriver() {
   const { t } = useTranslation();
   const { lang, toggle: toggleLang } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const referralCode = searchParams.get('ref') || '';
   const [registered, setRegistered] = useState(false);
   const [registeredName, setRegisteredName] = useState('');
 
@@ -108,6 +110,7 @@ export default function RegisterDriver() {
         company_name:   form.company_name,
         authority_since: form.authority_since,
         rate_con_email: form.rate_con_email,
+        referral_code:  referralCode,
       });
       setRegisteredName(form.name);
       setRegistered(true);
