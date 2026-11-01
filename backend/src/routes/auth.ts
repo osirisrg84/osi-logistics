@@ -213,11 +213,19 @@ router.post('/register-driver', sensitiveLimiter, async (req: Request, res: Resp
 
     // Referral program: the code travels in the registration link as
     // ?ref=<driver_code>. A bad/unknown code is just ignored -- never block
-    // registration over a broken referral link, and never let someone refer
-    // themselves.
+    // registration over a broken referral link, never let someone refer
+    // themselves, and only accept it from a referrer whose own account is
+    // still active+approved (not pending/rejected/deactivated) -- a driver
+    // doesn't need to have completed any load to refer, just a legitimate
+    // standing account.
     let referred_by_driver_id: string | null = null;
     if (referral_code) {
-      const referrer = await queryOne<{ id: string }>('SELECT id FROM drivers WHERE driver_code = ?', [String(referral_code).trim()]);
+      const referrer = await queryOne<{ id: string }>(
+        `SELECT d.id FROM drivers d
+         JOIN users u ON u.driver_id = d.id
+         WHERE d.driver_code = ? AND u.active = 1 AND u.approval_status = 'approved'`,
+        [String(referral_code).trim()]
+      );
       if (referrer && referrer.id !== driverId) referred_by_driver_id = referrer.id;
     }
 
