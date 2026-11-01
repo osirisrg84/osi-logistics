@@ -39,6 +39,18 @@ export async function resolveSessionUser(token: string | undefined): Promise<Aut
   };
 }
 
+// Writing last_activity_at on literally every authenticated request (the
+// driver portal alone fires half a dozen in parallel on open) hammered
+// SQLite with concurrent UPDATEs and caused real intermittent failures
+// elsewhere (confirmed live 2026-11-01: drivers getting logged out, because
+// DriverAuthContext treats ANY /auth/me failure -- including an unrelated
+// transient DB lock -- as an invalid session). The 2-day idle-shift check
+// only needs this timestamp to land at least once within any 2-day window,
+// not on every request, so throttle it in-memory per user instead of
+// writing every single time.
+const lastActivityWrite = new Map<string, number>();
+const ACTIVITY_WRITE_THROTTLE_MS = 5 * 60 * 1000; // once per 5 min per user is plenty
+
 export async function authenticate(req: Request, res: Response, next: NextFunction): Promise<void> {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) { res.status(401).json({ error: 'Authentication required' }); return; }
@@ -47,10 +59,14 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
     const user = await resolveSessionUser(token);
     if (!user) { res.status(401).json({ error: 'Invalid or expired session' }); return; }
     req.user = user;
-    // Fire-and-forget -- "being on shift and doing things in the app" is
-    // measured by this timestamp advancing; a slow/failed write here must
-    // never block the actual request.
-    exec("UPDATE users SET last_activity_at = datetime('now') WHERE id = ?", [user.id]).catch(() => {});
+    const now = Date.now();
+    const last = lastActivityWrite.get(user.id) ?? 0;
+    if (now - last > ACTIVITY_WRITE_THROTTLE_MS) {
+      lastActivityWrite.set(user.id, now);
+      // Fire-and-forget -- a slow/failed write here must never block the
+      // actual request.
+      exec("UPDATE users SET last_activity_at = datetime('now') WHERE id = ?", [user.id]).catch(() => {});
+    }
     next();
   } catch {
     res.status(500).json({ error: 'Auth error' });

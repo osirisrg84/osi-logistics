@@ -38,9 +38,18 @@ export function DriverAuthProvider({ children }: { children: ReactNode }) {
         setUser(data.user);
         setDriverProfile(data.driverProfile || null);
       })
-      .catch(() => {
-        localStorage.removeItem('osi_driver_token');
-        localStorage.removeItem('osi_driver_user');
+      .catch((err: unknown) => {
+        // Only a confirmed 401 (server says the session is actually invalid)
+        // should clear the stored token. Any other failure -- a timeout, a
+        // transient 500, a network blip -- must leave it alone, or a driver
+        // gets logged out (has to re-enter their password) over something
+        // that will just work on the next request (confirmed live
+        // 2026-11-01: this is what was happening).
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        if (status === 401) {
+          localStorage.removeItem('osi_driver_token');
+          localStorage.removeItem('osi_driver_user');
+        }
       })
       .finally(() => setLoading(false));
   }, []);

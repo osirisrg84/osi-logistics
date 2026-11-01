@@ -41,9 +41,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(data.user);
         setDriverProfile(data.driverProfile || null);
       })
-      .catch(() => {
-        localStorage.removeItem('osi_token');
-        localStorage.removeItem('osi_user');
+      .catch((err: unknown) => {
+        // Only clear the token on a confirmed 401 -- a transient failure
+        // (timeout, 500, network blip) should never force a re-login.
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        if (status === 401) {
+          localStorage.removeItem('osi_token');
+          localStorage.removeItem('osi_user');
+        }
       })
       .finally(() => setLoading(false));
   }, []);
