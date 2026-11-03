@@ -187,7 +187,7 @@ export default function RegisterDriver() {
             </div>
             <p className="text-xs text-slate-300 leading-snug">
               {t('registerDriver.trustEarnings')}{' '}
-              <Link to="/driver/referral-info" className="text-emerald-400 font-semibold underline underline-offset-2 hover:text-emerald-300">
+              <Link to="/driver/referral-info" className="text-emerald-400 font-semibold underline underline-offset-2 hover:text-emerald-300 whitespace-nowrap">
                 {t('registerDriver.trustEarningsMore')}
               </Link>
             </p>
