@@ -1189,7 +1189,8 @@
     "trustEarningsMore": "Ver cómo",
     "trustControl": "Sin dispatch forzado — tú eliges cada carga, siempre",
     "trustSupport": "Equipo de dispatch real, 24/7 — no solo horario de oficina",
-    "whyWeAskNote": "Pedimos tu CDL y datos de autoridad para verificarte y activar tu cuenta rápido.",
+    "whyWeAskNoteCdl": "Pedimos tu CDL y datos de autoridad para verificarte y activar tu cuenta rápido.",
+    "whyWeAskNoteDriver": "Pedimos tu licencia y datos de autoridad para verificarte y activar tu cuenta rápido.",
     "privacyNote": "Sin contratos. Cancela cuando quieras. Tu información solo se usa para activar tu cuenta — nunca se vende ni se comparte."
   },
   "referralInfo": {

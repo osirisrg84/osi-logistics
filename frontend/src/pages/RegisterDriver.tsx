@@ -315,7 +315,7 @@ export default function RegisterDriver() {
             </div>
             <p className="text-xs text-gray-400 -mt-2 flex items-start gap-2">
               <ShieldCheck className="w-4 h-4 text-gray-300 flex-shrink-0 mt-0.5" />
-              {t('registerDriver.whyWeAskNote')}
+              {requiresCdl ? t('registerDriver.whyWeAskNoteCdl') : t('registerDriver.whyWeAskNoteDriver')}
             </p>
 
             <div className="grid grid-cols-2 gap-3">

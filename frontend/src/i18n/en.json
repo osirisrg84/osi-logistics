@@ -1189,7 +1189,8 @@
     "trustEarningsMore": "See how",
     "trustControl": "No forced dispatch — you choose every load, always",
     "trustSupport": "Real dispatch team, 24/7 — not just office hours",
-    "whyWeAskNote": "We ask for your CDL and authority info to verify you and get your account active fast.",
+    "whyWeAskNoteCdl": "We ask for your CDL and authority info to verify you and get your account active fast.",
+    "whyWeAskNoteDriver": "We ask for your license and authority info to verify you and get your account active fast.",
     "privacyNote": "No contracts. Cancel anytime. Your information is only used to set up your account — never sold or shared."
   },
   "referralInfo": {
