@@ -52,6 +52,23 @@
 input[type="date"].date-empty::-webkit-datetime-edit { color: transparent; }
 input[type="date"].date-empty::-webkit-datetime-edit-fields-wrapper { color: transparent; }
 
+/* The browser's own calendar-picker button (right side, Chrome/Android)
+   floats at its own default size/position regardless of our padding,
+   landing uncentered next to the custom calendar icon we render on the
+   left (DateField, RegisterDriver.tsx). Pin its size and position so it
+   sits centered in the same right-padding gutter instead. */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 0.65rem;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  margin: 0;
+  opacity: 0.45;
+  cursor: pointer;
+  background-size: contain;
+}
+
 .leaflet-container { border-radius: 0.75rem; z-index: 0; }
 .leaflet-popup-content-wrapper {
   border-radius: 12px !important;
