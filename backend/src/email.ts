@@ -3,12 +3,19 @@ import { Resend } from 'resend';
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const FROM = process.env.RESEND_FROM || 'OSI Logistics <onboarding@resend.dev>';
 
+// FROM is a noreply@ address with no real mailbox behind it, so without a
+// reply-to every "responde a este correo" in these templates bounces back
+// to the sender with a 550 (mailbox doesn't exist). admin@osilogistics.com
+// is the one real, monitored mailbox (seeded admin account, already shown
+// in every footer), so replies get routed there instead.
+const REPLY_TO = process.env.RESEND_REPLY_TO || 'admin@osilogistics.com';
+
 async function sendEmail(payload: Parameters<Resend['emails']['send']>[0]) {
   if (!resend) {
     console.warn(`[email] RESEND_API_KEY not set — skipping email to ${payload.to}`);
     return;
   }
-  await resend.emails.send(payload);
+  await resend.emails.send({ replyTo: REPLY_TO, ...payload });
 }
 
 // Shared by the driver and dispatcher activation emails -- a gradient video
