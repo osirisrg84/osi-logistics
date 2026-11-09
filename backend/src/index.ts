@@ -3,7 +3,7 @@ import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
-import { initDatabase, switchToLocalSqlite, exec, query, queryOne } from './database';
+import { initDatabase, switchToLocalSqlite, getDbBackend, exec, query, queryOne } from './database';
 import { appEvents, DriverStatusEvent } from './events';
 import ordersRouter from './routes/orders';
 import driversRouter from './routes/drivers';
@@ -84,15 +84,22 @@ app.use('/api/auth', authRouter);
 app.use('/api/chat', chatRouter);
 
 app.get('/api/health', async (_req, res) => {
+  // dbBackend: 'local-sqlite' in production means Turso auth is failing and
+  // every session (and all other data) gets wiped on the next cold start --
+  // this must never read 'ok' silently, or the only symptom anyone sees is
+  // "I got logged out for no reason" days later. See database.ts.
+  const dbBackend = getDbBackend();
+  const degraded = dbBackend === 'local-sqlite' && process.env.NODE_ENV === 'production';
   try {
     const [userRow, driverRow] = await Promise.all([
       queryOne<{c:number}>('SELECT COUNT(*) as c FROM users'),
       queryOne<{c:number}>('SELECT COUNT(*) as c FROM drivers'),
     ]);
-    res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '2.5.0',
-               userCount: userRow?.c ?? 0, driverCount: driverRow?.c ?? 0 });
+    res.json({ status: degraded ? 'degraded' : 'ok', dbBackend, timestamp: new Date().toISOString(), version: '2.5.0',
+               userCount: userRow?.c ?? 0, driverCount: driverRow?.c ?? 0,
+               ...(degraded ? { warning: 'Running on ephemeral local SQLite -- Turso auth is failing. Sessions and data will reset on next restart. Check TURSO_URL/TURSO_AUTH_TOKEN.' } : {}) });
   } catch {
-    res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '2.5.0' });
+    res.json({ status: degraded ? 'degraded' : 'ok', dbBackend, timestamp: new Date().toISOString(), version: '2.5.0' });
   }
 });
 

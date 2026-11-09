@@ -4,10 +4,21 @@ import { v4 as uuidv4 } from 'uuid';
 
 let _db: Client | undefined;
 
+// Surfaced on /api/health so a silent Turso-auth failure (e.g. an expired
+// token) is instantly visible instead of only showing up as "why did
+// everyone get logged out" days later -- the app keeps running on the local
+// SQLite fallback either way, but that fallback is ephemeral (wiped on every
+// deploy/restart), so it must never go unnoticed in production.
+let _dbBackend: 'turso' | 'local-sqlite' = 'turso';
+export function getDbBackend(): 'turso' | 'local-sqlite' {
+  return _dbBackend;
+}
+
 export function getDb(): Client {
   if (!_db) {
     const url = (process.env.TURSO_URL || '').replace(/\s+/g, '') || 'file:./osi_logistics.db';
     const authToken = process.env.TURSO_AUTH_TOKEN?.replace(/\s+/g, '') || undefined;
+    if (url.startsWith('file:')) _dbBackend = 'local-sqlite';
     _db = createClient({ url, authToken });
   }
   return _db;
@@ -15,6 +26,7 @@ export function getDb(): Client {
 
 export function switchToLocalSqlite(): void {
   _db = createClient({ url: 'file:./osi_logistics.db' });
+  _dbBackend = 'local-sqlite';
   console.log('⚠️  Using local SQLite (Turso unavailable — data resets on each deploy)');
 }
 
