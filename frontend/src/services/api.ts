@@ -19,10 +19,17 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   response => response,
   error => {
-    if (error.response?.status === 401 && !window.location.pathname.includes('/login') &&
-        !window.location.pathname.includes('/admin') &&
-        !window.location.pathname.includes('/dispatcher') &&
-        !window.location.pathname.includes('/driver')) {
+    // A 401 from an arbitrary endpoint (orders, tracking, billing, ...) is
+    // not proof the session is actually dead -- it can be a one-off blip
+    // (a request that raced a token refresh, a transient backend hiccup,
+    // Render cold-start). Only /auth/me's entire job is "is this session
+    // still valid", so that's the only 401 trusted to force a logout here --
+    // same principle AuthContext/DriverAuthContext already apply to their
+    // own /auth/me check (confirmed live: admins were getting bounced to '/'
+    // because a single unrelated request 401'd on a page whose path didn't
+    // happen to contain "admin"/"dispatcher"/"driver"/"login").
+    const isAuthMeCall = typeof error.config?.url === 'string' && error.config.url.includes('/auth/me');
+    if (error.response?.status === 401 && isAuthMeCall) {
       localStorage.removeItem('osi_token');
       localStorage.removeItem('osi_user');
       window.location.href = '/';
