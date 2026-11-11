@@ -125,6 +125,15 @@ accent (`#a855f7`, not in the Tailwind config, hardcoded per-component) to visua
 dispatcher views. Dark mode is class-based (`dark:` variants), with Tailwind's stock `slate` palette as the
 dark-mode neutral convention. Font: Inter.
 
+## Integración de solo lectura con Project 16.0 (Centro de Automatización)
+
+`backend/src/routes/integrations.ts` expone `GET /api/integrations/contacts` (dispatchers y drivers reales: id,
+nombre, correo, teléfono, rol, estado). Se protege con una API key propia en `INTEGRATION_API_KEY` (header
+`x-integration-key`), **no** con sesión de admin; sin la variable responde 404 (fail-closed). Excluye admins y toda
+cuenta `@osilogistics.com` (admin + cuentas demo sembradas). Nunca devuelve SSN, fecha de nacimiento, datos de
+pago ni documentos — si algún día hace falta otro campo, agregarlo ahí a propósito. Montado en `index.ts` antes
+de las rutas protegidas.
+
 ## The two root-level widget files are separate, unrelated to the app
 
 `announcement-bar.html` and `chat-widget.html` are standalone, framework-free HTML/CSS/JS snippets meant

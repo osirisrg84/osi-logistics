@@ -20,6 +20,7 @@ import chatRouter from './routes/chat';
 import communityRouter from './routes/community';
 import incidentsRouter from './routes/incidents';
 import assistantRouter from './routes/assistant';
+import integrationsRouter from './routes/integrations';
 import { authenticate, resolveSessionUser, AuthUser } from './middleware/auth';
 
 const PORT = process.env.PORT || 3001;
@@ -102,6 +103,9 @@ app.get('/api/health', async (_req, res) => {
     res.json({ status: degraded ? 'degraded' : 'ok', dbBackend, timestamp: new Date().toISOString(), version: '2.5.0' });
   }
 });
+
+// Server-to-server, read-only; protegido por INTEGRATION_API_KEY (no por sesion) -- ver routes/integrations.ts
+app.use('/api/integrations', integrationsRouter);
 
 // Protected routes
 app.use('/api/orders', authenticate, ordersRouter);
