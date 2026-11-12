@@ -5,6 +5,7 @@ import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, 
 import api from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 import osiLogo from '../assets/osi-logo.jpeg';
+import { trackRegistration } from '../utils/tracking';
 import driverHero from '../assets/driver-hero.jpg';
 
 const EQUIPMENT_TYPES = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'];
@@ -114,7 +115,7 @@ export default function RegisterDriver() {
       });
       setRegisteredName(form.name);
       setRegistered(true);
-      (window as any).fbq?.('track', 'CompleteRegistration', { content_name: 'driver_registration' });
+      trackRegistration('driver');
     } catch (err: unknown) {
       setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error || t('registerDispatcher.errorRegistrationFailed'));
     } finally {
@@ -320,7 +321,7 @@ export default function RegisterDriver() {
 
             <div className="grid grid-cols-2 gap-3">
               <Field label={requiresCdl ? t('registerDriver.cdlLicenseNumberLabel') : t('registerDriver.driverLicenseNumberLabel')} required>
-                <input className="input" type="text" placeholder={requiresCdl ? "FL-CDL-000000" : "FL-DL-000000"}
+                <input className="input" type="text" placeholder={requiresCdl ? "e.g. D1234567" : "e.g. D1234567"}
                   value={form.license_number} onChange={set('license_number')} required />
               </Field>
               <Field label={t('registerDriver.licenseExpiryLabel')} required>

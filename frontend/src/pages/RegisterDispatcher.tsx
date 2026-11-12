@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { authApi } from '../services/api';
 import osiLogo from '../assets/osi-logo.jpeg';
+import { trackRegistration } from '../utils/tracking';
 import { useLanguage } from '../context/LanguageContext';
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
@@ -132,6 +133,7 @@ export default function RegisterDispatcher() {
       });
       setRegisteredName(form.name);
       setRegistered(true);
+      trackRegistration('dispatcher');
     } catch (err: unknown) {
       setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error || t('registerDispatcher.errorRegistrationFailed'));
     } finally {
