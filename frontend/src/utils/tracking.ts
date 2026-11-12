@@ -22,9 +22,11 @@ export function trackRegistration(role: Role): void {
     const name = `${role}_registration`;
     w.fbq?.('track', 'CompleteRegistration', { content_name: name });
     w.gtag?.('event', 'sign_up', { method: role });
-    const adsId = import.meta.env.VITE_GOOGLE_ADS_ID as string | undefined;
-    const adsLabel = import.meta.env.VITE_GOOGLE_ADS_REG_LABEL as string | undefined;
-    if (adsId && adsLabel) w.gtag?.('event', 'conversion', { send_to: `${adsId}/${adsLabel}` });
+    // Google Ads: conversion "Registro dispatcher/driver" (cuenta OSI Logistics). Los IDs no son secretos; pueden
+    // sustituirse con VITE_GOOGLE_ADS_ID / VITE_GOOGLE_ADS_REG_LABEL.
+    const adsId = (import.meta.env.VITE_GOOGLE_ADS_ID as string | undefined) || 'AW-18554975394';
+    const adsLabel = (import.meta.env.VITE_GOOGLE_ADS_REG_LABEL as string | undefined) || 'vDflCK_gpbcdEKLp2Y9F';
+    w.gtag?.('event', 'conversion', { send_to: `${adsId}/${adsLabel}` });
     w.ttq?.track('CompleteRegistration', { content_name: name });
   } catch {
     // la medicion nunca debe romper el registro
