@@ -30,6 +30,7 @@ import DispatcherProfilePage from './pages/DispatcherProfilePage';
 import DriverPortal from './pages/DriverPortal';
 import SetupAdmin from './pages/SetupAdmin';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 
 function Spinner() {
   return (
@@ -113,6 +114,7 @@ function AppRoutes() {
       <Route path="/app" element={<PublicOnly><Landing /></PublicOnly>} />
       <Route path="/setup-admin" element={<SetupAdmin />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsOfService />} />
 
       {/* Portal logins */}
       <Route path="/admin"      element={<PublicOnly><AdminLogin /></PublicOnly>} />
