@@ -169,7 +169,7 @@ export default function RegisterDriver() {
             <img src={osiLogo} alt="OSI Logistics" className="h-[60px] w-auto object-contain mx-auto rounded-xl shadow-lg shadow-black/30" />
           </a>
           <div className="relative rounded-3xl overflow-hidden mb-4 shadow-2xl shadow-black/40">
-            <img src={driverHero} alt="Happy OSI Logistics truck driver" className="w-full h-56 object-cover" />
+            <img src={driverHero} alt="Happy OSI Logistics truck driver" className="w-full h-56 sm:h-auto sm:aspect-[8/5] object-cover" />
           </div>
           <h1 className="text-2xl font-bold text-white">{t('registerDriver.heroTitle')}</h1>
           <p className="text-slate-400 text-sm mt-1">{t('registerDriver.heroSubtitle')}</p>
