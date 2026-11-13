@@ -175,13 +175,17 @@ router.get('/dispatchers', async (_req: Request, res: Response) => {
              u.date_of_birth, u.city, u.years_experience, u.availability,
              u.previous_companies, u.languages,
              COUNT(DISTINCT c.order_id)                                                        AS total_orders,
-             COALESCE(SUM(c.dispatcher_pay), 0)                                                AS total_earned,
-             COALESCE(SUM(CASE WHEN c.dispatcher_status='pending' THEN c.dispatcher_pay ELSE 0 END), 0)  AS pending,
-             COALESCE(SUM(CASE WHEN c.dispatcher_status='settled' THEN c.dispatcher_pay ELSE 0 END), 0)  AS settled,
-             COUNT(DISTINCT CASE WHEN o.status IN ('assigned','picked_up','in_transit') THEN o.id END) AS active_orders
+             ROUND(COALESCE(SUM(c.dispatcher_pay), 0), 2)                                      AS total_earned,
+             ROUND(COALESCE(SUM(CASE WHEN c.dispatcher_status='pending' THEN c.dispatcher_pay ELSE 0 END), 0), 2)  AS pending,
+             ROUND(COALESCE(SUM(CASE WHEN c.dispatcher_status='settled' THEN c.dispatcher_pay ELSE 0 END), 0), 2)  AS settled,
+             (SELECT COUNT(*) FROM orders o
+               WHERE o.dispatcher_user_id = u.id
+                 AND o.status IN ('assigned','picked_up','in_transit'))                        AS active_orders
       FROM users u
+      -- Solo se une commissions: unir tambien orders multiplicaba cada
+      -- comision por el numero de ordenes del dispatcher (total_earned de
+      -- millones). active_orders va como subconsulta para no repetir filas.
       LEFT JOIN commissions c ON u.id = c.dispatcher_user_id
-      LEFT JOIN orders o ON u.id = o.dispatcher_user_id
       WHERE u.role = 'dispatcher'
       GROUP BY u.id
       ORDER BY total_earned DESC

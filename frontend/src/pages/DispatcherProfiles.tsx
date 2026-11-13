@@ -443,12 +443,12 @@ export default function DispatcherProfiles() {
           { label: t('dispatcherProfiles.statDispatchers'), value: dispatchers.length, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/20' },
           { label: t('dispatcherProfiles.statOnShiftNow'), value: onShiftCount, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
           { label: t('dispatcherProfiles.statOrdersManaged'), value: totalOrders, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-          { label: t('dispatcherProfiles.statTotalCommissions'), value: `$${totalEarned.toFixed(2)}`, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
-          { label: t('dispatcherProfiles.statPendingPayout'), value: `$${totalPending.toFixed(2)}`, color: 'text-yellow-600', bg: 'bg-yellow-50 dark:bg-yellow-900/20' },
+          { label: t('dispatcherProfiles.statTotalCommissions'), value: `$${totalEarned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
+          { label: t('dispatcherProfiles.statPendingPayout'), value: `$${totalPending.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, color: 'text-yellow-600', bg: 'bg-yellow-50 dark:bg-yellow-900/20' },
         ].map(s => (
-          <div key={s.label} className={`card ${s.bg} p-4`}>
+          <div key={s.label} className={`card ${s.bg} p-4 min-w-0`}>
             <p className="text-xs text-gray-500 dark:text-slate-400">{s.label}</p>
-            <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
+            <p className={`text-xl sm:text-2xl font-bold mt-1 break-words ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>
