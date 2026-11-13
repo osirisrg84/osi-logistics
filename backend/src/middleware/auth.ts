@@ -1,6 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { exec, queryOne } from '../database';
 
+// Sesion de 30 dias que se RENUEVA mientras se usa. Antes eran 7 dias fijos desde el login: el admin se deslogueaba solo
+// cada semana aunque usara la app a diario.
+export const SESSION_TTL_MS = 30 * 24 * 3600 * 1000;
+
 export interface AuthUser {
   id: string;
   name: string;
@@ -66,6 +70,8 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
       // Fire-and-forget -- a slow/failed write here must never block the
       // actual request.
       exec("UPDATE users SET last_activity_at = datetime('now') WHERE id = ?", [user.id]).catch(() => {});
+      // Sesion deslizante: cada vez que se usa (como maximo cada 5 min) se vuelve a dar el plazo completo.
+      exec('UPDATE sessions SET expires_at = ? WHERE token = ?', [new Date(now + SESSION_TTL_MS).toISOString(), token]).catch(() => {});
     }
     next();
   } catch {

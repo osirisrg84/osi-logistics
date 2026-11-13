@@ -3,6 +3,7 @@ import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { scryptSync, randomBytes, timingSafeEqual } from 'node:crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne, getDriverCommissionRate } from '../database';
+import { SESSION_TTL_MS } from '../middleware/auth';
 import { appEvents } from '../events';
 import { sendVerificationCode, sendNewDriverRegistrationEmail, sendPasswordResetEmail } from '../email';
 import { sendSmsCode } from '../sms';
@@ -45,7 +46,7 @@ function verifyPassword(password: string, salt: string, storedHash: string): boo
 
 async function createSession(userId: string): Promise<string> {
   const token = randomBytes(32).toString('hex');
-  const expiresAt = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
+  const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
   await exec('INSERT INTO sessions (id, user_id, token, expires_at) VALUES (?, ?, ?, ?)',
     [uuidv4(), userId, token, expiresAt]);
   return token;
