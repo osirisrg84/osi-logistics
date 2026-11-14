@@ -1244,7 +1244,7 @@
     "caLicenseNumberLabel": "Número de licencia de conducir",
     "caAuthoritySinceLabel": "Fecha de registro del carrier (opcional)",
     "successBody": "Tu cuenta de conductor fue registrada exitosamente. Un administrador de OSI Logistics la revisará y activará. Recibirás acceso al Driver Portal en cuanto sea aprobada.",
-    "sectionEquipmentFirst": "Empieza Aquí — ¿Qué Manejas?",
+    "sectionEquipmentFirst": "¿Qué Manejas?",
     "equipmentTypePlaceholder": "Selecciona tu tipo de equipo",
     "cdlRequiredNote": "Este equipo requiere CDL (Licencia de Conducir Comercial).",
     "noCdlNote": "Buena noticia — este equipo no requiere CDL, solo tu licencia de conducir regular.",
