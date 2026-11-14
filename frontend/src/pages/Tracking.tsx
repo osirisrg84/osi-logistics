@@ -8,6 +8,7 @@ import { Driver } from '../types';
 import { getSocket } from '../services/socket';
 import { DriverStatusBadge } from '../components/StatusBadge';
 import { OnlineSince } from '../components/OnlineSince';
+import CountryFlag, { countryFlagHtml } from '../components/CountryFlag';
 import { formatDistanceToNow } from 'date-fns';
 import { parseServerDate } from '../utils/serverDate';
 import { formatLocation } from '../utils/location';
@@ -20,7 +21,8 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-function createDriverIcon(status: string, initials: string): L.DivIcon {
+function createDriverIcon(status: string, initials: string, country?: string): L.DivIcon {
+  const flag = countryFlagHtml(country);
   const colors: Record<string, string> = {
     available: '#22c55e',
     busy: '#f97316',
@@ -31,6 +33,7 @@ function createDriverIcon(status: string, initials: string): L.DivIcon {
   return L.divIcon({
     html: `
       <div style="position:relative;width:40px;height:40px">
+        ${flag ? `<div style="position:absolute;top:-6px;left:-10px;z-index:2;line-height:0">${flag}</div>` : ''}
         <div style="
           width:36px;height:36px;background:${color};
           border:3px solid white;border-radius:50%;
@@ -211,7 +214,7 @@ export default function Tracking() {
           <Marker
             key={driver.id}
             position={[driver.current_lat, driver.current_lng]}
-            icon={createDriverIcon(driver.status, driver.avatar || 'D')}
+            icon={createDriverIcon(driver.status, driver.avatar || 'D', driver.country)}
             eventHandlers={{ click: () => handleSelectDriver(driver) }}
           >
             <Popup>
@@ -222,7 +225,7 @@ export default function Tracking() {
                     driver.status === 'busy' ? 'bg-orange-500' : 'bg-yellow-500'
                   }`}>{driver.avatar}</div>
                   <div>
-                    <p className="font-semibold text-sm">{driver.name}</p>
+                    <p className="font-semibold text-sm flex items-center gap-1.5">{driver.name}<CountryFlag country={driver.country} /></p>
                     <p className="text-xs text-gray-500 capitalize">{t(`common.driverStatus.${driver.status}`)}</p>
                     {driver.status === 'available' && <OnlineSince since={driver.online_since} />}
                   </div>
@@ -382,7 +385,7 @@ export default function Tracking() {
                       {driver.avatar}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">{driver.name}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate flex items-center gap-1.5"><span className="truncate">{driver.name}</span><CountryFlag country={driver.country} /></p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <DriverStatusBadge status={driver.status as never} />
                         {driver.status === 'available' && <OnlineSince since={driver.online_since} />}

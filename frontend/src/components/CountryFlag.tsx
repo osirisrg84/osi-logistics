@@ -1,3 +1,4 @@
+import { renderToStaticMarkup } from 'react-dom/server';
 import { isColombia } from '../utils/taxId';
 
 // Banderas como SVG propio (los emojis de bandera no se ven en Windows: salen como letras "US").
@@ -51,4 +52,9 @@ export default function CountryFlag({ country, className = '' }: { country?: str
       )}
     </svg>
   );
+}
+
+/** La bandera como texto HTML, para meterla dentro de los iconos del mapa (Leaflet no usa React). */
+export function countryFlagHtml(country?: string | null): string {
+  return countryCode(country) ? renderToStaticMarkup(<CountryFlag country={country} />) : '';
 }

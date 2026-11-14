@@ -17,6 +17,7 @@ import { formatLocation } from '../utils/location';
 import { formatPhone } from '../utils/phone';
 import { CITIES_BY_STATE } from '../data/usCities';
 import { useAuth } from '../context/AuthContext';
+import CountryFlag, { countryCode } from '../components/CountryFlag';
 
 const STATUS_OPTIONS: OrderStatus[] = ['pending', 'offered', 'assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled'];
 
@@ -308,7 +309,7 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
                 <select className="input" value={assignDriverId} onChange={e => setAssignDriverId(e.target.value)}>
                   <option value="">{t('orders.unassignedSelectOption')}</option>
                   {availableDrivers.map(d => (
-                    <option key={d.id} value={d.id}>{d.name} · ★{d.rating.toFixed(1)} · {d.total_deliveries} {t('orders.tripsWord')}</option>
+                    <option key={d.id} value={d.id}>{countryCode(d.country) ? `${countryCode(d.country)} · ` : ''}{d.name} · ★{d.rating.toFixed(1)} · {d.total_deliveries} {t('orders.tripsWord')}</option>
                   ))}
                 </select>
               </div>

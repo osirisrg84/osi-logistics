@@ -259,6 +259,17 @@ export async function sendActivationEmail(to: string, name: string, role: string
                           <div style="width:28px;height:28px;background:#fff7ed;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#f97316;">2</div>
                         </td>
                         <td style="padding:10px 0 10px 8px;vertical-align:top;">
+                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Ponte activo (En turno)</p>
+                          <p style="margin:0;font-size:13px;color:#6b7280;">Arriba, en la Consola, toca el interruptor <strong style="color:#16a34a;">Activo</strong> hasta que diga <strong style="color:#16a34a;">En turno</strong>. Si estás en &ldquo;Libre&rdquo;, la Consola no te muestra a tus drivers.</p>
+                          <img src="https://dispatch.osilogistics.com/email/dispatcher-interruptor-activo.png" alt="Interruptor Activo en la parte de arriba de la Consola, en En turno" width="420" style="display:block;width:100%;max-width:420px;height:auto;margin-top:10px;border:1px solid #e5e7eb;border-radius:10px;">
+                        </td>
+                      </tr>
+                      <tr><td colspan="2" style="padding:0 0 2px 0;"><div style="height:1px;background:#f3f4f6;margin-left:36px;"></div></td></tr>
+                      <tr>
+                        <td style="padding:10px 0;vertical-align:top;width:36px;">
+                          <div style="width:28px;height:28px;background:#fff7ed;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#f97316;">3</div>
+                        </td>
+                        <td style="padding:10px 0 10px 8px;vertical-align:top;">
                           <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Completa tu perfil</p>
                           <p style="margin:0;font-size:13px;color:#6b7280;">Agrega tu método de pago y tus datos de contacto desde la sección Mi Perfil.</p>
                         </td>
@@ -266,7 +277,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
                       <tr><td colspan="2" style="padding:0 0 2px 0;"><div style="height:1px;background:#f3f4f6;margin-left:36px;"></div></td></tr>
                       <tr>
                         <td style="padding:10px 0;vertical-align:top;width:36px;">
-                          <div style="width:28px;height:28px;background:#dcfce7;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#16a34a;">3</div>
+                          <div style="width:28px;height:28px;background:#dcfce7;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#16a34a;">4</div>
                         </td>
                         <td style="padding:10px 0 10px 8px;vertical-align:top;">
                           <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Asigna tu primera carga</p>

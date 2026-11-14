@@ -15,11 +15,12 @@ router.get('/live', async (req: Request, res: Response) => {
       SELECT d.id, d.name, d.status, d.current_lat, d.current_lng, d.current_address,
              d.avatar, d.truck_id, d.rating, d.gps_active, d.phone, d.on_time_rate,
              d.equipment_type, d.total_deliveries, d.truck_make, d.truck_number, d.online_since,
-             t.plate_number, t.make, t.model, t.type as truck_type,
+             t.plate_number, t.make, t.model, t.type as truck_type, u.country,
              o.id as order_id, o.order_number, o.delivery_address, o.delivery_contact,
              o.status as order_status, o.estimated_delivery
       FROM drivers d
       LEFT JOIN trucks t ON d.truck_id = t.id
+      LEFT JOIN users u ON u.driver_id = d.id
       LEFT JOIN (
         SELECT *, ROW_NUMBER() OVER (PARTITION BY driver_id ORDER BY assigned_at DESC) as rn
         FROM orders WHERE status IN ('assigned','picked_up','in_transit')
