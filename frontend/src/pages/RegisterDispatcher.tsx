@@ -39,12 +39,21 @@ export default function RegisterDispatcher() {
   const [registered, setRegistered] = useState(false);
   const [registeredName, setRegisteredName] = useState('');
 
-
   const [form, setForm] = useState({
     name: '', date_of_birth: '', phone: '', email: '',
     city: '', country: '', password: '', confirm: '',
     years_experience: '', availability: 'full-time',
   });
+  const [cityOpen, setCityOpen] = useState(false);
+  const norm = (x: string) => x.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const citySuggestions = (() => {
+    const all = CITIES_BY_COUNTRY[form.country] || [];
+    const q = norm(form.city.trim());
+    if (!q) return all.slice(0, 40);
+    const starts = all.filter(c => norm(c).startsWith(q));
+    const has = all.filter(c => !norm(c).startsWith(q) && norm(c).includes(q));
+    return [...starts, ...has].slice(0, 40).filter(c => norm(c) !== q);
+  })();
   const [companies, setCompanies] = useState<string[]>(['']);
   const [languages, setLanguages] = useState<string[]>(['English']);
   const [equipmentExp, setEquipmentExp] = useState<string[]>([]);
@@ -268,14 +277,27 @@ export default function RegisterDispatcher() {
 
             <Field label={t('registerDispatcher.cityLabel')} required>
               <div className="relative">
-                <MapPin className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input className="input pl-8" type="text" list="city-options" autoComplete="off" required
+                <MapPin className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <input className="input pl-8" type="text" autoComplete="off" autoCorrect="off" spellCheck={false} required
                   disabled={!form.country}
                   placeholder={form.country ? t('registerDispatcher.cityTypeOrPick') : t('registerDispatcher.cityPickCountryFirst')}
-                  value={form.city} onChange={set('city')} />
-                <datalist id="city-options">
-                  {(CITIES_BY_COUNTRY[form.country] || []).map(c => <option key={c} value={c} />)}
-                </datalist>
+                  value={form.city}
+                  onChange={e => { setForm(f => ({ ...f, city: e.target.value })); setCityOpen(true); }}
+                  onFocus={() => setCityOpen(true)}
+                  onBlur={() => setTimeout(() => setCityOpen(false), 150)} />
+                {cityOpen && citySuggestions.length > 0 && (
+                  <ul className="absolute z-30 left-0 right-0 mt-1 max-h-56 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg py-1">
+                    {citySuggestions.map(c => (
+                      <li key={c}>
+                        <button type="button" className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 active:bg-blue-100"
+                          onPointerDown={e => e.preventDefault()}
+                          onClick={() => { setForm(f => ({ ...f, city: c })); setCityOpen(false); }}>
+                          {c}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </Field>
 
