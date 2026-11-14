@@ -1,3 +1,4 @@
+import { CITIES_BY_COUNTRY } from '../utils/cities';
 import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -37,6 +38,8 @@ export default function RegisterDispatcher() {
   ];
   const [registered, setRegistered] = useState(false);
   const [registeredName, setRegisteredName] = useState('');
+
+  const [cityOther, setCityOther] = useState(false);
 
   const [form, setForm] = useState({
     name: '', date_of_birth: '', phone: '', email: '',
@@ -110,6 +113,7 @@ export default function RegisterDispatcher() {
     setError('');
     if (form.password !== form.confirm) { setError(t('registerDispatcher.errorPasswordMismatch')); return; }
     if (form.password.length < 8) { setError(t('registerDispatcher.errorPasswordTooShort')); return; }
+    if (!form.city.trim()) { setError(t('registerDispatcher.citySelect') + ' *'); return; }
     if (!form.country) { setError(t('registerDispatcher.countryPlaceholder') + ' *'); return; }
     if (!idDocument) { setError(t('registerDispatcher.errorIdDocumentRequired')); return; }
     setLoading(true);
@@ -250,33 +254,45 @@ export default function RegisterDispatcher() {
               {idDocError && <p className="text-[11px] text-red-500 mt-1">{idDocError}</p>}
             </Field>
 
-            {/* Sin restriccion a EEUU -- texto libre para que cualquier pais
-                (Colombia, Mexico, etc.) pueda registrarse sin problema. */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Field label={t('registerDispatcher.cityLabel')}>
-                <div className="relative">
-                  <MapPin className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input className="input pl-8" type="text" placeholder="Miami, FL"
-                    value={form.city} onChange={set('city')} />
-                </div>
-              </Field>
-              <Field label={t('registerDispatcher.countryLabel')}>
-                <div className="relative">
-                  <Globe className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <select className={`input pl-8 ${form.country ? '' : 'text-gray-400'}`} value={form.country} onChange={set('country')} required>
-                    <option value="" disabled>{t('registerDispatcher.countryPlaceholder')}</option>
-                    <option value="United States">{t('registerDispatcher.countryUS')}</option>
-                    <option value="Colombia">{t('registerDispatcher.countryCO')}</option>
-                  </select>
-                </div>
-              </Field>
-            </div>
+            {/* Primero el pais; segun el pais se ofrece la lista de ciudades (o "Otra ciudad" para escribirla). */}
+            <Field label={t('registerDispatcher.countryLabel')} required>
+              <div className="relative">
+                <Globe className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <select className={`input pl-8 ${form.country ? '' : 'text-gray-400'}`} value={form.country}
+                  onChange={e => { setCityOther(false); setForm(f => ({ ...f, country: e.target.value, city: '' })); }} required>
+                  <option value="" disabled>{t('registerDispatcher.countryPlaceholder')}</option>
+                  <option value="United States">{t('registerDispatcher.countryUS')}</option>
+                  <option value="Colombia">{t('registerDispatcher.countryCO')}</option>
+                </select>
+              </div>
+            </Field>
+
+            <Field label={t('registerDispatcher.cityLabel')} required>
+              <div className="relative">
+                <MapPin className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <select className={`input pl-8 ${form.city || cityOther ? '' : 'text-gray-400'}`} disabled={!form.country}
+                  value={cityOther ? '__other__' : form.city} required
+                  onChange={e => {
+                    if (e.target.value === '__other__') { setCityOther(true); setForm(f => ({ ...f, city: '' })); }
+                    else { setCityOther(false); setForm(f => ({ ...f, city: e.target.value })); }
+                  }}>
+                  <option value="" disabled>{form.country ? t('registerDispatcher.citySelect') : t('registerDispatcher.cityPickCountryFirst')}</option>
+                  {(CITIES_BY_COUNTRY[form.country] || []).map(c => <option key={c} value={c}>{c}</option>)}
+                  {form.country && <option value="__other__">{t('registerDispatcher.cityOther')}</option>}
+                </select>
+              </div>
+              {cityOther && (
+                <input className="input mt-2" type="text" required autoFocus
+                  placeholder={form.country === 'Colombia' ? 'Bogotá, D.C.' : 'Miami, FL'}
+                  value={form.city} onChange={set('city')} />
+              )}
+            </Field>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label={t('registerDispatcher.phoneLabel')} required>
                 <div className="relative">
                   <Phone className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input className="input pl-8" type="tel" placeholder="(305) 555-0000"
+                  <input className="input pl-8" type="tel" placeholder={form.country === 'Colombia' ? '300 123 4567' : '(305) 555-0000'}
                     value={form.phone} onChange={set('phone')} required />
                 </div>
               </Field>
