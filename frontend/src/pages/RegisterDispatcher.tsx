@@ -40,7 +40,7 @@ export default function RegisterDispatcher() {
 
   const [form, setForm] = useState({
     name: '', date_of_birth: '', phone: '', email: '',
-    city: '', country: 'United States', password: '', confirm: '',
+    city: '', country: '', password: '', confirm: '',
     years_experience: '', availability: 'full-time',
   });
   const [companies, setCompanies] = useState<string[]>(['']);
@@ -110,6 +110,7 @@ export default function RegisterDispatcher() {
     setError('');
     if (form.password !== form.confirm) { setError(t('registerDispatcher.errorPasswordMismatch')); return; }
     if (form.password.length < 8) { setError(t('registerDispatcher.errorPasswordTooShort')); return; }
+    if (!form.country) { setError(t('registerDispatcher.countryPlaceholder') + ' *'); return; }
     if (!idDocument) { setError(t('registerDispatcher.errorIdDocumentRequired')); return; }
     setLoading(true);
     try {
@@ -251,18 +252,19 @@ export default function RegisterDispatcher() {
 
             {/* Sin restriccion a EEUU -- texto libre para que cualquier pais
                 (Colombia, Mexico, etc.) pueda registrarse sin problema. */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label={t('registerDispatcher.cityLabel')}>
                 <div className="relative">
                   <MapPin className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input className="input pl-8" type="text" placeholder="Bogotá"
+                  <input className="input pl-8" type="text" placeholder="Miami, FL"
                     value={form.city} onChange={set('city')} />
                 </div>
               </Field>
               <Field label={t('registerDispatcher.countryLabel')}>
                 <div className="relative">
                   <Globe className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <select className="input pl-8" value={form.country} onChange={set('country')} required>
+                  <select className={`input pl-8 ${form.country ? '' : 'text-gray-400'}`} value={form.country} onChange={set('country')} required>
+                    <option value="" disabled>{t('registerDispatcher.countryPlaceholder')}</option>
                     <option value="United States">{t('registerDispatcher.countryUS')}</option>
                     <option value="Colombia">{t('registerDispatcher.countryCO')}</option>
                   </select>
@@ -270,7 +272,7 @@ export default function RegisterDispatcher() {
               </Field>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label={t('registerDispatcher.phoneLabel')} required>
                 <div className="relative">
                   <Phone className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -295,7 +297,7 @@ export default function RegisterDispatcher() {
               <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{t('registerDispatcher.sectionProfessionalBackground')}</h2>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label={t('registerDispatcher.yearsExperienceLabel')} required>
                 <input className="input" type="number" min="0" max="50" placeholder="e.g. 5"
                   value={form.years_experience} onChange={set('years_experience')} required />
@@ -389,7 +391,7 @@ export default function RegisterDispatcher() {
               <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{t('registerDispatcher.sectionAccountSecurity')}</h2>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label={t('registerDispatcher.passwordLabel')} required>
                 <div className="relative">
                   <input className="input pr-9" type={showPw ? 'text' : 'password'}

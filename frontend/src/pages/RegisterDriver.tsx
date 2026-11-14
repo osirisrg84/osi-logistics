@@ -74,7 +74,7 @@ export default function RegisterDriver() {
     license_number: '', license_expiry: '',
     equipment_type: '', mc_number: '', dot_number: '', company_name: '', authority_since: '',
     rate_con_email: '',
-    country: 'United States',
+    country: '',
     // Canada
     province: '', operating_scope: '', carrier_number: '', license_class: '',
     business_number: '', gst_hst_number: '', cbsa_carrier_code: '', fast_number: '',
@@ -253,18 +253,19 @@ export default function RegisterDriver() {
             <div className="grid grid-cols-2 gap-3">
               {([['United States', 'registerDriver.countryUS'], ['Canada', 'registerDriver.countryCA']] as const).map(([value, key]) => (
                 <button key={value} type="button" onClick={() => setForm(f => ({ ...f, country: value }))}
-                  className={`flex items-center justify-center gap-2.5 py-3 rounded-xl border-2 text-sm font-bold transition-colors ${
+                  className={`flex flex-col items-center justify-center gap-1.5 px-2 py-3 rounded-xl border-2 text-sm font-bold leading-tight transition-colors ${
                     form.country === value ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'
                   }`}>
-                  <CountryFlag country={value} className="!w-6 !h-[17px]" /> {t(key)}
+                  <CountryFlag country={value} className="!w-7 !h-[20px]" /> <span>{t(key)}</span>
                 </button>
               ))}
             </div>
+            {!form.country && <p className="text-xs text-gray-400">{t('registerDriver.countryHint')}</p>}
           </div>
 
           {/* Equipment first -- a single tap, no typing, decides which
               license field and which authority type show up next. */}
-          <div className="bg-white rounded-2xl shadow-xl p-5 space-y-3">
+          <div className={`bg-white rounded-2xl shadow-xl p-5 space-y-3 ${form.country ? '' : 'hidden'}`}>
             <div className="flex items-center gap-2.5 mb-1">
               <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
                 <Truck className="w-[18px] h-[18px] text-blue-500" />
@@ -302,7 +303,7 @@ export default function RegisterDriver() {
                 value={form.name} onChange={set('name')} required autoFocus />
             </Field>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label={t('registerDispatcher.phoneLabel')} required>
                 <input className="input" type="tel" placeholder="(305) 555-0000"
                   value={form.phone} onChange={set('phone')} required />
@@ -313,7 +314,7 @@ export default function RegisterDriver() {
               </Field>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label={t('registerDispatcher.passwordLabel')} required>
                 <div className="relative">
                   <input className="input pr-9" type={showPw ? 'text' : 'password'}
@@ -368,7 +369,7 @@ export default function RegisterDriver() {
             </p>
             )}
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label={isCanada ? t('registerDriver.caLicenseNumberLabel') : requiresCdl ? t('registerDriver.cdlLicenseNumberLabel') : t('registerDriver.driverLicenseNumberLabel')} required>
                 <input className="input" type="text" placeholder={requiresCdl ? "e.g. D1234567" : "e.g. D1234567"}
                   value={form.license_number} onChange={set('license_number')} required />
@@ -455,7 +456,7 @@ export default function RegisterDriver() {
                   <p className="text-[10px] text-gray-400 mt-1">{t('registerDriver.caCarrierNumberHint')}</p>
                 </Field>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Field label={t('registerDriver.caBusinessNumber')}>
                     <input className="input font-mono" type="text" inputMode="numeric" placeholder="123456789" maxLength={9}
                       value={form.business_number} onChange={set('business_number')} />
@@ -472,7 +473,7 @@ export default function RegisterDriver() {
                   <div className="rounded-xl bg-blue-50/60 border border-blue-100 p-3 space-y-3">
                     <p className="text-xs font-bold text-blue-700 uppercase tracking-wide">{t('registerDriver.caSectionBorder')}</p>
                     <p className="text-[11px] text-gray-500">{t('registerDriver.caCrossBorderNote')}</p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Field label={t('registerDriver.caUsdot')} required>
                         <input className="input" type="text" placeholder="000000" value={form.dot_number} onChange={set('dot_number')} required />
                       </Field>
@@ -480,7 +481,7 @@ export default function RegisterDriver() {
                         <input className="input" type="text" placeholder="000000" value={form.mc_number} onChange={set('mc_number')} />
                       </Field>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Field label={t('registerDriver.caCbsa')} required>
                         <input className="input font-mono uppercase" type="text" maxLength={4} placeholder="ABCD"
                           value={form.cbsa_carrier_code} onChange={set('cbsa_carrier_code')} required />
