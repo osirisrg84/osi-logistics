@@ -1165,7 +1165,7 @@
     "countryPlaceholder": "Selecciona tu país",
     "citySelect": "Selecciona tu ciudad",
     "cityPickCountryFirst": "Primero elige tu país",
-    "cityOther": "Otra ciudad (escríbela)",
+    "cityTypeOrPick": "Escribe o elige tu ciudad",
     "countryHint": "Elige dónde vives y trabajas. Define el documento fiscal que te pediremos en tu perfil.",
     "phoneLabel": "Teléfono",
     "emailLabel": "Email",

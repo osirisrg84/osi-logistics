@@ -1165,7 +1165,7 @@
     "countryPlaceholder": "Select your country",
     "citySelect": "Select your city",
     "cityPickCountryFirst": "Select your country first",
-    "cityOther": "Other city (type it)",
+    "cityTypeOrPick": "Type or pick your city",
     "countryHint": "Choose where you live and work. It sets the tax document we ask for in your profile.",
     "phoneLabel": "Phone",
     "emailLabel": "Email",
