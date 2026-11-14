@@ -29,7 +29,7 @@ const CA_LICENSE_CLASSES: [string, string][] = [
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div className="min-w-0">
-      <label className="block text-xs font-semibold text-gray-500 mb-1.5">
+      <label className="flex items-end text-xs font-semibold text-gray-500 mb-1.5 sm:min-h-[2rem]">
         {label} {required && <span className="text-red-400">*</span>}
       </label>
       {children}
@@ -305,7 +305,7 @@ export default function RegisterDriver() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label={t('registerDispatcher.phoneLabel')} required>
-                <input className="input" type="tel" placeholder="(305) 555-0000"
+                <input className="input" type="tel" placeholder={isCanada ? "(416) 555-0123" : "(305) 555-0000"}
                   value={form.phone} onChange={set('phone')} required />
               </Field>
               <Field label={t('registerDispatcher.emailLabel')} required>
@@ -371,7 +371,7 @@ export default function RegisterDriver() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label={isCanada ? t('registerDriver.caLicenseNumberLabel') : requiresCdl ? t('registerDriver.cdlLicenseNumberLabel') : t('registerDriver.driverLicenseNumberLabel')} required>
-                <input className="input" type="text" placeholder={requiresCdl ? "e.g. D1234567" : "e.g. D1234567"}
+                <input className="input" type="text" placeholder={isCanada ? "e.g. A1234-56789-01234" : "e.g. D1234567"}
                   value={form.license_number} onChange={set('license_number')} required />
               </Field>
               <Field label={t('registerDriver.licenseExpiryLabel')} required>
