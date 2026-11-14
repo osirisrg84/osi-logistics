@@ -38,6 +38,8 @@ const STAFF_EDITABLE_FIELDS = [
   ...DRIVER_SELF_FIELDS,
   'name', 'phone', 'email', 'license_number', 'license_expiry', 'hire_date',
   'company_name', 'mc_number', 'dot_number', 'authority_since',
+  'province', 'operating_scope', 'carrier_number', 'business_number', 'gst_hst_number',
+  'license_class', 'cbsa_carrier_code', 'fast_number',
 ];
 
 // Un dispatcher (no admin) debe ponerse "en turno" para ver quienes estan
@@ -54,7 +56,7 @@ router.get('/', async (req: Request, res: Response) => {
       SELECT d.*,
              t.plate_number, t.make, t.model, t.type as truck_type,
              (SELECT COUNT(*) FROM orders WHERE driver_id = d.id AND status IN ('assigned','picked_up','in_transit')) as active_orders,
-             u.approval_status
+             u.approval_status, u.country
       FROM drivers d
       LEFT JOIN trucks t ON d.truck_id = t.id
       LEFT JOIN users u ON u.driver_id = d.id

@@ -8,6 +8,7 @@ import { appEvents } from '../events';
 import { sendVerificationCode, sendNewDriverRegistrationEmail, sendPasswordResetEmail } from '../email';
 import { sendSmsCode } from '../sms';
 import { getFirebaseAdmin } from '../firebase-admin';
+import { canonicalCountry, validateCanadianDriver } from '../country';
 
 const router = Router();
 
@@ -89,11 +90,15 @@ router.post('/register', sensitiveLimiter, async (req: Request, res: Response) =
   try {
     const {
       name, email, password, role = 'dispatcher', driver_id = null,
-      phone = '', date_of_birth = '', city = '', country = '',
+      phone = '', date_of_birth = '', city = '', country: rawCountry = '',
       years_experience = 0, previous_companies = '', languages = '', availability = 'full-time',
       equipment_experience = '',
       id_document_filename = '', id_document_data = '',
     } = req.body;
+
+    // El registro ofrece solo Estados Unidos y Colombia; se guardan siempre con el mismo texto
+    // (el perfil fiscal depende del pais). Cualquier otro valor se conserva tal cual.
+    const country = canonicalCountry(rawCountry) || String(rawCountry).trim();
 
     if (!name || !email || !password) return res.status(400).json({ error: 'Name, email, and password are required' });
     if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
@@ -188,13 +193,25 @@ router.post('/register-driver', sensitiveLimiter, async (req: Request, res: Resp
       hire_date = new Date().toISOString().split('T')[0],
       equipment_type = 'Dry Van', company_name = 'OSI Logistics INC',
       mc_number = '', dot_number = '', authority_since = '', rate_con_email = '',
-      referral_code = '',
+      referral_code = '', country: rawDriverCountry = '',
+      province = '', operating_scope = '', carrier_number = '', business_number = '', gst_hst_number = '',
+      license_class = '', cbsa_carrier_code = '', fast_number = '',
     } = req.body;
+    const driverCountry = canonicalCountry(rawDriverCountry) || 'United States';
+    if (driverCountry === 'Colombia') return res.status(400).json({ error: 'Los drivers solo pueden registrarse desde Estados Unidos o Canadá' });
 
     if (!name || !email || !password || !phone || !license_number || !license_expiry) {
       return res.status(400).json({ error: 'All required fields must be filled in' });
     }
     if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
+
+    // Canada: requisitos propios (NSC/CVOR, clase de licencia, alcance, BN, y USDOT + carrier code CBSA si cruza la frontera)
+    const isCanada = driverCountry === 'Canada';
+    if (isCanada) {
+      const heavy = !['Van', 'Box Truck', 'Hotshot'].includes(equipment_type);
+      const errs = validateCanadianDriver({ province, operating_scope, license_class, carrier_number, business_number, gst_hst_number, dot_number, cbsa_carrier_code, heavy });
+      if (errs.length) return res.status(400).json({ error: errs[0], errors: errs });
+    }
 
     const existingUser = await queryOne('SELECT id FROM users WHERE email = ?', [email.toLowerCase()]);
     if (existingUser) return res.status(409).json({ error: 'An account with this email already exists' });
@@ -234,18 +251,23 @@ router.post('/register-driver', sensitiveLimiter, async (req: Request, res: Resp
       (id, name, phone, email, license_number, license_expiry, status,
        current_lat, current_lng, current_address,
        rating, total_deliveries, on_time_rate, avatar, hire_date,
-       equipment_type, company_name, mc_number, dot_number, authority_since, rate_con_email, driver_code, referred_by_driver_id)
+       equipment_type, company_name, mc_number, dot_number, authority_since, rate_con_email, driver_code, referred_by_driver_id,
+       province, operating_scope, carrier_number, business_number, gst_hst_number, license_class, cbsa_carrier_code, fast_number)
       VALUES (?, ?, ?, ?, ?, ?, 'offline', 25.7617, -80.1918, 'Miami, FL',
-              5.0, 0, 100.0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              5.0, 0, 100.0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+              ?, ?, ?, ?, ?, ?, ?, ?)`,
       [driverId, name, phone, email.toLowerCase(), license_number, license_expiry,
-       initials, hire_date, equipment_type, company_name, mc_number, dot_number, authority_since, rate_con_email, driver_code, referred_by_driver_id]);
+       initials, hire_date, equipment_type, company_name, mc_number, dot_number, authority_since, rate_con_email, driver_code, referred_by_driver_id,
+       isCanada ? province : '', isCanada ? operating_scope : '', isCanada ? String(carrier_number).trim() : '',
+       isCanada ? String(business_number).replace(/\s/g, '') : '', isCanada ? String(gst_hst_number).replace(/\s/g, '').toUpperCase() : '',
+       isCanada ? license_class : '', isCanada ? String(cbsa_carrier_code).trim().toUpperCase() : '', isCanada ? String(fast_number).trim() : '']);
 
     const salt = randomBytes(16).toString('hex');
     const passwordHash = hashPassword(password, salt);
     const userId = uuidv4();
 
-    await exec("INSERT INTO users (id, name, email, password_hash, salt, role, driver_id, active, approval_status) VALUES (?, ?, ?, ?, ?, 'driver', ?, 0, 'pending')",
-      [userId, name, email.toLowerCase(), passwordHash, salt, driverId]);
+    await exec("INSERT INTO users (id, name, email, password_hash, salt, role, driver_id, active, approval_status, country) VALUES (?, ?, ?, ?, ?, 'driver', ?, 0, 'pending', ?)",
+      [userId, name, email.toLowerCase(), passwordHash, salt, driverId, driverCountry]);
 
     await exec("INSERT INTO notifications (id, type, title, message, read) VALUES (?, 'driver', 'Nuevo Driver Pendiente de Aprobación', ?, 0)",
       [uuidv4(), `${name} se registró como conductor y está esperando aprobación.`]);
@@ -265,12 +287,12 @@ router.get('/profile', async (req: Request, res: Response) => {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: 'No token' });
     const row = await queryOne<{
-      payout_method: string; payout_details: string; ssn: string; dispatcher_code: string;
+      payout_method: string; payout_details: string; ssn: string; tax_id_type: string; dispatcher_code: string;
       phone: string; availability: string; languages: string; years_experience: number;
       city: string; country: string; date_of_birth: string; previous_companies: string; equipment_experience: string;
       shift_active: number; email_verified: number; phone_verified: number;
     }>(`
-      SELECT u.payout_method, u.payout_details, u.ssn, u.dispatcher_code,
+      SELECT u.payout_method, u.payout_details, u.ssn, u.tax_id_type, u.dispatcher_code,
              u.phone, u.availability, u.languages, u.years_experience,
              u.city, u.country, u.date_of_birth, u.previous_companies, u.equipment_experience,
              u.shift_active, u.email_verified, u.phone_verified
@@ -282,6 +304,7 @@ router.get('/profile', async (req: Request, res: Response) => {
       payout_method:        row.payout_method,
       payout_details:       row.payout_details,
       ssn:                  row.ssn,
+      tax_id_type:          row.tax_id_type,
       dispatcher_code:      row.dispatcher_code,
       phone:                row.phone,
       availability:         row.availability,
@@ -306,7 +329,7 @@ router.put('/profile', async (req: Request, res: Response) => {
     const session = await queryOne<{ user_id: string }>('SELECT user_id FROM sessions WHERE token = ? AND expires_at > datetime(\'now\')', [token]);
     if (!session) return res.status(401).json({ error: 'Invalid session' });
     const {
-      payout_method, payout_details, ssn,
+      payout_method, payout_details, ssn, tax_id_type,
       phone, availability, languages, years_experience,
       city, country, date_of_birth, previous_companies, equipment_experience,
     } = req.body;
@@ -315,6 +338,10 @@ router.put('/profile', async (req: Request, res: Response) => {
     if (payout_method        !== undefined) { updates.push('payout_method = ?');        vals.push(payout_method); }
     if (payout_details       !== undefined) { updates.push('payout_details = ?');       vals.push(payout_details); }
     if (ssn                  !== undefined) { updates.push('ssn = ?');                  vals.push(ssn); }
+    if (tax_id_type          !== undefined) {
+      if (!['', 'ssn', 'cedula', 'nit'].includes(String(tax_id_type))) return res.status(400).json({ error: 'Tipo de documento fiscal no válido' });
+      updates.push('tax_id_type = ?'); vals.push(tax_id_type);
+    }
     if (phone                !== undefined) { updates.push('phone = ?');                vals.push(phone); }
     if (availability         !== undefined) { updates.push('availability = ?');         vals.push(availability); }
     if (languages            !== undefined) { updates.push('languages = ?');            vals.push(languages); }
@@ -566,7 +593,7 @@ router.delete('/account', async (req: Request, res: Response) => {
 
     await exec(
       `UPDATE users SET active = 0, email = ?, password_hash = ?, salt = ?, name = 'Deleted User',
-       phone = '', ssn = '', date_of_birth = '', city = '', previous_companies = '',
+       phone = '', ssn = '', tax_id_type = '', date_of_birth = '', city = '', previous_companies = '',
        languages = '', payout_method = '', payout_details = '', equipment_experience = ''
        WHERE id = ?`,
       [tombstoneEmail, randomHash, randomSalt, user.id]

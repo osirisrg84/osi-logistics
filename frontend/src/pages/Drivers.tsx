@@ -12,6 +12,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { parseServerDate } from '../utils/serverDate';
 import { playSuccessChime } from '../utils/sounds';
 import { formatPhone } from '../utils/phone';
+import CountryFlag from '../components/CountryFlag';
 
 const STATUS_OPTIONS: DriverStatus[] = ['available', 'busy', 'on_break', 'offline'];
 
@@ -50,7 +51,17 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
     dot_number: ((driver as unknown as Record<string,string>)?.dot_number || '').replace(/^(MC-|DOT-)/i, ''),
     authority_since: driver?.authority_since || '',
     rate_con_email: (driver as unknown as Record<string,string>)?.rate_con_email || '',
+    // Canada (vacios para drivers de EE. UU.)
+    province: (driver as unknown as Record<string,string>)?.province || '',
+    operating_scope: (driver as unknown as Record<string,string>)?.operating_scope || '',
+    carrier_number: (driver as unknown as Record<string,string>)?.carrier_number || '',
+    license_class: (driver as unknown as Record<string,string>)?.license_class || '',
+    business_number: (driver as unknown as Record<string,string>)?.business_number || '',
+    gst_hst_number: (driver as unknown as Record<string,string>)?.gst_hst_number || '',
+    cbsa_carrier_code: (driver as unknown as Record<string,string>)?.cbsa_carrier_code || '',
+    fast_number: (driver as unknown as Record<string,string>)?.fast_number || '',
   });
+  const isCanadianDriver = driver?.country === 'Canada';
   const DOT_TYPES = ['Van', 'Box Truck', 'Hotshot'];
   const isDotType = DOT_TYPES.includes(form.equipment_type);
   const [saving, setSaving] = useState(false);
@@ -144,6 +155,66 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
                 value={form.rate_con_email} onChange={e => setForm({...form, rate_con_email: e.target.value})} />
               <p className="text-[10px] text-gray-400 mt-1">Los brokers enviarán el rate confirmation a este correo.</p>
             </div>
+            {isCanadianDriver && (
+              <>
+                <div className="col-span-2 pt-1"><p className="text-xs font-bold text-red-600 uppercase tracking-wide">Canada</p></div>
+                <div>
+                  <label className="label">Province</label>
+                  <select className="input" value={form.province} onChange={e => setForm({...form, province: e.target.value})}>
+                    <option value="">—</option>
+                    {['ON','QC','AB','BC','MB','SK','NS','NB','NL','PE','YT','NT','NU'].map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="label">Scope</label>
+                  <select className="input" value={form.operating_scope} onChange={e => setForm({...form, operating_scope: e.target.value})}>
+                    <option value="">—</option>
+                    <option value="domestic">Inside Canada</option>
+                    <option value="interprovincial">Interprovincial</option>
+                    <option value="cross_border">Cross-border</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="label">NSC / CVOR / NIR #</label>
+                  <input className="input" value={form.carrier_number} onChange={e => setForm({...form, carrier_number: e.target.value})} />
+                </div>
+                <div>
+                  <label className="label">Licence class</label>
+                  <select className="input" value={form.license_class} onChange={e => setForm({...form, license_class: e.target.value})}>
+                    <option value="">—</option>
+                    {['1','A','D','DZ','G','other'].map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="label">Business Number (BN)</label>
+                  <input className="input font-mono" maxLength={9} value={form.business_number} onChange={e => setForm({...form, business_number: e.target.value})} placeholder="123456789" />
+                </div>
+                <div>
+                  <label className="label">GST/HST #</label>
+                  <input className="input font-mono" maxLength={15} value={form.gst_hst_number} onChange={e => setForm({...form, gst_hst_number: e.target.value})} placeholder="123456789RT0001" />
+                </div>
+                {form.operating_scope === 'cross_border' && (
+                  <>
+                    <div>
+                      <label className="label">USDOT #</label>
+                      <input className="input" value={form.dot_number} onChange={e => setForm({...form, dot_number: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="label">MC #</label>
+                      <input className="input" value={form.mc_number} onChange={e => setForm({...form, mc_number: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="label">CBSA carrier code</label>
+                      <input className="input font-mono uppercase" maxLength={4} value={form.cbsa_carrier_code} onChange={e => setForm({...form, cbsa_carrier_code: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="label">FAST #</label>
+                      <input className="input" value={form.fast_number} onChange={e => setForm({...form, fast_number: e.target.value})} />
+                    </div>
+                  </>
+                )}
+              </>
+            )}
             {driver && (
               <div>
                 <label className="label">Status</label>
@@ -200,6 +271,7 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-slate-100">{driver.name}</h3>
+                <CountryFlag country={driver.country} />
                 {driver.email?.endsWith('@osilogistics.com') && (
                   <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600/50 tracking-wide">demo</span>
                 )}
@@ -312,6 +384,46 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
             const isDot = ['Van', 'Box Truck', 'Hotshot'].includes(driver.equipment_type || '');
             const stripPfx = (v: string) => v.replace(/^(MC-|DOT-)/i, '');
             const authNum = stripPfx(isDot ? (dr.dot_number || driver.mc_number || '') : (driver.mc_number || ''));
+            if (driver.country === 'Canada') {
+              const scopeLabel: Record<string, string> = { domestic: 'Inside Canada', interprovincial: 'Interprovincial', cross_border: 'Cross-border (U.S.)' };
+              const carrierLabel = dr.province === 'ON' ? 'CVOR #' : dr.province === 'QC' ? 'NIR #' : 'NSC / SFC #';
+              const rows: [string, string][] = [
+                ['Company Name', driver.company_name || ''],
+                ['Province', dr.province || ''],
+                ['Scope', scopeLabel[dr.operating_scope] || ''],
+                [carrierLabel, dr.carrier_number || ''],
+                ['Licence class', dr.license_class || ''],
+                ['Business Number (BN)', dr.business_number || ''],
+                ['GST/HST #', dr.gst_hst_number || ''],
+                ...(dr.operating_scope === 'cross_border' ? [
+                  ['USDOT #', stripPfx(dr.dot_number || '')],
+                  ['MC #', stripPfx(driver.mc_number || '')],
+                  ['CBSA carrier code', dr.cbsa_carrier_code || ''],
+                  ['FAST #', dr.fast_number || ''],
+                ] as [string, string][] : []),
+              ];
+              return (
+                <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4">
+                  <p className="text-xs font-semibold text-red-700 dark:text-red-400 flex items-center gap-2 mb-3">
+                    <Building2 className="w-3 h-3" /> COMPANY / CANADIAN REGISTRATION
+                  </p>
+                  <div className="space-y-2">
+                    {rows.filter(([, v]) => v).map(([label, value]) => (
+                      <div key={label} className="flex items-center justify-between gap-3">
+                        <span className="text-xs text-gray-500 dark:text-slate-400">{label}</span>
+                        <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200 text-right break-all">{value}</span>
+                      </div>
+                    ))}
+                    {dr.rate_con_email && (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Correo Rate Confirmation</span>
+                        <a href={`mailto:${dr.rate_con_email}`} className="text-sm font-medium text-red-700 dark:text-red-400 hover:underline break-all">{dr.rate_con_email}</a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            }
             return (driver.company_name || authNum || dr.rate_con_email) ? (
             <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
               <p className="text-xs font-semibold text-green-700 dark:text-green-400 flex items-center gap-2 mb-3">
@@ -644,6 +756,7 @@ export default function Drivers() {
                 <div>
                   <div className="flex items-center gap-1.5">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">{driver.name}</h3>
+                    <CountryFlag country={driver.country} />
                     {driver.email?.endsWith('@osilogistics.com') && (
                       <span className="text-[9px] font-semibold px-1 py-0.5 rounded text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600/50 tracking-wide leading-none">demo</span>
                     )}

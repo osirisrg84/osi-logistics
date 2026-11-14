@@ -247,6 +247,11 @@ export async function initDatabase(): Promise<void> {
   await addColumnIfMissing('users', 'date_of_birth',        "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('users', 'city',                 "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('users', 'country',               "TEXT NOT NULL DEFAULT ''");
+  // Tipo del documento fiscal guardado en users.ssn ('ssn' = EE. UU., 'cedula'/'nit' = Colombia, '' = sin definir).
+  // La columna se sigue llamando ssn por historia; guarda el numero de identificacion fiscal que corresponda al pais.
+  await addColumnIfMissing('users', 'tax_id_type',           "TEXT NOT NULL DEFAULT ''");
+  // Hasta ahora solo se registraban drivers de EE. UU.: los que no tienen pais quedan como Estados Unidos (para su bandera).
+  await exec("UPDATE users SET country = 'United States' WHERE role = 'driver' AND (country IS NULL OR country = '')");
   await addColumnIfMissing('users', 'years_experience',     "INTEGER NOT NULL DEFAULT 0");
   await addColumnIfMissing('users', 'previous_companies',   "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('users', 'languages',            "TEXT NOT NULL DEFAULT ''");
@@ -447,6 +452,16 @@ export async function initDatabase(): Promise<void> {
   // activity (getDriverCommissionRate below), so it can go up or down week
   // to week, not a value that gets stored and goes stale.
   await addColumnIfMissing('drivers', 'referred_by_driver_id', "TEXT");
+  // Drivers de Canada (los de EE. UU. dejan estos campos vacios). carrier_number = NSC/SFC/CVOR/NIR segun la provincia;
+  // dot_number / mc_number se reutilizan para USDOT / MC cuando el driver canadiense cruza a EE. UU.
+  await addColumnIfMissing('drivers', 'province',            "TEXT NOT NULL DEFAULT ''");
+  await addColumnIfMissing('drivers', 'operating_scope',     "TEXT NOT NULL DEFAULT ''");
+  await addColumnIfMissing('drivers', 'carrier_number',      "TEXT NOT NULL DEFAULT ''");
+  await addColumnIfMissing('drivers', 'business_number',     "TEXT NOT NULL DEFAULT ''");
+  await addColumnIfMissing('drivers', 'gst_hst_number',      "TEXT NOT NULL DEFAULT ''");
+  await addColumnIfMissing('drivers', 'license_class',       "TEXT NOT NULL DEFAULT ''");
+  await addColumnIfMissing('drivers', 'cbsa_carrier_code',   "TEXT NOT NULL DEFAULT ''");
+  await addColumnIfMissing('drivers', 'fast_number',         "TEXT NOT NULL DEFAULT ''");
   // Backfill: drivers que YA estaban 'available' antes de que esta columna
   // existiera se quedaban con online_since en NULL para siempre (el codigo
   // solo lo setea en un CAMBIO de estado, no al arrancar) -- el badge de

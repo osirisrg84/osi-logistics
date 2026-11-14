@@ -145,7 +145,7 @@ export const billingApi = {
 export const userApi = {
   getProfile:       () => api.get('/auth/profile'),
   updateProfile: (data: {
-    payout_method?: string; payout_details?: string; ssn?: string;
+    payout_method?: string; payout_details?: string; ssn?: string; tax_id_type?: string;
     phone?: string; availability?: string; languages?: string; years_experience?: number;
     city?: string; country?: string; date_of_birth?: string; previous_companies?: string; equipment_experience?: string;
   }) => api.put('/auth/profile', data),

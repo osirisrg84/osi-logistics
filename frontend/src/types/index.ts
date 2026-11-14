@@ -29,6 +29,7 @@ export interface Driver {
   equipment_type?: string;
   company_name?: string;
   mc_number?: string;
+  country?: string;
   gps_active?: number;
   factoring_company?: string;
   factoring_phone?: string;

@@ -2527,7 +2527,32 @@ export default function DriverPortal() {
                   <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{driver.company_name}</span>
                 </div>
               )}
-              {authorityNum && (
+              {driverExtra?.province ? (
+                // Driver de Canada: su registro canadiense en lugar de MC/DOT (los edita el equipo de OSI)
+                <>
+                  {([
+                    [t('registerDriver.caProvince'), driverExtra.province],
+                    [t('registerDriver.caScope'), driverExtra.operating_scope
+                      ? t(`registerDriver.caScope${driverExtra.operating_scope === 'cross_border' ? 'CrossBorder' : driverExtra.operating_scope === 'interprovincial' ? 'Interprovincial' : 'Domestic'}`)
+                      : ''],
+                    [driverExtra.province === 'ON' ? t('registerDriver.caCarrierNumberOn') : driverExtra.province === 'QC' ? t('registerDriver.caCarrierNumberQc') : t('registerDriver.caCarrierNumberOther'), driverExtra.carrier_number],
+                    [t('registerDriver.caLicenseClass'), driverExtra.license_class],
+                    [t('registerDriver.caBusinessNumber'), driverExtra.business_number],
+                    [t('registerDriver.caGstHst'), driverExtra.gst_hst_number],
+                    ...(driverExtra.operating_scope === 'cross_border' ? [
+                      [t('registerDriver.caUsdot'), stripPrefix(driverExtra.dot_number || '')],
+                      [t('registerDriver.caMc'), stripPrefix(driver?.mc_number || '')],
+                      [t('registerDriver.caCbsa'), driverExtra.cbsa_carrier_code],
+                      [t('registerDriver.caFast'), driverExtra.fast_number],
+                    ] : []),
+                  ] as [string, string][]).filter(([, v]) => v).map(([label, value]) => (
+                    <div key={label} className="flex items-center justify-between gap-3">
+                      <span className="text-xs text-gray-500 dark:text-slate-400">{label}</span>
+                      <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200 text-right break-all">{value}</span>
+                    </div>
+                  ))}
+                </>
+              ) : authorityNum && (
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-gray-500 dark:text-slate-400">{isDotEquip ? 'DOT#' : 'MC#'}</span>
                   <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">{authorityNum}</span>

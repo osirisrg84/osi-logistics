@@ -7,6 +7,8 @@ import { getSocket } from '../services/socket';
 import { format, formatDistanceToNow } from 'date-fns';
 import { parseServerDate } from '../utils/serverDate';
 import { formatPhone } from '../utils/phone';
+import CountryFlag, { countryCode } from '../components/CountryFlag';
+import { effectiveTaxType, isColombia, maskTaxId, validateTaxId, type TaxIdType } from '../utils/taxId';
 
 interface DispatcherProfile {
   id: string;
@@ -14,6 +16,8 @@ interface DispatcherProfile {
   email: string;
   phone: string;
   ssn: string;
+  tax_id_type?: string;
+  country?: string;
   active: number;
   created_at: string;
   total_orders: number;
@@ -33,13 +37,6 @@ interface DispatcherProfile {
   shift_changed_at: string | null;
 }
 
-function maskSSN(ssn: string): string {
-  if (!ssn) return '—';
-  const digits = ssn.replace(/\D/g, '');
-  if (digits.length < 4) return '***-**-' + ssn.slice(-digits.length).padStart(4, '*');
-  return `***-**-${digits.slice(-4)}`;
-}
-
 interface EditModalProps {
   dispatcher: DispatcherProfile;
   onClose: () => void;
@@ -52,18 +49,32 @@ function EditModal({ dispatcher, onClose, onSaved }: EditModalProps) {
   const [email,    setEmail]    = useState(dispatcher.email || '');
   const [phone,    setPhone]    = useState(dispatcher.phone || '');
   const [ssn,      setSSN]      = useState(dispatcher.ssn   || '');
+  // El pais del dispatcher (Estados Unidos o Colombia) define el documento fiscal y la bandera.
+  const initialCountry = countryCode(dispatcher.country) === 'CO' ? 'Colombia' : countryCode(dispatcher.country) === 'US' ? 'United States' : '';
+  const [country,  setCountry]  = useState(initialCountry);
+  const colombia = country === 'Colombia';
+  const [docType,  setDocType]  = useState<TaxIdType>(effectiveTaxType(dispatcher.country, dispatcher.tax_id_type));
+  const [taxError, setTaxError] = useState('');
   const [active,   setActive]   = useState(!!dispatcher.active);
   const [password, setPassword] = useState('');
   const [showPwd,  setShowPwd]  = useState(false);
   const [saving,   setSaving]   = useState(false);
 
   async function handleSave() {
+    // Si el campo fiscal esta vacio se deja pasar (se puede completar despues); si tiene algo, se valida su formato.
+    const type: TaxIdType = colombia ? docType : 'ssn';
+    if (ssn.trim()) {
+      const err = validateTaxId(type, ssn);
+      if (err) { setTaxError(err); return; }
+    }
+    setTaxError('');
     setSaving(true);
     try {
-      const payload: Record<string, unknown> = { name, email, phone, ssn, active };
+      const payload: Record<string, unknown> = { name, email, phone, ssn: ssn.trim(), tax_id_type: ssn.trim() ? type : '', active };
+      if (country) payload.country = country;
       if (password) payload.password = password;
       await api.put(`/admin/dispatchers/${dispatcher.id}`, payload);
-      onSaved({ name, email, phone, ssn, active: active ? 1 : 0 });
+      onSaved({ name, email, phone, ssn: ssn.trim(), tax_id_type: ssn.trim() ? type : '', ...(country ? { country } : {}), active: active ? 1 : 0 });
       onClose();
     } catch {
     } finally {
@@ -100,12 +111,37 @@ function EditModal({ dispatcher, onClose, onSaved }: EditModalProps) {
             <input className="input w-full" placeholder="(305) 555-0000" value={phone} onChange={e => setPhone(e.target.value)} />
           </div>
 
-          {/* SSN */}
+          {/* Pais del dispatcher */}
+          <div>
+            <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block">{t('registerDispatcher.countryLabel')}</label>
+            <div className="flex items-center gap-2">
+              <CountryFlag country={country} />
+              <select className="input w-full" value={country} onChange={e => { setCountry(e.target.value); setTaxError(''); setDocType(e.target.value === 'Colombia' ? 'cedula' : 'ssn'); }}>
+                {!country && <option value="">—</option>}
+                <option value="United States">{t('registerDispatcher.countryUS')}</option>
+                <option value="Colombia">{t('registerDispatcher.countryCO')}</option>
+              </select>
+            </div>
+          </div>
+
+          {/* SSN (EE. UU.) o documento fiscal de Colombia */}
+          {colombia && (
+            <div>
+              <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block">{t('dispatcherProfiles.docTypeLabel')}</label>
+              <select className="input w-full" value={docType} onChange={e => { setDocType(e.target.value as TaxIdType); setTaxError(''); }}>
+                <option value="cedula">{t('dispatcherProfiles.docCedula')}</option>
+                <option value="nit">{t('dispatcherProfiles.docNit')}</option>
+              </select>
+            </div>
+          )}
           <div>
             <label className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-1 block flex items-center gap-1">
-              <Shield className="w-3 h-3" /> SSN
+              <Shield className="w-3 h-3" /> {colombia ? (docType === 'nit' ? 'NIT / RUT' : 'Cédula') : 'SSN'}
             </label>
-            <input className="input w-full font-mono" placeholder="XXX-XX-XXXX" value={ssn} onChange={e => setSSN(e.target.value)} />
+            <input className="input w-full font-mono"
+              placeholder={colombia ? (docType === 'nit' ? t('dispatcherProfiles.nitPlaceholder') : t('dispatcherProfiles.cedulaPlaceholder')) : 'XXX-XX-XXXX'}
+              value={ssn} onChange={e => { setSSN(e.target.value); setTaxError(''); }} />
+            {taxError && <p className="text-[11px] text-red-500 mt-0.5">{t('commissions.' + taxError)}</p>}
             <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">{t('dispatcherProfiles.ssnConfidential')}</p>
           </div>
 
@@ -198,6 +234,7 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
             </div>
             <div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-slate-100">{dispatcher.name}</h3>
+              <CountryFlag country={dispatcher.country} />
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                   dispatcher.active
@@ -336,20 +373,23 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
           {/* ── Tax / SSN ── */}
           <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4">
             <p className="text-xs font-semibold text-purple-700 dark:text-purple-400 flex items-center gap-2 mb-3">
-              <Shield className="w-3 h-3" /> {t('dispatcherProfiles.taxInfo')}
+              <Shield className="w-3 h-3" /> {isColombia(dispatcher.country) ? t('dispatcherProfiles.taxInfoCo') : t('dispatcherProfiles.taxInfo')}
+            </p>
+            <p className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 mb-2">
+              {isColombia(dispatcher.country) ? t('dispatcherProfiles.taxFormCo') : t('dispatcherProfiles.taxFormUS')}
             </p>
             {dispatcher.ssn ? (
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500 dark:text-slate-400">SSN</span>
+                <span className="text-xs text-gray-500 dark:text-slate-400">{isColombia(dispatcher.country) ? (effectiveTaxType(dispatcher.country, dispatcher.tax_id_type) === 'nit' ? 'NIT / RUT' : 'Cédula (CC)') : 'SSN'}</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">{showSSN ? dispatcher.ssn : maskSSN(dispatcher.ssn)}</span>
+                  <span className="text-sm font-mono font-medium text-gray-800 dark:text-slate-200">{showSSN ? dispatcher.ssn : maskTaxId(effectiveTaxType(dispatcher.country, dispatcher.tax_id_type), dispatcher.ssn)}</span>
                   <button onClick={() => setShowSSN(!showSSN)} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300">
                     {showSSN ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
                 </div>
               </div>
             ) : (
-              <button onClick={onEdit} className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 font-medium">{t('dispatcherProfiles.addSsn')}</button>
+              <button onClick={onEdit} className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 font-medium">{isColombia(dispatcher.country) ? t('dispatcherProfiles.addDoc') : t('dispatcherProfiles.addSsn')}</button>
             )}
           </div>
 
@@ -479,7 +519,7 @@ export default function DispatcherProfiles() {
                     {initials}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{d.name}</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white truncate flex items-center gap-1.5"><span className="truncate">{d.name}</span><CountryFlag country={d.country} /></p>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                       <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
                         d.active ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400'
@@ -524,7 +564,7 @@ export default function DispatcherProfiles() {
                   <div className="flex items-center gap-2">
                     <Shield className="w-3 h-3 text-gray-400 dark:text-slate-500 flex-shrink-0" />
                     <span className={`text-xs font-medium ${d.ssn ? 'text-green-600 dark:text-green-400' : 'italic text-gray-300 dark:text-slate-600'}`}>
-                      {d.ssn ? t('dispatcherProfiles.ssnOnFile') : t('dispatcherProfiles.noSsn')}
+                      {d.ssn ? (isColombia(d.country) ? t('dispatcherProfiles.docOnFile') : t('dispatcherProfiles.ssnOnFile')) : (isColombia(d.country) ? t('dispatcherProfiles.noDoc') : t('dispatcherProfiles.noSsn'))}
                     </span>
                   </div>
                 </div>

@@ -3,6 +3,7 @@ import { scryptSync, randomBytes } from 'node:crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { exec, query, queryOne } from '../database';
 import { requireRole } from '../middleware/auth';
+import { canonicalCountry } from '../country';
 import { sendActivationEmail } from '../email';
 
 const router = Router();
@@ -169,7 +170,7 @@ router.put('/users/:id/archive', async (req: Request, res: Response) => {
 router.get('/dispatchers', async (_req: Request, res: Response) => {
   try {
     res.json(await query(`
-      SELECT u.id, u.name, u.email, u.phone, u.ssn, u.active, u.created_at,
+      SELECT u.id, u.name, u.email, u.phone, u.ssn, u.tax_id_type, u.country, u.active, u.created_at,
              u.equipment_experience, u.dispatcher_code,
              u.shift_active, u.shift_changed_at,
              u.date_of_birth, u.city, u.years_experience, u.availability,
@@ -195,7 +196,7 @@ router.get('/dispatchers', async (_req: Request, res: Response) => {
 
 router.put('/dispatchers/:id', async (req: Request, res: Response) => {
   try {
-    const { name, email, phone, ssn, active, password } = req.body;
+    const { name, email, phone, ssn, tax_id_type, country, active, password } = req.body;
     const user = await queryOne("SELECT id FROM users WHERE id = ? AND role='dispatcher'", [req.params.id]);
     if (!user) return res.status(404).json({ error: 'Dispatcher not found' });
 
@@ -204,6 +205,15 @@ router.put('/dispatchers/:id', async (req: Request, res: Response) => {
     if (email  !== undefined) updates.email  = email.toLowerCase();
     if (phone  !== undefined) updates.phone  = phone;
     if (ssn    !== undefined) updates.ssn    = ssn;
+    if (country !== undefined) {
+      const c = canonicalCountry(country);
+      if (c !== 'United States' && c !== 'Colombia') return res.status(400).json({ error: 'Los dispatchers son de Estados Unidos o Colombia' });
+      updates.country = c;
+    }
+    if (tax_id_type !== undefined) {
+      if (!['', 'ssn', 'cedula', 'nit'].includes(String(tax_id_type))) return res.status(400).json({ error: 'Tipo de documento fiscal no válido' });
+      updates.tax_id_type = tax_id_type;
+    }
     if (active !== undefined) updates.active = active ? 1 : 0;
     if (password) {
       const salt = randomBytes(16).toString('hex');
@@ -230,6 +240,14 @@ const DRIVER_CHECKS = [
   { name: 'equipment',          label: 'Verificación de Equipo' },
 ];
 
+// Canada: mismas comprobaciones que EE. UU. (el MVR pasa a ser el "driver abstract") + registro del carrier en la provincia (NSC/CVOR/NIR).
+// Para quien cruza la frontera, ademas, los documentos de USDOT/CBSA.
+const DRIVER_CHECKS_CA = [
+  ...DRIVER_CHECKS,
+  { name: 'carrier_registration', label: 'Registro de carrier (NSC / CVOR / NIR)' },
+];
+const DRIVER_CHECK_BORDER = { name: 'border_docs', label: 'Documentos de frontera (USDOT / carrier code CBSA)' };
+
 const DISPATCHER_CHECKS = [
   { name: 'identity',           label: 'Verificación de Identidad' },
   { name: 'background',         label: 'Background Check' },
@@ -238,8 +256,11 @@ const DISPATCHER_CHECKS = [
   { name: 'experience',         label: 'Verificación de Experiencia' },
 ];
 
-async function ensureVerifications(entityType: string, entityId: string): Promise<void> {
-  const checks = entityType === 'driver' ? DRIVER_CHECKS : DISPATCHER_CHECKS;
+async function ensureVerifications(entityType: string, entityId: string, opts: { country?: string; scope?: string } = {}): Promise<void> {
+  let checks = entityType === 'driver' ? DRIVER_CHECKS : DISPATCHER_CHECKS;
+  if (entityType === 'driver' && opts.country === 'Canada') {
+    checks = opts.scope === 'cross_border' ? [...DRIVER_CHECKS_CA, DRIVER_CHECK_BORDER] : DRIVER_CHECKS_CA;
+  }
   for (const c of checks) {
     const existing = await queryOne(
       'SELECT id FROM verifications WHERE entity_type = ? AND entity_id = ? AND check_name = ?',
@@ -259,9 +280,11 @@ router.get('/verifications', async (_req: Request, res: Response) => {
     // Drivers with accounts (active OR pending approval)
     const drivers = await query<Record<string, unknown>>(`
       SELECT d.id, d.name, d.email, d.phone, d.license_number, d.license_expiry,
-             d.equipment_type, d.company_name, d.mc_number, d.coi_filename,
+             d.equipment_type, d.company_name, d.mc_number, d.dot_number, d.coi_filename,
              d.coi_expiry, d.hire_date, d.avatar, d.driver_code,
-             u.id as user_id, u.active, u.approval_status,
+             d.province, d.operating_scope, d.carrier_number, d.business_number, d.gst_hst_number,
+             d.license_class, d.cbsa_carrier_code, d.fast_number,
+             u.id as user_id, u.active, u.approval_status, u.country,
              EXISTS(SELECT 1 FROM driver_license_documents WHERE driver_id = d.id) as has_license_document,
              EXISTS(SELECT 1 FROM driver_coi_documents WHERE driver_id = d.id) as has_coi_document,
              EXISTS(SELECT 1 FROM driver_equipment_documents WHERE driver_id = d.id) as has_equipment_document
@@ -270,13 +293,13 @@ router.get('/verifications', async (_req: Request, res: Response) => {
       WHERE u.approval_status IN ('pending', 'approved')
       ORDER BY u.active ASC, d.name ASC
     `);
-    for (const d of drivers) await ensureVerifications('driver', d.id as string);
+    for (const d of drivers) await ensureVerifications('driver', d.id as string, { country: d.country as string, scope: d.operating_scope as string });
 
     // Dispatchers (active OR pending approval)
     const dispatchers = await query<Record<string, unknown>>(`
       SELECT u.id, u.name, u.email, u.phone, u.city, u.years_experience,
              u.previous_companies, u.languages, u.availability,
-             u.equipment_experience, u.date_of_birth, u.dispatcher_code,
+             u.equipment_experience, u.date_of_birth, u.dispatcher_code, u.country,
              u.active, u.approval_status,
              EXISTS(SELECT 1 FROM dispatcher_id_documents WHERE user_id = u.id) as has_id_document
       FROM users u

@@ -40,7 +40,7 @@ export default function RegisterDispatcher() {
 
   const [form, setForm] = useState({
     name: '', date_of_birth: '', phone: '', email: '',
-    city: '', country: '', password: '', confirm: '',
+    city: '', country: 'United States', password: '', confirm: '',
     years_experience: '', availability: 'full-time',
   });
   const [companies, setCompanies] = useState<string[]>(['']);
@@ -262,8 +262,10 @@ export default function RegisterDispatcher() {
               <Field label={t('registerDispatcher.countryLabel')}>
                 <div className="relative">
                   <Globe className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input className="input pl-8" type="text" placeholder="Colombia"
-                    value={form.country} onChange={set('country')} />
+                  <select className="input pl-8" value={form.country} onChange={set('country')} required>
+                    <option value="United States">{t('registerDispatcher.countryUS')}</option>
+                    <option value="Colombia">{t('registerDispatcher.countryCO')}</option>
+                  </select>
                 </div>
               </Field>
             </div>

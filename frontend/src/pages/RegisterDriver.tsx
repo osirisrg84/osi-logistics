@@ -7,9 +7,24 @@ import { useLanguage } from '../context/LanguageContext';
 import osiLogo from '../assets/osi-logo.jpeg';
 import { trackRegistration } from '../utils/tracking';
 import driverHero from '../assets/driver-hero.jpg';
+import CountryFlag from '../components/CountryFlag';
 
 const EQUIPMENT_TYPES = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'];
 const DOT_TYPES = ['Van', 'Box Truck', 'Hotshot'];
+const CA_PROVINCES: [string, string][] = [
+  ['ON', 'Ontario'], ['QC', 'Quebec'], ['AB', 'Alberta'], ['BC', 'British Columbia'], ['MB', 'Manitoba'],
+  ['SK', 'Saskatchewan'], ['NS', 'Nova Scotia'], ['NB', 'New Brunswick'], ['NL', 'Newfoundland and Labrador'],
+  ['PE', 'Prince Edward Island'], ['YT', 'Yukon'], ['NT', 'Northwest Territories'], ['NU', 'Nunavut'],
+];
+const CA_SCOPES: [string, string][] = [
+  ['domestic', 'registerDriver.caScopeDomestic'],
+  ['interprovincial', 'registerDriver.caScopeInterprovincial'],
+  ['cross_border', 'registerDriver.caScopeCrossBorder'],
+];
+const CA_LICENSE_CLASSES: [string, string][] = [
+  ['1', 'registerDriver.caClassOne'], ['A', 'registerDriver.caClassA'], ['D', 'registerDriver.caClassD'],
+  ['DZ', 'registerDriver.caClassDZ'], ['G', 'registerDriver.caClassG'], ['other', 'registerDriver.caClassOther'],
+];
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
@@ -59,7 +74,12 @@ export default function RegisterDriver() {
     license_number: '', license_expiry: '',
     equipment_type: '', mc_number: '', dot_number: '', company_name: '', authority_since: '',
     rate_con_email: '',
+    country: 'United States',
+    // Canada
+    province: '', operating_scope: '', carrier_number: '', license_class: '',
+    business_number: '', gst_hst_number: '', cbsa_carrier_code: '', fast_number: '',
   });
+  const isCanada = form.country === 'Canada';
   // Equipment picked first drives everything below: DOT_TYPES (Van, Box
   // Truck, Hotshot) are commonly run under 26,001 lbs GVWR/GCWR, so they
   // don't require a CDL -- a regular driver's license is enough -- and in
@@ -96,6 +116,7 @@ export default function RegisterDriver() {
     setError('');
     if (form.password !== form.confirm) { setError(t('registerDispatcher.errorPasswordMismatch')); return; }
     if (form.password.length < 8) { setError(t('registerDispatcher.errorPasswordTooShort')); return; }
+    if (isCanada && !form.operating_scope) { setError(t('registerDriver.caScope') + ' *'); return; }
     setLoading(true);
     try {
       await api.post('/auth/register-driver', {
@@ -112,6 +133,17 @@ export default function RegisterDriver() {
         authority_since: form.authority_since,
         rate_con_email: form.rate_con_email,
         referral_code:  referralCode,
+        country:        form.country,
+        ...(isCanada ? {
+          province:          form.province,
+          operating_scope:   form.operating_scope,
+          carrier_number:    form.carrier_number,
+          license_class:     form.license_class,
+          business_number:   form.business_number,
+          gst_hst_number:    form.gst_hst_number,
+          cbsa_carrier_code: form.cbsa_carrier_code,
+          fast_number:       form.fast_number,
+        } : {}),
       });
       setRegisteredName(form.name);
       setRegistered(true);
@@ -215,6 +247,21 @@ export default function RegisterDriver() {
             </div>
           )}
 
+          {/* Country first: it decides which requirements (US: MC/DOT + CDL, Canada: NSC/CVOR + licence class) the rest of the form asks for. */}
+          <div className="bg-white rounded-2xl shadow-xl p-5 space-y-3">
+            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{t('registerDriver.sectionCountry')}</h2>
+            <div className="grid grid-cols-2 gap-3">
+              {([['United States', 'registerDriver.countryUS'], ['Canada', 'registerDriver.countryCA']] as const).map(([value, key]) => (
+                <button key={value} type="button" onClick={() => setForm(f => ({ ...f, country: value }))}
+                  className={`flex items-center justify-center gap-2.5 py-3 rounded-xl border-2 text-sm font-bold transition-colors ${
+                    form.country === value ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                  }`}>
+                  <CountryFlag country={value} className="!w-6 !h-[17px]" /> {t(key)}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Equipment first -- a single tap, no typing, decides which
               license field and which authority type show up next. */}
           <div className="bg-white rounded-2xl shadow-xl p-5 space-y-3">
@@ -230,7 +277,7 @@ export default function RegisterDriver() {
                 {EQUIPMENT_TYPES.map(eq => <option key={eq} value={eq}>{eq}</option>)}
               </select>
             </Field>
-            {form.equipment_type && (
+            {form.equipment_type && !isCanada && (
               <p className="text-xs text-gray-400 flex items-start gap-2">
                 <ShieldCheck className="w-4 h-4 text-gray-300 flex-shrink-0 mt-0.5" />
                 {requiresCdl ? t('registerDriver.cdlRequiredNote') : t('registerDriver.noCdlNote')}
@@ -312,15 +359,17 @@ export default function RegisterDriver() {
               <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
                 <Hash className="w-[18px] h-[18px] text-orange-500" />
               </div>
-              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{requiresCdl ? t('registerDriver.sectionCdlLicense') : t('registerDriver.sectionDriverLicense')}</h2>
+              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{requiresCdl && !isCanada ? t('registerDriver.sectionCdlLicense') : t('registerDriver.sectionDriverLicense')}</h2>
             </div>
+            {!isCanada && (
             <p className="text-xs text-gray-400 -mt-2 flex items-start gap-2">
               <ShieldCheck className="w-4 h-4 text-gray-300 flex-shrink-0 mt-0.5" />
               {requiresCdl ? t('registerDriver.whyWeAskNoteCdl') : t('registerDriver.whyWeAskNoteDriver')}
             </p>
+            )}
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label={requiresCdl ? t('registerDriver.cdlLicenseNumberLabel') : t('registerDriver.driverLicenseNumberLabel')} required>
+              <Field label={isCanada ? t('registerDriver.caLicenseNumberLabel') : requiresCdl ? t('registerDriver.cdlLicenseNumberLabel') : t('registerDriver.driverLicenseNumberLabel')} required>
                 <input className="input" type="text" placeholder={requiresCdl ? "e.g. D1234567" : "e.g. D1234567"}
                   value={form.license_number} onChange={set('license_number')} required />
               </Field>
@@ -329,6 +378,14 @@ export default function RegisterDriver() {
                   placeholder={t('registerDriver.selectDate')} />
               </Field>
             </div>
+            {isCanada && (
+              <Field label={t('registerDriver.caLicenseClass')} required>
+                <select className="input" value={form.license_class} onChange={set('license_class')} required>
+                  <option value="" disabled>—</option>
+                  {CA_LICENSE_CLASSES.map(([value, key]) => <option key={value} value={value}>{t(key)}</option>)}
+                </select>
+              </Field>
+            )}
 
           </div>
 
@@ -341,6 +398,7 @@ export default function RegisterDriver() {
               <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">{t('registerDriver.sectionCompanyEquipment')}</h2>
             </div>
 
+            {!isCanada && (<>
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1.5">
                 {t('registerDriver.authorityTypeLabel')}
@@ -365,13 +423,84 @@ export default function RegisterDriver() {
                 value={authorityType === 'MC#' ? form.mc_number : form.dot_number}
                 onChange={authorityType === 'MC#' ? set('mc_number') : set('dot_number')} />
             </Field>
+            </>)}
+
+            {isCanada && (
+              <>
+                <Field label={t('registerDriver.caProvince')} required>
+                  <select className="input" value={form.province} onChange={set('province')} required>
+                    <option value="" disabled>—</option>
+                    {CA_PROVINCES.map(([code, name]) => <option key={code} value={code}>{name} ({code})</option>)}
+                  </select>
+                </Field>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1.5">{t('registerDriver.caScope')} <span className="text-red-400">*</span></label>
+                  <div className="space-y-2">
+                    {CA_SCOPES.map(([value, key]) => (
+                      <label key={value} className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer text-sm transition-colors ${
+                        form.operating_scope === value ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold' : 'border-gray-200 text-gray-600'
+                      }`}>
+                        <input type="radio" name="operating_scope" className="sr-only" checked={form.operating_scope === value}
+                          onChange={() => setForm(f => ({ ...f, operating_scope: value }))} />
+                        {t(key)}
+                      </label>
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-1.5">{t('registerDriver.caCabotageNote')}</p>
+                </div>
+
+                <Field label={form.province === 'ON' ? t('registerDriver.caCarrierNumberOn') : form.province === 'QC' ? t('registerDriver.caCarrierNumberQc') : t('registerDriver.caCarrierNumberOther')} required={requiresCdl}>
+                  <input className="input" type="text" value={form.carrier_number} onChange={set('carrier_number')} required={requiresCdl} />
+                  <p className="text-[10px] text-gray-400 mt-1">{t('registerDriver.caCarrierNumberHint')}</p>
+                </Field>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label={t('registerDriver.caBusinessNumber')}>
+                    <input className="input font-mono" type="text" inputMode="numeric" placeholder="123456789" maxLength={9}
+                      value={form.business_number} onChange={set('business_number')} />
+                    <p className="text-[10px] text-gray-400 mt-1">{t('registerDriver.caBusinessNumberHint')}</p>
+                  </Field>
+                  <Field label={t('registerDriver.caGstHst')}>
+                    <input className="input font-mono" type="text" placeholder="123456789RT0001" maxLength={15}
+                      value={form.gst_hst_number} onChange={set('gst_hst_number')} />
+                    <p className="text-[10px] text-gray-400 mt-1">{t('registerDriver.caGstHstHint')}</p>
+                  </Field>
+                </div>
+
+                {form.operating_scope === 'cross_border' && (
+                  <div className="rounded-xl bg-blue-50/60 border border-blue-100 p-3 space-y-3">
+                    <p className="text-xs font-bold text-blue-700 uppercase tracking-wide">{t('registerDriver.caSectionBorder')}</p>
+                    <p className="text-[11px] text-gray-500">{t('registerDriver.caCrossBorderNote')}</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field label={t('registerDriver.caUsdot')} required>
+                        <input className="input" type="text" placeholder="000000" value={form.dot_number} onChange={set('dot_number')} required />
+                      </Field>
+                      <Field label={t('registerDriver.caMc')}>
+                        <input className="input" type="text" placeholder="000000" value={form.mc_number} onChange={set('mc_number')} />
+                      </Field>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field label={t('registerDriver.caCbsa')} required>
+                        <input className="input font-mono uppercase" type="text" maxLength={4} placeholder="ABCD"
+                          value={form.cbsa_carrier_code} onChange={set('cbsa_carrier_code')} required />
+                        <p className="text-[10px] text-gray-400 mt-1">{t('registerDriver.caCbsaHint')}</p>
+                      </Field>
+                      <Field label={t('registerDriver.caFast')}>
+                        <input className="input" type="text" value={form.fast_number} onChange={set('fast_number')} />
+                      </Field>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
 
             <Field label={t('registerDriver.companyNameLabel')}>
               <input className="input" type="text" placeholder="OSI Logistics INC"
                 value={form.company_name} onChange={set('company_name')} />
             </Field>
 
-            <Field label={t('registerDriver.authoritySinceLabel')}>
+            <Field label={isCanada ? t('registerDriver.caAuthoritySinceLabel') : t('registerDriver.authoritySinceLabel')}>
               <DateField value={form.authority_since} onChange={set('authority_since')}
                 placeholder={t('registerDriver.selectDate')} />
             </Field>

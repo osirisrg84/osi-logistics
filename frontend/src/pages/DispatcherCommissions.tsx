@@ -9,6 +9,7 @@ import {
 import { billingApi, userApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { format } from 'date-fns';
+import { effectiveTaxType, isColombia, maskTaxId, validateTaxId, type TaxIdType } from '../utils/taxId';
 
 interface CommissionRow {
   id: string;
@@ -172,6 +173,13 @@ export default function DispatcherCommissions() {
   const [ssnInput,     setSsnInput]     = useState('');
   const [savingSsn,    setSavingSsn]    = useState(false);
   const [showSsn,      setShowSsn]      = useState(false);
+  // El documento fiscal depende del pais: EE. UU. = SSN, Colombia = cedula o NIT/RUT
+  const [country,      setCountry]      = useState('');
+  const [storedType,   setStoredType]   = useState('');
+  const [docType,      setDocType]      = useState<TaxIdType>('ssn');
+  const [taxError,     setTaxError]     = useState('');
+  const colombia = isColombia(country);
+  const taxType: TaxIdType = effectiveTaxType(country, storedType);
 
   const load = useCallback(async () => {
     if (!user?.id) return;
@@ -193,22 +201,30 @@ export default function DispatcherCommissions() {
     userApi.getProfile().then(({ data }) => {
       setPayoutMethod(data.payout_method || '');
       setSsn(data.ssn || '');
+      setCountry(data.country || '');
+      setStoredType(data.tax_id_type || '');
       try { setPayoutDetails(data.payout_details ? JSON.parse(data.payout_details) : {}); }
       catch { setPayoutDetails({}); }
     }).catch(() => {});
   }, []);
 
-  const maskSSN = (s: string) => {
-    const d = s.replace(/\D/g, '');
-    if (d.length < 4) return s;
-    return `***-**-${d.slice(-4)}`;
+  const startEditTax = (value: string) => {
+    setSsnInput(value);
+    setDocType(taxType);
+    setTaxError('');
+    setEditingSsn(true);
   };
 
   const saveSsn = async () => {
+    const type: TaxIdType = colombia ? docType : 'ssn';
+    const err = validateTaxId(type, ssnInput);
+    if (err) { setTaxError(err); return; }
+    setTaxError('');
     setSavingSsn(true);
     try {
-      await userApi.updateProfile({ ssn: ssnInput });
-      setSsn(ssnInput);
+      await userApi.updateProfile({ ssn: ssnInput.trim(), tax_id_type: type });
+      setSsn(ssnInput.trim());
+      setStoredType(type);
       setEditingSsn(false);
     } catch {} finally { setSavingSsn(false); }
   };
@@ -485,30 +501,59 @@ export default function DispatcherCommissions() {
               <Shield className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-gray-900 dark:text-white">{t('commissions.taxTitle')}</h2>
-              <p className="text-xs text-gray-400 dark:text-slate-500">{t('commissions.taxSubtitle')}</p>
+              <h2 className="text-sm font-bold text-gray-900 dark:text-white">{colombia ? t('commissions.taxTitleCo') : t('commissions.taxTitle')}</h2>
+              <p className="text-xs text-gray-400 dark:text-slate-500">{colombia ? t('commissions.taxSubtitleCo') : t('commissions.taxSubtitle')}</p>
             </div>
           </div>
           {!editingSsn && ssn && (
-            <button onClick={() => { setSsnInput(ssn); setEditingSsn(true); }}
+            <button onClick={() => startEditTax(ssn)}
               className="flex items-center gap-1.5 text-xs text-purple-500 hover:text-purple-600 font-semibold transition-colors">
               <Pencil className="w-3.5 h-3.5" /> {t('commissions.edit')}
             </button>
           )}
         </div>
 
+        <p className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 -mt-2 mb-3">
+          {colombia ? t('commissions.taxFormCo') : t('commissions.taxFormUS')}
+        </p>
+
         {editingSsn ? (
           <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1.5">
-                Social Security Number (SSN) <span className="text-red-400">*</span>
-              </label>
-              <input className="input font-mono" type="text" placeholder="XXX-XX-XXXX"
-                value={ssnInput} onChange={e => setSsnInput(e.target.value)} maxLength={11} />
-              <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-1.5">
-                Tu SSN es necesario para generar tu formulario 1099 a fin de año. Se almacena de forma segura.
-              </p>
-            </div>
+            {colombia ? (
+              <>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1.5">
+                    {t('commissions.taxDocType')} <span className="text-red-400">*</span>
+                  </label>
+                  <select className="input" value={docType} onChange={e => { setDocType(e.target.value as TaxIdType); setTaxError(''); }}>
+                    <option value="cedula">{t('commissions.taxDocCedula')}</option>
+                    <option value="nit">{t('commissions.taxDocNit')}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1.5">
+                    {docType === 'nit' ? t('commissions.taxDocNumberNit') : t('commissions.taxDocNumberCedula')} <span className="text-red-400">*</span>
+                  </label>
+                  <input className="input font-mono" type="text" inputMode="numeric"
+                    placeholder={docType === 'nit' ? '900.123.456-7' : '1.234.567.890'}
+                    value={ssnInput} onChange={e => { setSsnInput(e.target.value); setTaxError(''); }} maxLength={16} />
+                  {taxError && <p className="text-[11px] text-red-500 mt-1">{t('commissions.' + taxError)}</p>}
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-1.5">{t('commissions.taxDocHelpCo')}</p>
+                </div>
+              </>
+            ) : (
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1.5">
+                  Social Security Number (SSN) <span className="text-red-400">*</span>
+                </label>
+                <input className="input font-mono" type="text" placeholder="XXX-XX-XXXX"
+                  value={ssnInput} onChange={e => { setSsnInput(e.target.value); setTaxError(''); }} maxLength={11} />
+                {taxError && <p className="text-[11px] text-red-500 mt-1">{t('commissions.' + taxError)}</p>}
+                <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-1.5">
+                  {t('commissions.ssnHelp')}
+                </p>
+              </div>
+            )}
             <div className="flex gap-2">
               <button onClick={() => setEditingSsn(false)}
                 className="flex-1 py-2.5 rounded-xl text-sm text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors font-medium">
@@ -518,7 +563,7 @@ export default function DispatcherCommissions() {
                 className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-purple-500 hover:bg-purple-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5">
                 {savingSsn
                   ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  : <><CheckCircle2 className="w-4 h-4" /> {t('commissions.saveSsn')}</>}
+                  : <><CheckCircle2 className="w-4 h-4" /> {colombia ? t('commissions.saveDoc') : t('commissions.saveSsn')}</>}
               </button>
             </div>
           </div>
@@ -526,8 +571,8 @@ export default function DispatcherCommissions() {
           <div className="flex items-center gap-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-700/30 rounded-xl px-4 py-3">
             <Shield className="w-4 h-4 text-purple-500 flex-shrink-0" />
             <div className="flex-1">
-              <p className="text-xs text-gray-400 dark:text-slate-500 mb-0.5">{t('commissions.ssnRegistered')}</p>
-              <p className="text-sm font-mono font-bold text-gray-900 dark:text-white">{showSsn ? ssn : maskSSN(ssn)}</p>
+              <p className="text-xs text-gray-400 dark:text-slate-500 mb-0.5">{colombia ? t('commissions.docRegistered') + ' · ' + (taxType === 'nit' ? 'NIT / RUT' : 'CC') : t('commissions.ssnRegistered')}</p>
+              <p className="text-sm font-mono font-bold text-gray-900 dark:text-white">{showSsn ? ssn : maskTaxId(taxType, ssn)}</p>
             </div>
             <button onClick={() => setShowSsn(!showSsn)} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300">
               {showSsn ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -538,11 +583,11 @@ export default function DispatcherCommissions() {
             <div className="w-10 h-10 bg-gray-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-2">
               <Shield className="w-5 h-5 text-gray-400 dark:text-slate-500" />
             </div>
-            <p className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('commissions.noSsnTitle')}</p>
-            <p className="text-xs text-gray-400 dark:text-slate-500 mb-4">{t('commissions.noSsnHint')}</p>
-            <button onClick={() => { setSsnInput(''); setEditingSsn(true); }}
+            <p className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1">{colombia ? t('commissions.noDocTitle') : t('commissions.noSsnTitle')}</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mb-4">{colombia ? t('commissions.noDocHint') : t('commissions.noSsnHint')}</p>
+            <button onClick={() => startEditTax('')}
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-500 hover:bg-purple-600 text-white text-xs font-bold rounded-xl transition-colors">
-              <PlusCircle className="w-3.5 h-3.5" /> {t('commissions.addSsn')}
+              <PlusCircle className="w-3.5 h-3.5" /> {colombia ? t('commissions.addDoc') : t('commissions.addSsn')}
             </button>
           </div>
         )}

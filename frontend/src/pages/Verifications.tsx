@@ -8,6 +8,7 @@ import {
 import api from '../services/api';
 import { format } from 'date-fns';
 import { formatPhone } from '../utils/phone';
+import CountryFlag from '../components/CountryFlag';
 
 type CheckStatus = 'pending' | 'verified' | 'failed' | 'na';
 
@@ -43,10 +44,22 @@ interface DriverEntity {
   has_license_document: number;
   has_coi_document: number;
   has_equipment_document: number;
+  // pais y datos de Canada (vacios para drivers de EE. UU.)
+  country?: string;
+  dot_number?: string;
+  province?: string;
+  operating_scope?: string;
+  carrier_number?: string;
+  business_number?: string;
+  gst_hst_number?: string;
+  license_class?: string;
+  cbsa_carrier_code?: string;
+  fast_number?: string;
 }
 
 interface DispatcherEntity {
   id: string;
+  country?: string;
   name: string;
   email: string;
   phone: string;
@@ -192,8 +205,9 @@ interface EntityCardProps {
   subtitle: string;
   detail: string;
   checks: VerificationCheck[];
-  checkNamespace: 'driverChecks' | 'dispatcherChecks';
+  checkNamespace: 'driverChecks' | 'driverChecksCA' | 'dispatcherChecks';
   isDemo?: boolean;
+  country?: string;
   onUpdate: (entityId: string, checkName: string, status: CheckStatus, notes: string) => Promise<void>;
   onApprove: (userId: string) => Promise<void>;
   onReject: (userId: string) => Promise<void>;
@@ -207,7 +221,7 @@ const STATUS_BANNER: Record<string, { bg: string; border: string; iconColor: str
   archived: { bg: 'bg-gray-100 dark:bg-slate-800/60',  border: 'border-gray-200 dark:border-slate-600/40',   iconColor: 'text-gray-400' },
 };
 
-function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtitle, detail, checks, checkNamespace, isDemo, onUpdate, onApprove, onReject, onArchive, children }: EntityCardProps) {
+function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtitle, detail, checks, checkNamespace, isDemo, country, onUpdate, onApprove, onReject, onArchive, children }: EntityCardProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [acting, setAct] = useState<'approve' | 'reject' | 'archive' | null>(null);
@@ -302,7 +316,7 @@ function EntityCard({ entityId, entityType, userId, approvalStatus, name, subtit
           {name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-900 dark:text-slate-100 break-words">{name}</p>
+          <p className="text-sm font-semibold text-gray-900 dark:text-slate-100 break-words flex items-center gap-1.5">{name}<CountryFlag country={country} /></p>
           <div className="flex items-center gap-2 flex-wrap mt-1">
             {isDemo && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400 border border-purple-200 dark:border-purple-700/40">{t('verifications.demo')}</span>}
             {approvalStatus === 'pending'  && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border border-amber-200 dark:border-amber-700/40">{t('verifications.pending')}</span>}
@@ -512,9 +526,12 @@ export default function Verifications() {
                   approvalStatus={d.approval_status}
                   name={d.name}
                   subtitle={`${d.email} · ${formatPhone(d.phone)}`}
-                  detail={`${d.equipment_type} · ${d.company_name}${d.mc_number ? ` · MC# ${d.mc_number.replace(/^(MC-|DOT-)/i, '')}` : ''}`}
+                  detail={d.country === 'Canada'
+                    ? `${d.equipment_type} · ${d.company_name}${d.province ? ` · ${d.province}` : ''}${d.carrier_number ? ` · ${d.province === 'ON' ? 'CVOR' : d.province === 'QC' ? 'NIR' : 'NSC'}# ${d.carrier_number}` : ''}`
+                    : `${d.equipment_type} · ${d.company_name}${d.mc_number ? ` · MC# ${d.mc_number.replace(/^(MC-|DOT-)/i, '')}` : ''}`}
                   checks={dChecks}
-                  checkNamespace="driverChecks"
+                  checkNamespace={d.country === 'Canada' ? 'driverChecksCA' : 'driverChecks'}
+                  country={d.country}
                   isDemo={d.email?.endsWith('@osilogistics.com')}
                   onUpdate={handleUpdate}
                   onApprove={handleApprove}
@@ -522,6 +539,24 @@ export default function Verifications() {
                   onArchive={handleArchive}
                 >
                   <InfoRow label={t('verifications.licenseNumber')} value={d.license_number} />
+                  {d.country === 'Canada' && (
+                    <>
+                      <InfoRow label={t('registerDriver.caLicenseClass')} value={d.license_class || '—'} />
+                      <InfoRow label={t('registerDriver.caProvince')} value={d.province || '—'} />
+                      <InfoRow label={t('registerDriver.caScope')} value={d.operating_scope ? t(`registerDriver.caScope${d.operating_scope === 'cross_border' ? 'CrossBorder' : d.operating_scope === 'interprovincial' ? 'Interprovincial' : 'Domestic'}`) : '—'} />
+                      <InfoRow label={d.province === 'ON' ? t('registerDriver.caCarrierNumberOn') : d.province === 'QC' ? t('registerDriver.caCarrierNumberQc') : t('registerDriver.caCarrierNumberOther')} value={d.carrier_number || '—'} />
+                      <InfoRow label={t('registerDriver.caBusinessNumber')} value={d.business_number || '—'} />
+                      <InfoRow label={t('registerDriver.caGstHst')} value={d.gst_hst_number || '—'} />
+                      {d.operating_scope === 'cross_border' && (
+                        <>
+                          <InfoRow label={t('registerDriver.caUsdot')} value={d.dot_number || '—'} />
+                          <InfoRow label={t('registerDriver.caMc')} value={d.mc_number || '—'} />
+                          <InfoRow label={t('registerDriver.caCbsa')} value={d.cbsa_carrier_code || '—'} />
+                          <InfoRow label={t('registerDriver.caFast')} value={d.fast_number || '—'} />
+                        </>
+                      )}
+                    </>
+                  )}
                   <InfoRow label={t('verifications.expires')} value={d.license_expiry ? format(new Date(d.license_expiry), 'MMM d, yyyy') : '—'} warn={!!d.license_expiry && new Date(d.license_expiry) < new Date(Date.now() + 90*24*3600*1000)} />
                   <div>
                     <span className="text-xs text-gray-500 dark:text-slate-400">{t('verifications.licensePhoto')}: </span>
@@ -582,6 +617,7 @@ export default function Verifications() {
                   key={d.id}
                   entityId={d.id}
                   entityType="dispatcher"
+                  country={d.country}
                   userId={d.id}
                   approvalStatus={d.approval_status}
                   name={d.name}
