@@ -1265,7 +1265,7 @@
     "rateConEmailLabel": "Correo para Rate Confirmation",
     "rateConEmailHint": "Los brokers enviarán el rate confirmation a este correo.",
     "createAccountBtn": "Crear Cuenta de Conductor",
-    "trustEarnings": "Comisión transparente del 7%, con la opción de bajarla hasta 0% si refieres drivers.",
+    "trustEarnings": "Comisión del 7%, que baja hasta 0% si refieres drivers.",
     "trustEarningsMore": "Ver cómo",
     "trustControl": "Sin dispatch forzado — tú eliges cada carga, siempre",
     "trustSupport": "Equipo de dispatch real, 24/7 — no solo horario de oficina",
