@@ -42,7 +42,7 @@ function Spinner() {
 
 function getHomeForRole(role: string) {
   if (role === 'driver') return '/driver';
-  if (role === 'dispatcher') return '/hub';
+  if (role === 'dispatcher') return '/dashboard';
   return '/dashboard';
 }
 
