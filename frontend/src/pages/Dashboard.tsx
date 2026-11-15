@@ -102,7 +102,7 @@ function HomeOffice({ name, inTransit, pending, onNavigate, isAdmin = false }: {
         {isAdmin ? (
           <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto w-full">
             <button onClick={() => onNavigate('/drivers')} className="flex flex-col items-center justify-center gap-1.5 px-3 py-4 rounded-2xl bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-amber-200/70 dark:border-white/10 text-gray-800 dark:text-white text-base font-bold active:scale-95 transition">
-              <Truck className="w-6 h-6 text-orange-500" /> Driver
+              <Truck className="w-6 h-6 text-blue-500" /> Driver
             </button>
             <button onClick={() => onNavigate('/dispatchers')} className="flex flex-col items-center justify-center gap-1.5 px-3 py-4 rounded-2xl bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-amber-200/70 dark:border-white/10 text-gray-800 dark:text-white text-base font-bold active:scale-95 transition">
               <Users className="w-6 h-6 text-orange-500" /> Dispatcher
