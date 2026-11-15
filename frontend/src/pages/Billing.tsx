@@ -7,6 +7,7 @@ import {
 import { billingApi } from '../services/api';
 import api from '../services/api';
 import { format } from '../utils/dateFormat';
+import i18n from '../i18n';
 
 interface Commission {
   id: string;
@@ -56,7 +57,7 @@ interface Summary {
   settled_count: number;
 }
 
-function fmt(n: number) { return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }); }
+function fmt(n: number) { return n.toLocaleString(i18n.language?.startsWith('en') ? 'en-US' : 'es-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }); }
 
 function StatusChip({ status }: { status: 'pending' | 'settled' }) {
   const { t } = useTranslation();

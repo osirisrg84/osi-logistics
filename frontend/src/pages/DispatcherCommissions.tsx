@@ -9,6 +9,7 @@ import {
 import { billingApi, userApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { format } from '../utils/dateFormat';
+import i18n from '../i18n';
 import { effectiveTaxType, isColombia, maskTaxId, validateTaxId, type TaxIdType } from '../utils/taxId';
 
 interface CommissionRow {
@@ -87,18 +88,23 @@ const PAYOUT_METHODS = [
   },
 ];
 
-function fmt(n: number) { return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; }
+function fmt(n: number) { return `$${n.toLocaleString(i18n.language?.startsWith('en') ? 'en-US' : 'es-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; }
 function maskAccount(s: string) { return s.length > 4 ? `****${s.slice(-4)}` : s; }
+
+function methodLabel(m: { id: string; label: string }): string {
+  if (['ach', 'wire', 'check', 'cash'].includes(m.id)) return i18n.t(`grupoB.commissions.method_${m.id}`);
+  return m.label;
+}
 
 function payoutSummary(method: string, details: PayoutDetails): string {
   switch (method) {
     case 'zelle':  return details.contact || '—';
-    case 'ach':    return `${details.bank || 'Banco'} · ${maskAccount(details.account || '')} · ${details.type === 'savings' ? 'Savings' : 'Checking'}`;
-    case 'wire':   return `${details.bank || 'Banco'} · ${maskAccount(details.account || '')}${details.swift ? ` · ${details.swift}` : ''}`;
+    case 'ach':    return `${details.bank || i18n.t('grupoB.commissions.bankFallback')} · ${maskAccount(details.account || '')} · ${details.type === 'savings' ? i18n.t('grupoB.commissions.savings') : i18n.t('grupoB.commissions.checking')}`;
+    case 'wire':   return `${details.bank || i18n.t('grupoB.commissions.bankFallback')} · ${maskAccount(details.account || '')}${details.swift ? ` · ${details.swift}` : ''}`;
     case 'paypal': return details.email || '—';
     case 'venmo':  return details.username || '—';
-    case 'check':  return `A nombre de: ${details.payable_to || '—'}`;
-    case 'cash':   return 'OSI coordinará la entrega en efectivo';
+    case 'check':  return i18n.t('grupoB.commissions.payableToSummary', { name: details.payable_to || '—' });
+    case 'cash':   return i18n.t('grupoB.commissions.cashSummary');
     default:       return '—';
   }
 }
@@ -129,6 +135,7 @@ function StatusChip({ status }: { status: 'pending' | 'settled' }) {
 }
 
 function PayoutDisplay({ method, details }: { method: string; details: PayoutDetails }) {
+  const { t } = useTranslation();
   const cfg = PAYOUT_METHODS.find(m => m.id === method);
   if (!cfg) return null;
   const Icon = cfg.icon;
@@ -139,9 +146,9 @@ function PayoutDisplay({ method, details }: { method: string; details: PayoutDet
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          <p className="text-sm font-bold text-gray-900 dark:text-white">{cfg.label}</p>
+          <p className="text-sm font-bold text-gray-900 dark:text-white">{methodLabel(cfg)}</p>
           <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-1.5 py-0.5 rounded-full">
-            <CheckCircle2 className="w-3 h-3" /> Activo
+            <CheckCircle2 className="w-3 h-3" /> {t('common.truckStatus.active')}
           </span>
         </div>
         <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{payoutSummary(method, details)}</p>
@@ -363,7 +370,7 @@ export default function DispatcherCommissions() {
           <div className="space-y-4">
             {/* Method grid selector */}
             <div>
-              <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-2">Selecciona un método</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-2">{t('grupoB.commissions.selectMethod')}</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                 {PAYOUT_METHODS.map(m => {
                   const Icon = m.icon;
@@ -376,7 +383,7 @@ export default function DispatcherCommissions() {
                           : 'bg-gray-50 dark:bg-slate-700/50 border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-500'
                       }`}>
                       <Icon className="w-4 h-4 flex-shrink-0" />
-                      <span className="truncate">{m.label}</span>
+                      <span className="truncate">{methodLabel(m)}</span>
                     </button>
                   );
                 })}
@@ -385,15 +392,15 @@ export default function DispatcherCommissions() {
 
             {/* Dynamic fields */}
             {payoutMethod === 'zelle' && (
-              <Field label="Email o teléfono de Zelle" required>
-                <input className="input" type="text" placeholder="305-555-0101 o correo@email.com"
+              <Field label={t('grupoB.commissions.zelleLabel')} required>
+                <input className="input" type="text" placeholder={t('grupoB.commissions.zellePlaceholder')}
                   value={payoutDetails.contact || ''} onChange={e => updateDetail('contact', e.target.value)} />
               </Field>
             )}
 
             {(payoutMethod === 'ach' || payoutMethod === 'wire') && (
               <div className="space-y-3">
-                <Field label="Nombre del banco" required>
+                <Field label={t('grupoB.commissions.bankName')} required>
                   <input className="input" type="text" placeholder="Chase, Wells Fargo, Bank of America..."
                     value={payoutDetails.bank || ''} onChange={e => updateDetail('bank', e.target.value)} />
                 </Field>
@@ -409,14 +416,14 @@ export default function DispatcherCommissions() {
                   </Field>
                 </div>
                 {payoutMethod === 'ach' ? (
-                  <Field label="Tipo de cuenta">
+                  <Field label={t('grupoB.commissions.accountType')}>
                     <select className="input" value={payoutDetails.type || 'checking'} onChange={e => updateDetail('type', e.target.value)}>
-                      <option value="checking">Checking</option>
-                      <option value="savings">Savings</option>
+                      <option value="checking">{t('grupoB.commissions.checking')}</option>
+                      <option value="savings">{t('grupoB.commissions.savings')}</option>
                     </select>
                   </Field>
                 ) : (
-                  <Field label="SWIFT / BIC (opcional)">
+                  <Field label={t('grupoB.commissions.swiftOptional')}>
                     <input className="input font-mono" type="text" placeholder="CHASUS33"
                       value={payoutDetails.swift || ''} onChange={e => updateDetail('swift', e.target.value)} />
                   </Field>
@@ -425,26 +432,26 @@ export default function DispatcherCommissions() {
             )}
 
             {payoutMethod === 'paypal' && (
-              <Field label="Email de PayPal" required>
-                <input className="input" type="email" placeholder="tu@email.com"
+              <Field label={t('grupoB.commissions.paypalEmail')} required>
+                <input className="input" type="email" placeholder={t('grupoB.commissions.emailPlaceholder')}
                   value={payoutDetails.email || ''} onChange={e => updateDetail('email', e.target.value)} />
               </Field>
             )}
 
             {payoutMethod === 'venmo' && (
-              <Field label="Usuario de Venmo" required>
-                <input className="input" type="text" placeholder="@tu-usuario"
+              <Field label={t('grupoB.commissions.venmoUser')} required>
+                <input className="input" type="text" placeholder={t('grupoB.commissions.venmoPlaceholder')}
                   value={payoutDetails.username || ''} onChange={e => updateDetail('username', e.target.value)} />
               </Field>
             )}
 
             {payoutMethod === 'check' && (
               <div className="space-y-3">
-                <Field label="A nombre de (Payable to)" required>
-                  <input className="input" type="text" placeholder="Tu nombre completo legal"
+                <Field label={t('grupoB.commissions.payableTo')} required>
+                  <input className="input" type="text" placeholder={t('grupoB.commissions.legalNamePlaceholder')}
                     value={payoutDetails.payable_to || ''} onChange={e => updateDetail('payable_to', e.target.value)} />
                 </Field>
-                <Field label="Dirección de envío" required>
+                <Field label={t('grupoB.commissions.mailingAddress')} required>
                   <input className="input" type="text" placeholder="123 Main St, Miami FL 33125"
                     value={payoutDetails.address || ''} onChange={e => updateDetail('address', e.target.value)} />
                 </Field>
@@ -454,7 +461,7 @@ export default function DispatcherCommissions() {
             {payoutMethod === 'cash' && (
               <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700/30 rounded-xl p-3.5">
                 <p className="text-xs text-emerald-700 dark:text-emerald-400">
-                  Recibirás tus pagos en efectivo. OSI Logistics coordinará el método de entrega contigo directamente.
+                  {t('grupoB.commissions.cashNote')}
                 </p>
               </div>
             )}
@@ -544,7 +551,7 @@ export default function DispatcherCommissions() {
             ) : (
               <div>
                 <label className="block text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1.5">
-                  Social Security Number (SSN) <span className="text-red-400">*</span>
+                  {t('grupoB.commissions.ssnLabel')} <span className="text-red-400">*</span>
                 </label>
                 <input className="input font-mono" type="text" placeholder="XXX-XX-XXXX"
                   value={ssnInput} onChange={e => { setSsnInput(e.target.value); setTaxError(''); }} maxLength={11} />
@@ -668,7 +675,7 @@ export default function DispatcherCommissions() {
               </div>
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-600 dark:text-slate-400">{r.driver_name}</p>
-                <p className="text-xs text-gray-400 dark:text-slate-500">{fmt(r.order_price)} carga</p>
+                <p className="text-xs text-gray-400 dark:text-slate-500">{t('grupoB.commissions.loadSuffix', { amount: fmt(r.order_price) })}</p>
               </div>
               <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 rounded-lg px-3 py-2">
                 <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">{t('commissions.tableMyCommission')}</span>

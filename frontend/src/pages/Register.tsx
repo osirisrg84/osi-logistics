@@ -1,6 +1,8 @@
 ﻿import { useState, useEffect, FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, Languages } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../services/api';
 
@@ -13,6 +15,8 @@ interface DriverOption {
 }
 
 export default function Register() {
+  const { t } = useTranslation();
+  const { lang, toggle: toggleLang } = useLanguage();
   const { login } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -45,7 +49,7 @@ export default function Register() {
   };
 
   const strength = passwordStrength(form.password);
-  const strengthLabels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+  const strengthLabels = ['', t('register2.strengthWeak'), t('register2.strengthFair'), t('register2.strengthGood'), t('register2.strengthStrong')];
   const strengthColors = ['', 'bg-red-400', 'bg-yellow-400', 'bg-blue-400', 'bg-green-500'];
 
   const handleSubmit = async (e: FormEvent) => {
@@ -53,15 +57,15 @@ export default function Register() {
     setError('');
 
     if (form.password !== form.confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('register2.errMismatch'));
       return;
     }
     if (form.password.length < 8) {
-      setError('Password must be at least 8 characters');
+      setError(t('register2.errShort'));
       return;
     }
     if (form.role === 'driver' && !form.driver_id) {
-      setError('Please select your driver profile');
+      setError(t('register2.errSelectProfile'));
       return;
     }
 
@@ -78,7 +82,7 @@ export default function Register() {
       navigate(form.role === 'driver' ? '/driver' : '/dashboard', { replace: true });
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
-      setError(msg || 'Registration failed. Please try again.');
+      setError(msg || t('register2.errFailed'));
     } finally {
       setLoading(false);
     }
@@ -89,13 +93,18 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md fade-in">
-        {/* Back link */}
-        <Link
-          to={form.role === 'driver' ? '/driver/login' : '/dispatcher'}
-          className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm mb-5 transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to login
-        </Link>
+        {/* Back link + language */}
+        <div className="flex items-center justify-between mb-5">
+          <Link
+            to={form.role === 'driver' ? '/driver/login' : '/dispatcher'}
+            className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> {t('register2.backToLogin')}
+          </Link>
+          <button type="button" onClick={toggleLang} className="flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-slate-200 transition-colors">
+            <Languages className="w-4 h-4 hidden sm:block" /> {lang.toUpperCase()}
+          </button>
+        </div>
 
         {/* Logo */}
         <div className="text-center mb-6">
@@ -103,12 +112,12 @@ export default function Register() {
             <Truck className="w-7 h-7 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white">OSI Logistics</h1>
-          <p className="text-slate-400 text-sm mt-1">Create your account</p>
+          <p className="text-slate-400 text-sm mt-1">{t('register2.createYourAccount')}</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">Join OSI Logistics</h2>
-          <p className="text-sm text-gray-500 mb-6">Fill in your details to get started</p>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">{t('register2.joinTitle')}</h2>
+          <p className="text-sm text-gray-500 mb-6">{t('register2.joinSubtitle')}</p>
 
           {error && (
             <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl mb-4">
@@ -120,7 +129,7 @@ export default function Register() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Role selection */}
             <div>
-              <label className="label">Account Type</label>
+              <label className="label">{t('register2.accountType')}</label>
               <div className="grid grid-cols-2 gap-2">
                 {(['dispatcher', 'driver'] as const).map(role => (
                   <button
@@ -134,9 +143,9 @@ export default function Register() {
                     }`}
                   >
                     <div className="text-lg mb-0.5">{role === 'dispatcher' ? '📋' : '🚛'}</div>
-                    <div className="capitalize">{role}</div>
+                    <div>{t(role === 'dispatcher' ? 'register2.dispatcher' : 'register2.driver')}</div>
                     <div className="text-xs mt-0.5 font-normal text-gray-400">
-                      {role === 'dispatcher' ? 'Full dashboard access' : 'Driver portal access'}
+                      {role === 'dispatcher' ? t('register2.dispatcherDesc') : t('register2.driverDesc')}
                     </div>
                   </button>
                 ))}
@@ -144,13 +153,13 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="label">Full Name</label>
+              <label className="label">{t('register2.fullName')}</label>
               <input className="input" value={form.name} onChange={e => setForm({...form, name: e.target.value})}
                 placeholder="Carlos Rodriguez" required />
             </div>
 
             <div>
-              <label className="label">Email Address</label>
+              <label className="label">{t('register2.emailAddress')}</label>
               <input className="input" type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})}
                 placeholder="you@osilogistics.com" required />
             </div>
@@ -158,10 +167,10 @@ export default function Register() {
             {/* Driver profile selection */}
             {form.role === 'driver' && (
               <div>
-                <label className="label">Select Your Driver Profile</label>
+                <label className="label">{t('register2.selectProfile')}</label>
                 {availableDrivers.length === 0 ? (
                   <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-sm text-yellow-700">
-                    No unregistered driver profiles available. Contact your administrator.
+                    {t('register2.noProfiles')}
                   </div>
                 ) : (
                   <select
@@ -173,7 +182,7 @@ export default function Register() {
                     }}
                     required={form.role === 'driver'}
                   >
-                    <option value="">Choose your profile...</option>
+                    <option value="">{t('register2.chooseProfile')}</option>
                     {availableDrivers.map(d => (
                       <option key={d.id} value={d.id}>{d.name} · {d.phone}</option>
                     ))}
@@ -183,14 +192,14 @@ export default function Register() {
             )}
 
             <div>
-              <label className="label">Password</label>
+              <label className="label">{t('register2.password')}</label>
               <div className="relative">
                 <input
                   className="input pr-10"
                   type={showPassword ? 'text' : 'password'}
                   value={form.password}
                   onChange={e => setForm({...form, password: e.target.value})}
-                  placeholder="Min. 8 characters"
+                  placeholder={t('register2.passwordPlaceholder')}
                   required
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
@@ -206,21 +215,21 @@ export default function Register() {
                     ))}
                   </div>
                   <p className={`text-xs ${strength >= 3 ? 'text-green-600' : strength >= 2 ? 'text-yellow-600' : 'text-red-500'}`}>
-                    {strengthLabels[strength]} password
+                    {strengthLabels[strength]}
                   </p>
                 </div>
               )}
             </div>
 
             <div>
-              <label className="label">Confirm Password</label>
+              <label className="label">{t('register2.confirmPassword')}</label>
               <div className="relative">
                 <input
                   className="input pr-10"
                   type={showPassword ? 'text' : 'password'}
                   value={form.confirmPassword}
                   onChange={e => setForm({...form, confirmPassword: e.target.value})}
-                  placeholder="Repeat your password"
+                  placeholder={t('register2.confirmPlaceholder')}
                   required
                 />
                 {form.confirmPassword && (
@@ -242,22 +251,22 @@ export default function Register() {
               {loading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Creating account...
+                  {t('register2.creating')}
                 </>
               ) : (
-                'Create Account'
+                t('register2.createAccount')
               )}
             </button>
           </form>
 
           <div className="mt-4 text-center">
             <p className="text-sm text-gray-500">
-              Already have an account?{' '}
+              {t('register2.haveAccount')}{' '}
               <Link
                 to={form.role === 'driver' ? '/driver/login' : '/dispatcher'}
                 className="text-orange-500 hover:text-orange-600 font-medium"
               >
-                Sign in
+                {t('register2.signIn')}
               </Link>
             </p>
           </div>

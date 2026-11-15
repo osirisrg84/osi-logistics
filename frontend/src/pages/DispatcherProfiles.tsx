@@ -327,7 +327,7 @@ function DetailModal({ dispatcher, onClose, onEdit }: DetailModalProps) {
               {dispatcher.availability && (
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-400 dark:text-slate-500">{t('dispatcherProfiles.availability')}</span>
-                  <span className="font-medium text-gray-800 dark:text-slate-200 capitalize">{dispatcher.availability.replace('-', ' ')}</span>
+                  <span className="font-medium text-gray-800 dark:text-slate-200 capitalize">{({ 'full-time': t('registerDispatcher.availabilityFullTime'), 'part-time': t('registerDispatcher.availabilityPartTime'), 'contract': t('registerDispatcher.availabilityContract'), 'on-call': t('registerDispatcher.availabilityOnCall') } as Record<string, string>)[dispatcher.availability] ?? dispatcher.availability.replace('-', ' ')}</span>
                 </div>
               )}
               {dispatcher.date_of_birth && (

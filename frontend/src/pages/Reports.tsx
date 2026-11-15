@@ -47,7 +47,8 @@ function EmptyChart({ label }: { label: string }) {
 }
 
 export default function Reports() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language?.startsWith('en') ? 'en-US' : 'es-US';
   const [dashData, setDashData] = useState<Record<string, unknown> | null>(null);
   const [ordersReport, setOrdersReport] = useState<unknown[]>([]);
   const [driversReport, setDriversReport] = useState<unknown[]>([]);
@@ -127,8 +128,8 @@ export default function Reports() {
         <>
           {/* KPI Cards */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            <KpiCard title={t('reports.totalRevenue')} value={`$${((kpis?.total_revenue || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub={t('reports.thisMonth', { value: `$${((kpis?.monthly_revenue || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` })} icon={DollarSign} color="bg-green-100 text-green-600" />
-            <KpiCard title={t('reports.avgOrderValue')} value={`$${((kpis?.avg_order_value || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub={t('reports.perCompletedOrder')} icon={Package} color="bg-blue-100 text-blue-600" />
+            <KpiCard title={t('reports.totalRevenue')} value={`$${((kpis?.total_revenue || 0)).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub={t('reports.thisMonth', { value: `$${((kpis?.monthly_revenue || 0)).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` })} icon={DollarSign} color="bg-green-100 text-green-600" />
+            <KpiCard title={t('reports.avgOrderValue')} value={`$${((kpis?.avg_order_value || 0)).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub={t('reports.perCompletedOrder')} icon={Package} color="bg-blue-100 text-blue-600" />
             <KpiCard title={t('reports.onTimeRate')} value={`${((kpis?.on_time_rate || 0)).toFixed(1)}%`} sub={t('reports.overallPerformance')} icon={TrendingUp} color="bg-orange-100 text-orange-600" />
             <KpiCard title={t('reports.avgDelivery')} value={`${((kpis?.avg_delivery_hours || 0)).toFixed(1)}h`} sub={t('reports.pickupToDelivery')} icon={Clock} color="bg-purple-100 text-purple-600" />
             <KpiCard title={t('reports.customerRating')} value={`★ ${kpis?.customer_satisfaction?.toFixed(1) || '4.7'}`} sub={t('reports.avgSatisfaction')} icon={Star} color="bg-yellow-100 text-yellow-600" />
@@ -159,7 +160,7 @@ export default function Reports() {
                     <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={d => format(new Date(d + 'T00:00:00'), 'MM/dd')} />
                     <YAxis tick={{ fontSize: 10 }} />
                     <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
-                    <Area type="monotone" dataKey="revenue" stroke="#f97316" strokeWidth={2} fill="url(#grad1)" name="Revenue ($)" />
+                    <Area type="monotone" dataKey="revenue" stroke="#f97316" strokeWidth={2} fill="url(#grad1)" name={t('grupoB.reports.revenueUsd')} />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : <EmptyChart label={t('reports.emptyRevenue')} />}
@@ -187,7 +188,7 @@ export default function Reports() {
               {byPriority.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
-                    <Pie data={byPriority} cx="50%" cy="50%" outerRadius={85} dataKey="count" nameKey="priority" labelLine={false}>
+                    <Pie data={byPriority.map(p => ({ ...p, priority: t(`common.priority.${p.priority}`, { defaultValue: p.priority }) }))} cx="50%" cy="50%" outerRadius={85} dataKey="count" nameKey="priority" labelLine={false}>
                       {byPriority.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
                     <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} formatter={(value, name) => [value, name]} />
@@ -241,7 +242,7 @@ export default function Reports() {
                       <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{row.total_orders}</td>
                       <td className="px-4 py-3 text-sm text-green-600 font-medium">{row.delivered}</td>
                       <td className="px-4 py-3 text-sm text-red-500">{row.cancelled}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-slate-100">${(row.revenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-slate-100">${(row.revenue || 0).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                       <td className="px-4 py-3 text-sm text-gray-600 dark:text-slate-400">{((row.avg_distance || 0) * 0.621371).toFixed(1)}</td>
                     </tr>
                   ))}
@@ -276,14 +277,14 @@ export default function Reports() {
                       <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-slate-100">{driver.name}</td>
                       <td className="px-4 py-3">
                         <span className={`badge text-xs ${driver.status === 'available' ? 'bg-green-100 text-green-700' : driver.status === 'busy' ? 'bg-orange-100 text-orange-700' : driver.status === 'on_break' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>
-                          {driver.status.replace(/_/g, ' ')}
+                          {t(`common.driverStatus.${driver.status}`, { defaultValue: driver.status.replace(/_/g, ' ') })}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{driver.total_deliveries}</td>
                       <td className="px-4 py-3 text-sm text-blue-600 font-medium">{driver.orders_this_month}</td>
                       <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{(driver.on_time_rate || 0).toFixed(1)}%</td>
                       <td className="px-4 py-3 text-sm text-yellow-500">★ {(driver.rating || 0).toFixed(1)}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-green-600">${(driver.revenue_this_month || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-green-600">${(driver.revenue_this_month || 0).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                       <td className="px-4 py-3 text-sm text-gray-600 dark:text-slate-400">{(driver.avg_delivery_minutes || 0).toFixed(0)}</td>
                     </tr>
                   ))}
@@ -322,13 +323,13 @@ export default function Reports() {
                       <td className="px-4 py-3 text-xs text-gray-600 dark:text-slate-400">{truck.type}</td>
                       <td className="px-4 py-3">
                         <span className={`badge text-xs ${truck.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                          {truck.status}
+                          {t(`common.truckStatus.${truck.status}`, { defaultValue: truck.status })}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{(truck.mileage || 0).toLocaleString()}</td>
                       <td className="px-4 py-3 text-sm text-blue-600 font-medium">{truck.total_trips}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{truck.total_km ? Math.round((truck.total_km * 0.621371) * 5 + 1100).toLocaleString('en-US') : '—'}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-green-600">{truck.revenue_generated ? `$${(truck.revenue_generated).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">{truck.total_km ? Math.round((truck.total_km * 0.621371) * 5 + 1100).toLocaleString(locale) : '—'}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-green-600">{truck.revenue_generated ? `$${(truck.revenue_generated).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <div className="flex-1 h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full">

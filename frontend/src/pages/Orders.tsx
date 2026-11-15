@@ -18,6 +18,9 @@ import { formatPhone } from '../utils/phone';
 import { CITIES_BY_STATE } from '../data/usCities';
 import { useAuth } from '../context/AuthContext';
 import CountryFlag, { countryCode } from '../components/CountryFlag';
+import i18n from '../i18n';
+
+const numLocale = () => (i18n.language?.startsWith('en') ? 'en-US' : 'es-US');
 
 const STATUS_OPTIONS: OrderStatus[] = ['pending', 'offered', 'assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled'];
 
@@ -776,7 +779,7 @@ function DetailModal({ order: initialOrder, onClose, onRefresh }: DetailModalPro
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
               <p className="text-xs text-gray-500 dark:text-slate-400">{t('orders.rateLabel')}</p>
-              <p className="text-sm font-semibold text-green-600">${order.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <p className="text-sm font-semibold text-green-600">${order.price.toLocaleString(numLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
             <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-xl p-3">
               <p className="text-xs text-gray-500 dark:text-slate-400">{t('orders.distanceLabel')}</p>
@@ -818,7 +821,7 @@ function DetailModal({ order: initialOrder, onClose, onRefresh }: DetailModalPro
           {(order.dispatcher_name || order.dispatcher_user_id) && (
             <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-orange-700 dark:text-orange-400 mb-2">
-                <User className="w-3 h-3" /> DISPATCHER
+                <User className="w-3 h-3" /> {t('grupoB.orders.dispatcherCaps')}
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -826,7 +829,7 @@ function DetailModal({ order: initialOrder, onClose, onRefresh }: DetailModalPro
                     {(order.dispatcher_name || 'DS').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-slate-100 leading-tight">{order.dispatcher_name || 'Dispatcher'}</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-slate-100 leading-tight">{order.dispatcher_name || t('grupoB.orders.dispatcher')}</p>
                     <p className="text-xs text-gray-500 dark:text-slate-400">{t('orders.assignedThisOrder')}</p>
                   </div>
                 </div>
@@ -1121,7 +1124,7 @@ export default function Orders() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-green-600">${order.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p className="text-sm font-bold text-green-600">${order.price.toLocaleString(numLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     <OrderStatusBadge status={order.status} />
                   </div>
                 </div>
@@ -1218,7 +1221,7 @@ export default function Orders() {
                         }
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <span className="text-sm font-semibold text-green-600">${order.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span className="text-sm font-semibold text-green-600">${order.price.toLocaleString(numLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center gap-1">
@@ -1226,12 +1229,12 @@ export default function Orders() {
                             <Eye className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
                           </button>
                           {canEditOrder(order) && (
-                            <button onClick={() => setEditOrder(order)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg" title="Edit order">
+                            <button onClick={() => setEditOrder(order)} className="p-1.5 hover:bg-gray-100 dark:bg-slate-700 rounded-lg" title={t('grupoB.orders.editOrderTooltip')}>
                               <Edit2 className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
                             </button>
                           )}
                           {['pending', 'offered'].includes(order.status) && (
-                            <button onClick={() => setAssignOrder(order)} className="p-1.5 hover:bg-blue-50 rounded-lg" title="Enviar oferta">
+                            <button onClick={() => setAssignOrder(order)} className="p-1.5 hover:bg-blue-50 rounded-lg" title={t('orders.sendOfferTitle')}>
                               <UserCheck className="w-3.5 h-3.5 text-blue-500" />
                             </button>
                           )}
@@ -1252,10 +1255,10 @@ export default function Orders() {
       )}
 
       {/* Modals */}
-      {showCreate && <CreateOrderModal onClose={() => setShowCreate(false)} onSave={() => { fetchOrders(); showToast('¡Orden creada exitosamente! 🚛'); playSuccessChime(); }} drivers={drivers} trucks={trucks} />}
+      {showCreate && <CreateOrderModal onClose={() => setShowCreate(false)} onSave={() => { fetchOrders(); showToast(t('grupoB.orders.createdToast')); playSuccessChime(); }} drivers={drivers} trucks={trucks} />}
       {assignOrder && <AssignModal order={assignOrder} drivers={drivers} onClose={() => setAssignOrder(null)} onSave={fetchOrders} />}
       {detailOrder && <DetailModal order={detailOrder} onClose={() => setDetailOrder(null)} onRefresh={fetchOrders} />}
-      {editOrder && <EditOrderModal order={editOrder} onClose={() => setEditOrder(null)} onSave={() => { fetchOrders(); showToast('¡Orden actualizada! ✅'); }} />}
+      {editOrder && <EditOrderModal order={editOrder} onClose={() => setEditOrder(null)} onSave={() => { fetchOrders(); showToast(t('grupoB.orders.updatedToast')); }} />}
     </div>
   );
 }

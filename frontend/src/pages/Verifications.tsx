@@ -481,14 +481,14 @@ export default function Verifications() {
             onClick={() => setTab('drivers')}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-colors ${tab === 'drivers' ? 'bg-blue-500 text-white' : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'}`}
           >
-            <Truck className="w-4 h-4" /> Drivers
+            <Truck className="w-4 h-4" /> {t('verifications.statDrivers')}
             {pendingDrivers > 0 && <span className="bg-amber-500 text-white text-xs font-bold px-1.5 rounded-full">{pendingDrivers}</span>}
           </button>
           <button
             onClick={() => setTab('dispatchers')}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-colors border-l border-gray-200 dark:border-slate-700 ${tab === 'dispatchers' ? 'bg-orange-500 text-white' : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'}`}
           >
-            <User className="w-4 h-4" /> Dispatchers
+            <User className="w-4 h-4" /> {t('verifications.statDispatchers')}
             {pendingDispatchers > 0 && <span className="bg-amber-500 text-white text-xs font-bold px-1.5 rounded-full">{pendingDispatchers}</span>}
           </button>
         </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { LayoutDashboard, Package, MapPin, Users, BarChart3, MoreHorizontal, X, Truck, Layers } from 'lucide-react';
 import Sidebar from './Sidebar';
 import Header from './Header';
@@ -15,11 +16,11 @@ const BACKEND = import.meta.env.PROD
   : 'http://localhost:3001';
 
 const BOTTOM_NAV = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Home'    },
-  { to: '/orders',    icon: Package,         label: 'Orders'  },
-  { to: '/tracking',  icon: MapPin,          label: 'Tracking'},
-  { to: '/drivers',   icon: Users,           label: 'Drivers' },
-  { to: '/hub',       icon: Layers,          label: 'Hub'     },
+  { to: '/dashboard', icon: LayoutDashboard, labelKey: 'layout2.navHome'     },
+  { to: '/orders',    icon: Package,         labelKey: 'layout2.navOrders'   },
+  { to: '/tracking',  icon: MapPin,          labelKey: 'layout2.navTracking' },
+  { to: '/drivers',   icon: Users,           labelKey: 'layout2.navDrivers'  },
+  { to: '/hub',       icon: Layers,          labelKey: 'layout2.navHub'      },
 ];
 
 interface DriverToast {
@@ -29,6 +30,7 @@ interface DriverToast {
 }
 
 function DriverOnlineToast({ toast, onClose }: { toast: DriverToast; onClose: () => void }) {
+  const { t } = useTranslation();
   useEffect(() => {
     const t = setTimeout(onClose, 6000);
     return () => clearTimeout(t);
@@ -40,9 +42,9 @@ function DriverOnlineToast({ toast, onClose }: { toast: DriverToast; onClose: ()
         <Truck className="w-4 h-4 text-white" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold text-green-400">Driver Online</p>
+        <p className="text-xs font-semibold text-green-400">{t('layout2.driverOnline')}</p>
         <p className="text-sm font-bold text-white truncate">{toast.name}</p>
-        <p className="text-xs text-slate-400">Está disponible y listo</p>
+        <p className="text-xs text-slate-400">{t('layout2.availableReady')}</p>
       </div>
       <button onClick={onClose} className="text-slate-500 hover:text-slate-300 flex-shrink-0">
         <X className="w-4 h-4" />
@@ -79,6 +81,7 @@ async function registerPush(): Promise<void> {
 }
 
 function BottomNav({ onMoreClick }: { onMoreClick: () => void }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const activeColor = isAdmin ? 'text-purple-500' : 'text-orange-500';
@@ -87,16 +90,16 @@ function BottomNav({ onMoreClick }: { onMoreClick: () => void }) {
   const navItems = isAdmin
     ? BOTTOM_NAV
     : [
-        { to: '/dashboard', icon: LayoutDashboard, label: 'Stats'   },
-        { to: '/orders',    icon: Package,         label: 'Orders'  },
-        { to: '/tracking',  icon: MapPin,          label: 'Tracking'},
-        { to: '/drivers',   icon: Users,           label: 'Drivers' },
-        { to: '/reports',   icon: BarChart3,       label: 'Reports' },
+        { to: '/dashboard', icon: LayoutDashboard, labelKey: 'layout2.navStats'    },
+        { to: '/orders',    icon: Package,         labelKey: 'layout2.navOrders'   },
+        { to: '/tracking',  icon: MapPin,          labelKey: 'layout2.navTracking' },
+        { to: '/drivers',   icon: Users,           labelKey: 'layout2.navDrivers'  },
+        { to: '/reports',   icon: BarChart3,       labelKey: 'layout2.navReports'  },
       ];
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 flex items-stretch">
-      {navItems.map(({ to, icon: Icon, label }) => (
+      {navItems.map(({ to, icon: Icon, labelKey }) => (
         <NavLink
           key={to}
           to={to}
@@ -106,22 +109,23 @@ function BottomNav({ onMoreClick }: { onMoreClick: () => void }) {
           }
         >
           <Icon className="w-5 h-5" />
-          {label}
+          {t(labelKey)}
         </NavLink>
       ))}
       <button
         onClick={onMoreClick}
         className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium text-gray-400 dark:text-slate-500"
-        title="Más opciones"
+        title={t('layout2.moreOptions')}
       >
         <MoreHorizontal className="w-5 h-5" />
-        More
+        {t('layout2.more')}
       </button>
     </nav>
   );
 }
 
 export default function Layout() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const [sidebarOpen, setSidebarOpen] = useState(() => {
@@ -201,7 +205,7 @@ export default function Layout() {
       {!isAdmin && (
         <AiAssistantPanel
           chat={assistantApi.chat}
-          title="Asistente OSI"
+          title={t('layout2.assistantTitle')}
           name="Valeria"
           avatarSrc="/assistants/valeria.jpg"
           role={{ es: 'Mesa de despacho', en: 'Dispatch desk' }}
@@ -209,7 +213,7 @@ export default function Layout() {
             es: ['¿Qué cargas tengo pendientes?', '¿Qué driver está disponible y más cerca?', '¿Cuánto llevo en comisiones este mes?'],
             en: ['Which loads are pending?', 'Which driver is available and closest?', 'How much have I earned in commissions this month?'],
           }}
-          greeting="Soy Valeria, la asistente de IA de OSI. Pregúntame por órdenes, conductores o tus comisiones."
+          greeting={t('layout2.valeriaGreeting')}
           buttonClassName="fixed bottom-20 md:bottom-6 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
           panelClassName="fixed bottom-36 md:bottom-24 right-4 left-4 sm:left-auto z-40 sm:w-96 max-h-[70vh] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col overflow-hidden fade-in"
         />

@@ -16,7 +16,7 @@ import CountryFlag from '../components/CountryFlag';
 
 const STATUS_OPTIONS: DriverStatus[] = ['available', 'busy', 'on_break', 'offline'];
 
-function calcAuthority(since: string): string {
+function calcAuthority(since: string, t: (k: string, o?: Record<string, unknown>) => string): string {
   if (!since) return '';
   const start = new Date(since);
   const now = new Date();
@@ -24,9 +24,11 @@ function calcAuthority(since: string): string {
   let months = now.getMonth() - start.getMonth();
   if (now.getDate() < start.getDate()) months--;
   if (months < 0) { years--; months += 12; }
-  if (years === 0) return `${months} mes${months !== 1 ? 'es' : ''}`;
-  if (months === 0) return `${years} año${years !== 1 ? 's' : ''}`;
-  return `${years} año${years !== 1 ? 's' : ''}, ${months} mes${months !== 1 ? 'es' : ''}`;
+  const y = t('drivers2.yearsCount', { count: years });
+  const m = t('drivers2.monthsCount', { count: months });
+  if (years === 0) return m;
+  if (months === 0) return y;
+  return `${y}, ${m}`;
 }
 
 interface DriverFormProps {
@@ -36,6 +38,7 @@ interface DriverFormProps {
 }
 
 function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: driver?.name || '',
     phone: driver?.phone || '',
@@ -87,43 +90,43 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">{driver ? 'Edit Driver' : 'Add New Driver'}</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">{driver ? t('drivers2.editDriver') : t('drivers2.addNewDriver')}</h2>
           <button onClick={onClose}><X className="w-5 h-5 text-gray-500 dark:text-slate-400" /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
-              <label className="label">Full Name *</label>
+              <label className="label">{t('drivers2.fullName')}</label>
               <input className="input" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required placeholder="John Smith" />
             </div>
             <div>
-              <label className="label">Phone *</label>
+              <label className="label">{t('drivers2.phone')}</label>
               <input className="input" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} required placeholder="(305) 555-0000" />
             </div>
             <div>
-              <label className="label">Email *</label>
+              <label className="label">{t('drivers2.email')}</label>
               <input className="input" type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required placeholder="driver@company.com" />
             </div>
             <div>
-              <label className="label">CDL License # *</label>
+              <label className="label">{t('drivers2.cdlLicense')}</label>
               <input className="input" value={form.license_number} onChange={e => setForm({...form, license_number: e.target.value})} required placeholder="FL-CDL-000000" />
             </div>
             <div>
-              <label className="label">License Expiry *</label>
+              <label className="label">{t('drivers2.licenseExpiry')}</label>
               <input className="input" type="date" value={form.license_expiry} onChange={e => setForm({...form, license_expiry: e.target.value})} required />
             </div>
             <div className="col-span-2 border-t border-gray-100 dark:border-slate-700 pt-3">
               <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-2">
-                <Building2 className="w-3.5 h-3.5" /> Company / Equipment
+                <Building2 className="w-3.5 h-3.5" /> {t('drivers2.companyEquipment')}
               </p>
             </div>
             <div>
-              <label className="label">Make and Model *</label>
-              <input className="input" type="text" placeholder="e.g. Volvo 860, Kenworth T680"
+              <label className="label">{t('drivers2.makeModel')}</label>
+              <input className="input" type="text" placeholder={t('drivers2.makeModelPlaceholder')}
                 value={form.truck_make} onChange={e => setForm({...form, truck_make: e.target.value})} />
             </div>
             <div>
-              <label className="label">Equipment Type</label>
+              <label className="label">{t('drivers2.equipmentType')}</label>
               <select className="input" value={form.equipment_type} onChange={e => setForm({...form, equipment_type: e.target.value})}>
                 {['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'].map(t => <option key={t} value={t}>{t}</option>)}
               </select>
@@ -142,36 +145,36 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
               )}
             </div>
             <div className="col-span-2">
-              <label className="label">Company Name</label>
+              <label className="label">{t('drivers2.companyName')}</label>
               <input className="input" value={form.company_name} onChange={e => setForm({...form, company_name: e.target.value})} placeholder="OSI Logistics INC" />
             </div>
             <div className="col-span-2">
-              <label className="label">Autoridad MC/DOT desde</label>
+              <label className="label">{t('drivers2.authoritySince')}</label>
               <input className="input" type="date" value={form.authority_since} onChange={e => setForm({...form, authority_since: e.target.value})} />
             </div>
             <div className="col-span-2">
-              <label className="label">Correo para Rate Confirmation</label>
-              <input className="input" type="email" placeholder="dispatch@tuempresa.com"
+              <label className="label">{t('drivers2.rateConEmail')}</label>
+              <input className="input" type="email" placeholder={t('drivers2.rateConEmailPlaceholder')}
                 value={form.rate_con_email} onChange={e => setForm({...form, rate_con_email: e.target.value})} />
-              <p className="text-[10px] text-gray-400 mt-1">Los brokers enviarán el rate confirmation a este correo.</p>
+              <p className="text-[10px] text-gray-400 mt-1">{t('drivers2.rateConEmailHint')}</p>
             </div>
             {isCanadianDriver && (
               <>
-                <div className="col-span-2 pt-1"><p className="text-xs font-bold text-red-600 uppercase tracking-wide">Canada</p></div>
+                <div className="col-span-2 pt-1"><p className="text-xs font-bold text-red-600 uppercase tracking-wide">{t('drivers2.canada')}</p></div>
                 <div>
-                  <label className="label">Province</label>
+                  <label className="label">{t('drivers2.province')}</label>
                   <select className="input" value={form.province} onChange={e => setForm({...form, province: e.target.value})}>
                     <option value="">—</option>
                     {['ON','QC','AB','BC','MB','SK','NS','NB','NL','PE','YT','NT','NU'].map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="label">Scope</label>
+                  <label className="label">{t('drivers2.scope')}</label>
                   <select className="input" value={form.operating_scope} onChange={e => setForm({...form, operating_scope: e.target.value})}>
                     <option value="">—</option>
-                    <option value="domestic">Inside Canada</option>
-                    <option value="interprovincial">Interprovincial</option>
-                    <option value="cross_border">Cross-border</option>
+                    <option value="domestic">{t('drivers2.scopeDomestic')}</option>
+                    <option value="interprovincial">{t('drivers2.scopeInterprovincial')}</option>
+                    <option value="cross_border">{t('drivers2.scopeCrossBorder')}</option>
                   </select>
                 </div>
                 <div>
@@ -179,14 +182,14 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
                   <input className="input" value={form.carrier_number} onChange={e => setForm({...form, carrier_number: e.target.value})} />
                 </div>
                 <div>
-                  <label className="label">Licence class</label>
+                  <label className="label">{t('drivers2.licenceClass')}</label>
                   <select className="input" value={form.license_class} onChange={e => setForm({...form, license_class: e.target.value})}>
                     <option value="">—</option>
-                    {['1','A','D','DZ','G','other'].map(c => <option key={c} value={c}>{c}</option>)}
+                    {['1','A','D','DZ','G','other'].map(c => <option key={c} value={c}>{c === 'other' ? t('drivers2.other') : c}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="label">Business Number (BN)</label>
+                  <label className="label">{t('drivers2.businessNumber')}</label>
                   <input className="input font-mono" maxLength={9} value={form.business_number} onChange={e => setForm({...form, business_number: e.target.value})} placeholder="123456789" />
                 </div>
                 <div>
@@ -217,17 +220,17 @@ function DriverForm({ driver, onClose, onSave }: DriverFormProps) {
             )}
             {driver && (
               <div>
-                <label className="label">Status</label>
+                <label className="label">{t('drivers2.status')}</label>
                 <select className="input" value={form.status} onChange={e => setForm({...form, status: e.target.value as typeof form.status})}>
-                  {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
+                  {STATUS_OPTIONS.map(s => <option key={s} value={s}>{t(`drivers.status.${s}`)}</option>)}
                 </select>
               </div>
             )}
           </div>
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">Cancel</button>
+            <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">{t('drivers2.cancel')}</button>
             <button type="submit" disabled={saving} className="btn-primary flex-1 justify-center">
-              {saving ? 'Saving...' : driver ? 'Save Changes' : 'Add Driver'}
+              {saving ? t('drivers2.saving') : driver ? t('drivers2.saveChanges') : t('drivers2.addDriverBtn')}
             </button>
           </div>
         </form>
@@ -247,6 +250,7 @@ interface Favorite { id: string; name: string; address: string; type: string; }
 const FAV_ICONS: Record<string, string> = { home: '🏠', work: '🏢', frequent: '⭐', other: '📍' };
 
 function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: DriverDetailProps) {
+  const { t, i18n } = useTranslation();
   const [recentOrders, setRecentOrders] = useState<unknown[]>([]);
   const [favorites, setFavorites] = useState<Favorite[]>([]);
 
@@ -259,7 +263,7 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">Driver Profile</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">{t('drivers2.driverProfile')}</h2>
           <button onClick={onClose}><X className="w-5 h-5 text-gray-500 dark:text-slate-400" /></button>
         </div>
         <div className="p-6 space-y-5">
@@ -285,7 +289,7 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
                 <DriverStatusBadge status={driver.status} />
                 {driver.status === 'available' && <OnlineSince since={driver.online_since} />}
               </div>
-              <p className="text-xs text-gray-400 mt-1">Hired {format(new Date(driver.hire_date), 'MMM d, yyyy')}</p>
+              <p className="text-xs text-gray-400 mt-1">{t('drivers2.hired', { date: format(new Date(driver.hire_date), 'MMM d, yyyy') })}</p>
             </div>
           </div>
 
@@ -293,28 +297,28 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-orange-50 rounded-xl p-3 text-center">
               <p className="text-2xl font-bold text-orange-600">{driver.rating.toFixed(1)}</p>
-              <p className="text-xs text-gray-500 flex items-center justify-center gap-1"><Star className="w-3 h-3" /> Rating</p>
+              <p className="text-xs text-gray-500 flex items-center justify-center gap-1"><Star className="w-3 h-3" /> {t('drivers2.rating')}</p>
             </div>
             <div className="bg-blue-50 rounded-xl p-3 text-center">
               <p className="text-2xl font-bold text-blue-600">{driver.total_deliveries}</p>
-              <p className="text-xs text-gray-500 flex items-center justify-center gap-1"><Package className="w-3 h-3" /> Trips</p>
+              <p className="text-xs text-gray-500 flex items-center justify-center gap-1"><Package className="w-3 h-3" /> {t('drivers2.trips')}</p>
             </div>
             <div className="bg-green-50 rounded-xl p-3 text-center">
               <p className="text-2xl font-bold text-green-600">{driver.on_time_rate.toFixed(0)}%</p>
-              <p className="text-xs text-gray-500 dark:text-slate-400">On-Time</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">{t('drivers2.onTime')}</p>
             </div>
           </div>
 
           {/* Vs. fleet average */}
           <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4">
             <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 flex items-center gap-2 mb-2">
-              <TrendingUp className="w-3.5 h-3.5 text-orange-500" /> VS. PROMEDIO DE FLOTA
+              <TrendingUp className="w-3.5 h-3.5 text-orange-500" /> {t('drivers2.vsFleet')}
             </p>
             <ResponsiveContainer width="100%" height={140}>
               <BarChart
                 data={[
-                  { metric: 'Rating', driver: (driver.rating / 5) * 100, fleet: (fleetAvgRating / 5) * 100, driverLabel: driver.rating.toFixed(1), fleetLabel: fleetAvgRating.toFixed(1) },
-                  { metric: 'On-Time', driver: driver.on_time_rate, fleet: fleetAvgOnTime, driverLabel: `${driver.on_time_rate.toFixed(0)}%`, fleetLabel: `${fleetAvgOnTime.toFixed(0)}%` },
+                  { metric: t('drivers2.rating'), driver: (driver.rating / 5) * 100, fleet: (fleetAvgRating / 5) * 100, driverLabel: driver.rating.toFixed(1), fleetLabel: fleetAvgRating.toFixed(1) },
+                  { metric: t('drivers2.onTime'), driver: driver.on_time_rate, fleet: fleetAvgOnTime, driverLabel: `${driver.on_time_rate.toFixed(0)}%`, fleetLabel: `${fleetAvgOnTime.toFixed(0)}%` },
                 ]}
                 margin={{ top: 4, right: 8, left: -20, bottom: 0 }}
               >
@@ -323,10 +327,10 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
                 <Tooltip
                   formatter={(_value, name, item) => {
                     const payload = item.payload as { driverLabel: string; fleetLabel: string };
-                    return [name === 'driver' ? payload.driverLabel : payload.fleetLabel, name === 'driver' ? driver.name : 'Promedio flota'];
+                    return [name === 'driver' ? payload.driverLabel : payload.fleetLabel, name === 'driver' ? driver.name : t('drivers2.fleetAvg')];
                   }}
                 />
-                <Legend formatter={v => v === 'driver' ? driver.name.split(' ')[0] : 'Promedio flota'} wrapperStyle={{ fontSize: 11 }} />
+                <Legend formatter={v => v === 'driver' ? driver.name.split(' ')[0] : t('drivers2.fleetAvg')} wrapperStyle={{ fontSize: 11 }} />
                 <Bar dataKey="driver" fill="#f97316" radius={[6, 6, 0, 0]} />
                 <Bar dataKey="fleet" fill="#cbd5e1" radius={[6, 6, 0, 0]} />
               </BarChart>
@@ -347,16 +351,16 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
 
           {/* License */}
           <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-xl p-4">
-            <p className="text-xs font-semibold text-gray-700 mb-2">CDL LICENSE</p>
+            <p className="text-xs font-semibold text-gray-700 mb-2">{t('drivers2.cdlLicenseTitle')}</p>
             <p className="text-sm font-mono text-gray-900 dark:text-slate-100">{driver.license_number}</p>
-            <p className="text-xs text-gray-500 mt-1">Expires: {format(new Date(driver.license_expiry), 'MMMM d, yyyy')}</p>
+            <p className="text-xs text-gray-500 mt-1">{t('drivers2.expires', { date: format(new Date(driver.license_expiry), 'MMMM d, yyyy') })}</p>
           </div>
 
           {/* Equipment */}
           {(driver.make || driver.truck_make || driver.equipment_type) && (
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
               <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 flex items-center gap-2 mb-2">
-                <Truck className="w-3 h-3" /> EQUIPO
+                <Truck className="w-3 h-3" /> {t('drivers2.equipmentTitle')}
               </p>
               <div className="flex items-center gap-3">
                 {driver.equipment_type && (
@@ -385,15 +389,15 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
             const stripPfx = (v: string) => v.replace(/^(MC-|DOT-)/i, '');
             const authNum = stripPfx(isDot ? (dr.dot_number || driver.mc_number || '') : (driver.mc_number || ''));
             if (driver.country === 'Canada') {
-              const scopeLabel: Record<string, string> = { domestic: 'Inside Canada', interprovincial: 'Interprovincial', cross_border: 'Cross-border (U.S.)' };
+              const scopeLabel: Record<string, string> = { domestic: t('drivers2.scopeDomestic'), interprovincial: t('drivers2.scopeInterprovincial'), cross_border: t('drivers2.scopeCrossBorderUS') };
               const carrierLabel = dr.province === 'ON' ? 'CVOR #' : dr.province === 'QC' ? 'NIR #' : 'NSC / SFC #';
               const rows: [string, string][] = [
-                ['Company Name', driver.company_name || ''],
-                ['Province', dr.province || ''],
-                ['Scope', scopeLabel[dr.operating_scope] || ''],
+                [t('drivers2.companyName'), driver.company_name || ''],
+                [t('drivers2.province'), dr.province || ''],
+                [t('drivers2.scope'), scopeLabel[dr.operating_scope] || ''],
                 [carrierLabel, dr.carrier_number || ''],
-                ['Licence class', dr.license_class || ''],
-                ['Business Number (BN)', dr.business_number || ''],
+                [t('drivers2.licenceClass'), dr.license_class === 'other' ? t('drivers2.other') : (dr.license_class || '')],
+                [t('drivers2.businessNumber'), dr.business_number || ''],
                 ['GST/HST #', dr.gst_hst_number || ''],
                 ...(dr.operating_scope === 'cross_border' ? [
                   ['USDOT #', stripPfx(dr.dot_number || '')],
@@ -405,7 +409,7 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
               return (
                 <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4">
                   <p className="text-xs font-semibold text-red-700 dark:text-red-400 flex items-center gap-2 mb-3">
-                    <Building2 className="w-3 h-3" /> COMPANY / CANADIAN REGISTRATION
+                    <Building2 className="w-3 h-3" /> {t('drivers2.companyCanadian')}
                   </p>
                   <div className="space-y-2">
                     {rows.filter(([, v]) => v).map(([label, value]) => (
@@ -416,7 +420,7 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
                     ))}
                     {dr.rate_con_email && (
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Correo Rate Confirmation</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">{t('drivers2.rateConEmailShort')}</span>
                         <a href={`mailto:${dr.rate_con_email}`} className="text-sm font-medium text-red-700 dark:text-red-400 hover:underline break-all">{dr.rate_con_email}</a>
                       </div>
                     )}
@@ -427,12 +431,12 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
             return (driver.company_name || authNum || dr.rate_con_email) ? (
             <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
               <p className="text-xs font-semibold text-green-700 dark:text-green-400 flex items-center gap-2 mb-3">
-                <Building2 className="w-3 h-3" /> COMPANY / AUTHORITY
+                <Building2 className="w-3 h-3" /> {t('drivers2.companyAuthority')}
               </p>
               <div className="space-y-2">
                 {driver.company_name && (
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-slate-400">Company Name</span>
+                    <span className="text-xs text-gray-500 dark:text-slate-400">{t('drivers2.companyName')}</span>
                     <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{driver.company_name}</span>
                   </div>
                 )}
@@ -444,13 +448,13 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
                 )}
                 {driver.authority_since && (
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> Tiempo con autoridad</span>
-                    <span className="text-sm font-medium text-green-700 dark:text-green-400">{calcAuthority(driver.authority_since)}</span>
+                    <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> {t('drivers2.timeWithAuthority')}</span>
+                    <span className="text-sm font-medium text-green-700 dark:text-green-400">{calcAuthority(driver.authority_since, t)}</span>
                   </div>
                 )}
                 {dr.rate_con_email && (
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-xs text-gray-500 dark:text-slate-400">Correo Rate Confirmation</span>
+                    <span className="text-xs text-gray-500 dark:text-slate-400">{t('drivers2.rateConEmailShort')}</span>
                     <a href={`mailto:${dr.rate_con_email}`} className="text-sm font-medium text-green-700 dark:text-green-400 hover:underline break-all">{dr.rate_con_email}</a>
                   </div>
                 )}
@@ -467,21 +471,21 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
             let details: Record<string, string> = {};
             try { details = rawDetails ? JSON.parse(rawDetails) : {}; } catch {}
             const ICONS: Record<string, string> = { zelle: '📱', paypal: '🅿️', venmo: '💸', ach: '🏦', check: '📝' };
-            const LABELS: Record<string, string> = { zelle: 'Zelle', paypal: 'PayPal', venmo: 'Venmo', ach: 'Direct Deposit', check: 'Check' };
+            const LABELS: Record<string, string> = { zelle: 'Zelle', paypal: 'PayPal', venmo: 'Venmo', ach: t('drivers2.directDeposit'), check: t('drivers2.check') };
             const summary = () => {
               switch (method) {
                 case 'zelle':  return details.contact || '—';
                 case 'paypal': return details.email || '—';
                 case 'venmo':  return details.username || '—';
                 case 'ach':    return details.bank ? `${details.bank} · ****${(details.account || '').slice(-4)}` : '—';
-                case 'check':  return details.payable_to ? `A nombre de: ${details.payable_to}` : '—';
+                case 'check':  return details.payable_to ? t('drivers2.payableTo', { name: details.payable_to }) : '—';
                 default:       return '—';
               }
             };
             return (
               <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4">
                 <p className="text-xs font-semibold text-orange-700 dark:text-orange-400 flex items-center gap-2 mb-3">
-                  <Wallet className="w-3 h-3" /> PAYMENT METHOD
+                  <Wallet className="w-3 h-3" /> {t('drivers2.paymentMethod')}
                 </p>
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{ICONS[method] || '💳'}</span>
@@ -489,7 +493,7 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
                     <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{LABELS[method] || method}</p>
                     <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{summary()}</p>
                   </div>
-                  <span className="text-[10px] font-semibold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/40 px-2 py-0.5 rounded-full">Configurado</span>
+                  <span className="text-[10px] font-semibold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/40 px-2 py-0.5 rounded-full">{t('drivers2.configured')}</span>
                 </div>
               </div>
             );
@@ -506,15 +510,15 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
             const isExpiringSoon = daysLeft !== null && daysLeft >= 0 && daysLeft <= 30;
             const statusColor = isExpired ? '#ef4444' : isExpiringSoon ? '#f59e0b' : coiExpiry ? '#22c55e' : '#94a3b8';
             const statusLabel = isExpired
-              ? `Vencido hace ${Math.abs(daysLeft!)} días`
+              ? t('drivers2.expiredAgo', { count: Math.abs(daysLeft!) })
               : isExpiringSoon
-                ? `Vence en ${daysLeft} días`
-                : coiExpiry ? 'Vigente' : 'No cargado';
+                ? t('drivers2.expiresIn', { count: daysLeft! })
+                : coiExpiry ? t('drivers2.valid') : t('drivers2.notLoaded');
             return (
               <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 flex items-center gap-2">
-                    <ShieldCheck className="w-3 h-3" /> COI — CERTIFICATE OF INSURANCE
+                    <ShieldCheck className="w-3 h-3" /> {t('drivers2.coiTitle')}
                   </p>
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
                     style={{ background: `${statusColor}18`, color: statusColor }}>
@@ -525,22 +529,22 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
                   <div className="flex items-center gap-2 min-w-0">
                     <FileText className="w-4 h-4 flex-shrink-0" style={{ color: statusColor }} />
                     <span className="text-sm text-gray-700 dark:text-slate-300 truncate max-w-[180px]">
-                      {coiFile || 'Sin archivo cargado'}
+                      {coiFile || t('drivers2.noFile')}
                     </span>
                   </div>
                   {coiFile && (
                     <a href={`#coi-${driver.id}`}
                       className="flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 bg-blue-100 dark:bg-blue-900/40 px-2.5 py-1 rounded-lg transition-colors flex-shrink-0 ml-2">
-                      <FileText className="w-3 h-3" /> Ver COI
+                      <FileText className="w-3 h-3" /> {t('drivers2.viewCoi')}
                     </a>
                   )}
                 </div>
                 {coiExpiry && (
                   <div className="flex items-center gap-1.5 mt-2">
                     <Calendar className="w-3 h-3 text-gray-400" />
-                    <span className="text-xs text-gray-500 dark:text-slate-400">Vencimiento: </span>
+                    <span className="text-xs text-gray-500 dark:text-slate-400">{t('drivers2.expiration')}: </span>
                     <span className="text-xs font-semibold" style={{ color: statusColor }}>
-                      {new Date(coiExpiry + 'T00:00:00').toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      {new Date(coiExpiry + 'T00:00:00').toLocaleDateString(i18n.language, { day: '2-digit', month: 'short', year: 'numeric' })}
                     </span>
                     {(isExpired || isExpiringSoon) && <AlertCircle className="w-3 h-3 ml-1" style={{ color: statusColor }} />}
                   </div>
@@ -553,11 +557,11 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
           <div>
             <div className="flex items-center gap-2 mb-3">
               <MapPin className="w-3.5 h-3.5 text-orange-500" />
-              <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 uppercase tracking-wide">Lugares favoritos del driver</p>
+              <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 uppercase tracking-wide">{t('drivers2.favoritePlaces')}</p>
             </div>
             {favorites.length === 0 ? (
               <p className="text-xs text-gray-400 dark:text-slate-500 text-center py-3 bg-gray-50 dark:bg-slate-900 rounded-xl">
-                Sin lugares guardados
+                {t('drivers2.noPlaces')}
               </p>
             ) : (
               <div className="space-y-2">
@@ -577,7 +581,7 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
           {/* Recent orders */}
           {recentOrders.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-gray-700 mb-3">RECENT ORDERS</p>
+              <p className="text-xs font-semibold text-gray-700 mb-3">{t('drivers2.recentOrders')}</p>
               <div className="space-y-2">
                 {(recentOrders as Array<{ id: string; order_number: string; customer_name: string; status: string; delivered_at: string | null }>).slice(0, 5).map(order => (
                   <div key={order.id} className="flex items-center justify-between text-sm">
@@ -587,7 +591,7 @@ function DriverDetail({ driver, onClose, fleetAvgRating, fleetAvgOnTime }: Drive
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`badge text-xs ${order.status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                        {order.status}
+                        {t(`common.orderStatus.${order.status}`, { defaultValue: order.status })}
                       </span>
                       {order.delivered_at && (
                         <span className="text-xs text-gray-400 dark:text-slate-500">{formatDistanceToNow(parseServerDate(order.delivered_at), { addSuffix: true })}</span>
@@ -662,9 +666,7 @@ export default function Drivers() {
       const activeOrders = err.response?.data?.activeOrders;
       if (activeOrders && activeOrders > 0) {
         const force = confirm(
-          `${driver.name} tiene ${activeOrders} orden${activeOrders !== 1 ? 'es' : ''} activa${activeOrders !== 1 ? 's' : ''}.\n\n` +
-          `Si continúas, esas órdenes quedarán sin asignar (estado Pendiente).\n\n` +
-          `¿Eliminar de todas formas?`
+          t('drivers2.forceDeleteConfirm', { name: driver.name, count: activeOrders })
         );
         if (!force) return;
         await driversApi.deleteForce(driver.id);
@@ -772,7 +774,7 @@ export default function Drivers() {
                     {driver.status === 'available' && <OnlineSince since={driver.online_since} />}
                     {driver.approval_status === 'pending' && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700/50">
-                        <Clock className="w-3 h-3" /> Pendiente aprobación
+                        <Clock className="w-3 h-3" /> {t('drivers2.pendingApproval')}
                       </span>
                     )}
                   </div>
@@ -831,15 +833,15 @@ export default function Drivers() {
 
             <div className="grid grid-cols-3 gap-2 mt-4">
               <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-lg p-2">
-                <p className="text-xs text-gray-500 dark:text-slate-400">Rating</p>
+                <p className="text-xs text-gray-500 dark:text-slate-400">{t('drivers2.rating')}</p>
                 <p className="text-sm font-bold text-yellow-500">★ {driver.rating.toFixed(1)}</p>
               </div>
               <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-lg p-2">
-                <p className="text-xs text-gray-500 dark:text-slate-400">Trips</p>
+                <p className="text-xs text-gray-500 dark:text-slate-400">{t('drivers2.trips')}</p>
                 <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{driver.total_deliveries}</p>
               </div>
               <div className="text-center bg-gray-50 dark:bg-slate-900 rounded-lg p-2">
-                <p className="text-xs text-gray-500 dark:text-slate-400">On-Time</p>
+                <p className="text-xs text-gray-500 dark:text-slate-400">{t('drivers2.onTime')}</p>
                 <p className="text-sm font-bold text-green-600">{driver.on_time_rate.toFixed(0)}%</p>
               </div>
             </div>
@@ -847,7 +849,7 @@ export default function Drivers() {
             {driver.active_orders !== undefined && driver.active_orders > 0 && (
               <div className="mt-3 bg-orange-500/15 dark:bg-orange-500/20 border border-orange-500/30 dark:border-orange-500/40 rounded-lg p-2 flex items-center gap-2">
                 <Package className="w-3.5 h-3.5 text-orange-400" />
-                <span className="text-xs text-orange-600 dark:text-orange-300 font-semibold">{driver.active_orders} active order(s)</span>
+                <span className="text-xs text-orange-600 dark:text-orange-300 font-semibold">{t('drivers2.activeOrders', { count: driver.active_orders })}</span>
               </div>
             )}
           </div>
@@ -859,7 +861,7 @@ export default function Drivers() {
         <DriverForm
           driver={editDriver || undefined}
           onClose={() => { setShowForm(false); setEditDriver(null); }}
-          onSave={(isNew) => { fetchDrivers(); if (isNew) { showToast('¡Conductor agregado con éxito! 🚚'); playSuccessChime(); } }}
+          onSave={(isNew) => { fetchDrivers(); if (isNew) { showToast(t('drivers2.driverAdded')); playSuccessChime(); } }}
         />
       )}
       {detailDriver && (

@@ -1,12 +1,14 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Truck, ClipboardList, ArrowRight, MapPin } from 'lucide-react';
+import { Truck, ClipboardList, ArrowRight, MapPin, Languages } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 import osiLogo from '../assets/osi-logo.jpeg';
 import { setThemeColor, NEUTRAL_COLOR, DISPATCH_COLOR } from '../utils/appManifest';
 
 export default function Landing() {
   const { t } = useTranslation();
+  const { lang, toggle: toggleLang } = useLanguage();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -59,7 +61,10 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-center p-6 relative">
+      <button type="button" onClick={toggleLang} className="absolute top-4 right-4 flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-slate-200 transition-colors">
+        <Languages className="w-4 h-4 hidden sm:block" /> {lang.toUpperCase()}
+      </button>
       {/* Header */}
       <div className="text-center mb-12">
         <a href="https://www.osilogistics.com/" target="_blank" rel="noopener noreferrer">

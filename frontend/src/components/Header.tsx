@@ -107,6 +107,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const { user, logout, updateUser } = useAuth();
   const { dark, toggle: toggleTheme } = useTheme();
   const { lang, toggle: toggleLang } = useLanguage();
+  const roleLabel = t(`layout2.role.${user?.role ?? 'dispatcher'}`, { defaultValue: user?.role ?? '' });
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unread, setUnread] = useState(0);
   const [showNotifs, setShowNotifs] = useState(false);
@@ -275,7 +276,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <div className="hidden md:block">
           <h1 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h1>
           <p className="text-xs text-gray-400 dark:text-slate-500">
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            {new Date().toLocaleDateString(lang === 'en' ? 'en-US' : 'es-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </div>
       </div>
@@ -340,7 +341,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <button
           onClick={toggleLang}
           className="px-2 py-2 rounded-lg text-xs font-bold text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1"
-          title={lang === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+          title={t('layout2.switchLangTitle')}
         >
           <Languages className="w-4 h-4 hidden sm:block" />
           <span>{lang.toUpperCase()}</span>
@@ -405,7 +406,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             </div>
             <div className="hidden md:block text-left">
               <p className="text-xs font-semibold text-gray-900 dark:text-slate-100 leading-none">{user?.name}</p>
-              <p className="text-xs text-gray-400 dark:text-slate-500 capitalize mt-0.5">{user?.role}</p>
+              <p className="text-xs text-gray-400 dark:text-slate-500 capitalize mt-0.5">{roleLabel}</p>
             </div>
             <ChevronDown className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500 hidden md:block" />
           </button>
@@ -415,7 +416,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
               <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-700">
                 <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{user?.name}</p>
                 <p className="text-xs text-gray-400 dark:text-slate-500 truncate">{user?.email}</p>
-                <span className={`badge mt-1 capitalize ${user?.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300' : 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300'}`}>{user?.role}</span>
+                <span className={`badge mt-1 capitalize ${user?.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300' : 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300'}`}>{roleLabel}</span>
               </div>
               <button onClick={() => {
                   setShowUserMenu(false);

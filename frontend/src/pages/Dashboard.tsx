@@ -36,6 +36,7 @@ interface StatCardProps {
 }
 
 function StatCard({ title, value, sub, icon: Icon, color, trend, onClick }: StatCardProps) {
+  const { t } = useTranslation();
   return (
     <div
       className={`card fade-in transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md${onClick ? ' cursor-pointer hover:ring-2 hover:ring-orange-400/50 active:scale-[0.98]' : ''}`}
@@ -49,7 +50,7 @@ function StatCard({ title, value, sub, icon: Icon, color, trend, onClick }: Stat
           {trend !== undefined && (
             <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${trend >= 0 ? 'text-green-600' : 'text-red-500'}`}>
               <TrendingUp className="w-3 h-3 flex-shrink-0" />
-              {trend >= 0 ? '+' : ''}{trend.toFixed(1)}% vs last week
+              {trend >= 0 ? '+' : ''}{trend.toFixed(1)}% {t('dashboard.vsLastWeek')}
             </div>
           )}
         </div>
@@ -62,7 +63,7 @@ function StatCard({ title, value, sub, icon: Icon, color, trend, onClick }: Stat
 }
 
 function HomeOffice({ name, inTransit, pending, onNavigate, isAdmin = false }: { name: string; inTransit: number; pending: number; onNavigate: (path: string) => void; isAdmin?: boolean }) {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const es = !i18n.language?.startsWith('en');
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -102,10 +103,10 @@ function HomeOffice({ name, inTransit, pending, onNavigate, isAdmin = false }: {
         {isAdmin ? (
           <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto w-full">
             <button onClick={() => onNavigate('/drivers')} className="flex flex-col items-center justify-center gap-1.5 px-3 py-4 rounded-2xl bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-amber-200/70 dark:border-white/10 text-gray-800 dark:text-white text-base font-bold active:scale-95 transition">
-              <Truck className="w-6 h-6 text-blue-500" /> Driver
+              <Truck className="w-6 h-6 text-blue-500" /> {t('grupoB.dashboard.driver')}
             </button>
             <button onClick={() => onNavigate('/dispatchers')} className="flex flex-col items-center justify-center gap-1.5 px-3 py-4 rounded-2xl bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-amber-200/70 dark:border-white/10 text-gray-800 dark:text-white text-base font-bold active:scale-95 transition">
-              <Users className="w-6 h-6 text-orange-500" /> Dispatcher
+              <Users className="w-6 h-6 text-orange-500" /> {t('grupoB.dashboard.dispatcher')}
             </button>
           </div>
         ) : (
@@ -114,10 +115,10 @@ function HomeOffice({ name, inTransit, pending, onNavigate, isAdmin = false }: {
             <Plus className="w-4 h-4" /> {es ? 'Nueva orden' : 'New order'}
           </button>
           <button onClick={() => onNavigate('/tracking')} className="flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-xl whitespace-nowrap bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-amber-200/70 dark:border-white/10 text-gray-800 dark:text-white text-sm font-semibold active:scale-95 transition">
-            <MapPin className="w-4 h-4" /> Tracking
+            <MapPin className="w-4 h-4" /> {t('grupoB.dashboard.tracking')}
           </button>
           <button onClick={() => onNavigate('/drivers')} className="flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-xl whitespace-nowrap bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-amber-200/70 dark:border-white/10 text-gray-800 dark:text-white text-sm font-semibold active:scale-95 transition">
-            <Users className="w-4 h-4" /> Drivers
+            <Users className="w-4 h-4" /> {t('grupoB.dashboard.drivers')}
           </button>
         </div>
         )}
@@ -128,7 +129,8 @@ function HomeOffice({ name, inTransit, pending, onNavigate, isAdmin = false }: {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language?.startsWith('en') ? 'en-US' : 'es-US';
   const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [orderStats, setOrderStats] = useState<Record<string, number>>({});
@@ -186,7 +188,7 @@ export default function Dashboard() {
   }
 
   const pieData = stats?.ordersByStatus.map(s => ({
-    name: s.status.replace('_', ' '),
+    name: t(`common.orderStatus.${s.status}`, { defaultValue: s.status.replace('_', ' ') }),
     value: s.count,
     color: STATUS_COLORS[s.status] || '#94a3b8',
   })) || [];
@@ -233,8 +235,8 @@ export default function Dashboard() {
         />
         <StatCard
           title={t('common.nav.commissions')}
-          value={`$${commissionTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-          sub={`$${commissionMonth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${t('dashboard.thisMonth')}`}
+          value={`$${commissionTotal.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          sub={`$${commissionMonth.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${t('dashboard.thisMonth')}`}
           icon={DollarSign}
           color="bg-orange-100 text-orange-600"
           onClick={() => navigate('/commissions')}
@@ -286,7 +288,7 @@ export default function Dashboard() {
         {/* Revenue Chart */}
         <div className="card lg:col-span-2 !px-2 !py-3 sm:!p-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-3">
-            <h3 className="font-semibold text-gray-900 dark:text-slate-100">Revenue & Orders</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-slate-100">{t('grupoB.dashboard.revenueOrders')}</h3>
             <div className="flex gap-1">
               {([7, 14, 28] as const).map(d => (
                 <button
@@ -317,12 +319,12 @@ export default function Dashboard() {
               <YAxis yAxisId="ord" orientation="right" tick={{ fontSize: 10 }} allowDecimals={false} width={20} />
               <Tooltip
                 formatter={(value: number, name: string) => [
-                  name === 'revenue' ? `$${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : value,
-                  name === 'revenue' ? 'Revenue' : 'Orders',
+                  name === 'revenue' ? `$${Number(value).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : value,
+                  name === 'revenue' ? t('grupoB.dashboard.revenue') : t('grupoB.dashboard.orders'),
                 ]}
                 contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
               />
-              <Legend wrapperStyle={{ fontSize: 11 }} formatter={n => n === 'revenue' ? 'Revenue' : 'Orders'} />
+              <Legend wrapperStyle={{ fontSize: 11 }} formatter={n => n === 'revenue' ? t('grupoB.dashboard.revenue') : t('grupoB.dashboard.orders')} />
               <Area yAxisId="rev" type="monotone" dataKey="revenue" stroke="#f97316" strokeWidth={2} fill="url(#revenueGrad)" />
               <Area yAxisId="ord" type="monotone" dataKey="orders" stroke="#3b82f6" strokeWidth={2} fill="url(#ordersGrad)" />
             </AreaChart>
@@ -331,7 +333,7 @@ export default function Dashboard() {
 
         {/* Order Status Pie */}
         <div className="card">
-          <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Orders by Status</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">{t('grupoB.dashboard.ordersByStatus')}</h3>
           <ResponsiveContainer width="100%" height={180}>
             <PieChart>
               <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={3} dataKey="value">
@@ -362,7 +364,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Top Drivers */}
         <div className="card">
-          <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Top Drivers</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">{t('grupoB.dashboard.topDrivers')}</h3>
           <div className="space-y-3">
             {(stats?.topDrivers || []).slice(0, 5).map((driver, i) => (
               <div key={i} className="flex items-center gap-3">
@@ -372,7 +374,7 @@ export default function Dashboard() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">{driver.name}</p>
-                    <span className="text-xs text-gray-500 dark:text-slate-400">{driver.total_deliveries} trips</span>
+                    <span className="text-xs text-gray-500 dark:text-slate-400">{t('grupoB.dashboard.trips', { count: driver.total_deliveries })}</span>
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <div className="flex-1 h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full">
@@ -392,7 +394,7 @@ export default function Dashboard() {
 
         {/* Recent Activity */}
         <div className="card">
-          <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Recent Activity</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">{t('grupoB.dashboard.recentActivity')}</h3>
           <div className="space-y-3">
             {(stats?.recentActivity || []).slice(0, 6).map((activity, i) => (
               <div key={i} className="flex items-start gap-3">
@@ -420,13 +422,13 @@ export default function Dashboard() {
 
       {/* Fleet Stats */}
       <div className="card">
-        <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">Fleet Overview</h3>
+        <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-4">{t('grupoB.dashboard.fleetOverview')}</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { label: 'Total Trucks', value: driverStats.total || 0, color: 'text-gray-900 dark:text-white' },
-            { label: 'Active', value: driverStats.available || 0, color: 'text-green-600' },
-            { label: 'On Break', value: driverStats.on_break || 0, color: 'text-yellow-600' },
-            { label: 'Offline', value: driverStats.offline || 0, color: 'text-gray-400' },
+            { label: t('grupoB.dashboard.totalTrucks'), value: driverStats.total || 0, color: 'text-gray-900 dark:text-white' },
+            { label: t('grupoB.dashboard.active'), value: driverStats.available || 0, color: 'text-green-600' },
+            { label: t('grupoB.dashboard.onBreak'), value: driverStats.on_break || 0, color: 'text-yellow-600' },
+            { label: t('grupoB.dashboard.offline'), value: driverStats.offline || 0, color: 'text-gray-400' },
           ].map((item, i) => (
             <div key={i} className="text-center">
               <Truck className="w-6 h-6 mx-auto text-gray-300 mb-1" />

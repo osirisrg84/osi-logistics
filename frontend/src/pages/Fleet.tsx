@@ -23,6 +23,7 @@ interface TruckFormProps {
 }
 
 function TruckForm({ truck, onClose, onSave }: TruckFormProps) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     plate_number: truck?.plate_number || '',
     make: truck?.make || '',
@@ -72,80 +73,80 @@ function TruckForm({ truck, onClose, onSave }: TruckFormProps) {
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">{truck ? 'Edit Truck' : 'Add New Truck'}</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">{truck ? t('fleet2.editTruck') : t('fleet2.addNewTruck')}</h2>
           <button onClick={onClose}><X className="w-5 h-5 text-gray-500 dark:text-slate-400" /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="label">Plate Number *</label>
+              <label className="label">{t('fleet2.plateNumber')}</label>
               <input className="input" value={form.plate_number} onChange={e => setForm({...form, plate_number: e.target.value})} required placeholder="OSI-XXX" />
             </div>
             <div>
-              <label className="label">Type *</label>
+              <label className="label">{t('fleet2.type')}</label>
               <select className="input" value={form.type} onChange={e => setForm({...form, type: e.target.value})}>
-                {TRUCK_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                {TRUCK_TYPES.map(tt => <option key={tt} value={tt}>{tt}</option>)}
               </select>
             </div>
             <div>
-              <label className="label">Make *</label>
+              <label className="label">{t('fleet2.make')}</label>
               <input className="input" value={form.make} onChange={e => setForm({...form, make: e.target.value})} required placeholder="Ford" />
             </div>
             <div>
-              <label className="label">Model *</label>
+              <label className="label">{t('fleet2.model')}</label>
               <input className="input" value={form.model} onChange={e => setForm({...form, model: e.target.value})} required placeholder="F-650" />
             </div>
             <div>
-              <label className="label">Year *</label>
+              <label className="label">{t('fleet2.year')}</label>
               <input className="input" type="number" value={form.year} onChange={e => setForm({...form, year: e.target.value})} required min="2000" max="2030" />
             </div>
             <div>
-              <label className="label">Color</label>
+              <label className="label">{t('fleet2.color')}</label>
               <input className="input" value={form.color} onChange={e => setForm({...form, color: e.target.value})} placeholder="White" />
             </div>
             <div>
-              <label className="label">Capacity (lbs)</label>
+              <label className="label">{t('fleet2.capacityLbs')}</label>
               <input className="input" type="number" value={form.capacity_kg} onChange={e => setForm({...form, capacity_kg: e.target.value})} placeholder="5000" />
             </div>
             <div>
-              <label className="label">Volume (m³)</label>
+              <label className="label">{t('fleet2.volumeM3')}</label>
               <input className="input" type="number" value={form.capacity_m3} onChange={e => setForm({...form, capacity_m3: e.target.value})} placeholder="20" />
             </div>
             <div>
-              <label className="label">Mileage</label>
+              <label className="label">{t('fleet2.mileage')}</label>
               <input className="input" type="number" value={form.mileage} onChange={e => setForm({...form, mileage: e.target.value})} placeholder="0" />
             </div>
             <div>
-              <label className="label">Fuel Level (%)</label>
+              <label className="label">{t('fleet2.fuelLevelPct')}</label>
               <input className="input" type="number" value={form.fuel_level} onChange={e => setForm({...form, fuel_level: e.target.value})} min="0" max="100" placeholder="100" />
             </div>
             <div>
-              <label className="label">Last Maintenance</label>
+              <label className="label">{t('fleet2.lastMaintenance')}</label>
               <input className="input" type="date" value={form.last_maintenance} onChange={e => setForm({...form, last_maintenance: e.target.value})} />
             </div>
             <div>
-              <label className="label">Next Maintenance</label>
+              <label className="label">{t('fleet2.nextMaintenance')}</label>
               <input className="input" type="date" value={form.next_maintenance} onChange={e => setForm({...form, next_maintenance: e.target.value})} />
             </div>
             <div className="col-span-2">
               <label className="label">VIN</label>
-              <input className="input font-mono" value={form.vin} onChange={e => setForm({...form, vin: e.target.value})} placeholder="Vehicle Identification Number" />
+              <input className="input font-mono" value={form.vin} onChange={e => setForm({...form, vin: e.target.value})} placeholder={t('fleet2.vinPlaceholder')} />
             </div>
             {truck && (
               <div>
-                <label className="label">Status</label>
+                <label className="label">{t('fleet2.status')}</label>
                 <select className="input" value={form.status} onChange={e => setForm({...form, status: e.target.value as typeof form.status})}>
-                  <option value="active">Active</option>
-                  <option value="maintenance">Maintenance</option>
-                  <option value="inactive">Inactive</option>
+                  <option value="active">{t('fleet.status.active')}</option>
+                  <option value="maintenance">{t('fleet.status.maintenance')}</option>
+                  <option value="inactive">{t('fleet.status.inactive')}</option>
                 </select>
               </div>
             )}
           </div>
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">Cancel</button>
+            <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">{t('fleet2.cancel')}</button>
             <button type="submit" disabled={saving} className="btn-primary flex-1 justify-center">
-              {saving ? 'Saving...' : truck ? 'Save Changes' : 'Add Truck'}
+              {saving ? t('fleet2.saving') : truck ? t('fleet2.saveChanges') : t('fleet2.addTruckBtn')}
             </button>
           </div>
         </form>
@@ -308,11 +309,11 @@ export default function Fleet() {
               {/* Capacity */}
               <div className="grid grid-cols-2 gap-2 mb-4">
                 <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-lg p-2 text-center">
-                  <p className="text-xs text-gray-500 dark:text-slate-400">Capacity</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400">{t('fleet2.capacity')}</p>
                   <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{truck.capacity_kg.toLocaleString()} kg</p>
                 </div>
                 <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-lg p-2 text-center">
-                  <p className="text-xs text-gray-500 dark:text-slate-400">Volume</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400">{t('fleet2.volume')}</p>
                   <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{truck.capacity_m3} m³</p>
                 </div>
               </div>
@@ -320,7 +321,7 @@ export default function Fleet() {
               {/* Fuel Level */}
               <div className="mb-3">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-gray-500 flex items-center gap-1"><Fuel className="w-3 h-3" /> Fuel Level</span>
+                  <span className="text-xs text-gray-500 flex items-center gap-1"><Fuel className="w-3 h-3" /> {t('fleet2.fuelLevel')}</span>
                   <span className={`text-xs font-semibold ${truck.fuel_level < 30 ? 'text-red-500' : truck.fuel_level < 60 ? 'text-yellow-500' : 'text-green-600'}`}>
                     {truck.fuel_level}%
                   </span>
@@ -337,7 +338,7 @@ export default function Fleet() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
                   <Wrench className="w-3 h-3" />
-                  Next service: {format(new Date(truck.next_maintenance), 'MMM d, yyyy')}
+                  {t('fleet2.nextService', { date: format(new Date(truck.next_maintenance), 'MMM d, yyyy') })}
                 </div>
                 <span className={`badge text-xs ${maintStatus.color}`}>
                   {maintStatus.label}
@@ -349,11 +350,11 @@ export default function Fleet() {
                 <span>{truck.mileage.toLocaleString()} mi</span>
                 {truck.driver_name && (
                   <span className="flex items-center gap-1 text-blue-600">
-                    <span>Driver: {truck.driver_name}</span>
+                    <span>{t('fleet2.driver', { name: truck.driver_name })}</span>
                   </span>
                 )}
                 {truck.active_orders !== undefined && truck.active_orders > 0 && (
-                  <span className="text-orange-500">{truck.active_orders} active orders</span>
+                  <span className="text-orange-500">{t('fleet2.activeOrders', { count: truck.active_orders })}</span>
                 )}
               </div>
 
@@ -370,7 +371,7 @@ export default function Fleet() {
         <TruckForm
           truck={editTruck || undefined}
           onClose={() => { setShowForm(false); setEditTruck(null); }}
-          onSave={(isNew) => { fetchTrucks(); if (isNew) { showToast('¡Camión agregado con éxito! 🚛'); playSuccessChime(); } }}
+          onSave={(isNew) => { fetchTrucks(); if (isNew) { showToast(t('fleet2.truckAdded')); playSuccessChime(); } }}
         />
       )}
     </div>

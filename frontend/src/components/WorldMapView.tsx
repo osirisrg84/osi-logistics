@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { driversApi } from '../services/api';
 import { Driver } from '../types';
+import { useTranslation } from 'react-i18next';
 
 // ── Operating countries ──────────────────────────────────────────────────────
 const COUNTRIES = [
@@ -109,6 +110,7 @@ function FitBounds({ drivers }: { drivers: Driver[] }) {
 }
 
 export default function WorldMapView() {
+  const { t } = useTranslation();
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -133,15 +135,15 @@ export default function WorldMapView() {
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-3 text-center">
           <p className="text-xl font-bold text-orange-500">{COUNTRIES.length}</p>
-          <p className="text-xs text-gray-500 dark:text-slate-400">Countries</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400">{t('grupoB.map.countries')}</p>
         </div>
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-3 text-center">
           <p className="text-xl font-bold text-green-600">{online}</p>
-          <p className="text-xs text-gray-500 dark:text-slate-400">Online Drivers</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400">{t('grupoB.map.onlineDrivers')}</p>
         </div>
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-3 text-center">
           <p className="text-xl font-bold text-blue-600">{onRoute}</p>
-          <p className="text-xs text-gray-500 dark:text-slate-400">On Route</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400">{t('grupoB.map.onRoute')}</p>
         </div>
       </div>
 
@@ -175,13 +177,13 @@ export default function WorldMapView() {
               >
                 <Popup>
                   <div className="text-sm min-w-[140px]">
-                    <p className="font-bold text-base">{c.flag} {c.name}</p>
+                    <p className="font-bold text-base">{c.flag} {t(`grupoB.map.country_${c.code}`)}</p>
                     <span className={`inline-block mt-1 px-2 py-0.5 rounded text-xs font-semibold ${
                       c.tier === 'hub' ? 'bg-orange-100 text-orange-700' :
                       c.tier === 'active' ? 'bg-blue-100 text-blue-700' :
                       'bg-slate-100 text-slate-600'
                     }`}>
-                      {TIER_STYLE[c.tier].label}
+                      {t(`grupoB.map.tier_${c.tier}`)}
                     </span>
                   </div>
                 </Popup>
@@ -204,7 +206,7 @@ export default function WorldMapView() {
                         className="w-2 h-2 rounded-full flex-shrink-0"
                         style={{ background: DRIVER_STATUS_COLOR[d.status] }}
                       />
-                      <span className="text-xs font-medium">{DRIVER_STATUS_LABEL[d.status]}</span>
+                      <span className="text-xs font-medium">{t(`grupoB.map.ds_${d.status}`, { defaultValue: DRIVER_STATUS_LABEL[d.status] })}</span>
                     </div>
                     {d.plate_number && (
                       <p className="text-xs text-gray-400 mt-1">🚛 {d.plate_number} · {d.make} {d.model}</p>
@@ -219,46 +221,46 @@ export default function WorldMapView() {
 
       {/* Map legend */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-3">
-        <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase mb-2">Legend</p>
+        <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase mb-2">{t('grupoB.map.legend')}</p>
         <div className="flex flex-wrap gap-x-4 gap-y-2">
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-orange-500 flex-shrink-0" />
-            <span className="text-xs text-gray-600 dark:text-slate-300">Main Hub</span>
+            <span className="text-xs text-gray-600 dark:text-slate-300">{t('grupoB.map.mainHub')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-blue-500 flex-shrink-0" />
-            <span className="text-xs text-gray-600 dark:text-slate-300">Active Region</span>
+            <span className="text-xs text-gray-600 dark:text-slate-300">{t('grupoB.map.activeRegion')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-slate-400 flex-shrink-0" />
-            <span className="text-xs text-gray-600 dark:text-slate-300">Partner Region</span>
+            <span className="text-xs text-gray-600 dark:text-slate-300">{t('grupoB.map.partnerRegion')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-green-500 flex-shrink-0" />
-            <span className="text-xs text-gray-600 dark:text-slate-300">Driver Online</span>
+            <span className="text-xs text-gray-600 dark:text-slate-300">{t('grupoB.map.driverOnline')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-orange-400 flex-shrink-0" />
-            <span className="text-xs text-gray-600 dark:text-slate-300">On Delivery</span>
+            <span className="text-xs text-gray-600 dark:text-slate-300">{t('grupoB.map.onDelivery')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-slate-400 flex-shrink-0" />
-            <span className="text-xs text-gray-600 dark:text-slate-300">Offline</span>
+            <span className="text-xs text-gray-600 dark:text-slate-300">{t('grupoB.map.offline')}</span>
           </div>
         </div>
       </div>
 
       {/* Countries grid */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-4">
-        <p className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Operating Countries</p>
+        <p className="text-sm font-semibold text-gray-900 dark:text-white mb-3">{t('grupoB.map.operatingCountries')}</p>
         <div className="grid grid-cols-2 gap-2">
           {COUNTRIES.map(c => (
             <div key={c.code} className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-slate-700">
               <span className="text-lg">{c.flag}</span>
               <div className="min-w-0">
-                <p className="text-xs font-medium text-gray-900 dark:text-white truncate">{c.name}</p>
+                <p className="text-xs font-medium text-gray-900 dark:text-white truncate">{t(`grupoB.map.country_${c.code}`)}</p>
                 <span className={`text-[10px] font-semibold ${TIER_STYLE[c.tier].text}`}>
-                  {TIER_STYLE[c.tier].label}
+                  {t(`grupoB.map.tier_${c.tier}`)}
                 </span>
               </div>
             </div>

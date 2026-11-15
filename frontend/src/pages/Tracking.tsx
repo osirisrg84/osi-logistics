@@ -73,7 +73,7 @@ interface StatusEvent { id: string; name: string; status: string; lat: number; l
 interface StatusToast { id: string; name: string; online: boolean; }
 
 export default function Tracking() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
   const [driverPath, setDriverPath] = useState<[number, number][]>([]);
@@ -99,7 +99,7 @@ export default function Tracking() {
     try {
       const r = await fetch(
         `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-        { headers: { 'Accept-Language': 'en-US,en' } }
+        { headers: { 'Accept-Language': (i18n.language?.startsWith('en') ? 'en-US,en' : 'es-US,es') } }
       );
       const data = await r.json();
       const city  = data.address?.city || data.address?.town || data.address?.village || data.address?.county || '';

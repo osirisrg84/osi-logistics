@@ -53,6 +53,10 @@ export default function DispatcherProfilePage() {
   const [profile, setProfile]   = useState<ProfileData>({});
   const [commRows, setCommRows] = useState<CommissionRow[]>([]);
   const [loading, setLoading]   = useState(true);
+  const availLabel = (v: string) => {
+    const map: Record<string, string> = { 'full-time': 'registerDispatcher.availabilityFullTime', 'part-time': 'registerDispatcher.availabilityPartTime', 'contract': 'registerDispatcher.availabilityContract', 'on-call': 'registerDispatcher.availabilityOnCall' };
+    return map[v] ? t(map[v]) : v;
+  };
   const EQUIP_TYPES = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'];
   const [editingContact, setEditingContact] = useState(false);
   const [savingContact,  setSavingContact]  = useState(false);
@@ -100,10 +104,10 @@ export default function DispatcherProfilePage() {
       }
       await userApi.sendVerification(type);
       setCodeSent(true);
-      setVerifyMsg(type === 'phone' ? 'Código enviado — revisa tus SMS o correo' : 'Código enviado — revisa tu correo');
+      setVerifyMsg(type === 'phone' ? t('profile2.codeSentPhone') : t('profile2.codeSentEmail'));
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { error?: string } }; message?: string })
-        ?.response?.data?.error || (e as { message?: string })?.message || 'Error al enviar el código';
+        ?.response?.data?.error || (e as { message?: string })?.message || t('profile2.sendCodeError');
       setVerifyMsg(msg);
       recaptchaRef.current?.clear(); recaptchaRef.current = null;
     } finally { setSendingCode(false); }
@@ -123,7 +127,7 @@ export default function DispatcherProfilePage() {
         setProfile(prev => ({ ...prev, [`${verifying}_verified`]: true }));
       }
       setVerifying(null); setCodeInput(''); setCodeSent(false); setConfirmationResult(null); setVerifyMsg('');
-    } catch { setVerifyMsg('Código incorrecto o expirado'); }
+    } catch { setVerifyMsg(t('profile2.codeInvalid')); }
     finally { setVerifyingCode(false); }
   };
 
@@ -261,7 +265,7 @@ export default function DispatcherProfilePage() {
           <div className="absolute right-12 top-5 w-5 h-5 rounded-full border border-white/8" />
           <div className="absolute right-20 top-2 w-3 h-3 rounded-full" style={{ background: `${accent}18` }} />
           <div className="absolute right-4 bottom-2.5 text-[9px] font-bold tracking-[0.3em] text-white/30 uppercase select-none">
-            OSI LOGISTICS · {isAdmin ? 'ADMIN' : 'DISPATCH'}
+            OSI LOGISTICS · {isAdmin ? t('profile2.badgeAdmin') : t('profile2.badgeDispatch')}
           </div>
         </div>
 
@@ -348,8 +352,8 @@ export default function DispatcherProfilePage() {
                         try {
                           await userApi.sendVerification('phone');
                           setCodeSent(true);
-                          setVerifyMsg('Código enviado — revisa tu correo');
-                        } catch { setVerifyMsg('Error al reenviar'); }
+                          setVerifyMsg(t('profile2.codeSentEmail'));
+                        } catch { setVerifyMsg(t('profile2.resendError')); }
                         finally { setSendingCode(false); }
                       }} className="text-[10px] text-gray-400 underline w-full text-center">
                         {t('profile.resendToEmail')}
@@ -608,7 +612,7 @@ export default function DispatcherProfilePage() {
         {editingProfile ? (
           <div className="space-y-3">
             {([
-              { label: t('profile.languagesLabel'), key: 'languages',        placeholder: 'English, Spanish', type: 'text'   },
+              { label: t('profile.languagesLabel'), key: 'languages',        placeholder: t('profile2.languagesPlaceholder'), type: 'text'   },
               { label: t('profile.yearsExpLabel'),   key: 'years_experience', placeholder: '5',                type: 'number' },
             ] as { label: string; key: string; placeholder: string; type: string }[]).map(({ label, key, placeholder, type }) => (
               <div key={key}>
@@ -624,7 +628,7 @@ export default function DispatcherProfilePage() {
               <select value={profileForm.availability}
                 onChange={e => setProfileForm(f => ({ ...f, availability: e.target.value }))}
                 className={`w-full px-3 py-2 rounded-xl text-sm border outline-none focus:ring-2 focus:ring-orange-400/40 ${dark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`}>
-                {['full-time', 'part-time', 'contract', 'on-call'].map(o => <option key={o}>{o}</option>)}
+                {['full-time', 'part-time', 'contract', 'on-call'].map(o => <option key={o} value={o}>{availLabel(o)}</option>)}
               </select>
             </div>
             <div>
@@ -650,7 +654,7 @@ export default function DispatcherProfilePage() {
         ) : (
           <div className="space-y-2">
             {([
-              { icon: Clock,     label: profile.availability || '—',                sub: t('profile.availabilityLabel') },
+              { icon: Clock,     label: profile.availability ? availLabel(profile.availability) : '—',                sub: t('profile.availabilityLabel') },
               { icon: Briefcase, label: profile.years_experience ? `${profile.years_experience} ${t('profile.yearsSuffix')}` : '—', sub: t('profile.experienceLabel') },
               { icon: Globe,     label: profile.languages || '—',                   sub: t('profile.languagesLabel') },
             ] as { icon: React.ComponentType<{ className?: string }>; label: string; sub: string }[]).filter(row => row.label && row.label !== '—').map(row => (

@@ -63,6 +63,7 @@ interface UserFormProps {
 }
 
 function UserForm({ user, onClose, onSave }: UserFormProps) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -76,8 +77,8 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user && !form.password) { setError('Password is required for new users'); return; }
-    if (form.password && form.password.length < 8) { setError('Password must be at least 8 characters'); return; }
+    if (!user && !form.password) { setError(t('usersMgmt2.passwordRequired')); return; }
+    if (form.password && form.password.length < 8) { setError(t('usersMgmt2.passwordMin')); return; }
     setSaving(true);
     try {
       const payload: Record<string, unknown> = { name: form.name, email: form.email, role: form.role };
@@ -91,7 +92,7 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
       onSave();
       onClose();
     } catch (err: unknown) {
-      setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to save user');
+      setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error || t('usersMgmt2.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -101,7 +102,7 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">{user ? 'Edit User' : 'Create User'}</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 dark:text-slate-100">{user ? t('usersMgmt2.editUser') : t('usersMgmt.createUser')}</h2>
           <button onClick={onClose}><X className="w-5 h-5 text-gray-400 dark:text-slate-500" /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -111,19 +112,19 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
             </div>
           )}
           <div>
-            <label className="label">Full Name *</label>
+            <label className="label">{t('usersMgmt2.fullName')}</label>
             <input className="input" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
           </div>
           <div>
-            <label className="label">Email *</label>
+            <label className="label">{t('usersMgmt2.email')}</label>
             <input className="input" type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
           </div>
           <div>
-            <label className="label">{user ? 'New Password (leave blank to keep)' : 'Password *'}</label>
+            <label className="label">{user ? t('usersMgmt2.newPassword') : t('usersMgmt2.password')}</label>
             <div className="relative">
               <input className="input pr-10" type={showPassword ? 'text' : 'password'} value={form.password}
                 onChange={e => setForm({...form, password: e.target.value})}
-                placeholder={user ? 'Leave blank to keep current' : 'Min. 8 characters'}
+                placeholder={user ? t('usersMgmt2.leaveBlank') : t('usersMgmt2.minChars')}
                 required={!user} />
               <button type="button" onClick={() => setShowPassword(v => !v)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -132,7 +133,7 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
             </div>
           </div>
           <div>
-            <label className="label">Role *</label>
+            <label className="label">{t('usersMgmt2.role')}</label>
             <div className="grid grid-cols-3 gap-2">
               {(['admin', 'dispatcher', 'driver'] as const).map(r => {
                 const Icon = ROLE_ICONS[r];
@@ -155,8 +156,8 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
           {user && (
             <div className="flex items-center justify-between py-2">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-slate-100">Active Account</p>
-                <p className="text-xs text-gray-400 dark:text-slate-500">Deactivated users cannot sign in</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{t('usersMgmt2.activeAccount')}</p>
+                <p className="text-xs text-gray-400 dark:text-slate-500">{t('usersMgmt2.deactivatedHint')}</p>
               </div>
               <button type="button" onClick={() => setForm({...form, active: form.active ? 0 : 1})}
                 className={`w-11 h-6 rounded-full transition-colors ${form.active ? 'bg-green-500' : 'bg-gray-200'}`}>
@@ -165,10 +166,10 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
             </div>
           )}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">Cancel</button>
+            <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">{t('usersMgmt2.cancel')}</button>
             <button type="submit" disabled={saving}
               className="flex-1 justify-center bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm">
-              {saving ? 'Saving...' : user ? 'Save Changes' : 'Create User'}
+              {saving ? t('usersMgmt2.saving') : user ? t('usersMgmt2.saveChanges') : t('usersMgmt.createUser')}
             </button>
           </div>
         </form>

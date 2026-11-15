@@ -22,6 +22,7 @@ import { useDriverAuth } from '../context/DriverAuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { ordersApi, driversApi, billingApi, notificationsApi, userApi, driverAxios, communityApi, analyticsApi, incidentsApi, assistantApi } from '../services/driverApi';
 import { StripeCardPayment } from '../components/StripeCardPayment';
 import { IncidentReportModal } from '../components/IncidentReportModal';
@@ -97,7 +98,7 @@ async function registerDriverPush(): Promise<void> {
   }
 }
 
-function calcAuthority(since: string): string {
+function calcAuthority(since: string, t: (key: string, opts?: Record<string, unknown>) => string): string {
   if (!since) return '';
   const start = new Date(since);
   const now = new Date();
@@ -105,9 +106,11 @@ function calcAuthority(since: string): string {
   let months = now.getMonth() - start.getMonth();
   if (now.getDate() < start.getDate()) months--;
   if (months < 0) { years--; months += 12; }
-  if (years === 0) return `${months} mes${months !== 1 ? 'es' : ''}`;
-  if (months === 0) return `${years} año${years !== 1 ? 's' : ''}`;
-  return `${years} año${years !== 1 ? 's' : ''}, ${months} mes${months !== 1 ? 'es' : ''}`;
+  const mTxt = t('driverPortal2.monthsCount', { count: months });
+  const yTxt = t('driverPortal2.yearsCount', { count: years });
+  if (years === 0) return mTxt;
+  if (months === 0) return yTxt;
+  return `${yTxt}, ${mTxt}`;
 }
 
 function getStatusFlow(t: (key: string) => string): Record<string, { next: string; label: string; color: string }> {
@@ -127,8 +130,11 @@ const DOC_TYPES: { value: OrderDocument['type']; label: string }[] = [
   { value: 'scale_receipt', label: ORDER_DOCUMENT_TYPE_LABELS.scale_receipt },
   { value: 'other',         label: ORDER_DOCUMENT_TYPE_LABELS.other },
 ];
+// Etiqueta traducida del tipo de documento (el value que se envia al backend no cambia).
+const docTypeLabel = (t: (key: string) => string, type: OrderDocument['type']) => t(`driverPortal2.docType.${type}`);
 
 function DriverRateCon({ orderId }: { orderId: string }) {
+  const { t } = useTranslation();
   const [rateCon, setRateCon] = useState<{ filename: string; uploaded_at: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -144,7 +150,7 @@ function DriverRateCon({ orderId }: { orderId: string }) {
 
   const handleFile = async (file: File) => {
     setError('');
-    if (file.size > 8 * 1024 * 1024) { setError('El archivo no puede superar 8MB'); return; }
+    if (file.size > 8 * 1024 * 1024) { setError(t('driverPortal2.fileTooBig')); return; }
     setUploading(true);
     try {
       const base64 = await new Promise<string>((resolve, reject) => {
@@ -156,7 +162,7 @@ function DriverRateCon({ orderId }: { orderId: string }) {
       const { data } = await ordersApi.uploadRateCon(orderId, { filename: file.name, data: base64 });
       setRateCon({ filename: data.filename, uploaded_at: data.uploaded_at });
     } catch {
-      setError('Error al subir el archivo');
+      setError(t('driverPortal2.uploadFileError'));
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -174,7 +180,7 @@ function DriverRateCon({ orderId }: { orderId: string }) {
         <div className="flex items-center justify-between gap-2 bg-white dark:bg-slate-700 rounded-lg px-2.5 py-1.5 border border-amber-100 dark:border-amber-800/30">
           <p className="text-xs text-gray-700 dark:text-slate-300 truncate">{rateCon.filename}</p>
           <label className="text-[10px] font-semibold text-amber-600 hover:text-amber-700 flex-shrink-0 cursor-pointer">
-            {uploading ? '...' : 'Reemplazar'}
+            {uploading ? '...' : t('driverPortal2.replace')}
             <input ref={fileInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" disabled={uploading}
               onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
           </label>
@@ -182,7 +188,7 @@ function DriverRateCon({ orderId }: { orderId: string }) {
       ) : (
         <label className="flex items-center justify-center gap-1.5 cursor-pointer px-3 py-2 rounded-lg border-2 border-dashed border-amber-300 dark:border-amber-700 hover:border-amber-400 transition-colors text-xs font-semibold text-amber-600 dark:text-amber-400">
           {uploading ? <div className="w-3.5 h-3.5 border-2 border-amber-300 border-t-amber-600 rounded-full animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-          Subir Rate Confirmation (PDF, JPG, PNG)
+          {t('driverPortal2.uploadRateCon')}
           <input ref={fileInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" disabled={uploading}
             onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
         </label>
@@ -193,6 +199,7 @@ function DriverRateCon({ orderId }: { orderId: string }) {
 }
 
 function OrderDocuments({ orderId }: { orderId: string }) {
+  const { t } = useTranslation();
   const [docs, setDocs] = useState<OrderDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [docType, setDocType] = useState<OrderDocument['type']>('signed_bol');
@@ -210,7 +217,7 @@ function OrderDocuments({ orderId }: { orderId: string }) {
 
   const handleFile = async (file: File) => {
     setError(''); setSent(false);
-    if (file.size > 8 * 1024 * 1024) { setError('El archivo no puede superar 8MB'); return; }
+    if (file.size > 8 * 1024 * 1024) { setError(t('driverPortal2.fileTooBig')); return; }
     setUploading(true);
     try {
       const base64 = await new Promise<string>((resolve, reject) => {
@@ -223,7 +230,7 @@ function OrderDocuments({ orderId }: { orderId: string }) {
       setDocs(prev => [{ id: data.id, type: docType, filename: data.filename, uploaded_at: data.uploaded_at }, ...prev]);
       setSent(true);
     } catch {
-      setError('Error al subir el documento');
+      setError(t('driverPortal2.uploadDocError'));
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -236,14 +243,14 @@ function OrderDocuments({ orderId }: { orderId: string }) {
       setDocs(prev => prev.filter(d => d.id !== docId));
       setSent(false);
     } catch {
-      setError('Error al eliminar el documento');
+      setError(t('driverPortal2.deleteDocError'));
     }
   };
 
   return (
     <div className="bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-xl p-3 space-y-2">
       <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 flex items-center gap-1.5">
-        <FileText className="w-3.5 h-3.5 text-indigo-500" /> Documentos
+        <FileText className="w-3.5 h-3.5 text-indigo-500" /> {t('driverPortal2.documents')}
       </p>
 
       {!loading && docs.length > 0 && (
@@ -251,11 +258,11 @@ function OrderDocuments({ orderId }: { orderId: string }) {
           {docs.map(doc => (
             <div key={doc.id} className="flex items-center justify-between gap-2 bg-white dark:bg-slate-700 rounded-lg px-2.5 py-1.5 border border-indigo-100 dark:border-indigo-800/30">
               <div className="min-w-0">
-                <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-wide">{ORDER_DOCUMENT_TYPE_LABELS[doc.type]}</p>
+                <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-wide">{docTypeLabel(t, doc.type)}</p>
                 <p className="text-xs text-gray-700 dark:text-slate-300 truncate">{doc.filename}</p>
               </div>
               <button onClick={() => handleDelete(doc.id)} className="text-[10px] font-semibold text-red-400 hover:text-red-500 flex-shrink-0">
-                Eliminar
+                {t('driverPortal2.delete')}
               </button>
             </div>
           ))}
@@ -265,17 +272,17 @@ function OrderDocuments({ orderId }: { orderId: string }) {
       <div className="flex gap-2">
         <select value={docType} onChange={e => setDocType(e.target.value as OrderDocument['type'])}
           className="flex-1 text-xs rounded-lg border border-indigo-200 dark:border-indigo-800/40 bg-white dark:bg-slate-700 px-2 py-1.5 text-gray-700 dark:text-slate-200">
-          {DOC_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+          {DOC_TYPES.map(d => <option key={d.value} value={d.value}>{docTypeLabel(t, d.value)}</option>)}
         </select>
         <label className="flex items-center justify-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-lg border-2 border-dashed border-indigo-300 dark:border-indigo-700 hover:border-indigo-400 transition-colors text-xs font-semibold text-indigo-600 dark:text-indigo-400 flex-shrink-0">
           {uploading ? <div className="w-3.5 h-3.5 border-2 border-indigo-300 border-t-indigo-600 rounded-full animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-          Subir
+          {t('driverPortal2.upload')}
           <input ref={fileInputRef} type="file" accept="image/*,application/pdf" className="hidden"
             onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} disabled={uploading} />
         </label>
       </div>
 
-      {sent && <p className="text-[10px] text-green-600 dark:text-green-400">Documento enviado por correo a Rate Confirmation ✓</p>}
+      {sent && <p className="text-[10px] text-green-600 dark:text-green-400">{t('driverPortal2.docSentByEmail')}</p>}
       {error && <p className="text-[10px] text-red-500">{error}</p>}
     </div>
   );
@@ -619,8 +626,8 @@ export default function DriverPortal() {
     { id: 'zelle',  label: 'Zelle',         icon: '📱' },
     { id: 'paypal', label: 'PayPal',         icon: '🅿️' },
     { id: 'venmo',  label: 'Venmo',          icon: '💸' },
-    { id: 'ach',    label: 'Direct Deposit', icon: '🏦' },
-    { id: 'check',  label: 'Check',          icon: '📝' },
+    { id: 'ach',    label: t('driverPortal2.directDeposit'), icon: '🏦' },
+    { id: 'check',  label: t('driverPortal2.check'),          icon: '📝' },
   ];
   const [payoutMethod,  setPayoutMethod]  = useState('');
   const [payoutDetails, setPayoutDetails] = useState<PayoutDetails>({});
@@ -769,7 +776,7 @@ export default function DriverPortal() {
       setCommunityPosts(prev => [data, ...prev]);
       setPostText('');
     } catch {
-      alert('No se pudo publicar. Intenta de nuevo.');
+      alert(t('driverPortal2.postError'));
     } finally {
       setPosting(false);
     }
@@ -849,7 +856,7 @@ export default function DriverPortal() {
       case 'paypal': return details.email || '—';
       case 'venmo':  return details.username || '—';
       case 'ach':    return details.bank ? `${details.bank} · ****${(details.account || '').slice(-4)}` : '—';
-      case 'check':  return details.payable_to ? `A nombre de: ${details.payable_to}` : '—';
+      case 'check':  return details.payable_to ? t('driverPortal2.payableToLine', { name: details.payable_to }) : '—';
       default:       return '—';
     }
   };
@@ -923,7 +930,7 @@ export default function DriverPortal() {
       setNewFav({ name: '', address: '', type: 'home' });
       setShowAddFav(false);
     } catch {
-      setFavError('No se pudo guardar. Intenta de nuevo.');
+      setFavError(t('driverPortal2.favSaveError'));
     } finally {
       setSavingFav(false);
     }
@@ -1299,7 +1306,7 @@ export default function DriverPortal() {
       // abierta en primer plano y esta es la que se ve.
       if ('Notification' in window) {
         const miles = Math.round((offer.distance_km || 0) * 0.621371);
-        const show = () => new Notification('🚛 Nueva oferta de carga', {
+        const show = () => new Notification(i18n.t('driverPortal2.newOfferTitle'), {
           body: `${offer.order_number} · $${Math.round(offer.price).toLocaleString('en-US')}${miles ? ' · ' + miles + ' mi' : ''}\n${formatLocation(offer.pickup_address, offer.pickup_contact)} → ${formatLocation(offer.delivery_address, offer.delivery_contact)}`,
           icon: '/favicon.ico',
           requireInteraction: true,
@@ -1506,7 +1513,7 @@ export default function DriverPortal() {
     // saca de la app (y de recibir mas ofertas) a mitad de una entrega que
     // todavia tiene que terminar.
     if (newStatus === 'offline' && activeOrders.length > 0) {
-      alert('No puedes ponerte "Offline" mientras tengas una orden en curso.');
+      alert(t('driverPortal2.cannotGoOffline'));
       return;
     }
     setTogglingStatus(true);
@@ -1528,7 +1535,7 @@ export default function DriverPortal() {
   // llegar si no tiene la app abierta. Se le pide primero ponerse "Offline".
   const handleLogoutClick = () => {
     if (driverStatus !== 'offline') {
-      alert('Debes ponerte "Offline" antes de cerrar sesión.');
+      alert(t('driverPortal2.mustGoOffline'));
       return;
     }
     logout();
@@ -1571,7 +1578,7 @@ export default function DriverPortal() {
         window.open(data.url, '_blank');
       }
     } catch {
-      alert('Error al conectar con Stripe. Intenta de nuevo.');
+      alert(t('driverPortal2.stripeError'));
     } finally {
       setPayProcessing(false);
     }
@@ -1689,7 +1696,7 @@ export default function DriverPortal() {
             <div className="flex items-center gap-2.5">
               <img src={osiLogo} alt="OSI Logistics" className="h-8 w-auto object-contain rounded-md flex-shrink-0" />
               <span className="text-xs font-semibold px-2.5 py-1 rounded-full tracking-wide text-blue-300 bg-blue-500/20 border border-blue-500/30">
-                Driver Portal
+                {t('driverPortal2.portalBadge')}
               </span>
             </div>
             <div className="flex items-center gap-0.5">
@@ -1738,9 +1745,9 @@ export default function DriverPortal() {
                   }}>
                   <Power className={`w-3 h-3 flex-shrink-0 transition-colors ${driverStatus !== 'offline' ? 'text-green-400' : 'text-slate-600'}`} />
                   <div className="flex-1 min-w-0 text-left">
-                    <p className="text-[9px] font-bold text-white leading-none">Go Online</p>
+                    <p className="text-[9px] font-bold text-white leading-none">{t('driverPortal2.goOnline')}</p>
                     <p className="text-[8px] leading-none mt-0.5" style={{ color: driverStatus !== 'offline' ? '#4ade80' : '#475569' }}>
-                      {driverStatus === 'offline' ? 'Offline' : driverStatus === 'on_break' ? 'Break' : 'Online'}
+                      {driverStatus === 'offline' ? t('driverPortal2.stateOffline') : driverStatus === 'on_break' ? t('driverPortal2.stateBreak') : t('driverPortal2.stateOnline')}
                     </p>
                   </div>
                   {togglingStatus
@@ -1764,7 +1771,7 @@ export default function DriverPortal() {
                   <div className="flex-1 min-w-0 text-left">
                     <p className="text-[9px] font-bold text-white leading-none">GPS</p>
                     <p className="text-[8px] leading-none mt-0.5" style={{ color: trackingOn ? '#22d3ee' : '#475569' }}>
-                      {trackingOn ? 'Live' : 'Paused'}
+                      {trackingOn ? t('driverPortal2.gpsLive') : t('driverPortal2.gpsPaused')}
                     </p>
                   </div>
                   <div className="relative flex-shrink-0 rounded-full" style={{ width: 24, height: 13, background: trackingOn ? 'linear-gradient(90deg,#06b6d4,#0891b2)' : 'rgba(51,65,85,0.9)', boxShadow: trackingOn ? '0 0 6px rgba(6,182,212,0.4)' : 'none', transition: 'background 0.25s' }}>
@@ -1813,19 +1820,19 @@ export default function DriverPortal() {
                 <div className="flex gap-2">
                   {isBusy && (
                     <div className="flex items-center gap-1 text-[10px] text-orange-400 bg-orange-500/10 rounded-lg px-2 py-1.5 flex-1 border border-orange-500/15">
-                      <AlertTriangle className="w-3 h-3 flex-shrink-0" /> Active delivery in progress
+                      <AlertTriangle className="w-3 h-3 flex-shrink-0" /> {t('driverPortal2.activeDelivery')}
                     </div>
                   )}
                   {!isBusy && driverStatus !== 'on_break' && (
                     <button onClick={() => { playBreakSound(); setStatus('on_break'); }} disabled={togglingStatus}
                       className="flex-1 flex items-center justify-center gap-1 text-[11px] font-semibold py-1.5 rounded-xl border border-yellow-500/25 text-yellow-400 bg-yellow-500/8 hover:bg-yellow-500/15 transition-colors">
-                      <Coffee className="w-3 h-3" /> Take a Break
+                      <Coffee className="w-3 h-3" /> {t('driverPortal2.takeBreak')}
                     </button>
                   )}
                   {driverStatus === 'on_break' && (
                     <button onClick={() => { playRetakeSound(); setStatus('available'); }} disabled={togglingStatus}
                       className="flex-1 flex items-center justify-center gap-1 text-[11px] font-semibold py-1.5 rounded-xl border border-green-500/25 text-green-400 bg-green-500/8 hover:bg-green-500/15 transition-colors">
-                      <Power className="w-3 h-3" /> Retomar
+                      <Power className="w-3 h-3" /> {t('driverPortal2.resume')}
                     </button>
                   )}
                 </div>
@@ -1878,8 +1885,8 @@ export default function DriverPortal() {
                 <p className="text-base font-bold text-white leading-tight truncate">{driver?.name || user?.name}</p>
                 <p className="text-xs text-slate-400 mt-0.5 truncate">
                   {localTruckMake
-                    ? <>{localTruckMake}<span className="text-slate-600"> · </span>{localEquipType || driver?.equipment_type || 'Driver'}</>
-                    : (localEquipType || driver?.equipment_type || 'Driver')
+                    ? <>{localTruckMake}<span className="text-slate-600"> · </span>{localEquipType || driver?.equipment_type || t('driverPortal2.roleDriver')}</>
+                    : (localEquipType || driver?.equipment_type || t('driverPortal2.roleDriver'))
                   }
                 </p>
                 <span className={`inline-flex items-center gap-1 text-xs font-semibold mt-1.5 px-2 py-0.5 rounded-full ${
@@ -2069,7 +2076,7 @@ export default function DriverPortal() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" style={{ boxShadow: '0 0 6px rgba(34,211,238,0.8)' }} />
-                <span className="text-[10px] font-bold text-cyan-400 tracking-[0.15em] uppercase">Live Tracking</span>
+                <span className="text-[10px] font-bold text-cyan-400 tracking-[0.15em] uppercase">{t('driverPortal2.liveTracking')}</span>
               </div>
               <span className="text-[10px] font-mono text-cyan-300/60">
                 {driver?.current_lat?.toFixed(4)}°N · {Math.abs(driver?.current_lng ?? 0).toFixed(4)}°W
@@ -2085,7 +2092,7 @@ export default function DriverPortal() {
               <span className="text-[10px] font-mono text-white/40 truncate max-w-[55%]">{driver?.current_address}</span>
               <div className="flex items-center gap-1.5">
                 <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-                <span className="text-[10px] font-mono text-white/50 tracking-widest">OFFLINE</span>
+                <span className="text-[10px] font-mono text-white/50 tracking-widest">{t('driverPortal2.hudOffline')}</span>
               </div>
             </div>
           </div>
@@ -2662,7 +2669,7 @@ export default function DriverPortal() {
               {driver.authority_since && (
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> {t('driverPortal.authorityTime')}</span>
-                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">{calcAuthority(driver.authority_since)}</span>
+                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">{calcAuthority(driver.authority_since, t)}</span>
                 </div>
               )}
 
@@ -2685,7 +2692,7 @@ export default function DriverPortal() {
                   <div className="space-y-2 mt-1">
                     <input type="email" className="input text-sm w-full" value={rateConEmail}
                       onChange={e => setRateConEmail(e.target.value)}
-                      placeholder="dispatch@tuempresa.com" />
+                      placeholder={t('driverPortal2.rateConEmailPlaceholder')} />
                     <p className="text-[10px] text-gray-400 dark:text-slate-500">{t('driverPortal.rateConEmailHint')}</p>
                     <div className="flex gap-2">
                       <button onClick={() => { setEditingRateConEmail(false); setRateConEmail(driverExtra?.rate_con_email || ''); }}
@@ -2803,7 +2810,7 @@ export default function DriverPortal() {
               <div className="space-y-4">
                 <div>
                   <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">{t('driverPortal.truckMakeModel')}</label>
-                  <input type="text" placeholder="e.g. Volvo 860, Kenworth T680"
+                  <input type="text" placeholder={t('driverPortal2.truckMakePlaceholder')}
                     value={localTruckMake} onChange={e => setLocalTruckMake(e.target.value)}
                     className="w-full px-3 py-2.5 rounded-xl text-sm bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 border-0 outline-none focus:ring-2 focus:ring-blue-500/40" />
                 </div>
@@ -2826,12 +2833,12 @@ export default function DriverPortal() {
                   <>
                     <div>
                       <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">{t('driverPortal.truckNumber')}</label>
-                      <input type="text" placeholder="e.g. 9809" value={truckNum} onChange={e => setTruckNum(e.target.value)}
+                      <input type="text" placeholder={t('driverPortal2.truckNumPlaceholder')} value={truckNum} onChange={e => setTruckNum(e.target.value)}
                         className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
                     </div>
                     <div>
                       <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">{t('driverPortal.trailerNumber')}</label>
-                      <input type="text" placeholder="e.g. T4126" value={trailerNum} onChange={e => setTrailerNum(e.target.value)}
+                      <input type="text" placeholder={t('driverPortal2.trailerNumPlaceholder')} value={trailerNum} onChange={e => setTrailerNum(e.target.value)}
                         className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
                     </div>
                   </>
@@ -2843,19 +2850,19 @@ export default function DriverPortal() {
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <label className="text-[10px] text-gray-400 dark:text-slate-500 mb-1 block">{t('driverPortal.length')}</label>
-                          <input type="number" placeholder="ej. 16" value={equipLength} onChange={e => setEquipLength(e.target.value)}
+                          <input type="number" placeholder={t('driverPortal2.lengthPlaceholder')} value={equipLength} onChange={e => setEquipLength(e.target.value)}
                             className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
                         </div>
                         <div>
                           <label className="text-[10px] text-gray-400 dark:text-slate-500 mb-1 block">{t('driverPortal.width')}</label>
-                          <input type="number" placeholder="ej. 8" value={equipWidth} onChange={e => setEquipWidth(e.target.value)}
+                          <input type="number" placeholder={t('driverPortal2.widthPlaceholder')} value={equipWidth} onChange={e => setEquipWidth(e.target.value)}
                             className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
                         </div>
                       </div>
                     </div>
                     <div>
                       <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">{t('driverPortal.loadCapacityLbs')}</label>
-                      <input type="number" placeholder="ej. 10000" value={loadCapacity} onChange={e => setLoadCapacity(e.target.value)}
+                      <input type="number" placeholder={t('driverPortal2.capacityPlaceholder')} value={loadCapacity} onChange={e => setLoadCapacity(e.target.value)}
                         className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/40" />
                     </div>
                   </>
@@ -2965,7 +2972,7 @@ export default function DriverPortal() {
                     <Calendar className="w-3 h-3 text-gray-400" />
                     <span className="text-xs text-gray-500 dark:text-slate-400">{t('driverPortal.expiry')}</span>
                     <span className="text-xs font-semibold" style={{ color: statusColor }}>
-                      {new Date(coiExpiry + 'T00:00:00').toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      {new Date(coiExpiry + 'T00:00:00').toLocaleDateString(lang === 'en' ? 'en-US' : 'es-US', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </span>
                     {(isExpired || isExpiringSoon) && <AlertCircle className="w-3 h-3 ml-1" style={{ color: statusColor }} />}
                   </div>
@@ -3131,7 +3138,7 @@ export default function DriverPortal() {
                   <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">{t('driverPortal.factoringCompany')}</p>
                   <input className="input text-sm w-full" value={factoringCompany}
                     onChange={e => setFactoringCompany(e.target.value)}
-                    placeholder="Ej: OTR Solutions, RTS Financial..." />
+                    placeholder={t('driverPortal2.factoringPlaceholder')} />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
@@ -4316,7 +4323,7 @@ export default function DriverPortal() {
                                 ))}
                               </div>
                               <div>
-                                <div style={{ fontSize: 5.5, color: isRecording ? 'rgba(34,197,94,0.45)' : 'rgba(34,197,94,0.24)', fontFamily: '"Courier New",monospace', letterSpacing: '0.08em' }}>CANAL</div>
+                                <div style={{ fontSize: 5.5, color: isRecording ? 'rgba(34,197,94,0.45)' : 'rgba(34,197,94,0.24)', fontFamily: '"Courier New",monospace', letterSpacing: '0.08em' }}>{t('driverPortal2.channel')}</div>
                                 <div style={{ fontSize: 20, fontWeight: 900, fontFamily: '"Courier New",monospace', lineHeight: 1,
                                   color: isRecording ? '#22c55e' : '#145a24',
                                   textShadow: isRecording ? '0 0 12px rgba(34,197,94,1), 0 0 24px rgba(34,197,94,0.4)' : 'none',
@@ -4478,7 +4485,7 @@ export default function DriverPortal() {
                               {t('driverPortal.tapToRecord')}
                             </span>
                           )}
-                          <span style={{ fontSize: 5.5, letterSpacing: '0.35em', fontWeight: 900, fontFamily: 'Arial', color: 'rgba(71,85,105,0.38)', textTransform: 'uppercase' }}>OSI · FLEET RADIO</span>
+                          <span style={{ fontSize: 5.5, letterSpacing: '0.35em', fontWeight: 900, fontFamily: 'Arial', color: 'rgba(71,85,105,0.38)', textTransform: 'uppercase' }}>{t('driverPortal2.fleetRadio')}</span>
                         </div>
 
                       </div>{/* end body */}

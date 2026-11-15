@@ -371,7 +371,7 @@ export default function RegisterDriver() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label={isCanada ? t('registerDriver.caLicenseNumberLabel') : requiresCdl ? t('registerDriver.cdlLicenseNumberLabel') : t('registerDriver.driverLicenseNumberLabel')} required>
-                <input className="input" type="text" placeholder={isCanada ? "e.g. A1234-56789-01234" : "e.g. D1234567"}
+                <input className="input" type="text" placeholder={isCanada ? t('regExtra.licenseExampleCA') : t('regExtra.licenseExampleUS')}
                   value={form.license_number} onChange={set('license_number')} required />
               </Field>
               <Field label={t('registerDriver.licenseExpiryLabel')} required>
@@ -509,7 +509,7 @@ export default function RegisterDriver() {
             <Field label={t('registerDriver.rateConEmailLabel')}>
               <div className="relative">
                 <Send className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input className="input pl-9" type="email" placeholder="dispatch@tuempresa.com"
+                <input className="input pl-9" type="email" placeholder={t('regExtra.rateConEmailPlaceholder')}
                   value={form.rate_con_email} onChange={set('rate_con_email')} />
               </div>
               <p className="text-[10px] text-gray-400 mt-1">{t('registerDriver.rateConEmailHint')}</p>

@@ -328,7 +328,7 @@ export default function RegisterDispatcher() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label={t('registerDispatcher.yearsExperienceLabel')} required>
-                <input className="input" type="number" min="0" max="50" placeholder="e.g. 5"
+                <input className="input" type="number" min="0" max="50" placeholder={t('regExtra.yearsExample')}
                   value={form.years_experience} onChange={set('years_experience')} required />
               </Field>
               <Field label={t('registerDispatcher.availabilityLabel')}>
@@ -348,7 +348,7 @@ export default function RegisterDispatcher() {
                     <input
                       className="input flex-1"
                       type="text"
-                      placeholder={i === 0 ? 'e.g. Amazon Freight' : i === 1 ? 'e.g. XPO Logistics' : `Company ${i + 1}`}
+                      placeholder={i === 0 ? t('regExtra.companyExample1') : i === 1 ? t('regExtra.companyExample2') : t('regExtra.companyN', { n: i + 1 })}
                       value={c}
                       onChange={e => updateCompany(i, e.target.value)}
                     />

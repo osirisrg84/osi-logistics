@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, Mic, Square } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 
 interface ChatMessage { role: 'user' | 'assistant'; content: string; }
@@ -58,7 +59,10 @@ const ACCENT_CLASSES = {
 
 const LISTEN_BAR_HEIGHTS = [8, 14, 20, 13, 22, 16, 9, 18, 24, 15, 11, 19, 14, 8];
 
-export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title = 'Asistente OSI', placeholder = 'Pregunta algo...', greeting, accent = 'orange', avatarSrc, name, role, quickPrompts }: AiAssistantPanelProps) {
+export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title: titleProp, placeholder: placeholderProp, greeting, accent = 'orange', avatarSrc, name, role, quickPrompts }: AiAssistantPanelProps) {
+  const { t } = useTranslation();
+  const title = titleProp ?? t('layout2.assistantTitle');
+  const placeholder = placeholderProp ?? t('aiPanel.placeholder');
   const accentClasses = ACCENT_CLASSES[accent];
   const { lang } = useLanguage();
   const [open, setOpen] = useState(false);
@@ -109,7 +113,7 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
       const { data } = await chat(text, messages.slice(-6));
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'No pude procesar eso, intenta de nuevo.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: t('aiPanel.errorGeneric') }]);
     } finally {
       setSending(false);
     }
@@ -141,13 +145,13 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
               )}
               <div className="min-w-0">
                 <p className="text-sm font-bold truncate leading-tight">{name ?? title}</p>
-                {name && <p className="text-[11px] text-white/85 truncate leading-tight">{lang === 'en' ? 'AI assistant' : 'Asistente IA'}{role ? ` · ${role[lang === 'en' ? 'en' : 'es']}` : ''}</p>}
+                {name && <p className="text-[11px] text-white/85 truncate leading-tight">{t('aiPanel.aiAssistant')}{role ? ` · ${role[lang === 'en' ? 'en' : 'es']}` : ''}</p>}
               </div>
             </div>
             <button
               onClick={() => setOpen(false)}
               className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 hover:bg-white/20 transition-colors"
-              aria-label="Cerrar"
+              aria-label={t('aiPanel.close')}
             >
               <X className="w-4 h-4" />
             </button>
@@ -170,13 +174,13 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
                     />
                   ))}
                 </div>
-                <p className={`text-xs font-semibold ${accentClasses.listenText}`}>{lang === 'en' ? 'Listening...' : 'Escuchando...'}</p>
+                <p className={`text-xs font-semibold ${accentClasses.listenText}`}>{t('aiPanel.listening')}</p>
               </div>
             )}
             {messages.length === 0 && (
               <div className="py-4 flex flex-col items-center gap-3">
                 <p className="text-xs text-gray-500 dark:text-slate-400 text-center">
-                  {greeting ?? '¿En qué te puedo ayudar?'}
+                  {greeting ?? t('aiPanel.defaultGreeting')}
                 </p>
                 {quickPrompts && (
                   <div className="flex flex-col gap-2 w-full">
@@ -209,7 +213,7 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
               <div className="flex items-end gap-2 justify-start">
                 {avatarSrc && <img src={avatarSrc} alt="" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />}
                 <div className="bg-gray-100 dark:bg-slate-700 rounded-2xl px-3 py-2 text-sm text-gray-400 dark:text-slate-500">
-                  {lang === 'en' ? 'Thinking...' : 'Pensando...'}
+                  {t('aiPanel.thinking')}
                 </div>
               </div>
             )}
@@ -231,7 +235,7 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
                 className={`w-9 h-9 rounded-xl disabled:opacity-40 text-white flex items-center justify-center flex-shrink-0 transition-colors ${
                   listening ? 'bg-red-500 hover:bg-red-400 animate-pulse' : accentClasses.sendButton
                 }`}
-                aria-label={listening ? 'Detener dictado' : 'Hablar'}
+                aria-label={listening ? t('aiPanel.stopDictation') : t('aiPanel.speak')}
               >
                 {listening ? <Square className="w-3.5 h-3.5" /> : <Mic className="w-4 h-4" />}
               </button>
@@ -240,7 +244,7 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
               onClick={() => void send()}
               disabled={!input.trim() || sending}
               className={`w-9 h-9 rounded-xl disabled:opacity-40 text-white flex items-center justify-center flex-shrink-0 transition-colors ${accentClasses.sendButton}`}
-              aria-label="Enviar"
+              aria-label={t('aiPanel.send')}
             >
               <Send className="w-4 h-4" />
             </button>

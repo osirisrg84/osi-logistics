@@ -140,7 +140,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           <div className="min-w-0">
             <div className="text-white text-xs font-medium truncate">{user?.name}</div>
             <div className={`text-xs font-semibold capitalize ${isAdmin ? 'text-purple-400' : 'text-orange-400'}`}>
-              {user?.role}
+              {t(`layout2.role.${user?.role ?? 'dispatcher'}`, { defaultValue: user?.role ?? '' })}
             </div>
           </div>
         </div>

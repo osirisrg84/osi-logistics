@@ -166,58 +166,58 @@ export default function Settings() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">{t('settings.companyInfo')}</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <label className="label">Company Name</label>
+                <label className="label">{t('grupoB.settings.companyName')}</label>
                 <input className="input" value={companySettings.company_name}
                   onChange={e => setCompanySettings({...companySettings, company_name: e.target.value})} />
               </div>
               <div>
-                <label className="label">Dispatch Email</label>
+                <label className="label">{t('grupoB.settings.dispatchEmail')}</label>
                 <input className="input" type="email" value={companySettings.company_email}
                   onChange={e => setCompanySettings({...companySettings, company_email: e.target.value})} />
               </div>
               <div>
-                <label className="label">Phone</label>
+                <label className="label">{t('grupoB.settings.phone')}</label>
                 <input className="input" value={companySettings.company_phone}
                   onChange={e => setCompanySettings({...companySettings, company_phone: e.target.value})} />
               </div>
               <div className="col-span-2">
-                <label className="label">Address</label>
+                <label className="label">{t('grupoB.settings.address')}</label>
                 <input className="input" value={companySettings.company_address}
                   onChange={e => setCompanySettings({...companySettings, company_address: e.target.value})} />
               </div>
               <div>
-                <label className="label">Timezone</label>
+                <label className="label">{t('grupoB.settings.timezone')}</label>
                 <select className="input" value={companySettings.timezone}
                   onChange={e => setCompanySettings({...companySettings, timezone: e.target.value})}>
-                  <option value="America/New_York">Eastern Time (ET)</option>
-                  <option value="America/Chicago">Central Time (CT)</option>
-                  <option value="America/Denver">Mountain Time (MT)</option>
-                  <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                  <option value="America/New_York">{t('grupoB.settings.tzET')}</option>
+                  <option value="America/Chicago">{t('grupoB.settings.tzCT')}</option>
+                  <option value="America/Denver">{t('grupoB.settings.tzMT')}</option>
+                  <option value="America/Los_Angeles">{t('grupoB.settings.tzPT')}</option>
                 </select>
               </div>
               <div>
-                <label className="label">Currency</label>
+                <label className="label">{t('grupoB.settings.currency')}</label>
                 <select className="input" value={companySettings.currency}
                   onChange={e => setCompanySettings({...companySettings, currency: e.target.value})}>
-                  <option value="USD">USD — US Dollar</option>
-                  <option value="EUR">EUR — Euro</option>
-                  <option value="MXN">MXN — Mexican Peso</option>
+                  <option value="USD">{t('grupoB.settings.curUSD')}</option>
+                  <option value="EUR">{t('grupoB.settings.curEUR')}</option>
+                  <option value="MXN">{t('grupoB.settings.curMXN')}</option>
                 </select>
               </div>
               <div>
-                <label className="label">Distance Unit</label>
+                <label className="label">{t('grupoB.settings.distanceUnit')}</label>
                 <select className="input" value={companySettings.distance_unit}
                   onChange={e => setCompanySettings({...companySettings, distance_unit: e.target.value})}>
-                  <option value="miles">Miles</option>
-                  <option value="km">Kilometers</option>
+                  <option value="miles">{t('grupoB.settings.miles')}</option>
+                  <option value="km">{t('grupoB.settings.kilometers')}</option>
                 </select>
               </div>
               <div>
-                <label className="label">Weight Unit</label>
+                <label className="label">{t('grupoB.settings.weightUnit')}</label>
                 <select className="input" value={companySettings.weight_unit}
                   onChange={e => setCompanySettings({...companySettings, weight_unit: e.target.value})}>
-                  <option value="kg">Kilograms (kg)</option>
-                  <option value="lbs">Pounds (lbs)</option>
+                  <option value="kg">{t('grupoB.settings.kg')}</option>
+                  <option value="lbs">{t('grupoB.settings.lbs')}</option>
                 </select>
               </div>
             </div>
@@ -228,11 +228,11 @@ export default function Settings() {
           <div className="card">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">{t('settings.notificationPrefs')}</h3>
             <div className="space-y-4">
-              <p className="text-sm font-medium text-gray-700 dark:text-slate-300">Order Events</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-slate-300">{t('grupoB.settings.orderEvents')}</p>
               {[
-                { key: 'order_created', label: 'New order created' },
-                { key: 'order_assigned', label: 'Order assigned to driver' },
-                { key: 'order_delivered', label: 'Order delivered' },
+                { key: 'order_created', label: t('grupoB.settings.evCreated') },
+                { key: 'order_assigned', label: t('grupoB.settings.evAssigned') },
+                { key: 'order_delivered', label: t('grupoB.settings.evDelivered') },
               ].map(({ key, label }) => (
                 <div key={key} className="flex items-center justify-between py-2 border-b border-gray-50">
                   <span className="text-sm text-gray-700 dark:text-slate-300">{label}</span>
@@ -244,11 +244,11 @@ export default function Settings() {
                   </button>
                 </div>
               ))}
-              <p className="text-sm font-medium text-gray-700 mt-4">Fleet Alerts</p>
+              <p className="text-sm font-medium text-gray-700 mt-4">{t('grupoB.settings.fleetAlerts')}</p>
               {[
-                { key: 'driver_offline', label: 'Driver goes offline unexpectedly' },
-                { key: 'low_fuel', label: 'Low fuel level warning' },
-                { key: 'maintenance_due', label: 'Maintenance due reminder' },
+                { key: 'driver_offline', label: t('grupoB.settings.evOffline') },
+                { key: 'low_fuel', label: t('grupoB.settings.evFuel') },
+                { key: 'maintenance_due', label: t('grupoB.settings.evMaint') },
               ].map(({ key, label }) => (
                 <div key={key} className="flex items-center justify-between py-2 border-b border-gray-50">
                   <span className="text-sm text-gray-700 dark:text-slate-300">{label}</span>
@@ -260,11 +260,11 @@ export default function Settings() {
                   </button>
                 </div>
               ))}
-              <p className="text-sm font-medium text-gray-700 mt-4">Delivery Channels</p>
+              <p className="text-sm font-medium text-gray-700 mt-4">{t('grupoB.settings.deliveryChannels')}</p>
               {[
-                { key: 'sound_enabled', label: 'Sound notifications' },
-                { key: 'email_alerts', label: 'Email alerts' },
-                { key: 'sms_alerts', label: 'SMS alerts' },
+                { key: 'sound_enabled', label: t('grupoB.settings.chSound') },
+                { key: 'email_alerts', label: t('grupoB.settings.chEmail') },
+                { key: 'sms_alerts', label: t('grupoB.settings.chSms') },
               ].map(({ key, label }) => (
                 <div key={key} className="flex items-center justify-between py-2 border-b border-gray-50">
                   <span className="text-sm text-gray-700 dark:text-slate-300">{label}</span>
@@ -286,8 +286,8 @@ export default function Settings() {
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-gray-50">
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-slate-100">Auto-Assign Orders</p>
-                  <p className="text-xs text-gray-400 dark:text-slate-500">Automatically assign new orders to available drivers</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{t('grupoB.settings.autoAssign')}</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500">{t('grupoB.settings.autoAssignDesc')}</p>
                 </div>
                 <button
                   onClick={() => setDispatchSettings({...dispatchSettings, auto_assign: !dispatchSettings.auto_assign})}
@@ -298,23 +298,23 @@ export default function Settings() {
               </div>
               <div className="grid grid-cols-2 gap-4 py-3">
                 <div>
-                  <label className="label">Max Orders per Driver</label>
+                  <label className="label">{t('grupoB.settings.maxOrders')}</label>
                   <input className="input" type="number" value={dispatchSettings.max_orders_per_driver}
                     onChange={e => setDispatchSettings({...dispatchSettings, max_orders_per_driver: parseInt(e.target.value)})} min="1" max="10" />
                 </div>
                 <div>
-                  <label className="label">Assignment Radius (mi)</label>
+                  <label className="label">{t('grupoB.settings.assignRadius')}</label>
                   <input className="input" type="number" value={dispatchSettings.assignment_radius_km}
                     onChange={e => setDispatchSettings({...dispatchSettings, assignment_radius_km: parseInt(e.target.value)})} min="5" max="500" />
                 </div>
                 <div>
-                  <label className="label">Auto-assign Priority Threshold</label>
+                  <label className="label">{t('grupoB.settings.priorityThreshold')}</label>
                   <select className="input" value={dispatchSettings.priority_threshold}
                     onChange={e => setDispatchSettings({...dispatchSettings, priority_threshold: e.target.value})}>
-                    <option value="urgent">Urgent only</option>
-                    <option value="high">High & above</option>
-                    <option value="normal">Normal & above</option>
-                    <option value="all">All orders</option>
+                    <option value="urgent">{t('grupoB.settings.prioUrgent')}</option>
+                    <option value="high">{t('grupoB.settings.prioHigh')}</option>
+                    <option value="normal">{t('grupoB.settings.prioNormal')}</option>
+                    <option value="all">{t('grupoB.settings.prioAll')}</option>
                   </select>
                 </div>
               </div>
@@ -327,29 +327,29 @@ export default function Settings() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">{t('settings.trackingSettings')}</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="label">GPS Update Interval (seconds)</label>
+                <label className="label">{t('grupoB.settings.gpsInterval')}</label>
                 <input className="input" type="number" value={trackingSettings.update_interval_sec}
                   onChange={e => setTrackingSettings({...trackingSettings, update_interval_sec: parseInt(e.target.value)})} min="1" max="60" />
               </div>
               <div>
-                <label className="label">History Retention (days)</label>
+                <label className="label">{t('grupoB.settings.historyRetention')}</label>
                 <input className="input" type="number" value={trackingSettings.history_days}
                   onChange={e => setTrackingSettings({...trackingSettings, history_days: parseInt(e.target.value)})} min="7" max="365" />
               </div>
               <div>
-                <label className="label">Idle Threshold (minutes)</label>
+                <label className="label">{t('grupoB.settings.idleThreshold')}</label>
                 <input className="input" type="number" value={trackingSettings.idle_threshold_min}
                   onChange={e => setTrackingSettings({...trackingSettings, idle_threshold_min: parseInt(e.target.value)})} min="1" max="60" />
               </div>
               <div>
-                <label className="label">Speed Alert Threshold (mi/h)</label>
+                <label className="label">{t('grupoB.settings.speedThreshold')}</label>
                 <input className="input" type="number" value={trackingSettings.max_speed_kmh}
                   onChange={e => setTrackingSettings({...trackingSettings, max_speed_kmh: parseInt(e.target.value)})} min="60" max="200" />
               </div>
               <div className="col-span-2 space-y-3">
                 {[
-                  { key: 'geofence_alerts', label: 'Geofence alerts', desc: 'Alert when driver leaves designated area' },
-                  { key: 'speed_alerts', label: 'Speed alerts', desc: 'Alert when driver exceeds speed limit' },
+                  { key: 'geofence_alerts', label: t('grupoB.settings.geofence'), desc: t('grupoB.settings.geofenceDesc') },
+                  { key: 'speed_alerts', label: t('grupoB.settings.speedAlerts'), desc: t('grupoB.settings.speedAlertsDesc') },
                 ].map(({ key, label, desc }) => (
                   <div key={key} className="flex items-center justify-between py-2 border-b border-gray-50">
                     <div>
@@ -374,7 +374,7 @@ export default function Settings() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-5">{t('settings.appearanceTitle')}</h3>
             <div className="space-y-5">
               <div>
-                <label className="label">Brand Color</label>
+                <label className="label">{t('grupoB.settings.brandColor')}</label>
                 <div className="flex items-center gap-3 mt-2">
                   {['#f97316', '#3b82f6', '#22c55e', '#8b5cf6', '#ef4444', '#0ea5e9'].map(color => (
                     <button key={color} className="w-8 h-8 rounded-full border-2 border-white shadow-md" style={{ backgroundColor: color }} />
@@ -382,15 +382,15 @@ export default function Settings() {
                 </div>
               </div>
               <div>
-                <label className="label">Map Style</label>
+                <label className="label">{t('grupoB.settings.mapStyle')}</label>
                 <select className="input w-48">
                   <option>OpenStreetMap</option>
-                  <option>Dark Mode</option>
-                  <option>Satellite</option>
+                  <option value="Dark Mode">{t('grupoB.settings.mapDark')}</option>
+                  <option value="Satellite">{t('grupoB.settings.mapSatellite')}</option>
                 </select>
               </div>
               <div>
-                <label className="label">Date Format</label>
+                <label className="label">{t('grupoB.settings.dateFormat')}</label>
                 <select className="input w-48">
                   <option>MM/DD/YYYY</option>
                   <option>DD/MM/YYYY</option>
@@ -532,16 +532,16 @@ export default function Settings() {
                 <p className="text-xs font-mono text-gray-600 bg-white rounded-lg p-2 border border-gray-200 dark:border-slate-600">http://localhost:3001/api</p>
               </div>
               <div className="bg-gray-50 dark:bg-slate-800/50 dark:bg-slate-900 rounded-xl p-4">
-                <p className="text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">WebSocket (Real-time)</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">{t('grupoB.settings.websocket')}</p>
                 <p className="text-xs font-mono text-gray-600 bg-white rounded-lg p-2 border border-gray-200 dark:border-slate-600">ws://localhost:3001</p>
               </div>
               <div>
-                <label className="label">Webhook URL (for order events)</label>
+                <label className="label">{t('grupoB.settings.webhookUrl')}</label>
                 <input className="input font-mono" placeholder="https://your-system.com/webhook" />
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full" />
-                <span className="text-xs text-gray-600 dark:text-slate-400">API is online and accepting requests</span>
+                <span className="text-xs text-gray-600 dark:text-slate-400">{t('grupoB.settings.apiOnline')}</span>
               </div>
             </div>
           </div>
