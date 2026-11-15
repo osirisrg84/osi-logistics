@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Package, Users, Truck, TrendingUp, DollarSign,
-  Clock, CheckCircle, AlertTriangle, Activity,
+  Clock, CheckCircle, AlertTriangle, Activity, Laptop, Coffee, Plus, MapPin,
 } from 'lucide-react';
 import {
   AreaChart, Area, PieChart, Pie, Cell,
@@ -44,8 +44,8 @@ function StatCard({ title, value, sub, icon: Icon, color, trend, onClick }: Stat
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-xs sm:text-sm text-gray-500 font-medium">{title}</p>
-          <p className="text-sm sm:text-2xl font-bold text-gray-900 dark:text-white mt-1 leading-tight whitespace-nowrap overflow-hidden">{value}</p>
-          {sub && <p className="text-xs text-gray-400 mt-1 truncate">{sub}</p>}
+          <p className={`${String(value).length > 8 ? 'text-xl sm:text-3xl' : 'text-3xl sm:text-4xl'} font-extrabold text-gray-900 dark:text-white mt-1 leading-tight whitespace-nowrap overflow-hidden tabular-nums`}>{value}</p>
+          {sub && <p className="text-sm text-gray-400 mt-1 truncate">{sub}</p>}
           {trend !== undefined && (
             <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${trend >= 0 ? 'text-green-600' : 'text-red-500'}`}>
               <TrendingUp className="w-3 h-3 flex-shrink-0" />
@@ -55,6 +55,61 @@ function StatCard({ title, value, sub, icon: Icon, color, trend, onClick }: Stat
         </div>
         <div className={`w-8 h-8 sm:w-11 sm:h-11 rounded-xl flex-shrink-0 flex items-center justify-center ${color}`}>
           <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HomeOffice({ name, inTransit, pending, onNavigate }: { name: string; inTransit: number; pending: number; onNavigate: (path: string) => void }) {
+  const { i18n } = useTranslation();
+  const es = !i18n.language?.startsWith('en');
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(id);
+  }, []);
+  const h = now.getHours();
+  const greet = es ? (h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches') : (h < 12 ? 'Good morning' : h < 19 ? 'Good afternoon' : 'Good evening');
+  const first = (name || '').split(' ')[0];
+  const day = format(now, 'EEEE d MMM');
+  const time = format(now, 'h:mm a');
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 dark:border-amber-500/20 bg-gradient-to-br from-amber-50 via-orange-50 to-white dark:from-[#2a1d12] dark:via-[#1e1810] dark:to-slate-900 p-4 sm:p-5">
+      {/* lampara de escritorio: luz calida desde la esquina */}
+      <div className="pointer-events-none absolute -top-10 -right-10 w-48 h-48 rounded-full bg-amber-300/30 dark:bg-amber-400/10 blur-3xl" />
+      {/* silueta de laptop + taza en el escritorio */}
+      <div className="pointer-events-none absolute right-3 bottom-2 flex items-end gap-2 opacity-20 dark:opacity-25 text-orange-600 dark:text-amber-300">
+        <Coffee className="w-6 h-6" />
+        <Laptop className="w-14 h-14 sm:w-20 sm:h-20" strokeWidth={1.2} />
+      </div>
+      <div className="relative flex flex-col gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-orange-600 dark:text-amber-300 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 pulse-dot" />
+            {es ? 'Mi oficina · trabajo remoto' : 'My office · remote work'}
+          </p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white mt-1">{greet}{first ? `, ${first}` : ''}</h2>
+          <p className="text-sm text-gray-500 dark:text-slate-400 capitalize">{day} · {time}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="px-2.5 py-1 rounded-full bg-white/70 dark:bg-white/5 border border-amber-200/60 dark:border-white/10 text-gray-700 dark:text-slate-200">
+            <strong>{inTransit}</strong> {es ? 'en tránsito' : 'in transit'}
+          </span>
+          <span className="px-2.5 py-1 rounded-full bg-white/70 dark:bg-white/5 border border-amber-200/60 dark:border-white/10 text-gray-700 dark:text-slate-200">
+            <strong>{pending}</strong> {es ? 'pendientes' : 'pending'}
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => onNavigate('/orders')} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold shadow-sm active:scale-95 transition">
+            <Plus className="w-4 h-4" /> {es ? 'Nueva orden' : 'New order'}
+          </button>
+          <button onClick={() => onNavigate('/tracking')} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-amber-200/70 dark:border-white/10 text-gray-800 dark:text-white text-sm font-semibold active:scale-95 transition">
+            <MapPin className="w-4 h-4" /> Tracking
+          </button>
+          <button onClick={() => onNavigate('/drivers')} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-amber-200/70 dark:border-white/10 text-gray-800 dark:text-white text-sm font-semibold active:scale-95 transition">
+            <Users className="w-4 h-4" /> Drivers
+          </button>
         </div>
       </div>
     </div>
@@ -140,6 +195,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 fade-in">
+      <HomeOffice name={user?.name || ''} inTransit={orderStats.in_transit || 0} pending={orderStats.pending || 0} onNavigate={navigate} />
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
@@ -183,7 +239,7 @@ export default function Dashboard() {
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-slate-400">{t('dashboard.deliveredToday')}</p>
-            <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{orderStats.delivered_today || 0}</p>
+            <p className="text-3xl font-extrabold text-gray-900 dark:text-white dark:text-slate-100 tabular-nums">{orderStats.delivered_today || 0}</p>
           </div>
         </div>
         <div className="card fade-in flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
@@ -192,7 +248,7 @@ export default function Dashboard() {
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-slate-400">{t('dashboard.avgDeliveryTime')}</p>
-            <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{(stats?.kpis.avg_delivery_hours || 0).toFixed(1)}h</p>
+            <p className="text-3xl font-extrabold text-gray-900 dark:text-white dark:text-slate-100 tabular-nums">{(stats?.kpis.avg_delivery_hours || 0).toFixed(1)}h</p>
           </div>
         </div>
         <div className="card fade-in flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
@@ -201,7 +257,7 @@ export default function Dashboard() {
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-slate-400">{t('dashboard.onTimeRate')}</p>
-            <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{(stats?.kpis.on_time_rate || 0).toFixed(1)}%</p>
+            <p className="text-3xl font-extrabold text-gray-900 dark:text-white dark:text-slate-100 tabular-nums">{(stats?.kpis.on_time_rate || 0).toFixed(1)}%</p>
           </div>
         </div>
         <div className="card fade-in flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
@@ -210,7 +266,7 @@ export default function Dashboard() {
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-slate-400">{t('dashboard.pendingOrders')}</p>
-            <p className="text-xl font-bold text-gray-900 dark:text-white dark:text-slate-100">{orderStats.pending || 0}</p>
+            <p className="text-3xl font-extrabold text-gray-900 dark:text-white dark:text-slate-100 tabular-nums">{orderStats.pending || 0}</p>
           </div>
         </div>
       </div>

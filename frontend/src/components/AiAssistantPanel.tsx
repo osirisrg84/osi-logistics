@@ -119,7 +119,7 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
     <>
       <button
         onClick={() => setOpen(v => !v)}
-        className={`${buttonClassName ?? 'fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform'}${avatarSrc && !open ? ' !p-0 ring-2 ring-offset-2 ring-offset-transparent ' + (accent === 'blue' ? 'ring-blue-400' : 'ring-orange-400') : ''}`}
+        className={`${buttonClassName ?? 'fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform'}${avatarSrc && !open ? ' !p-0 ring-[1.5px] ring-offset-0 ' + (accent === 'blue' ? 'ring-blue-400' : 'ring-orange-400') : ''}`}
         aria-label="OSI IA"
       >
         {open ? <X className="w-6 h-6" /> : avatarSrc ? (

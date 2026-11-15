@@ -1907,8 +1907,18 @@ export default function DriverPortal() {
         {/* ── Tablero: relojes de camion ─────────────────────── */}
         <div className="px-4 pb-5">
           <div className="max-w-lg mx-auto rounded-3xl px-2 pt-4 pb-3 bg-gradient-to-b from-white/8 to-white/3 border border-white/10">
-            <div className="grid grid-cols-3 gap-1 items-start">
+            <div className="grid grid-cols-[1fr_1.4fr_1fr] gap-1 items-end">
               <TruckGauge
+                size={108}
+                value={onTimePct}
+                max={100}
+                label={t('driverPortal.gaugeOnTime')}
+                valueText={`${Math.round(onTimePct)}%`}
+                maxText="100"
+                from="#ef4444" to="#22c55e"
+              />
+              <TruckGauge
+                size={156}
                 value={displayRevenue}
                 max={revenueGoal}
                 label={t('driverPortal.gaugeRevenue')}
@@ -1918,14 +1928,7 @@ export default function DriverPortal() {
                 onClick={() => setTab('delivered')}
               />
               <TruckGauge
-                value={onTimePct}
-                max={100}
-                label={t('driverPortal.gaugeOnTime')}
-                valueText={`${Math.round(onTimePct)}%`}
-                maxText="100"
-                from="#ef4444" to="#22c55e"
-              />
-              <TruckGauge
+                size={108}
                 value={unlockedCount}
                 max={8}
                 label={t('driverPortal.achievements')}
@@ -4736,8 +4739,8 @@ export default function DriverPortal() {
       <AiAssistantPanel
         chat={assistantApi.chat}
         title={t('driverPortal.assistantTitle')}
-        name="Rachel"
-        avatarSrc="/assistants/rachel.jpg"
+        name="Maya"
+        avatarSrc="/assistants/maya.jpg"
         role={{ es: 'Copiloto del driver', en: 'Driver copilot' }}
         quickPrompts={{
           es: ['¿Cómo activo mi disponibilidad?', '¿Cuánto gané esta semana?', '¿Cómo subo mi seguro (COI)?'],
