@@ -61,7 +61,7 @@ function StatCard({ title, value, sub, icon: Icon, color, trend, onClick }: Stat
   );
 }
 
-function HomeOffice({ name, inTransit, pending, onNavigate }: { name: string; inTransit: number; pending: number; onNavigate: (path: string) => void }) {
+function HomeOffice({ name, inTransit, pending, onNavigate, isAdmin = false }: { name: string; inTransit: number; pending: number; onNavigate: (path: string) => void; isAdmin?: boolean }) {
   const { i18n } = useTranslation();
   const es = !i18n.language?.startsWith('en');
   const [now, setNow] = useState(() => new Date());
@@ -99,6 +99,16 @@ function HomeOffice({ name, inTransit, pending, onNavigate }: { name: string; in
             <Laptop className="w-12 h-12" strokeWidth={1.2} />
           </span>
         </div>
+        {isAdmin ? (
+          <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto w-full">
+            <button onClick={() => onNavigate('/drivers')} className="flex flex-col items-center justify-center gap-1.5 px-3 py-4 rounded-2xl bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-amber-200/70 dark:border-white/10 text-gray-800 dark:text-white text-base font-bold active:scale-95 transition">
+              <Truck className="w-6 h-6 text-orange-500" /> Driver
+            </button>
+            <button onClick={() => onNavigate('/dispatchers')} className="flex flex-col items-center justify-center gap-1.5 px-3 py-4 rounded-2xl bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-amber-200/70 dark:border-white/10 text-gray-800 dark:text-white text-base font-bold active:scale-95 transition">
+              <Users className="w-6 h-6 text-orange-500" /> Dispatcher
+            </button>
+          </div>
+        ) : (
         <div className="grid grid-cols-3 gap-2 max-w-md">
           <button onClick={() => onNavigate('/orders')} className="flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-xl whitespace-nowrap bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold shadow-sm active:scale-95 transition">
             <Plus className="w-4 h-4" /> {es ? 'Nueva orden' : 'New order'}
@@ -110,6 +120,7 @@ function HomeOffice({ name, inTransit, pending, onNavigate }: { name: string; in
             <Users className="w-4 h-4" /> Drivers
           </button>
         </div>
+        )}
       </div>
     </div>
   );
@@ -194,7 +205,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 fade-in">
-      <HomeOffice name={user?.name || ''} inTransit={orderStats.in_transit || 0} pending={orderStats.pending || 0} onNavigate={navigate} />
+      <HomeOffice name={user?.name || ''} inTransit={orderStats.in_transit || 0} pending={orderStats.pending || 0} onNavigate={navigate} isAdmin={user?.role === 'admin'} />
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard

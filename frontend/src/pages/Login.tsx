@@ -1,8 +1,9 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ClipboardList, Eye, EyeOff, AlertCircle, ArrowLeft, Truck, BarChart2, Users } from 'lucide-react';
+import { ClipboardList, Eye, EyeOff, AlertCircle, ArrowLeft, Truck, BarChart2, Users, KeyRound, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { authApi } from '../services/api';
 
 function playLoginSound() {
   try {
@@ -77,6 +78,46 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [mode, setMode] = useState<'login' | 'forgot' | 'reset'>('login');
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetCode, setResetCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState('');
+  const [resetInfo, setResetInfo] = useState('');
+
+  const goToForgot = () => { setResetEmail(email); setResetError(''); setResetInfo(''); setMode('forgot'); };
+
+  const handleForgotSubmit = async (e: FormEvent | { preventDefault: () => void }) => {
+    e.preventDefault();
+    setResetError('');
+    setResetLoading(true);
+    try {
+      await authApi.forgotPassword(resetEmail);
+    } catch { /* mismo mensaje exista o no el correo */ }
+    setResetInfo(t('driverLogin.genericCodeMessage'));
+    setMode('reset');
+    setResetLoading(false);
+  };
+
+  const handleResetSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setResetError('');
+    if (newPassword.length < 8) { setResetError(t('driverLogin.passwordMinLengthError')); return; }
+    if (newPassword !== confirmPassword) { setResetError(t('driverLogin.passwordMismatchError')); return; }
+    setResetLoading(true);
+    try {
+      await authApi.resetPassword(resetEmail, resetCode, newPassword);
+      setEmail(resetEmail); setPassword(''); setResetCode(''); setNewPassword(''); setConfirmPassword(''); setResetInfo(''); setError('');
+      setMode('login');
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setResetError(msg || t('driverLogin.resetFailedError'));
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -144,6 +185,7 @@ export default function Login() {
 
         {/* Card */}
         <div className="bg-white rounded-3xl shadow-2xl p-7 w-full max-w-sm mx-auto">
+          {mode === 'login' && (<>
           <h2 className="text-xl font-bold text-gray-900 mb-1">{t('login.welcomeBack')}</h2>
           <p className="text-sm text-gray-500 mb-5">{t('login.loginSubtitle')}</p>
 
@@ -185,6 +227,9 @@ export default function Login() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              <button type="button" onClick={goToForgot} className="text-xs text-orange-500 hover:text-orange-600 font-medium mt-1.5">
+                {t('driverLogin.forgotPassword')}
+              </button>
             </div>
 
             <button
@@ -216,6 +261,63 @@ export default function Login() {
             {t('login.newDispatcherPrompt')}{' '}
             <Link to="/register?portal=dispatch" className="text-orange-500 hover:text-orange-600 font-medium">{t('login.createAccount')}</Link>
           </p>
+          </>)}
+
+          {mode === 'forgot' && (
+            <>
+              <button type="button" onClick={() => setMode('login')} className="inline-flex items-center gap-1 text-slate-400 hover:text-slate-600 text-xs mb-3">
+                <ArrowLeft className="w-3 h-3" /> {t('driverLogin.backToSignIn')}
+              </button>
+              <div className="w-11 h-11 bg-orange-50 rounded-xl flex items-center justify-center mb-3"><KeyRound className="w-5 h-5 text-orange-500" /></div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">{t('driverLogin.resetPasswordTitle')}</h2>
+              <p className="text-sm text-gray-500 mb-5">{t('driverLogin.genericCodeMessage')}</p>
+              <form onSubmit={handleForgotSubmit} className="space-y-4">
+                <div>
+                  <label className="label">Email</label>
+                  <input className="input" type="email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} placeholder="dispatcher@osilogistics.com" required autoFocus autoComplete="email" />
+                </div>
+                <button type="submit" disabled={resetLoading} className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-3 rounded-2xl transition-colors text-base mt-2">
+                  {resetLoading ? t('driverLogin.sending') : t('driverLogin.sendCode')}
+                </button>
+              </form>
+            </>
+          )}
+
+          {mode === 'reset' && (
+            <>
+              <button type="button" onClick={() => setMode('forgot')} className="inline-flex items-center gap-1 text-slate-400 hover:text-slate-600 text-xs mb-3">
+                <ArrowLeft className="w-3 h-3" /> {t('driverLogin.back')}
+              </button>
+              <div className="w-11 h-11 bg-green-50 rounded-xl flex items-center justify-center mb-3"><CheckCircle className="w-5 h-5 text-green-500" /></div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">{t('driverLogin.enterCodeTitle')}</h2>
+              {resetInfo && <p className="text-sm text-gray-500 mb-5">{resetInfo}</p>}
+              {resetError && (
+                <div className="flex items-start gap-2 bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-2xl mb-4">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" /><span>{resetError}</span>
+                </div>
+              )}
+              <form onSubmit={handleResetSubmit} className="space-y-4">
+                <div>
+                  <label className="label">{t('driverLogin.sixDigitCode')}</label>
+                  <input className="input text-center tracking-[0.4em] font-bold" type="text" inputMode="numeric" maxLength={6} value={resetCode} onChange={e => setResetCode(e.target.value.replace(/\D/g, ''))} placeholder="000000" required autoFocus />
+                </div>
+                <div>
+                  <label className="label">{t('driverLogin.newPassword')}</label>
+                  <input className="input" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder={t('driverLogin.minChars')} required autoComplete="new-password" />
+                </div>
+                <div>
+                  <label className="label">{t('driverLogin.confirmPassword')}</label>
+                  <input className="input" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder={t('driverLogin.repeatPassword')} required autoComplete="new-password" />
+                </div>
+                <button type="submit" disabled={resetLoading} className="w-full bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white font-bold py-3 rounded-2xl transition-colors text-base mt-2">
+                  {resetLoading ? t('driverLogin.saving') : t('driverLogin.changePassword')}
+                </button>
+                <button type="button" onClick={handleForgotSubmit} disabled={resetLoading} className="w-full text-xs text-orange-500 hover:text-orange-600 font-medium">
+                  {t('driverLogin.resendCode')}
+                </button>
+              </form>
+            </>
+          )}
         </div>
 
         <p className="text-xs text-slate-600 mt-6 text-center">
