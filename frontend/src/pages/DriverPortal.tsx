@@ -13,6 +13,7 @@ import {
 import osiLogo from '../assets/osi-logo.jpeg';
 import InstallAppButton from '../components/InstallAppButton';
 import InstallAppBanner from '../components/InstallAppBanner';
+import TruckGauge from '../components/TruckGauge';
 import { setAppManifest, setThemeColor, DRIVER_MANIFEST, DISPATCH_MANIFEST, DRIVER_COLOR, DISPATCH_COLOR } from '../utils/appManifest';
 import { formatLocation } from '../utils/location';
 import { formatPhone } from '../utils/phone';
@@ -1627,6 +1628,8 @@ export default function DriverPortal() {
     { icon: '🌟', label: t('driverPortal.achFiveStarDriver'),  desc: t('driverPortal.achFiveStarDriverDesc'),  unlocked: drvRating >= 4.8, current: drvRating,                 target: 4.8,  showProgress: false },
   ];
   const unlockedCount = ACHIEVEMENTS.filter(a => a.unlocked).length;
+  const revenueGoal = Math.max(5000, Math.ceil(displayRevenue / 2500) * 2500);
+  const onTimePct = Math.min(100, Math.max(0, Number(driver?.on_time_rate ?? 0)));
 
   const verificationPanel = verifying && (
     <div className="mt-2 p-3 rounded-xl border border-orange-100 bg-orange-50 dark:bg-slate-700/60 dark:border-slate-600">
@@ -1901,25 +1904,39 @@ export default function DriverPortal() {
           </div>
         </div>
 
-        {/* ── Stats bar ──────────────────────────────────────── */}
+        {/* ── Tablero: relojes de camion ─────────────────────── */}
         <div className="px-4 pb-5">
-          <div className="max-w-lg mx-auto grid grid-cols-3 gap-2">
-            <div className="rounded-2xl px-2 py-4 text-center bg-white/6 border border-white/10">
-              <p className="text-2xl font-bold text-orange-400">{activeOrders.length}</p>
-              <p className="text-xs mt-0.5 text-slate-500">Active Orders</p>
+          <div className="max-w-lg mx-auto rounded-3xl px-2 pt-4 pb-3 bg-gradient-to-b from-white/8 to-white/3 border border-white/10">
+            <div className="grid grid-cols-3 gap-1 items-start">
+              <TruckGauge
+                value={displayRevenue}
+                max={revenueGoal}
+                label={t('driverPortal.gaugeRevenue')}
+                valueText={`$${Math.round(displayRevenue).toLocaleString('en-US')}`}
+                maxText={`$${(revenueGoal / 1000).toFixed(revenueGoal % 1000 ? 1 : 0)}k`}
+                from="#22c55e" to="#facc15"
+                onClick={() => setTab('delivered')}
+              />
+              <TruckGauge
+                value={onTimePct}
+                max={100}
+                label={t('driverPortal.gaugeOnTime')}
+                valueText={`${Math.round(onTimePct)}%`}
+                maxText="100"
+                from="#ef4444" to="#22c55e"
+              />
+              <TruckGauge
+                value={unlockedCount}
+                max={8}
+                label={t('driverPortal.achievements')}
+                valueText={`${unlockedCount}/8`}
+                maxText="8"
+                from="#3b82f6" to="#22d3ee"
+              />
             </div>
-            <button onClick={() => setTab('delivered')}
-              className="rounded-2xl px-2 py-4 text-center active:scale-95 transition-transform w-full bg-white/6 border border-white/10">
-              <p className="font-bold text-emerald-400 leading-tight"
-                 style={{ fontSize: 'clamp(13px, 4vw, 18px)' }}>
-                ${displayRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </p>
-              <p className="text-xs mt-0.5 text-slate-500">{t('driverPortal.lastWeekRevenue')}</p>
-            </button>
-            <div className="rounded-2xl px-2 py-4 text-center bg-white/6 border border-white/10">
-              <Award className="w-5 h-5 text-orange-400 mx-auto" />
-              <p className="text-2xl font-bold text-orange-400 mt-0.5">{unlockedCount}<span className="text-sm text-orange-500/60 font-normal">/8</span></p>
-              <p className="text-xs mt-0.5 text-slate-500">{t('driverPortal.achievements')}</p>
+            <div className="mt-2 flex items-center justify-center gap-2 text-xs text-slate-300">
+              <span className={`w-2 h-2 rounded-full ${activeOrders.length > 0 ? 'bg-emerald-400 pulse-dot' : 'bg-slate-600'}`} />
+              <span><strong className="text-white">{activeOrders.length}</strong> {t('driverPortal.gaugeActiveOrders')}</span>
             </div>
           </div>
         </div>
