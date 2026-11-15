@@ -1924,7 +1924,7 @@ export default function DriverPortal() {
                 label={t('driverPortal.gaugeRevenue')}
                 valueText={`$${Math.round(displayRevenue).toLocaleString('en-US')}`}
                 maxText={`$${(revenueGoal / 1000).toFixed(revenueGoal % 1000 ? 1 : 0)}k`}
-                from="#22c55e" to="#facc15"
+                from="#facc15" to="#22c55e"
                 onClick={() => setTab('delivered')}
               />
               <TruckGauge
