@@ -452,29 +452,92 @@ function NotificationBlockedBanner() {
   const [permission, setPermission] = useState<NotificationPermission | null>(
     supported ? Notification.permission : null
   );
+  const [guideOpen, setGuideOpen] = useState(false);
+  const wasDenied = useRef(false);
 
   useEffect(() => {
     if (!supported) return;
     const check = () => setPermission(Notification.permission);
     document.addEventListener('visibilitychange', check);
-    const interval = setInterval(check, 5000);
+    const interval = setInterval(check, 3000);
     return () => { document.removeEventListener('visibilitychange', check); clearInterval(interval); };
   }, [supported]);
 
+  // Cuando el driver las activa desde los ajustes y vuelve a la app, registramos el push de inmediato.
+  useEffect(() => {
+    if (permission === 'denied') wasDenied.current = true;
+    if (permission === 'granted' && wasDenied.current) {
+      wasDenied.current = false;
+      setGuideOpen(false);
+      registerDriverPush();
+    }
+  }, [permission]);
+
   if (permission !== 'denied') return null;
 
+  const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const isInstalled = typeof window !== 'undefined' && !!window.matchMedia?.('(display-mode: standalone)').matches;
+  const steps: string[] = isIOS
+    ? [t('driverPortal.notifStepIos1'), t('driverPortal.notifStepIos2'), t('driverPortal.notifStepIos3')]
+    : isInstalled
+      ? [t('driverPortal.notifStepApp1'), t('driverPortal.notifStepApp2'), t('driverPortal.notifStepApp3')]
+      : [t('driverPortal.notifStepTab1'), t('driverPortal.notifStepTab2'), t('driverPortal.notifStepTab3')];
+
+  const checkAgain = () => {
+    setPermission(Notification.permission);
+    if (Notification.permission === 'granted') registerDriverPush();
+  };
+
   return (
-    <div className="mb-3 rounded-2xl px-4 py-3.5 bg-red-500/10 border border-red-500/25 flex items-start gap-3">
-      <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-red-500/20 text-red-300">
-        <BellOff className="w-4 h-4" />
+    <>
+      <div className="mb-3 rounded-2xl px-4 py-3.5 bg-red-500/10 border border-red-500/25 flex items-start gap-3">
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-red-500/20 text-red-300">
+          <BellOff className="w-4 h-4" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-white">{t('driverPortal.notifBlockedTitle')}</p>
+          <p className="text-xs mt-0.5 text-slate-300">
+            {t('driverPortal.notifBlockedDesc')}
+          </p>
+          <button
+            onClick={() => setGuideOpen(true)}
+            className="mt-2 text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+          >
+            {t('driverPortal.notifEnableBtn')}
+          </button>
+        </div>
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-white">{t('driverPortal.notifBlockedTitle')}</p>
-        <p className="text-xs mt-0.5 text-slate-300">
-          {t('driverPortal.notifBlockedDesc')}
-        </p>
-      </div>
-    </div>
+
+      {guideOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-3" onClick={() => setGuideOpen(false)}>
+          <div className="w-full max-w-sm rounded-2xl bg-slate-800 border border-white/10 p-5 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-base font-bold text-white">{t('driverPortal.notifGuideTitle')}</p>
+              <button onClick={() => setGuideOpen(false)} className="text-slate-400 hover:text-white text-xl leading-none" aria-label={t('driverPortal.notifGuideClose')}>&times;</button>
+            </div>
+            <p className="text-xs text-slate-300 mt-1">{t('driverPortal.notifGuideIntro')}</p>
+            <ol className="mt-3 space-y-2">
+              {steps.map((st, i) => (
+                <li key={i} className="flex items-start gap-2.5 text-sm text-slate-100">
+                  <span className="w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+                  <span>{st}</span>
+                </li>
+              ))}
+            </ol>
+            <p className="text-xs text-slate-400 mt-3">{t('driverPortal.notifGuideAuto')}</p>
+            <div className="mt-4 flex gap-2">
+              <button onClick={checkAgain} className="flex-1 text-sm font-semibold px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors">
+                {t('driverPortal.notifCheckAgain')}
+              </button>
+              <button onClick={() => setGuideOpen(false)} className="px-3 py-2 text-sm rounded-lg bg-white/10 text-slate-200 hover:bg-white/15 transition-colors">
+                {t('driverPortal.notifGuideClose')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
