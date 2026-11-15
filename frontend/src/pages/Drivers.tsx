@@ -754,9 +754,8 @@ export default function Drivers() {
                   {driver.avatar}
                 </div>
                 <div>
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">{driver.name}</h3>
-                    <CountryFlag country={driver.country} />
+                  <div className="flex items-center flex-wrap gap-x-1.5 gap-y-0.5">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">{driver.name}<CountryFlag country={driver.country} className="ml-1.5 align-[-2px]" /></h3>
                     {driver.email?.endsWith('@osilogistics.com') && (
                       <span className="text-[9px] font-semibold px-1 py-0.5 rounded text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600/50 tracking-wide leading-none">demo</span>
                     )}
