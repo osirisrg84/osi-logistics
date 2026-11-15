@@ -4719,6 +4719,13 @@ export default function DriverPortal() {
       <AiAssistantPanel
         chat={assistantApi.chat}
         title={t('driverPortal.assistantTitle')}
+        name="Rachel"
+        avatarSrc="/assistants/rachel.jpg"
+        role={{ es: 'Copiloto del driver', en: 'Driver copilot' }}
+        quickPrompts={{
+          es: ['¿Cómo activo mi disponibilidad?', '¿Cuánto gané esta semana?', '¿Cómo subo mi seguro (COI)?'],
+          en: ['How do I go online?', 'How much did I earn this week?', 'How do I upload my insurance (COI)?'],
+        }}
         greeting={t('driverPortal.assistantGreeting')}
         buttonClassName="fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
         accent="blue"

@@ -30,6 +30,11 @@ interface AiAssistantPanelProps {
   placeholder?: string;
   greeting?: string;
   accent?: 'orange' | 'blue';
+  /** Foto de la asistente, su nombre y su rol (por idioma), y preguntas rapidas (por idioma). */
+  avatarSrc?: string;
+  name?: string;
+  role?: { es: string; en: string };
+  quickPrompts?: { es: string[]; en: string[] };
 }
 
 const ACCENT_CLASSES = {
@@ -53,7 +58,7 @@ const ACCENT_CLASSES = {
 
 const LISTEN_BAR_HEIGHTS = [8, 14, 20, 13, 22, 16, 9, 18, 24, 15, 11, 19, 14, 8];
 
-export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title = 'Asistente OSI', placeholder = 'Pregunta algo...', greeting, accent = 'orange' }: AiAssistantPanelProps) {
+export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title = 'Asistente OSI', placeholder = 'Pregunta algo...', greeting, accent = 'orange', avatarSrc, name, role, quickPrompts }: AiAssistantPanelProps) {
   const accentClasses = ACCENT_CLASSES[accent];
   const { lang } = useLanguage();
   const [open, setOpen] = useState(false);
@@ -93,8 +98,8 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
     setListening(true);
   };
 
-  const send = async () => {
-    const text = input.trim();
+  const send = async (override?: string) => {
+    const text = (override ?? input).trim();
     if (!text || sending) return;
     const nextMessages: ChatMessage[] = [...messages, { role: 'user', content: text }];
     setMessages(nextMessages);
@@ -114,18 +119,30 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
     <>
       <button
         onClick={() => setOpen(v => !v)}
-        className={buttonClassName ?? 'fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform'}
+        className={`${buttonClassName ?? 'fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform'}${avatarSrc && !open ? ' !p-0 ring-2 ring-offset-2 ring-offset-transparent ' + (accent === 'blue' ? 'ring-blue-400' : 'ring-orange-400') : ''}`}
         aria-label="OSI IA"
       >
-        {open ? <X className="w-6 h-6" /> : <Bot className="w-6 h-6" />}
+        {open ? <X className="w-6 h-6" /> : avatarSrc ? (
+          <span className="relative block w-full h-full">
+            <img src={avatarSrc} alt={name ?? 'OSI IA'} className="w-full h-full rounded-full object-cover" />
+            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-white dark:border-slate-800" />
+          </span>
+        ) : <Bot className="w-6 h-6" />}
       </button>
 
       {open && (
         <div className={panelClassName ?? 'fixed bottom-24 right-4 left-4 sm:left-auto z-40 sm:w-96 max-h-[70vh] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col overflow-hidden fade-in'}>
           <div className={`flex items-center justify-between gap-2 px-4 py-3 border-b border-gray-100 dark:border-slate-700 text-white flex-shrink-0 ${accentClasses.header}`}>
-            <div className="flex items-center gap-2 min-w-0">
-              <Bot className="w-4 h-4 flex-shrink-0" />
-              <p className="text-sm font-bold truncate">{title}</p>
+            <div className="flex items-center gap-2.5 min-w-0">
+              {avatarSrc ? (
+                <img src={avatarSrc} alt={name ?? title} className="w-9 h-9 rounded-full object-cover border-2 border-white/70 flex-shrink-0" />
+              ) : (
+                <Bot className="w-4 h-4 flex-shrink-0" />
+              )}
+              <div className="min-w-0">
+                <p className="text-sm font-bold truncate leading-tight">{name ?? title}</p>
+                {name && <p className="text-[11px] text-white/85 truncate leading-tight">{lang === 'en' ? 'AI assistant' : 'Asistente IA'}{role ? ` · ${role[lang === 'en' ? 'en' : 'es']}` : ''}</p>}
+              </div>
             </div>
             <button
               onClick={() => setOpen(false)}
@@ -153,17 +170,33 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
                     />
                   ))}
                 </div>
-                <p className={`text-xs font-semibold ${accentClasses.listenText}`}>Escuchando...</p>
+                <p className={`text-xs font-semibold ${accentClasses.listenText}`}>{lang === 'en' ? 'Listening...' : 'Escuchando...'}</p>
               </div>
             )}
             {messages.length === 0 && (
-              <p className="text-xs text-gray-400 dark:text-slate-500 text-center py-6">
-                {greeting ?? '¿En qué te puedo ayudar?'}
-              </p>
+              <div className="py-4 flex flex-col items-center gap-3">
+                <p className="text-xs text-gray-500 dark:text-slate-400 text-center">
+                  {greeting ?? '¿En qué te puedo ayudar?'}
+                </p>
+                {quickPrompts && (
+                  <div className="flex flex-col gap-2 w-full">
+                    {quickPrompts[lang === 'en' ? 'en' : 'es'].map((q) => (
+                      <button
+                        key={q}
+                        onClick={() => void send(q)}
+                        className="text-left text-xs px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
             {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap ${
+              <div key={i} className={`flex items-end gap-2 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                {m.role !== 'user' && avatarSrc && <img src={avatarSrc} alt="" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />}
+                <div className={`max-w-[82%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap ${
                   m.role === 'user'
                     ? `${accentClasses.userBubble} text-white`
                     : 'bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-200'
@@ -173,9 +206,10 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
               </div>
             ))}
             {sending && (
-              <div className="flex justify-start">
+              <div className="flex items-end gap-2 justify-start">
+                {avatarSrc && <img src={avatarSrc} alt="" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />}
                 <div className="bg-gray-100 dark:bg-slate-700 rounded-2xl px-3 py-2 text-sm text-gray-400 dark:text-slate-500">
-                  Pensando...
+                  {lang === 'en' ? 'Thinking...' : 'Pensando...'}
                 </div>
               </div>
             )}
@@ -187,7 +221,7 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
               placeholder={placeholder}
               value={input}
               onChange={e => setInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') send(); }}
+              onKeyDown={e => { if (e.key === 'Enter') void send(); }}
               disabled={sending}
             />
             {speechSupported && (
@@ -203,7 +237,7 @@ export function AiAssistantPanel({ chat, buttonClassName, panelClassName, title 
               </button>
             )}
             <button
-              onClick={send}
+              onClick={() => void send()}
               disabled={!input.trim() || sending}
               className={`w-9 h-9 rounded-xl disabled:opacity-40 text-white flex items-center justify-center flex-shrink-0 transition-colors ${accentClasses.sendButton}`}
               aria-label="Enviar"
