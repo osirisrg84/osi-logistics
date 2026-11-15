@@ -78,11 +78,6 @@ function HomeOffice({ name, inTransit, pending, onNavigate }: { name: string; in
     <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 dark:border-amber-500/20 bg-gradient-to-br from-amber-50 via-orange-50 to-white dark:from-[#2a1d12] dark:via-[#1e1810] dark:to-slate-900 p-4 sm:p-5">
       {/* lampara de escritorio: luz calida desde la esquina */}
       <div className="pointer-events-none absolute -top-10 -right-10 w-48 h-48 rounded-full bg-amber-300/30 dark:bg-amber-400/10 blur-3xl" />
-      {/* silueta de laptop + taza en el escritorio */}
-      <div className="pointer-events-none absolute right-3 bottom-2 flex items-end gap-2 opacity-20 dark:opacity-25 text-orange-600 dark:text-amber-300">
-        <Coffee className="w-6 h-6" />
-        <Laptop className="w-14 h-14 sm:w-20 sm:h-20" strokeWidth={1.2} />
-      </div>
       <div className="relative flex flex-col gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-orange-600 dark:text-amber-300 flex items-center gap-1.5">
@@ -98,6 +93,10 @@ function HomeOffice({ name, inTransit, pending, onNavigate }: { name: string; in
           </span>
           <span className="px-2.5 py-1 rounded-full bg-white/70 dark:bg-white/5 border border-amber-200/60 dark:border-white/10 text-gray-700 dark:text-slate-200">
             <strong>{pending}</strong> {es ? 'pendientes' : 'pending'}
+          </span>
+          <span className="pointer-events-none ml-auto flex items-end gap-2 opacity-25 text-orange-600 dark:text-amber-300" aria-hidden="true">
+            <Coffee className="w-6 h-6" />
+            <Laptop className="w-12 h-12" strokeWidth={1.2} />
           </span>
         </div>
         <div className="grid grid-cols-3 gap-2 max-w-md">
