@@ -10,7 +10,7 @@ import { getSocket } from '../services/socket';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from '../utils/dateFormat';
 import { parseServerDate } from '../utils/serverDate';
 import { playNotificationPing } from '../utils/sounds';
 

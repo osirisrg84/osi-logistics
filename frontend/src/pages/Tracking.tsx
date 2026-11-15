@@ -9,7 +9,7 @@ import { getSocket } from '../services/socket';
 import { DriverStatusBadge } from '../components/StatusBadge';
 import { OnlineSince } from '../components/OnlineSince';
 import CountryFlag, { countryFlagHtml } from '../components/CountryFlag';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from '../utils/dateFormat';
 import { parseServerDate } from '../utils/serverDate';
 import { formatLocation } from '../utils/location';
 import { formatPhone } from '../utils/phone';

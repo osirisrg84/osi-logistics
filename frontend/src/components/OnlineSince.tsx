@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from '../utils/dateFormat';
 import { Timer } from 'lucide-react';
 import { parseServerDate } from '../utils/serverDate';
 

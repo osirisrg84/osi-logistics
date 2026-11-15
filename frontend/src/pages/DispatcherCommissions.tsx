@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { billingApi, userApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { format } from 'date-fns';
+import { format } from '../utils/dateFormat';
 import { effectiveTaxType, isColombia, maskTaxId, validateTaxId, type TaxIdType } from '../utils/taxId';
 
 interface CommissionRow {

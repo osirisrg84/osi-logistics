@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { communityApi, analyticsApi, incidentsApi } from '../services/api';
 import { IncidentReportModal } from '../components/IncidentReportModal';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from '../utils/dateFormat';
 import { parseServerDate } from '../utils/serverDate';
 import { formatPhone } from '../utils/phone';
 

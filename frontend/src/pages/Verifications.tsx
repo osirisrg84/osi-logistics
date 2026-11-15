@@ -6,7 +6,7 @@ import {
   XCircle, RefreshCw, Search, UserCheck, Archive, Ban,
 } from 'lucide-react';
 import api from '../services/api';
-import { format } from 'date-fns';
+import { format } from '../utils/dateFormat';
 import { formatPhone } from '../utils/phone';
 import CountryFlag from '../components/CountryFlag';
 

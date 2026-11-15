@@ -6,7 +6,8 @@ import { Truck } from '../types';
 import { trucksApi } from '../services/api';
 import { TruckStatusBadge } from '../components/StatusBadge';
 import { EmptyState } from '../components/EmptyState';
-import { format, differenceInDays } from 'date-fns';
+import { format } from '../utils/dateFormat';
+import { differenceInDays } from 'date-fns';
 import { playSuccessChime } from '../utils/sounds';
 
 const FLEET_STATUS_COLORS: Record<string, string> = {

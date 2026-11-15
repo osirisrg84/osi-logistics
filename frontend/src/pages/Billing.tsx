@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { billingApi } from '../services/api';
 import api from '../services/api';
-import { format } from 'date-fns';
+import { format } from '../utils/dateFormat';
 
 interface Commission {
   id: string;

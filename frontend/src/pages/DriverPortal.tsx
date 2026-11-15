@@ -28,7 +28,7 @@ import { IncidentReportModal } from '../components/IncidentReportModal';
 import { AiAssistantPanel } from '../components/AiAssistantPanel';
 import { Order, Driver, DriverStatus, OrderDocument, ORDER_DOCUMENT_TYPE_LABELS } from '../types';
 import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow } from '../utils/dateFormat';
 import { getSocket } from '../services/socket';
 import Map3D from '../components/Map3D';
 import { playNotificationPing, playSuccessChime } from '../utils/sounds';

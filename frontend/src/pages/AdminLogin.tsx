@@ -1,8 +1,9 @@
 ﻿import { useState, FormEvent, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Shield, Eye, EyeOff, AlertCircle, ArrowLeft, Users, BarChart3, Settings } from 'lucide-react';
+import { Shield, Eye, EyeOff, AlertCircle, ArrowLeft, Users, BarChart3, Settings, Languages } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   setAppManifest, setThemeColor, setFavicon,
   ADMIN_MANIFEST, DISPATCH_MANIFEST, ADMIN_COLOR, DISPATCH_COLOR, ADMIN_FAVICON, DISPATCH_FAVICON,
@@ -22,6 +23,7 @@ export default function AdminLogin() {
 
   const { t } = useTranslation();
   const { login } = useAuth();
+  const { lang, toggle: toggleLang } = useLanguage();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -58,9 +60,14 @@ export default function AdminLogin() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md fade-in">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm mb-6 transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> {t('adminLogin.backToPortalSelect')}
-        </Link>
+        <div className="flex items-center justify-between mb-6">
+          <Link to="/" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" /> {t('adminLogin.backToPortalSelect')}
+          </Link>
+          <button onClick={toggleLang} className="flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-slate-200 transition-colors">
+            <Languages className="w-4 h-4 hidden sm:block" /> {lang.toUpperCase()}
+          </button>
+        </div>
 
         {/* Logo */}
         <div className="text-center mb-7">

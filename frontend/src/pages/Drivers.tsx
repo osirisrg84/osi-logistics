@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { DriverStatusBadge } from '../components/StatusBadge';
 import { EmptyState } from '../components/EmptyState';
 import { OnlineSince } from '../components/OnlineSince';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow } from '../utils/dateFormat';
 import { parseServerDate } from '../utils/serverDate';
 import { playSuccessChime } from '../utils/sounds';
 import { formatPhone } from '../utils/phone';

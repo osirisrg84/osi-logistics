@@ -4,7 +4,7 @@ import { Search, ClipboardList, Package, DollarSign, TrendingUp, Clock, X, Mail,
 import type { ReactNode } from 'react';
 import api from '../services/api';
 import { getSocket } from '../services/socket';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow } from '../utils/dateFormat';
 import { parseServerDate } from '../utils/serverDate';
 import { formatPhone } from '../utils/phone';
 import CountryFlag, { countryCode } from '../components/CountryFlag';

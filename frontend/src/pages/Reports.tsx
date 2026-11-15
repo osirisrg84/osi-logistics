@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { TrendingUp, DollarSign, Package, Users, Truck, Star, Clock, Download } from 'lucide-react';
 import { analyticsApi } from '../services/api';
-import { format } from 'date-fns';
+import { format } from '../utils/dateFormat';
 
 const COLORS = ['#f97316', '#3b82f6', '#22c55e', '#8b5cf6', '#eab308', '#ef4444'];
 

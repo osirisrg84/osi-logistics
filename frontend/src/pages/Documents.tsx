@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FolderOpen, Search, RefreshCw, XCircle, FileBadge, Contact, ShieldCheck, Truck } from 'lucide-react';
-import { format } from 'date-fns';
+import { format } from '../utils/dateFormat';
 import api, { adminApi } from '../services/api';
 
 type DocType = 'dispatcher_id' | 'driver_license' | 'driver_coi' | 'driver_equipment';

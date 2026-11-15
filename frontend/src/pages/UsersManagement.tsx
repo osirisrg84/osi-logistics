@@ -2,7 +2,7 @@
 import { useTranslation } from 'react-i18next';
 import { Plus, Search, Edit2, Trash2, X, Shield, UserCheck, Truck, AlertTriangle, Clock, CheckCircle, XCircle, Mail, Eye, EyeOff } from 'lucide-react';
 import api from '../services/api';
-import { format } from 'date-fns';
+import { format } from '../utils/dateFormat';
 import { formatPhone } from '../utils/phone';
 
 interface User {

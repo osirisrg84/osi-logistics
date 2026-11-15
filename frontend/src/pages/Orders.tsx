@@ -10,7 +10,7 @@ import { Order, Driver, Truck as TruckType, OrderStatus } from '../types';
 import { ordersApi, driversApi, trucksApi } from '../services/api';
 import { OrderStatusBadge, DriverStatusBadge } from '../components/StatusBadge';
 import { EmptyState } from '../components/EmptyState';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow } from '../utils/dateFormat';
 import { getSocket } from '../services/socket';
 import { playSuccessChime } from '../utils/sounds';
 import { formatLocation } from '../utils/location';

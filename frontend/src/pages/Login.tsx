@@ -1,9 +1,10 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ClipboardList, Eye, EyeOff, AlertCircle, ArrowLeft, Truck, BarChart2, Users, KeyRound, CheckCircle } from 'lucide-react';
+import { ClipboardList, Eye, EyeOff, AlertCircle, ArrowLeft, Truck, BarChart2, Users, KeyRound, CheckCircle, Languages } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 
 function playLoginSound() {
   try {
@@ -72,6 +73,7 @@ function playLoginSound() {
 export default function Login() {
   const { t } = useTranslation();
   const { login } = useAuth();
+  const { lang, toggle: toggleLang } = useLanguage();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -156,9 +158,14 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm mb-6 transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> {t('driverLogin.backToPortalSelect')}
-        </Link>
+        <div className="flex items-center justify-between mb-6">
+          <Link to="/" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" /> {t('driverLogin.backToPortalSelect')}
+          </Link>
+          <button onClick={toggleLang} className="flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-slate-200 transition-colors">
+            <Languages className="w-4 h-4 hidden sm:block" /> {lang.toUpperCase()}
+          </button>
+        </div>
 
         {/* Hero */}
         <div className="text-center mb-8">

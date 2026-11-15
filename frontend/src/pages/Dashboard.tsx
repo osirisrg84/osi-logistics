@@ -13,7 +13,7 @@ import { analyticsApi, ordersApi, driversApi, billingApi } from '../services/api
 import { useAuth } from '../context/AuthContext';
 import { DashboardStats } from '../types';
 import { OrderStatusBadge } from '../components/StatusBadge';
-import { formatDistanceToNow, format } from 'date-fns';
+import { formatDistanceToNow, format } from '../utils/dateFormat';
 import { parseServerDate } from '../utils/serverDate';
 
 const STATUS_COLORS: Record<string, string> = {
