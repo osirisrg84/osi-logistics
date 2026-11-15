@@ -100,14 +100,14 @@ function HomeOffice({ name, inTransit, pending, onNavigate }: { name: string; in
             <strong>{pending}</strong> {es ? 'pendientes' : 'pending'}
           </span>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button onClick={() => onNavigate('/orders')} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold shadow-sm active:scale-95 transition">
+        <div className="grid grid-cols-3 gap-2 max-w-md">
+          <button onClick={() => onNavigate('/orders')} className="flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-xl whitespace-nowrap bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold shadow-sm active:scale-95 transition">
             <Plus className="w-4 h-4" /> {es ? 'Nueva orden' : 'New order'}
           </button>
-          <button onClick={() => onNavigate('/tracking')} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-amber-200/70 dark:border-white/10 text-gray-800 dark:text-white text-sm font-semibold active:scale-95 transition">
+          <button onClick={() => onNavigate('/tracking')} className="flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-xl whitespace-nowrap bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-amber-200/70 dark:border-white/10 text-gray-800 dark:text-white text-sm font-semibold active:scale-95 transition">
             <MapPin className="w-4 h-4" /> Tracking
           </button>
-          <button onClick={() => onNavigate('/drivers')} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-amber-200/70 dark:border-white/10 text-gray-800 dark:text-white text-sm font-semibold active:scale-95 transition">
+          <button onClick={() => onNavigate('/drivers')} className="flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-xl whitespace-nowrap bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-amber-200/70 dark:border-white/10 text-gray-800 dark:text-white text-sm font-semibold active:scale-95 transition">
             <Users className="w-4 h-4" /> Drivers
           </button>
         </div>
