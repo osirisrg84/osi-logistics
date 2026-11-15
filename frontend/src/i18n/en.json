@@ -814,6 +814,8 @@
     "notifStepIos3": "Turn on \"Allow Notifications\" and come back to this screen.",
     "notifGuideAuto": "Once you turn them on and come back, this screen updates by itself.",
     "notifCheckAgain": "I turned them on",
+    "notifStillBlocked": "They still look blocked. If you already turned them on in settings, reload the screen so it updates.",
+    "notifReload": "Reload screen",
     "notifGuideClose": "Close",
     "statusOnline": "Online",
     "statusOnDelivery": "On Delivery",

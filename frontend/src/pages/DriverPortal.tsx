@@ -453,6 +453,7 @@ function NotificationBlockedBanner() {
     supported ? Notification.permission : null
   );
   const [guideOpen, setGuideOpen] = useState(false);
+  const [stillBlocked, setStillBlocked] = useState(false);
   const wasDenied = useRef(false);
 
   useEffect(() => {
@@ -485,8 +486,14 @@ function NotificationBlockedBanner() {
       : [t('driverPortal.notifStepTab1'), t('driverPortal.notifStepTab2'), t('driverPortal.notifStepTab3')];
 
   const checkAgain = () => {
-    setPermission(Notification.permission);
-    if (Notification.permission === 'granted') registerDriverPush();
+    const current = Notification.permission;
+    setPermission(current);
+    if (current === 'granted') {
+      registerDriverPush();
+    } else {
+      // Sigue bloqueado: avisamos en pantalla en vez de quedarnos callados.
+      setStillBlocked(true);
+    }
   };
 
   return (
@@ -501,7 +508,7 @@ function NotificationBlockedBanner() {
             {t('driverPortal.notifBlockedDesc')}
           </p>
           <button
-            onClick={() => setGuideOpen(true)}
+            onClick={() => { setStillBlocked(false); setGuideOpen(true); }}
             className="mt-2 text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
           >
             {t('driverPortal.notifEnableBtn')}
@@ -526,6 +533,17 @@ function NotificationBlockedBanner() {
               ))}
             </ol>
             <p className="text-xs text-slate-400 mt-3">{t('driverPortal.notifGuideAuto')}</p>
+            {stillBlocked && (
+              <div className="mt-3 rounded-lg bg-amber-500/15 border border-amber-500/30 px-3 py-2">
+                <p className="text-xs text-amber-200">{t('driverPortal.notifStillBlocked')}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="mt-2 text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500 text-slate-900 hover:bg-amber-400 transition-colors"
+                >
+                  {t('driverPortal.notifReload')}
+                </button>
+              </div>
+            )}
             <div className="mt-4 flex gap-2">
               <button onClick={checkAgain} className="flex-1 text-sm font-semibold px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors">
                 {t('driverPortal.notifCheckAgain')}

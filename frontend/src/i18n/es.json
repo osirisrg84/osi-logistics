@@ -814,6 +814,8 @@
     "notifStepIos3": "Activa \"Permitir notificaciones\" y vuelve a esta pantalla.",
     "notifGuideAuto": "Cuando las actives y vuelvas, esta pantalla se actualiza sola.",
     "notifCheckAgain": "Ya las activé",
+    "notifStillBlocked": "Todavía las veo bloqueadas. Si ya las activaste en los ajustes, recarga la pantalla para que se actualice.",
+    "notifReload": "Recargar pantalla",
     "notifGuideClose": "Cerrar",
     "statusOnline": "En Línea",
     "statusOnDelivery": "En Entrega",
