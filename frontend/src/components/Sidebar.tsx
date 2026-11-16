@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import osiLogo from '../assets/osi-logo.jpeg';
+import OsiLogo from './OsiLogo';
 import {
   LayoutDashboard, Package, MapPin, Users, Truck,
   BarChart3, Settings, Zap, Shield, ClipboardList, UserCog, X, Receipt, TrendingUp, Headset, Layers, ShieldCheck, UserCircle, FolderOpen
@@ -56,7 +56,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
       {/* Logo */}
       <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <img src={osiLogo} alt="OSI Logistics" className="h-9 w-auto object-contain rounded-md flex-shrink-0" />
+          <OsiLogo variant="dark" className="h-9 w-auto object-contain flex-shrink-0" />
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
             isAdmin
               ? 'text-purple-300 bg-purple-500/20 border-purple-500/30'

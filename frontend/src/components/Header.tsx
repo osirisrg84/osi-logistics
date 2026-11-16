@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Bell, Search, RefreshCw, X, Check, LogOut, ChevronDown, Shield, Truck, ClipboardList, Sun, Moon, Zap, StickyNote, Headphones, Plus, Pin, Languages } from 'lucide-react';
-import osiLogo from '../assets/osi-logo.jpeg';
+import OsiLogo from './OsiLogo';
 import InstallAppButton from './InstallAppButton';
 import api, { notificationsApi, userApi } from '../services/api';
 import { Notification } from '../types';
@@ -267,7 +267,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           onClick={onMenuClick}
           className="md:hidden -ml-1 rounded-lg p-0.5 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-2"
         >
-          <img src={osiLogo} alt="OSI Logistics" className="h-9 w-auto object-contain rounded-md" />
+          <OsiLogo variant="auto" className="h-9 w-auto object-contain" />
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
             user?.role === 'admin'
               ? 'text-purple-700 bg-purple-50 border-purple-200 dark:text-purple-300 dark:bg-purple-500/20 dark:border-purple-500/30'

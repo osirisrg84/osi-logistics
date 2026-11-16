@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Truck, ClipboardList, ArrowRight, MapPin, Languages } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import osiLogo from '../assets/osi-logo.jpeg';
+import OsiLogo from '../components/OsiLogo';
 import { setThemeColor, NEUTRAL_COLOR, DISPATCH_COLOR } from '../utils/appManifest';
 
 export default function Landing() {
@@ -68,7 +68,7 @@ export default function Landing() {
       {/* Header */}
       <div className="text-center mb-12">
         <a href="https://www.osilogistics.com/" target="_blank" rel="noopener noreferrer">
-          <img src={osiLogo} alt="OSI Logistics" className="h-16 sm:h-20 w-auto object-contain mx-auto mb-7 sm:mb-5 rounded-2xl shadow-2xl shadow-black/40 hover:opacity-90 transition-opacity cursor-pointer" />
+          <OsiLogo variant="dark" className="h-16 sm:h-20 w-auto object-contain mx-auto mb-7 sm:mb-5 hover:opacity-90 transition-opacity cursor-pointer" />
         </a>
         <p className="text-slate-300 text-lg font-medium">{t('landing.tagline')}</p>
         <p className="text-slate-500 text-sm mt-0.5">{t('landing.taglineSub')}</p>

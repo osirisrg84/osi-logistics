@@ -7,7 +7,7 @@ import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, 
 import api, { registerAssistantApi } from '../services/api';
 import { AiAssistantPanel } from '../components/AiAssistantPanel';
 import { useLanguage } from '../context/LanguageContext';
-import osiLogo from '../assets/osi-logo.jpeg';
+import OsiLogo from '../components/OsiLogo';
 import { trackRegistration } from '../utils/tracking';
 import driverHero from '../assets/driver-hero.jpg';
 import CountryFlag from '../components/CountryFlag';
@@ -207,7 +207,7 @@ export default function RegisterDriver() {
         {/* Header */}
         <div className="text-center mb-7">
           <a href="https://osilogistics.com" target="_blank" rel="noopener noreferrer" className="inline-block mb-4">
-            <img src={osiLogo} alt="OSI Logistics" className="h-[60px] w-auto object-contain mx-auto rounded-xl shadow-lg shadow-black/30" />
+            <OsiLogo variant="dark" className="h-[60px] w-auto object-contain mx-auto" />
           </a>
           <div className="relative rounded-3xl overflow-hidden mb-4 shadow-2xl shadow-black/40">
             <img src={driverHero} alt="Happy OSI Logistics truck driver" className="w-full h-56 sm:h-auto sm:aspect-[8/5] object-cover" />

@@ -8,7 +8,7 @@ import {
   Plus, X, Globe, Clock, FileBadge, UploadCloud, Languages,
 } from 'lucide-react';
 import { authApi } from '../services/api';
-import osiLogo from '../assets/osi-logo.jpeg';
+import OsiLogo from '../components/OsiLogo';
 import { trackRegistration } from '../utils/tracking';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -197,7 +197,7 @@ export default function RegisterDispatcher() {
         {/* Header */}
         <div className="text-center mb-7">
           <a href="https://osilogistics.com" target="_blank" rel="noopener noreferrer" className="inline-block mb-4">
-            <img src={osiLogo} alt="OSI Logistics" className="h-[60px] w-auto object-contain mx-auto rounded-xl shadow-lg shadow-black/30" />
+            <OsiLogo variant="dark" className="h-[60px] w-auto object-contain mx-auto" />
           </a>
           <div className="w-16 h-16 bg-orange-500 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-orange-500/30">
             <ClipboardList className="w-8 h-8 text-white" />

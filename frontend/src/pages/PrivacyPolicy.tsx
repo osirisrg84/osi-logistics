@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ShieldCheck, Languages } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import osiLogo from '../assets/osi-logo.jpeg';
+import OsiLogo from '../components/OsiLogo';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -33,7 +33,7 @@ export default function PrivacyPolicy() {
 
         <div className="bg-white rounded-3xl shadow-2xl p-8">
           <div className="flex items-center gap-3 mb-1">
-            <img src={osiLogo} alt="OSI Logistics" className="h-10 w-auto object-contain rounded-md" />
+            <OsiLogo variant="light" className="h-10 w-auto object-contain" />
             <div>
               <h1 className="text-xl font-bold text-gray-900">{T('Política de Privacidad', 'Privacy Policy')}</h1>
               <p className="text-xs text-gray-400">OSI Logistics · {T('Última actualización: octubre de 2026', 'Last updated: October 2026')}</p>

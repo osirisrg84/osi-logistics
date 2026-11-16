@@ -10,7 +10,7 @@ import {
   FileText, Upload, Calendar, AlertCircle, Mail, Languages,
   Settings, ChevronRight, ChevronLeft, Share2, Copy,
 } from 'lucide-react';
-import osiLogo from '../assets/osi-logo.jpeg';
+import OsiLogo from '../components/OsiLogo';
 import InstallAppButton from '../components/InstallAppButton';
 import InstallAppBanner from '../components/InstallAppBanner';
 import TruckGauge from '../components/TruckGauge';
@@ -1703,7 +1703,7 @@ export default function DriverPortal() {
         <div className="px-4 pt-4 pb-2">
           <div className="max-w-lg mx-auto flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <img src={osiLogo} alt="OSI Logistics" className="h-8 w-auto object-contain rounded-md flex-shrink-0" />
+              <OsiLogo variant="dark" className="h-8 w-auto object-contain flex-shrink-0" />
               <span className="text-xs font-semibold px-2.5 py-1 rounded-full tracking-wide text-blue-300 bg-blue-500/20 border border-blue-500/30">
                 {t('driverPortal2.portalBadge')}
               </span>

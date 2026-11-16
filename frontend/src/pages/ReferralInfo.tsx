@@ -4,7 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Languages, Share2, UserPlus, TrendingDown, Gift } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import osiLogo from '../assets/osi-logo.jpeg';
+import OsiLogo from '../components/OsiLogo';
 
 function Step({ icon: Icon, title, text, color }: { icon: any; title: string; text: string; color: string }) {
   return (
@@ -46,7 +46,7 @@ export default function ReferralInfo() {
         </div>
 
         <div className="text-center mb-7">
-          <img src={osiLogo} alt="OSI Logistics" className="h-[60px] w-auto object-contain mx-auto mb-4 rounded-xl shadow-lg shadow-black/30" />
+          <OsiLogo variant="dark" className="h-[60px] w-auto object-contain mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-white text-balance">{t('referralInfo.title')}</h1>
           <p className="text-slate-400 text-sm mt-1">{t('referralInfo.subtitle')}</p>
         </div>
