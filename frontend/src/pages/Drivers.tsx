@@ -849,14 +849,15 @@ export default function Drivers() {
               </div>
             </div>
 
-            <DriverHoldControls driverId={driver.id} driverStatus={driver.status} hold={driver.hold} onChanged={fetchDrivers} notify={showToast} />
-
             {driver.active_orders !== undefined && driver.active_orders > 0 && (
               <div className="mt-3 bg-orange-500/15 dark:bg-orange-500/20 border border-orange-500/30 dark:border-orange-500/40 rounded-lg p-2 flex items-center gap-2">
                 <Package className="w-3.5 h-3.5 text-orange-400" />
                 <span className="text-xs text-orange-600 dark:text-orange-300 font-semibold">{t('drivers2.activeOrders', { count: driver.active_orders })}</span>
               </div>
             )}
+
+            {/* La accion (hold) va al final de la tarjeta, despues de la informacion */}
+            <DriverHoldControls driverId={driver.id} driverStatus={driver.status} hold={driver.hold} onChanged={fetchDrivers} notify={showToast} />
           </div>
         ))}
       </div>
