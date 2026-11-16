@@ -63,8 +63,8 @@ function StatCard({ title, value, sub, icon: Icon, color, trend, onClick }: Stat
   );
 }
 
-type ChartRange = 'today' | 'yesterday' | 7 | 14 | 30 | 60 | 90;
-const CHART_RANGES: ChartRange[] = ['today', 'yesterday', 7, 14, 30, 60, 90];
+type ChartRange = 'today' | 'yesterday' | 7 | 14 | 30;
+const CHART_RANGES: ChartRange[] = ['today', 'yesterday', 7, 14, 30];
 
 function HomeOffice({ name, inTransit, pending, onNavigate, isAdmin = false }: { name: string; inTransit: number; pending: number; onNavigate: (path: string) => void; isAdmin?: boolean }) {
   const { i18n, t } = useTranslation();
@@ -312,7 +312,7 @@ export default function Dashboard() {
         <div className="card lg:col-span-2 !px-2 !py-3 sm:!p-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-3">
             <h3 className="font-semibold text-gray-900 dark:text-slate-100">{t('grupoB.dashboard.revenueOrders')}</h3>
-            <div className="grid grid-cols-7 gap-1 sm:flex sm:gap-1">
+            <div className="grid grid-cols-5 gap-1 sm:flex sm:gap-1">
               {CHART_RANGES.map(d => (
                 <button
                   key={String(d)}
