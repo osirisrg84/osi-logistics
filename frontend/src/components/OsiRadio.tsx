@@ -82,16 +82,6 @@ export default function OsiRadio({ isRecording, seconds, onToggle, labels }: { i
           <rect x="175" y="50" width="24" height="6" rx="2" fill="url(#osiRchrome)" />
         </g>
 
-        {/* palanca PTT LATERAL (goma estriada) unida al costado izquierdo */}
-        <g transform={pressed ? 'translate(2 0)' : undefined}>
-          <rect x="5" y="130" width="22" height="88" rx="8" fill="url(#osiRrubber)" stroke="#000" strokeOpacity=".6" />
-          <rect x="5" y="130" width="22" height="88" rx="8" fill="url(#osiRtex)" />
-          {ribs(9, 140, 14, 7, 9.5, 0.13)}
-          <rect x="12" y="154" width="8" height="40" rx="3" fill={hot} opacity=".9" />
-          <rect x="12" y="154" width="8" height="40" rx="3" fill={hot} filter="url(#osiRglow)" opacity=".55" />
-          <rect x="13" y="156" width="2" height="36" rx="1" fill="#fff" opacity=".4" />
-        </g>
-
         {/* perillas VOL / CH y boton de emergencia sobre el hombro */}
         {[{ x: 34, l: 'VOL' }, { x: 80, l: 'CH' }].map((k) => (
           <g key={k.l}>
@@ -117,6 +107,18 @@ export default function OsiRadio({ isRecording, seconds, onToggle, labels }: { i
         <rect x="20" y="50" width="200" height="368" rx="28" fill="none" stroke="#fff" strokeOpacity=".09" />
         {/* estrias de agarre en los costados */}
         {ribs(21, 250, 6, 10, 8, 0.16)}{ribs(213, 250, 6, 10, 8, 0.16)}
+
+        {/* palanca PTT LATERAL (goma estriada), AHORA POR ENCIMA del cuerpo para que se vea completa, con el mismo naranja vivo del PTT */}
+        <g transform={pressed ? 'translate(2 0)' : undefined}>
+          <rect x="3" y="128" width="26" height="92" rx="9" fill="url(#osiRrubber)" stroke="#000" strokeOpacity=".6" />
+          <rect x="3" y="128" width="26" height="92" rx="9" fill="url(#osiRtex)" />
+          <rect x="3.5" y="128.5" width="25" height="91" rx="8.5" fill="none" stroke="#fff" strokeOpacity=".16" />
+          {ribs(7, 138, 14, 7, 11, 0.13)}
+          <rect x="9" y="150" width="14" height="48" rx="5" fill="#2a0f03" stroke="#000" strokeOpacity=".6" />
+          <rect x="10.5" y="151.5" width="11" height="45" rx="4" fill="url(#osiRptt)" />
+          <rect x="10.5" y="151.5" width="11" height="45" rx="4" fill={hot} filter="url(#osiRglow)" opacity=".75" />
+          <rect x="12.5" y="154" width="3" height="40" rx="1.5" fill="#fff" opacity=".5" />
+        </g>
 
         {/* PLACA FRONTAL empotrada */}
         <rect x="30" y="68" width="180" height="338" rx="22" fill="url(#osiRface)" stroke="#000" strokeOpacity=".7" strokeWidth="1.2" />
