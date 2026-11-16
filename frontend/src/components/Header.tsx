@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Bell, Search, RefreshCw, X, Check, LogOut, ChevronDown, Shield, Truck, ClipboardList, Sun, Moon, Zap, StickyNote, Headphones, Plus, Pin, Languages } from 'lucide-react';
@@ -15,11 +15,11 @@ import { parseServerDate } from '../utils/serverDate';
 import { playNotificationPing } from '../utils/sounds';
 
 const NOTIF_COLORS: Record<string, string> = {
-  order: 'bg-blue-100 text-blue-700',
-  driver: 'bg-green-100 text-green-700',
-  truck: 'bg-purple-100 text-purple-700',
-  system: 'bg-gray-100 text-gray-700',
-  alert: 'bg-red-100 text-red-700',
+  order: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
+  driver: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300',
+  truck: 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300',
+  system: 'bg-gray-100 text-gray-700 dark:bg-slate-600/60 dark:text-slate-200',
+  alert: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
 };
 
 function playShiftOnSound() {
@@ -378,20 +378,20 @@ export default function Header({ onMenuClick }: HeaderProps) {
                   </button>
                 </div>
               </div>
-              <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
+              <div className="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-slate-700">
                 {notifications.length === 0 ? (
-                  <div className="py-8 text-center text-gray-400 text-sm">{t('header.noNotifications')}</div>
+                  <div className="py-8 text-center text-gray-400 dark:text-slate-400 text-sm">{t('header.noNotifications')}</div>
                 ) : notifications.map(n => (
-                  <div key={n.id} className={`px-4 py-3 hover:bg-gray-50 ${!n.read ? 'bg-orange-50/30' : ''}`}>
+                  <div key={n.id} className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/60 ${!n.read ? 'bg-orange-50/60 dark:bg-orange-500/10' : ''}`}>
                     <div className="flex items-start gap-3">
                       <span className={`badge mt-0.5 text-xs ${NOTIF_COLORS[n.type] || NOTIF_COLORS.system}`}>{n.type}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm font-medium text-gray-900 truncate">{n.title}</p>
+                          <p className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">{n.title}</p>
                           {!n.read && <div className="w-1.5 h-1.5 bg-orange-500 rounded-full flex-shrink-0" />}
                         </div>
-                        <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{n.message}</p>
-                        <p className="text-xs text-gray-400 mt-1">{formatDistanceToNow(parseServerDate(n.created_at), { addSuffix: true })}</p>
+                        <p className="text-xs text-gray-500 dark:text-slate-300 mt-0.5 line-clamp-2">{n.message}</p>
+                        <p className="text-xs text-gray-400 dark:text-slate-400 mt-1">{formatDistanceToNow(parseServerDate(n.created_at), { addSuffix: true })}</p>
                       </div>
                     </div>
                   </div>
