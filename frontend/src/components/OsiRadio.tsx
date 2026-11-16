@@ -178,8 +178,8 @@ export default function OsiRadio({ isRecording, seconds, onToggle, labels }: { i
           </g>
         ))}
 
-        {/* BOTON PTT principal */}
-        <g transform={press}>
+        {/* BOTON PTT principal: en la parte baja del radio (pulgar) */}
+        <g transform="translate(0 44)"><g transform={press}>
           <rect x="34" y="266" width="172" height="62" rx="18" fill="#03060c" stroke="#fff" strokeOpacity=".05" />
           <rect x="40" y="272" width="160" height="50" rx="14" fill={hot} opacity=".5" filter="url(#osiRglow)" />
           <rect x="40" y="272" width="160" height="50" rx="14" fill="url(#osiRptt)" stroke="#000" strokeOpacity=".35" />
@@ -194,18 +194,18 @@ export default function OsiRadio({ isRecording, seconds, onToggle, labels }: { i
           <circle cx="120" cy="281" r="2.6" fill="#fff" opacity={tx ? 1 : 0.75} className="osiR-anim" style={{ animation: tx ? 'osiRBlink .8s steps(1) infinite' : undefined }} />
           <text x="120" y="304" textAnchor="middle" fontSize="17" fontWeight="900" letterSpacing="5" fill="#fff" fillOpacity=".96" fontFamily="'Arial Black',Arial,sans-serif">PTT</text>
           <text x="120" y="315" textAnchor="middle" fontSize="5.2" fontWeight="800" letterSpacing="1.6" fill="#fff" fillOpacity=".72" fontFamily="Inter,Arial,sans-serif">{(tx ? labels.transmitting : labels.pushToTalk).toUpperCase()}</text>
-        </g>
+        </g></g>
 
         {/* MICROFONO + marca */}
-        <circle cx="120" cy="346" r="8.5" fill="#02050a" stroke="#1b2536" />
-        <circle cx="120" cy="346" r="7" fill="url(#osiRmic)" />
-        <text x="120" y="371" textAnchor="middle" fontSize="6.6" fontWeight="800" letterSpacing="2.6" fill="#7e8da6" opacity=".75" fontFamily="Inter,Arial,sans-serif">OSI · FLEET X7</text>
-        <text x="120" y="380.6" textAnchor="middle" fontSize="4.8" fontWeight="700" letterSpacing="2" fill="#7e8da6" opacity=".45" fontFamily="Inter,Arial,sans-serif">TWO-WAY RADIO</text>
+        <circle cx="120" cy="293" r="8.5" fill="#02050a" stroke="#1b2536" />
+        <circle cx="120" cy="293" r="7" fill="url(#osiRmic)" />
+        <text x="120" y="268" textAnchor="middle" fontSize="6.6" fontWeight="800" letterSpacing="2.6" fill="#7e8da6" opacity=".75" fontFamily="Inter,Arial,sans-serif">OSI · FLEET X7</text>
+        <text x="120" y="277" textAnchor="middle" fontSize="4.8" fontWeight="700" letterSpacing="2" fill="#7e8da6" opacity=".45" fontFamily="Inter,Arial,sans-serif">TWO-WAY RADIO</text>
         <text x="120" y="397" textAnchor="middle" fontSize="6.4" fontWeight="800" letterSpacing="1.6" fill={tx ? '#ff7a7a' : '#fdba74'} opacity={tx ? 1 : 0.8} fontFamily="Inter,Arial,sans-serif" className="osiR-anim" style={{ animation: tx ? 'osiRBlink 1.1s steps(1) infinite' : undefined }}>{(tx ? labels.tapToStop : labels.tapToRecord).toUpperCase()}</text>
       </svg>
 
       {/* zonas tactiles (accesibles por teclado): boton PTT principal y palanca lateral */}
-      {[{ l: '14.2%', t: '63%', w: '71.7%', h: '14%', r: 18 }, { l: '2%', t: '32.4%', w: '9.6%', h: '19.8%', r: 9 }].map((z, i) => (
+      {[{ l: '14.2%', t: '72.9%', w: '71.7%', h: '14%', r: 18 }, { l: '2%', t: '32.4%', w: '9.6%', h: '19.8%', r: 9 }].map((z, i) => (
         <button
           key={i}
           type="button"
