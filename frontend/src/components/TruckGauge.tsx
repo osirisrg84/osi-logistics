@@ -24,9 +24,13 @@ interface TruckGaugeProps {
   to?: string;
   size?: number;
   onClick?: () => void;
+  /** color del numero en la ventana digital (por defecto ambar) */
+  valueColor?: string;
+  /** color de los numeros de los extremos (por defecto gris claro) */
+  edgeColor?: string;
 }
 
-export default function TruckGauge({ value, max, label, valueText, minText = '0', maxText, from = '#22c55e', to = '#f59e0b', size = 126, onClick }: TruckGaugeProps) {
+export default function TruckGauge({ value, max, label, valueText, minText = '0', maxText, from = '#22c55e', to = '#f59e0b', size = 126, onClick, valueColor = '#fbbf24', edgeColor = '#e2e8f0' }: TruckGaugeProps) {
   const uid = useId().replace(/:/g, '');
   const cx = size / 2;
   const cy = size / 2;
@@ -109,12 +113,12 @@ export default function TruckGauge({ value, max, label, valueText, minText = '0'
         })}
 
         {/* numeros clasicos en las marcas mayores: minimo, 50 % y maximo */}
-        <text x={polar(cx, cy, FACE - 25, START).x} y={polar(cx, cy, FACE - 25, START).y + fs * 0.35} textAnchor="middle" fontSize={fs * 0.9} fontWeight="700" fill="#e2e8f0">{minText}</text>
-        <text x={polar(cx, cy, FACE - 25, START + SWEEP).x} y={polar(cx, cy, FACE - 25, START + SWEEP).y + fs * 0.35} textAnchor="middle" fontSize={fs * 0.9} fontWeight="700" fill="#e2e8f0">{maxText ?? max}</text>
+        <text x={polar(cx, cy, FACE - 25, START).x} y={polar(cx, cy, FACE - 25, START).y + fs * 0.35} textAnchor="middle" fontSize={fs * 0.9} fontWeight="700" fill={edgeColor}>{minText}</text>
+        <text x={polar(cx, cy, FACE - 25, START + SWEEP).x} y={polar(cx, cy, FACE - 25, START + SWEEP).y + fs * 0.35} textAnchor="middle" fontSize={fs * 0.9} fontWeight="700" fill={edgeColor}>{maxText ?? max}</text>
 
         {/* ventana digital con el valor */}
         <rect x={cx - size * 0.18} y={cy + FACE * 0.5} width={size * 0.36} height={size * 0.15} rx="3" fill="#020304" stroke="rgba(148,163,184,.35)" strokeWidth=".8" />
-        <text x={cx} y={cy + FACE * 0.5 + size * 0.11} textAnchor="middle" fontSize={size * 0.1} fontWeight="800" fill="#fbbf24" style={{ fontVariantNumeric: 'tabular-nums', filter: 'drop-shadow(0 0 2px rgba(251,191,36,.7))' }}>
+        <text x={cx} y={cy + FACE * 0.5 + size * 0.11} textAnchor="middle" fontSize={size * 0.1} fontWeight="800" fill={valueColor} style={{ fontVariantNumeric: 'tabular-nums', filter: `drop-shadow(0 0 2px ${valueColor}b3)`, transition: 'fill .6s ease' }}>
           {valueText}
         </text>
 

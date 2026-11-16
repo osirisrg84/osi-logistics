@@ -435,6 +435,14 @@ function OrderCard({ order, onStatusUpdate, highlighted }: { order: Order; onSta
   );
 }
 
+// Color del ingreso semanal: ambar si es poco, pasa a verde a medida que sube; verde pleno desde ~$7,000.
+function revenueTone(v: number, soft = false): string {
+  const t = Math.min(Math.max(v / 7000, 0), 1);
+  const from = [251, 191, 36], to = soft ? [74, 222, 128] : [34, 197, 94];
+  const start = soft ? [226, 232, 240] : from;
+  const c = start.map((a, i) => Math.round(a + (to[i] - a) * t));
+  return `#${c.map((n) => n.toString(16).padStart(2, '0')).join('')}`;
+}
 const EQUIP_TYPES     = ['Dry Van', 'Reefer', 'Power Only', 'Flatbed', 'Tanker', 'Van', 'Box Truck', 'Hotshot'];
 const EQUIP_WITH_DIMS = ['Van', 'Box Truck', 'Hotshot'];
 
@@ -1932,6 +1940,8 @@ export default function DriverPortal() {
                 valueText={`$${Math.round(displayRevenue).toLocaleString('en-US')}`}
                 maxText={`$${(revenueGoal / 1000).toFixed(revenueGoal % 1000 ? 1 : 0)}k`}
                 from="#facc15" to="#22c55e"
+                valueColor={revenueTone(displayRevenue)}
+                edgeColor={revenueTone(displayRevenue, true)}
                 onClick={() => setTab('delivered')}
               />
               <TruckGauge
