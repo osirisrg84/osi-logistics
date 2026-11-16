@@ -72,6 +72,15 @@ router.post('/login', loginLimiter, async (req: Request, res: Response) => {
       return res.status(403).json({ error: 'Esta cuenta está desactivada. Contacta al administrador.' });
     }
 
+    // Cuentas demo compartidas (@osilogistics.com): cada vez que alguien entra, parten desconectadas
+    // (driver offline, dispatcher sin turno activo) y la persona se conecta a mano.
+    if (String(user.email).toLowerCase().endsWith('@osilogistics.com')) {
+      try {
+        if (user.role === 'driver' && user.driver_id) await exec("UPDATE drivers SET status = 'offline' WHERE id = ?", [user.driver_id as string]);
+        if (user.role === 'dispatcher') { await exec("UPDATE users SET shift_active = 0, shift_changed_at = datetime('now') WHERE id = ?", [user.id as string]); user.shift_active = 0; }
+      } catch { /* no bloquea el login */ }
+    }
+
     const token = await createSession(user.id as string);
     let driverProfile = null;
     if (user.role === 'driver' && user.driver_id) {

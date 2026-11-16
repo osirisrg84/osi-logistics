@@ -133,7 +133,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
   // ── Dispatcher strip state (shared mobile + desktop) ──────
   const [musicOn, setMusicOn] = useState(() => { try { return localStorage.getItem('osi_music_on') === '1'; } catch { return false; } });
-  const [notesOpen, setNotesOpen] = useState(() => { try { return localStorage.getItem('osi_notes_open') === '1'; } catch { return false; } });
+  const [notesOpen, setNotesOpen] = useState(() => { try { const v = localStorage.getItem('osi_notes_open'); if (v === null) return !!user?.email?.endsWith('@osilogistics.com'); return v === '1'; } catch { return false; } });
   // No se inicializa desde localStorage -- esa clave vive por NAVEGADOR, no
   // por usuario, asi que si dos dispatchers distintos probaban su cuenta en
   // el mismo dispositivo, el segundo heredaba el "Activo" encendido del
