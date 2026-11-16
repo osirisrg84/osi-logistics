@@ -51,6 +51,8 @@ export default function DispatcherProfilePage() {
     : 'linear-gradient(135deg,#f97316,#ea580c)';
 
   const [profile, setProfile]   = useState<ProfileData>({});
+  // Este es MI perfil: el punto de "en turno" sigue al interruptor Active de arriba al instante (no al valor cargado una sola vez).
+  const onShift = typeof user?.shift_active === 'boolean' ? user.shift_active : !!profile.shift_active;
   const [commRows, setCommRows] = useState<CommissionRow[]>([]);
   const [loading, setLoading]   = useState(true);
   const availLabel = (v: string) => {
@@ -282,7 +284,7 @@ export default function DispatcherProfilePage() {
                    }}>
                 {initials}
               </div>
-              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 ${dark ? 'border-slate-800' : 'border-white'} shadow-sm ${profile.shift_active ? 'bg-green-400 pulse-dot' : 'bg-slate-400'}`} />
+              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 ${dark ? 'border-slate-800' : 'border-white'} shadow-sm ${onShift ? 'bg-green-400 pulse-dot' : 'bg-slate-400'}`} />
             </div>
             {profile.dispatcher_code && (
               <span className="text-[10px] font-bold px-2.5 py-1 rounded-full mb-1 tracking-widest border"
