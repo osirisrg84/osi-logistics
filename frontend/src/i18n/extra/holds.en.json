@@ -16,5 +16,11 @@
     "errShift": "Go on shift to use the hold.",
     "errExpired": "That hold has already ended.",
     "errGeneric": "Couldn't complete the action. Please try again."
+  },
+  "grupoB": {
+    "dashboard": {
+      "rangeToday": "Today",
+      "rangeYesterday": "Yest."
+    }
   }
 }

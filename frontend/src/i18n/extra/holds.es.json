@@ -16,5 +16,11 @@
     "errShift": "Ponte en turno para usar el hold.",
     "errExpired": "Ese hold ya terminó.",
     "errGeneric": "No se pudo completar la acción. Intenta de nuevo."
+  },
+  "grupoB": {
+    "dashboard": {
+      "rangeToday": "Hoy",
+      "rangeYesterday": "Ayer"
+    }
   }
 }

@@ -63,6 +63,9 @@ function StatCard({ title, value, sub, icon: Icon, color, trend, onClick }: Stat
   );
 }
 
+type ChartRange = 'today' | 'yesterday' | 7 | 14 | 30 | 60 | 90;
+const CHART_RANGES: ChartRange[] = ['today', 'yesterday', 7, 14, 30, 60, 90];
+
 function HomeOffice({ name, inTransit, pending, onNavigate, isAdmin = false }: { name: string; inTransit: number; pending: number; onNavigate: (path: string) => void; isAdmin?: boolean }) {
   const { i18n, t } = useTranslation();
   const es = !i18n.language?.startsWith('en');
@@ -137,7 +140,7 @@ export default function Dashboard() {
   const [orderStats, setOrderStats] = useState<Record<string, number>>({});
   const [driverStats, setDriverStats] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
-  const [chartDays, setChartDays] = useState<7 | 14 | 28>(7);
+  const [chartDays, setChartDays] = useState<ChartRange>(7);
   const [commissionTotal, setCommissionTotal] = useState(0);
   const [commissionMonth, setCommissionMonth] = useState(0);
 
@@ -198,13 +201,30 @@ export default function Dashboard() {
   const revenueMap = new Map(
     (stats?.dailyRevenue || []).map((r: { date: string; revenue: number; orders: number }) => [r.date, r])
   );
-  const chartData = Array.from({ length: chartDays }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (chartDays - 1 - i));
-    const key = d.toISOString().slice(0, 10);
-    const row = revenueMap.get(key);
-    return { date: key, revenue: row?.revenue || 0, orders: row?.orders || 0 };
-  });
+  // Hoy / Ayer: 24 puntos por hora local. 7 a 90 dias: un punto por dia.
+  const recentOrders = ((stats as unknown as { recentOrders?: { ts: string; status: string; price: number }[] } | null)?.recentOrders) ?? [];
+  const hourly = (dayOffset: 0 | 1) => {
+    const base = new Date(); base.setHours(0, 0, 0, 0); base.setDate(base.getDate() - dayOffset);
+    const start = base.getTime(), end = start + 24 * 3600 * 1000;
+    const buckets = Array.from({ length: 24 }, (_, h) => ({ date: '', full: `${format(base, 'yyyy-MM-dd')} ${String(h).padStart(2, '0')}:00`, label: `${String(h).padStart(2, '0')}h`, revenue: 0, orders: 0 }));
+    for (const o of recentOrders) {
+      const ts = parseServerDate(o.ts).getTime();
+      if (!(ts >= start && ts < end)) continue;
+      const bk = buckets[new Date(ts).getHours()];
+      bk.orders += 1;
+      if (o.status === 'delivered') bk.revenue += o.price || 0;
+    }
+    return buckets;
+  };
+  const chartData = chartDays === 'today' || chartDays === 'yesterday'
+    ? hourly(chartDays === 'today' ? 0 : 1)
+    : Array.from({ length: chartDays }, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (chartDays - 1 - i));
+        const key = d.toISOString().slice(0, 10);
+        const row = revenueMap.get(key);
+        return { date: key, full: key, label: format(new Date(key + 'T00:00:00'), 'MM/dd'), revenue: row?.revenue || 0, orders: row?.orders || 0 };
+      });
 
   return (
     <div className="space-y-6 fade-in">
@@ -292,14 +312,14 @@ export default function Dashboard() {
         <div className="card lg:col-span-2 !px-2 !py-3 sm:!p-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-3">
             <h3 className="font-semibold text-gray-900 dark:text-slate-100">{t('grupoB.dashboard.revenueOrders')}</h3>
-            <div className="flex gap-1">
-              {([7, 14, 28] as const).map(d => (
+            <div className="grid grid-cols-7 gap-1 sm:flex sm:gap-1">
+              {CHART_RANGES.map(d => (
                 <button
-                  key={d}
+                  key={String(d)}
                   onClick={() => setChartDays(d)}
-                  className={`flex-1 sm:flex-none text-xs px-2 py-1.5 rounded-lg transition-colors ${chartDays === d ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                  className={`text-[11px] sm:text-xs px-1 sm:px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${chartDays === d ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
                 >
-                  {`${d}d`}
+                  {d === 'today' ? t('grupoB.dashboard.rangeToday') : d === 'yesterday' ? t('grupoB.dashboard.rangeYesterday') : `${d}d`}
                 </button>
               ))}
             </div>
@@ -317,10 +337,11 @@ export default function Dashboard() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={d => format(new Date(d + 'T00:00:00'), 'MM/dd')} />
+              <XAxis dataKey="label" tick={{ fontSize: 10 }} interval="preserveStartEnd" minTickGap={22} />
               <YAxis yAxisId="rev" orientation="left" tick={{ fontSize: 10 }} tickFormatter={v => v >= 1000 ? `$${(v/1000).toFixed(0)}k` : `$${v}`} width={36} />
               <YAxis yAxisId="ord" orientation="right" tick={{ fontSize: 10 }} allowDecimals={false} width={20} />
               <Tooltip
+                labelFormatter={(_, payload) => (payload?.[0]?.payload as { full?: string } | undefined)?.full ?? ''}
                 formatter={(value: number, name: string) => [
                   name === 'revenue' ? `$${Number(value).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : value,
                   name === 'revenue' ? t('grupoB.dashboard.revenue') : t('grupoB.dashboard.orders'),

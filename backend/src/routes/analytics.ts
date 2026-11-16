@@ -21,9 +21,9 @@ router.get('/dashboard', async (req: Request, res: Response) => {
     const of = getOrderFilter(req.user?.email, req.user?.role, (req.user as { id?: string })?.id);
     const df = demo ? DEMO_DRIVER_FILTER : REAL_DRIVER_FILTER;
     const [ordersByStatus, dailyRevenue, topDrivers, deliveryByHour, ordersByPriority, recentActivity,
-           totalRevRow, monthRevRow, avgValRow, onTimeRow, avgHrRow] = await Promise.all([
+           totalRevRow, monthRevRow, avgValRow, onTimeRow, avgHrRow, recentOrders] = await Promise.all([
       query(`SELECT o.status, COUNT(*) as count FROM orders o WHERE ${of} GROUP BY o.status`),
-      query(`SELECT date(COALESCE(o.delivered_at, o.created_at)) as date, SUM(CASE WHEN o.status='delivered' THEN o.price ELSE 0 END) as revenue, COUNT(*) as orders FROM orders o WHERE COALESCE(o.delivered_at, o.created_at) >= date('now', '-30 days') AND ${of} GROUP BY date(COALESCE(o.delivered_at, o.created_at)) ORDER BY date ASC`),
+      query(`SELECT date(COALESCE(o.delivered_at, o.created_at)) as date, SUM(CASE WHEN o.status='delivered' THEN o.price ELSE 0 END) as revenue, COUNT(*) as orders FROM orders o WHERE COALESCE(o.delivered_at, o.created_at) >= date('now', '-90 days') AND ${of} GROUP BY date(COALESCE(o.delivered_at, o.created_at)) ORDER BY date ASC`),
       query(`SELECT d.name, d.rating, d.total_deliveries, d.on_time_rate, d.avatar,
                COUNT(o.id) as recent_deliveries, SUM(o.price) as revenue
              FROM drivers d LEFT JOIN orders o ON o.driver_id = d.id AND o.status = 'delivered'
@@ -41,10 +41,12 @@ router.get('/dashboard', async (req: Request, res: Response) => {
       queryOne<{a:number}>(`SELECT COALESCE(AVG(o.price),0) as a FROM orders o WHERE o.status='delivered' AND ${of}`),
       queryOne<{r:number}>(`SELECT COALESCE(AVG(CASE WHEN o.delivered_at <= o.estimated_delivery THEN 100.0 ELSE 0 END),0) as r FROM orders o WHERE o.status='delivered' AND o.estimated_delivery IS NOT NULL AND ${of}`),
       queryOne<{avg:number|null}>(`SELECT AVG((julianday(o.delivered_at) - julianday(o.picked_up_at)) * 24) as avg FROM orders o WHERE o.delivered_at IS NOT NULL AND o.picked_up_at IS NOT NULL AND ${of}`),
+      // Ordenes de las ultimas ~50 h con su hora exacta: el navegador las reparte por hora local para "Hoy" y "Ayer".
+      query(`SELECT COALESCE(o.delivered_at, o.created_at) as ts, o.status, o.price FROM orders o WHERE COALESCE(o.delivered_at, o.created_at) >= datetime('now', '-50 hours') AND ${of} ORDER BY ts ASC`),
     ]);
 
     res.json({
-      ordersByStatus, dailyRevenue, topDrivers, deliveryByHour, ordersByPriority, recentActivity,
+      ordersByStatus, dailyRevenue, topDrivers, deliveryByHour, ordersByPriority, recentActivity, recentOrders,
       kpis: {
         total_revenue: totalRevRow?.r ?? 0,
         monthly_revenue: monthRevRow?.r ?? 0,
