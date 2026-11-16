@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { setThemeColor, DRIVER_COLOR } from '../utils/appManifest';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Languages, Share2, UserPlus, TrendingDown, Gift } from 'lucide-react';
@@ -19,6 +21,12 @@ function Step({ icon: Icon, title, text, color }: { icon: any; title: string; te
 }
 
 export default function ReferralInfo() {
+  // Pantallas de drivers: barra superior del navegador en azul (no el naranja de Dispatch)
+  useEffect(() => {
+    const prev = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.content || '#f97316';
+    setThemeColor(DRIVER_COLOR);
+    return () => setThemeColor(prev);
+  }, []);
   const { t } = useTranslation();
   const { lang, toggle: toggleLang } = useLanguage();
   const [searchParams] = useSearchParams();
