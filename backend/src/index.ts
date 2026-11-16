@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { initDatabase, switchToLocalSqlite, getDbBackend, exec, query, queryOne } from './database';
 import { appEvents, DriverStatusEvent } from './events';
 import ordersRouter from './routes/orders';
-import driversRouter from './routes/drivers';
+import driversRouter, { sweepExpiredHolds } from './routes/drivers';
 import trucksRouter from './routes/trucks';
 import trackingRouter from './routes/tracking';
 import analyticsRouter from './routes/analytics';
@@ -239,6 +239,11 @@ async function startSimulation(): Promise<void> {
     io.to('orders').emit('order_updated', data);
   });
 
+  // Hold de drivers: avisa en vivo a todos los dispatchers (reservado, ampliado, liberado o vencido).
+  appEvents.on('driver:hold_changed', (event: unknown) => {
+    io.to('dispatchers').emit('driver_hold_changed', event);
+  });
+
   appEvents.on('dispatcher:shift_changed', (event: { id: string; name: string; active: boolean }) => {
     io.to('dispatchers').emit('dispatcher_shift_changed', event);
   });
@@ -330,6 +335,11 @@ async function startSimulation(): Promise<void> {
   }, 3000);
 }
 
+// Cada 30 s libera los holds de drivers que ya vencieron (o que dejaron de estar disponibles) y avisa a los dispatchers.
+function startHoldSweeper(): void {
+  setInterval(() => { sweepExpiredHolds().catch(() => { /* se reintenta en 30 s */ }); }, 30 * 1000);
+}
+
 function startKeepAlive(): void {
   if (process.env.NODE_ENV !== 'production') return;
   const selfUrl = `${process.env.RENDER_EXTERNAL_URL || 'https://osi-logistics-backend.onrender.com'}/api/health`;
@@ -408,6 +418,7 @@ function startIdleDispatcherCheck(): void {
   await startSimulation();
   startKeepAlive();
   startIdleDispatcherCheck();
+  startHoldSweeper();
 })();
 
 export { io };

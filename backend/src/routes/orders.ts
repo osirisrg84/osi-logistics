@@ -476,6 +476,12 @@ router.post('/:id/offer', async (req: Request, res: Response) => {
     if (!canManageOrder(authReq, order)) return res.status(403).json({ error: 'No autorizado' });
     if (!['pending', 'offered'].includes(order.status as string)) return res.status(400).json({ error: 'Order is not available to offer' });
     if (!driver) return res.status(404).json({ error: 'Driver not found' });
+    // Hold: si otro dispatcher tiene reservado a este driver (y no ha vencido), no se le puede ofrecer una carga.
+    const holdBy = driver.hold_by as string | null | undefined;
+    const holdExp = driver.hold_expires_at as string | null | undefined;
+    if (holdBy && holdExp && new Date(holdExp).getTime() > Date.now() && holdBy !== authReq.user?.id && authReq.user?.role !== 'admin') {
+      return res.status(409).json({ error: 'driver_on_hold', by_name: driver.hold_by_name, expires_at: holdExp });
+    }
 
     await exec(`UPDATE orders SET status = 'offered', offered_to_driver_id = ?, offered_to_truck_id = ?, offered_at = ?,
       dispatcher_user_id = COALESCE(dispatcher_user_id, ?) WHERE id = ?`,

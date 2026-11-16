@@ -90,7 +90,7 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const availableDrivers = drivers.filter(d => d.status === 'available');
+  const availableDrivers = drivers.filter(d => d.status === 'available' && !(d.hold && !d.hold.mine && new Date(d.hold.expires_at).getTime() > Date.now()));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -625,7 +625,7 @@ function AssignModal({ order, drivers, onClose, onSave }: Omit<AssignModalProps,
   const [driverId, setDriverId] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const availableDrivers = drivers.filter(d => d.status === 'available');
+  const availableDrivers = drivers.filter(d => d.status === 'available' && !(d.hold && !d.hold.mine && new Date(d.hold.expires_at).getTime() > Date.now()));
 
   const handleOffer = async () => {
     if (!driverId) return;

@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DriverHoldControls, useHoldEvents } from '../components/DriverHolds';
 import { Plus, Search, Phone, Mail, Star, Truck, Package, X, Edit2, Trash2, Eye, MapPin, Building2, Clock, Wallet, ShieldCheck, FileText, Calendar, AlertCircle, CheckCircle, TrendingUp, Zap } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Driver, DriverStatus } from '../types';
@@ -655,6 +656,8 @@ export default function Drivers() {
   };
 
   useEffect(() => { fetchDrivers(); }, [statusFilter, search, user?.shift_active]);
+  // Hold en vivo: si otro dispatcher reserva o libera a un driver, la lista se actualiza sola.
+  useHoldEvents(() => { fetchDrivers(); });
 
   const handleDelete = async (driver: Driver) => {
     if (!confirm(t('drivers.confirmDelete', { name: driver.name }))) return;
@@ -845,6 +848,8 @@ export default function Drivers() {
                 <p className="text-sm font-bold text-green-600">{driver.on_time_rate.toFixed(0)}%</p>
               </div>
             </div>
+
+            <DriverHoldControls driverId={driver.id} driverStatus={driver.status} hold={driver.hold} onChanged={fetchDrivers} notify={showToast} />
 
             {driver.active_orders !== undefined && driver.active_orders > 0 && (
               <div className="mt-3 bg-orange-500/15 dark:bg-orange-500/20 border border-orange-500/30 dark:border-orange-500/40 rounded-lg p-2 flex items-center gap-2">

@@ -70,7 +70,11 @@ router.get('/', async (req: Request, res: Response) => {
       params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
     sql += ' ORDER BY d.name ASC';
-    res.json(await query(sql, params));
+    const rows = await query<Record<string, unknown>>(sql, params);
+    res.json(rows.map((r) => {
+      const { hold_by, hold_by_name, hold_started_at, hold_expires_at, ...rest } = r as Record<string, unknown> & { hold_by?: string | null; hold_by_name?: string | null; hold_started_at?: string | null; hold_expires_at?: string | null };
+      return { ...rest, hold: holdPayload({ id: '', name: '', status: '', email: '', hold_by: hold_by ?? null, hold_by_name: hold_by_name ?? null, hold_started_at: hold_started_at ?? null, hold_expires_at: hold_expires_at ?? null }, req.user?.id) };
+    }));
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
 
@@ -98,6 +102,101 @@ router.get('/stats', async (req: Request, res: Response) => {
     });
   } catch { res.status(500).json({ error: 'Failed' }); }
 });
+
+// ───────────── HOLD de drivers ─────────────
+// Un dispatcher puede reservar ("hold") a un driver DISPONIBLE mientras le trabaja una carga: 20 minutos, ampliables
+// de 10 o 20 en 10/20 (maximo 60 minutos en total desde ahora). Mientras dura, los demas dispatchers lo ven reservado y
+// no pueden ofrecerle cargas. Al vencer, o si el driver deja de estar disponible, el hold se libera solo.
+export const HOLD_DEFAULT_MIN = 20;
+export const HOLD_MAX_TOTAL_MIN = 60;
+const HOLD_EXTEND_OPTIONS = [10, 20];
+
+interface HoldRow { id: string; name: string; status: string; email: string; hold_by: string | null; hold_by_name: string | null; hold_started_at: string | null; hold_expires_at: string | null }
+const holdActive = (r: Pick<HoldRow, 'hold_by' | 'hold_expires_at'>): boolean => !!r.hold_by && !!r.hold_expires_at && new Date(r.hold_expires_at).getTime() > Date.now();
+export const holdPayload = (r: HoldRow, viewerId?: string) =>
+  holdActive(r) ? { by: r.hold_by, by_name: r.hold_by_name, started_at: r.hold_started_at, expires_at: r.hold_expires_at, mine: !!viewerId && r.hold_by === viewerId } : null;
+
+async function releaseHold(driverId: string, driverName: string, reason: 'released' | 'expired' | 'unavailable') {
+  await exec('UPDATE drivers SET hold_by = NULL, hold_by_name = NULL, hold_started_at = NULL, hold_expires_at = NULL WHERE id = ?', [driverId]);
+  appEvents.emit('driver:hold_changed', { driver_id: driverId, driver_name: driverName, hold: null, reason });
+}
+
+// Libera los holds vencidos o de drivers que ya no estan disponibles. Lo llama un temporizador del servidor cada 30 s.
+export async function sweepExpiredHolds(): Promise<number> {
+  const rows = await query<HoldRow>(
+    "SELECT id, name, status, email, hold_by, hold_by_name, hold_started_at, hold_expires_at FROM drivers WHERE hold_by IS NOT NULL AND (hold_expires_at IS NULL OR hold_expires_at <= ? OR status != 'available')",
+    [new Date().toISOString()],
+  );
+  for (const r of rows) await releaseHold(r.id, r.name, new Date(r.hold_expires_at ?? 0).getTime() <= Date.now() ? 'expired' : 'unavailable');
+  return rows.length;
+}
+
+const isStaff = (req: Request): boolean => req.user?.role === 'dispatcher' || req.user?.role === 'admin';
+// Un dispatcher demo (@osilogistics.com) solo toca drivers demo y un real solo drivers reales (admin, todos).
+const sameWorld = (req: Request, driverEmail: string): boolean => req.user?.role === 'admin' || isDemo(req.user?.email) === isDemo(driverEmail);
+
+// Mis holds activos (para el Dashboard): driver, cuenta regresiva y estado.
+router.get('/holds/mine', async (req: Request, res: Response) => {
+  try {
+    if (!isStaff(req)) return res.status(403).json({ error: 'No autorizado' });
+    const rows = await query<HoldRow & { phone: string; equipment_type: string | null }>(
+      `SELECT id, name, phone, equipment_type, status, email, hold_by, hold_by_name, hold_started_at, hold_expires_at
+       FROM drivers WHERE hold_by = ? AND hold_expires_at > ? ORDER BY hold_expires_at ASC`,
+      [req.user!.id, new Date().toISOString()],
+    );
+    res.json(rows.map((r) => ({ driver_id: r.id, name: r.name, phone: r.phone, equipment_type: r.equipment_type, status: r.status, hold: holdPayload(r, req.user!.id) })));
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.post('/:id/hold', async (req: Request, res: Response) => {
+  try {
+    if (!isStaff(req)) return res.status(403).json({ error: 'No autorizado' });
+    if (mustGoOnShift(req)) return res.status(409).json({ error: 'must_go_on_shift' });
+    const d = await queryOne<HoldRow>('SELECT id, name, status, email, hold_by, hold_by_name, hold_started_at, hold_expires_at FROM drivers WHERE id = ?', [req.params.id]);
+    if (!d || !sameWorld(req, d.email)) return res.status(404).json({ error: 'Driver not found' });
+    if (holdActive(d) && d.hold_by !== req.user!.id) return res.status(409).json({ error: 'held_by_other', by_name: d.hold_by_name, expires_at: d.hold_expires_at });
+    if (d.status !== 'available') return res.status(409).json({ error: 'not_available' });
+    const start = new Date();
+    const expires = new Date(start.getTime() + HOLD_DEFAULT_MIN * 60_000).toISOString();
+    await exec('UPDATE drivers SET hold_by = ?, hold_by_name = ?, hold_started_at = ?, hold_expires_at = ? WHERE id = ?',
+      [req.user!.id, req.user!.name, start.toISOString(), expires, d.id]);
+    const hold = { by: req.user!.id, by_name: req.user!.name, started_at: start.toISOString(), expires_at: expires, mine: true };
+    appEvents.emit('driver:hold_changed', { driver_id: d.id, driver_name: d.name, hold, reason: 'held' });
+    res.json({ driver_id: d.id, hold });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.post('/:id/hold/extend', async (req: Request, res: Response) => {
+  try {
+    if (!isStaff(req)) return res.status(403).json({ error: 'No autorizado' });
+    const minutes = Number(req.body?.minutes);
+    if (!HOLD_EXTEND_OPTIONS.includes(minutes)) return res.status(400).json({ error: 'invalid_minutes' });
+    const d = await queryOne<HoldRow>('SELECT id, name, status, email, hold_by, hold_by_name, hold_started_at, hold_expires_at FROM drivers WHERE id = ?', [req.params.id]);
+    if (!d || !sameWorld(req, d.email)) return res.status(404).json({ error: 'Driver not found' });
+    if (!holdActive(d)) return res.status(409).json({ error: 'no_active_hold' });
+    if (d.hold_by !== req.user!.id && req.user!.role !== 'admin') return res.status(403).json({ error: 'held_by_other', by_name: d.hold_by_name });
+    const now = Date.now();
+    const cap = now + HOLD_MAX_TOTAL_MIN * 60_000;
+    const next = Math.min(new Date(d.hold_expires_at!).getTime() + minutes * 60_000, cap);
+    const capped = next >= cap;
+    await exec('UPDATE drivers SET hold_expires_at = ? WHERE id = ?', [new Date(next).toISOString(), d.id]);
+    const hold = { by: d.hold_by, by_name: d.hold_by_name, started_at: d.hold_started_at, expires_at: new Date(next).toISOString(), mine: d.hold_by === req.user!.id };
+    appEvents.emit('driver:hold_changed', { driver_id: d.id, driver_name: d.name, hold, reason: 'extended' });
+    res.json({ driver_id: d.id, hold, capped });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.post('/:id/hold/release', async (req: Request, res: Response) => {
+  try {
+    if (!isStaff(req)) return res.status(403).json({ error: 'No autorizado' });
+    const d = await queryOne<HoldRow>('SELECT id, name, status, email, hold_by, hold_by_name, hold_started_at, hold_expires_at FROM drivers WHERE id = ?', [req.params.id]);
+    if (!d || !sameWorld(req, d.email)) return res.status(404).json({ error: 'Driver not found' });
+    if (d.hold_by && d.hold_by !== req.user!.id && req.user!.role !== 'admin') return res.status(403).json({ error: 'held_by_other', by_name: d.hold_by_name });
+    if (d.hold_by) await releaseHold(d.id, d.name, 'released');
+    res.json({ ok: true });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
 
 router.get('/:id', async (req: Request, res: Response) => {
   try {

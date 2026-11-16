@@ -27,6 +27,7 @@ export interface Driver {
   model?: string;
   truck_type?: string;
   equipment_type?: string;
+  hold?: { by: string | null; by_name: string | null; started_at: string | null; expires_at: string; mine: boolean } | null;
   company_name?: string;
   mc_number?: string;
   country?: string;

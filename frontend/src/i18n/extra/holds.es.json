@@ -1,0 +1,20 @@
+{
+  "holds": {
+    "holdBtn": "Poner en hold (20 min)",
+    "yourHold": "Tu hold",
+    "heldBy": "En hold con {{name}}",
+    "release": "Liberar",
+    "timeLeft": "Tiempo restante",
+    "panelTitle_one": "1 driver en hold",
+    "panelTitle_other": "{{count}} drivers en hold",
+    "panelHint": "Mientras dura, otros dispatchers no pueden ofrecerle cargas. Al terminar el tiempo vuelve a quedar disponible.",
+    "started": "Driver en hold por 20 minutos.",
+    "released": "Driver liberado: ya está disponible para otros.",
+    "capped": "Llegaste al máximo: un hold no puede pasar de 60 minutos en total.",
+    "errHeldByOther": "Este driver ya está en hold con {{name}}.",
+    "errNotAvailable": "Solo puedes poner en hold a un driver que esté disponible.",
+    "errShift": "Ponte en turno para usar el hold.",
+    "errExpired": "Ese hold ya terminó.",
+    "errGeneric": "No se pudo completar la acción. Intenta de nuevo."
+  }
+}

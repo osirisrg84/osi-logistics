@@ -242,6 +242,11 @@ export async function initDatabase(): Promise<void> {
   }
 
   // Migrations for users table
+  // Hold de driver: un dispatcher "reserva" a un driver disponible mientras le trabaja una carga (20 min, ampliable).
+  await addColumnIfMissing('drivers', 'hold_by',          'TEXT');
+  await addColumnIfMissing('drivers', 'hold_by_name',     'TEXT');
+  await addColumnIfMissing('drivers', 'hold_started_at',  'TEXT');
+  await addColumnIfMissing('drivers', 'hold_expires_at',  'TEXT');
   await addColumnIfMissing('users', 'phone',                "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('users', 'ssn',                  "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('users', 'date_of_birth',        "TEXT NOT NULL DEFAULT ''");

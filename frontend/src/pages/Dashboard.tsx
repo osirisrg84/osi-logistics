@@ -15,6 +15,7 @@ import { DashboardStats } from '../types';
 import { OrderStatusBadge } from '../components/StatusBadge';
 import { formatDistanceToNow, format } from '../utils/dateFormat';
 import { parseServerDate } from '../utils/serverDate';
+import { HoldsPanel } from '../components/DriverHolds';
 
 const STATUS_COLORS: Record<string, string> = {
   pending: '#eab308',
@@ -208,6 +209,8 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 fade-in">
       <HomeOffice name={user?.name || ''} inTransit={orderStats.in_transit || 0} pending={orderStats.pending || 0} onNavigate={navigate} isAdmin={user?.role === 'admin'} />
+      {/* Drivers que este dispatcher tiene en hold, con su cuenta regresiva (solo aparece si hay alguno) */}
+      {user?.role !== 'driver' && <HoldsPanel />}
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard

@@ -146,6 +146,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
       .then(({ data }) => setDispActive(!!data.shift_active))
       .catch(() => {});
   }, [isDispatcher]);
+  // Si el turno cambia desde otra pantalla (p. ej. el boton "Go on shift" de Drivers), el interruptor de arriba se actualiza al instante.
+  useEffect(() => {
+    if (isDispatcher && typeof user?.shift_active === 'boolean') setDispActive(user.shift_active);
+  }, [isDispatcher, user?.shift_active]);
   const [notes, setNotes] = useState<Array<{id: string; text: string; time: string}>>(() => { try { return JSON.parse(localStorage.getItem('osi_dispatch_notes') || '[]'); } catch { return []; } });
   const [noteInput, setNoteInput] = useState('');
 
