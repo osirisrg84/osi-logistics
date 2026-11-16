@@ -1,3 +1,4 @@
+import { aiGuard, cleanHistory, clientIp } from '../middleware/aiGuard';
 import { Router, Request, Response } from 'express';
 import Anthropic from '@anthropic-ai/sdk';
 import { query, queryOne } from '../database';
@@ -163,7 +164,13 @@ const SUGGEST_DRIVER_TOOL: Anthropic.Tool = {
   },
 };
 
-router.post('/chat', async (req: Request, res: Response) => {
+const assistantGuard = aiGuard({
+  name: 'assistant', windowMs: 10 * 60 * 1000, maxPerWindow: 25, maxPerDay: 120, globalPerDay: 1500,
+  keyOf: (req) => String((req as Request & { user?: { id?: string } }).user?.id ?? clientIp(req)),
+  busyReply: 'Llegaste al límite de consultas por ahora. Intenta de nuevo en unos minutos. / You reached the usage limit for now; please try again in a few minutes.',
+});
+
+router.post('/chat', assistantGuard, async (req: Request, res: Response) => {
   if (!req.user) return res.status(401).json({ error: 'No autenticado' });
   if (!process.env.ANTHROPIC_API_KEY) return res.status(503).json({ error: 'El asistente no está configurado' });
 
@@ -172,6 +179,7 @@ router.post('/chat', async (req: Request, res: Response) => {
     history?: Array<{ role: 'user' | 'assistant'; content: string }>;
   };
   if (!message || !message.trim()) return res.status(400).json({ error: 'message es requerido' });
+  if (message.length > 800) return res.status(400).json({ error: 'message demasiado largo (maximo 800 caracteres)' });
 
   const user = req.user;
   const isDispatchRole = user.role === 'admin' || user.role === 'dispatcher';
@@ -224,15 +232,15 @@ Responde siempre en el mismo idioma en que te escriban (español o inglés), de 
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const messages: Anthropic.MessageParam[] = [
-      ...(history ?? []).slice(-6).map(h => ({ role: h.role, content: h.content })),
+      ...cleanHistory(history, 6, 800),
       { role: 'user', content: message.trim() },
     ];
 
     let finalText = 'No pude procesar la solicitud, intenta de nuevo.';
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 3; i++) {
       const response = await client.messages.create({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 800,
+        max_tokens: 600,
         system,
         tools,
         messages,

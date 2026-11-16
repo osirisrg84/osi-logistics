@@ -134,6 +134,12 @@ export const assistantApi = {
     api.post('/assistant/chat', { message, history }),
 };
 
+// Maya (pagina de registro de driver): ruta publica, sin sesion.
+export const registerAssistantApi = {
+  chat: (message: string, history?: Array<{ role: 'user' | 'assistant'; content: string }>) =>
+    api.post('/chat/register', { message, history }),
+};
+
 export const billingApi = {
   getSummary:        ()              => api.get('/billing/summary'),
   getRecords:        (params?: Record<string, unknown>) => api.get('/billing/records', { params }),

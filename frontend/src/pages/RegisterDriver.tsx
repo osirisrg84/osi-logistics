@@ -2,7 +2,8 @@ import { useState, FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Truck, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowLeft, User, Phone, Mail, Lock, Building2, Calendar, Hash, Clock, Send, DollarSign, KeyRound, ShieldCheck, Languages } from 'lucide-react';
-import api from '../services/api';
+import api, { registerAssistantApi } from '../services/api';
+import { AiAssistantPanel } from '../components/AiAssistantPanel';
 import { useLanguage } from '../context/LanguageContext';
 import osiLogo from '../assets/osi-logo.jpeg';
 import { trackRegistration } from '../utils/tracking';
@@ -561,6 +562,24 @@ export default function RegisterDriver() {
           </p>
         </form>
       </div>
+      <AiAssistantPanel
+        chat={registerAssistantApi.chat}
+        name="Maya"
+        avatarSrc="/assistants/maya.jpg"
+        role={{ es: 'Guía de registro', en: 'Registration guide' }}
+        title="Maya"
+        accent="blue"
+        placeholder={lang === 'en' ? 'Ask about the registration…' : 'Pregunta sobre el registro…'}
+        greeting={lang === 'en'
+          ? "Hi! I'm Maya, OSI's AI assistant. I can help you fill out the registration, tell you which documents you need and what happens next. What would you like to know?"
+          : '¡Hola! Soy Maya, la asistente de IA de OSI. Te ayudo a llenar el registro, te digo qué documentos necesitas y qué pasa después. ¿Qué quieres saber?'}
+        quickPrompts={{
+          es: ['¿Qué documentos necesito?', '¿Cuánto cobra OSI?', '¿Qué pasa después de registrarme?'],
+          en: ['What documents do I need?', 'How much does OSI charge?', 'What happens after I register?'],
+        }}
+        buttonClassName="fixed bottom-4 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+        panelClassName="fixed bottom-20 right-4 left-4 sm:left-auto z-40 sm:w-96 max-h-[70vh] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col overflow-hidden fade-in"
+      />
     </div>
   );
 }
