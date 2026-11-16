@@ -27,6 +27,7 @@ import { ordersApi, driversApi, billingApi, notificationsApi, userApi, driverAxi
 import { StripeCardPayment } from '../components/StripeCardPayment';
 import { IncidentReportModal } from '../components/IncidentReportModal';
 import { AiAssistantPanel } from '../components/AiAssistantPanel';
+import OsiRadio from '../components/OsiRadio';
 import { Order, Driver, DriverStatus, OrderDocument, ORDER_DOCUMENT_TYPE_LABELS } from '../types';
 import { OrderStatusBadge, PriorityBadge } from '../components/StatusBadge';
 import { format, formatDistanceToNow } from '../utils/dateFormat';
@@ -4184,192 +4185,12 @@ export default function DriverPortal() {
                     </div>
                   )}
 
-                  {/* PTT — OSI Fleet Radio PRO X7 v5 — compact */}
+                  {/* Radio OSI Fleet X7 (componente propio, vectorial y animado) */}
                   <div className="flex flex-col items-center pt-1 pb-3 px-4 gap-2">
-
-                    <div style={{ position: 'relative', width: 162, height: 334 }}>
-
-                      {/* Ambient backdrop glow — breathing, color matches PTT/idle state */}
-                      <div style={{ position: 'absolute', left: '50%', top: '42%', width: 210, height: 210,
-                        transform: 'translate(-50%,-50%)', borderRadius: '50%', pointerEvents: 'none', zIndex: 0,
-                        background: isRecording
-                          ? 'radial-gradient(circle,rgba(239,68,68,0.3) 0%,rgba(239,68,68,0.1) 45%,transparent 72%)'
-                          : 'radial-gradient(circle,rgba(249,115,22,0.22) 0%,rgba(249,115,22,0.07) 45%,transparent 72%)',
-                        animation: 'radioAmbientGlow 3.2s ease-in-out infinite',
-                        filter: 'blur(2px)',
-                      }} />
-
-                      {/* Ground reflection — product-shot feel */}
-                      <div style={{ position: 'absolute', left: '50%', bottom: -6, width: 118, height: 14,
-                        transform: 'translateX(-50%)', borderRadius: '50%', pointerEvents: 'none', zIndex: 0,
-                        background: 'radial-gradient(ellipse,rgba(0,0,0,0.55) 0%,rgba(0,0,0,0.22) 55%,transparent 80%)',
-                        filter: 'blur(1.5px)',
-                      }} />
-
-                    <div style={{ position: 'relative', zIndex: 1, width: 162, height: 318,
-                      filter: 'drop-shadow(0 18px 40px rgba(0,0,0,0.98)) drop-shadow(0 5px 12px rgba(0,0,0,0.85))' }}>
-
-                      {/* ANTENNA */}
-                      <div style={{ position: 'absolute', right: 17, top: 0, width: 11, height: 56, borderRadius: '5px 5px 2px 2px',
-                        background: ['repeating-linear-gradient(180deg,rgba(255,255,255,0.08) 0px,rgba(255,255,255,0.08) 2px,rgba(0,0,0,0.1) 2px,rgba(0,0,0,0.1) 3.5px,transparent 3.5px,transparent 7px)','linear-gradient(to right,#020810 0%,#0a1824 18%,#152334 50%,#0a1824 82%,#020810 100%)'].join(','),
-                        boxShadow: '3px 0 10px rgba(0,0,0,0.95)', transform: 'rotate(7deg)', transformOrigin: 'bottom center',
-                      }} />
-                      <div style={{ position: 'absolute', right: 18, top: -3, width: 10, height: 10, borderRadius: '50%',
-                        background: 'radial-gradient(circle at 30% 26%,#ffffff 0%,#e2e8f0 18%,#94a3b8 48%,#334155 78%,#0f172a 100%)',
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.98)', transform: 'rotate(7deg) translateY(-4px)', transformOrigin: '50% 60px',
-                      }} />
-
-                      {/* MAIN BODY — content must fit in 270px height */}
-                      <div style={{ position: 'absolute', left: 0, top: 48, width: 155, bottom: 0,
-                        borderRadius: '13px 18px 11px 11px', overflow: 'hidden',
-                        background: ['linear-gradient(to right,rgba(255,255,255,0.18) 0px,rgba(255,255,255,0.07) 4px,rgba(255,255,255,0.02) 12px,transparent 22px)','radial-gradient(ellipse 90% 20% at 46% 0%,rgba(255,255,255,0.07) 0%,transparent 100%)','repeating-linear-gradient(0deg,transparent 0px,transparent 2px,rgba(255,255,255,0.004) 2px,rgba(255,255,255,0.004) 3px)','linear-gradient(158deg,#171d2a 0%,#0e1320 12%,#090c18 32%,#050810 58%,#020408 100%)'].join(','),
-                        boxShadow: ['inset -3px 0 10px rgba(0,0,0,0.72)','inset 0 -4px 14px rgba(0,0,0,0.82)','inset 1px 1px 0 rgba(255,255,255,0.15)'].join(','),
-                      }}>
-
-                        {/* CHROME RAIL */}
-                        <div style={{ height: 16, borderRadius: '13px 18px 0 0',
-                          background: 'linear-gradient(180deg,#b0bac8 0%,#d8dfe8 8%,#edf1f6 18%,#f8fafc 32%,#ffffff 46%,#f4f7fa 58%,#dde3ec 72%,#bdc6d2 84%,#8d9aaa 94%,#6b7888 100%)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.88), inset 0 1px 0 rgba(255,255,255,1), inset 0 -1px 0 rgba(0,0,0,0.28)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px',
-                        }}>
-                          <div style={{ display: 'flex', gap: 5 }}><div style={{ position: 'relative', width: 6, height: 6, borderRadius: '50%', background: 'radial-gradient(circle at 32% 26%,#c4cdd8 0%,#8892a0 40%,#3d4856 80%,#1e2530 100%)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.65), 0 0 0 0.5px rgba(0,0,0,0.5)' }}>
-                              <div style={{ position: 'absolute', top: '20%', left: '47%', width: 0.8, height: '60%', background: 'rgba(0,0,0,0.45)', transform: 'translateX(-50%)' }} />
-                              <div style={{ position: 'absolute', top: '47%', left: '20%', height: 0.8, width: '60%', background: 'rgba(0,0,0,0.45)', transform: 'translateY(-50%)' }} />
-                            </div><div style={{ position: 'relative', width: 6, height: 6, borderRadius: '50%', background: 'radial-gradient(circle at 32% 26%,#c4cdd8 0%,#8892a0 40%,#3d4856 80%,#1e2530 100%)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.65), 0 0 0 0.5px rgba(0,0,0,0.5)' }}>
-                              <div style={{ position: 'absolute', top: '20%', left: '47%', width: 0.8, height: '60%', background: 'rgba(0,0,0,0.45)', transform: 'translateX(-50%)' }} />
-                              <div style={{ position: 'absolute', top: '47%', left: '20%', height: 0.8, width: '60%', background: 'rgba(0,0,0,0.45)', transform: 'translateY(-50%)' }} />
-                            </div></div>
-                          <span style={{ fontSize: 5.5, letterSpacing: '0.38em', fontFamily: 'Arial', fontWeight: 900, color: '#3d4856', textShadow: '0 1px 0 rgba(255,255,255,0.65)' }}>OSI · PRO X7</span>
-                          <div style={{ display: 'flex', gap: 5 }}><div style={{ position: 'relative', width: 6, height: 6, borderRadius: '50%', background: 'radial-gradient(circle at 32% 26%,#c4cdd8 0%,#8892a0 40%,#3d4856 80%,#1e2530 100%)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.65), 0 0 0 0.5px rgba(0,0,0,0.5)' }}>
-                              <div style={{ position: 'absolute', top: '20%', left: '47%', width: 0.8, height: '60%', background: 'rgba(0,0,0,0.45)', transform: 'translateX(-50%)' }} />
-                              <div style={{ position: 'absolute', top: '47%', left: '20%', height: 0.8, width: '60%', background: 'rgba(0,0,0,0.45)', transform: 'translateY(-50%)' }} />
-                            </div><div style={{ position: 'relative', width: 6, height: 6, borderRadius: '50%', background: 'radial-gradient(circle at 32% 26%,#c4cdd8 0%,#8892a0 40%,#3d4856 80%,#1e2530 100%)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.65), 0 0 0 0.5px rgba(0,0,0,0.5)' }}>
-                              <div style={{ position: 'absolute', top: '20%', left: '47%', width: 0.8, height: '60%', background: 'rgba(0,0,0,0.45)', transform: 'translateX(-50%)' }} />
-                              <div style={{ position: 'absolute', top: '47%', left: '20%', height: 0.8, width: '60%', background: 'rgba(0,0,0,0.45)', transform: 'translateY(-50%)' }} />
-                            </div></div>
-                        </div>
-
-                        {/* KNOBS ROW */}
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 12px 0' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                            <div style={{ position: 'relative', width: 32, height: 32 }}>
-                              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'conic-gradient(from 0deg,#040a14 0deg,#0c1a28 9deg,#162638 14deg,#0c1a28 19deg,#040a14 28deg,#0c1a28 38deg,#162638 43deg,#0c1a28 48deg,#040a14 57deg,#0c1a28 67deg,#162638 72deg,#0c1a28 77deg,#040a14 86deg,#0c1a28 96deg,#162638 101deg,#0c1a28 106deg,#040a14 115deg,#0c1a28 125deg,#162638 130deg,#0c1a28 135deg,#040a14 144deg,#0c1a28 154deg,#162638 159deg,#0c1a28 164deg,#040a14 173deg,#0c1a28 183deg,#162638 188deg,#0c1a28 193deg,#040a14 202deg,#0c1a28 212deg,#162638 217deg,#0c1a28 222deg,#040a14 231deg,#0c1a28 241deg,#162638 246deg,#0c1a28 251deg,#040a14 260deg,#0c1a28 270deg,#162638 275deg,#0c1a28 280deg,#040a14 289deg,#0c1a28 299deg,#162638 304deg,#0c1a28 309deg,#040a14 318deg,#0c1a28 328deg,#162638 333deg,#0c1a28 338deg,#040a14 347deg,#0c1a28 357deg,#162638 360deg)', boxShadow: '0 3px 10px rgba(0,0,0,0.97), inset 0 2px 4px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.055)' }} />
-                              <div style={{ position: 'absolute', inset: 4, borderRadius: '50%', background: 'linear-gradient(135deg,#818c9e 0%,#d1d9e6 22%,#f4f6f9 46%,#d1d9e6 70%,#818c9e 100%)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.5), inset 0 -1px 1px rgba(255,255,255,0.3)' }} />
-                              <div style={{ position: 'absolute', inset: 7, borderRadius: '50%', background: 'radial-gradient(circle at 33% 28%,#223448 0%,#111f30 42%,#060c18 100%)', boxShadow: 'inset 0 3px 8px rgba(0,0,0,0.96)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 2 }}>
-                                <div style={{ width: 2.5, height: 4, borderRadius: '0 0 2px 2px', background: '#3b82f6', boxShadow: '0 0 7px #3b82f6' }} />
-                              </div>
-                            </div>
-                            <span style={{ fontSize: 5.5, letterSpacing: '0.2em', color: 'rgba(100,130,180,0.6)', fontFamily: 'Arial', fontWeight: 800 }}>VOL</span>
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                            <span style={{ fontSize: 6, letterSpacing: '0.3em', color: 'rgba(148,163,184,0.4)', fontFamily: 'Arial', fontWeight: 900 }}>OSI</span>
-                            <div style={{ width: 11, height: 11, borderRadius: '50%',
-                              background: isRecording ? 'radial-gradient(circle at 34% 30%,#fecaca 0%,#ef4444 50%,#7f1d1d 100%)' : 'radial-gradient(circle at 34% 30%,#bbf7d0 0%,#22c55e 50%,#14532d 100%)',
-                              boxShadow: isRecording ? '0 0 0 2.5px rgba(239,68,68,0.18), 0 0 18px 5px rgba(239,68,68,0.94)' : '0 0 0 2.5px rgba(34,197,94,0.16), 0 0 18px 5px rgba(34,197,94,0.9)',
-                              animation: isRecording ? 'none' : 'radioLedBreathe 2.4s ease-in-out infinite',
-                              transition: 'background 0.2s',
-                            }} />
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                            <div style={{ position: 'relative', width: 32, height: 32 }}>
-                              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'conic-gradient(from 0deg,#040a14 0deg,#0c1a28 9deg,#162638 14deg,#0c1a28 19deg,#040a14 28deg,#0c1a28 38deg,#162638 43deg,#0c1a28 48deg,#040a14 57deg,#0c1a28 67deg,#162638 72deg,#0c1a28 77deg,#040a14 86deg,#0c1a28 96deg,#162638 101deg,#0c1a28 106deg,#040a14 115deg,#0c1a28 125deg,#162638 130deg,#0c1a28 135deg,#040a14 144deg,#0c1a28 154deg,#162638 159deg,#0c1a28 164deg,#040a14 173deg,#0c1a28 183deg,#162638 188deg,#0c1a28 193deg,#040a14 202deg,#0c1a28 212deg,#162638 217deg,#0c1a28 222deg,#040a14 231deg,#0c1a28 241deg,#162638 246deg,#0c1a28 251deg,#040a14 260deg,#0c1a28 270deg,#162638 275deg,#0c1a28 280deg,#040a14 289deg,#0c1a28 299deg,#162638 304deg,#0c1a28 309deg,#040a14 318deg,#0c1a28 328deg,#162638 333deg,#0c1a28 338deg,#040a14 347deg,#0c1a28 357deg,#162638 360deg)', boxShadow: '0 3px 10px rgba(0,0,0,0.97), inset 0 2px 4px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.055)' }} />
-                              <div style={{ position: 'absolute', inset: 4, borderRadius: '50%', background: 'linear-gradient(135deg,#818c9e 0%,#d1d9e6 22%,#f4f6f9 46%,#d1d9e6 70%,#818c9e 100%)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.5), inset 0 -1px 1px rgba(255,255,255,0.3)' }} />
-                              <div style={{ position: 'absolute', inset: 7, borderRadius: '50%', background: 'radial-gradient(circle at 33% 28%,#223448 0%,#111f30 42%,#060c18 100%)', boxShadow: 'inset 0 3px 8px rgba(0,0,0,0.96)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 2 }}>
-                                <div style={{ width: 2.5, height: 4, borderRadius: '0 0 2px 2px', background: '#64748b', boxShadow: '0 0 7px #64748b' }} />
-                              </div>
-                            </div>
-                            <span style={{ fontSize: 5.5, letterSpacing: '0.2em', color: 'rgba(100,130,180,0.6)', fontFamily: 'Arial', fontWeight: 800 }}>CH</span>
-                          </div>
-                        </div>
-
-                        {/* SPEAKER DISC — 78px, compact */}
-                        <div style={{ display: 'flex', justifyContent: 'center', margin: '6px 0 4px' }}>
-                          <div style={{ position: 'relative', width: 78, height: 78, borderRadius: '50%',
-                            border: '2.5px solid #020406', background: '#010205',
-                            boxShadow: 'inset 0 6px 22px rgba(0,0,0,1), 0 2px 8px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.04)',
-                            overflow: 'hidden',
-                          }}>
-                            <div style={{ position: 'absolute', inset: 3, borderRadius: '50%', overflow: 'hidden',
-                              backgroundImage: 'radial-gradient(circle at 1.5px 1.5px,#04080e 1.6px,transparent 1.6px)',
-                              backgroundSize: '4.5px 4.5px', backgroundRepeat: 'repeat',
-                            }} />
-                            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%',
-                              background: 'radial-gradient(circle at 50% 52%,rgba(0,0,0,0.88) 0%,rgba(0,0,0,0.38) 42%,transparent 68%)',
-                            }} />
-                            {isRecording && [14,24,34].map((r,i) => (
-                              <div key={i} style={{ position: 'absolute', top: '50%', left: '50%',
-                                width: r*2, height: r*2, marginLeft: -r, marginTop: -r, borderRadius: '50%',
-                                border: `1.5px solid rgba(34,197,94,${0.6-i*0.18})`,
-                                animation: `pttRing ${0.85+i*0.3}s ease-out infinite`,
-                                animationDelay: `${i*0.18}s`,
-                              }} />
-                            ))}
-                            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%',
-                              background: 'radial-gradient(ellipse 55% 38% at 30% 24%,rgba(255,255,255,0.06) 0%,transparent 100%)',
-                              pointerEvents: 'none',
-                            }} />
-                          </div>
-                        </div>
-
-                        {/* LCD SCREEN — 44px */}
-                        <div style={{ margin: '0 8px 5px', borderRadius: 7, border: '2.5px solid #010203',
-                          boxShadow: 'inset 0 6px 18px rgba(0,0,0,1), 0 0 0 1px rgba(255,255,255,0.04)',
-                          position: 'relative', overflow: 'hidden', background: '#000',
-                        }}>
-                          <div style={{ height: 50, background: isRecording ? 'linear-gradient(180deg,#050f08 0%,#020804 100%)' : 'linear-gradient(180deg,#030c06 0%,#010503 100%)',
-                            display: 'flex', alignItems: 'stretch', padding: '4px 6px', transition: 'background 0.3s' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
-                              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 1.5 }}>
-                                {[3,5,7,9,12].map((h,i) => (
-                                  <div key={i} style={{ width: 3, height: h, borderRadius: '1px 1px 0 0',
-                                    background: isRecording ? (i < 4 ? '#22c55e' : '#0a2a12') : (i < 3 ? '#22c55e' : '#0a2a12'),
-                                    boxShadow: (isRecording ? i < 4 : i < 3) ? '0 0 4px rgba(34,197,94,0.6)' : 'none',
-                                    animation: isRecording && i < 4
-                                      ? `waveBar ${0.24+i*0.08}s ease-in-out infinite alternate`
-                                      : (!isRecording && i < 3 ? `radioIdleBars ${1.6+i*0.3}s ease-in-out infinite` : 'none'),
-                                    animationDelay: !isRecording && i < 3 ? `${i*0.25}s` : '0s',
-                                    transition: 'background 0.22s',
-                                  }} />
-                                ))}
-                              </div>
-                              <div>
-                                <div style={{ fontSize: 5.5, color: isRecording ? 'rgba(34,197,94,0.45)' : 'rgba(34,197,94,0.24)', fontFamily: '"Courier New",monospace', letterSpacing: '0.08em' }}>{t('driverPortal2.channel')}</div>
-                                <div style={{ fontSize: 20, fontWeight: 900, fontFamily: '"Courier New",monospace', lineHeight: 1,
-                                  color: isRecording ? '#22c55e' : '#145a24',
-                                  textShadow: isRecording ? '0 0 12px rgba(34,197,94,1), 0 0 24px rgba(34,197,94,0.4)' : 'none',
-                                  transition: 'all 0.22s',
-                                }}>{isRecording ? 'TX' : '01'}</div>
-                              </div>
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <div style={{ display: 'flex', gap: 1, border: `1px solid ${isRecording ? 'rgba(34,197,94,0.45)' : 'rgba(34,197,94,0.22)'}`, borderRadius: 2, padding: '1px 1.5px' }}>
-                                  {[0,1,2,3].map(i => <div key={i} style={{ width: 3, height: 6, borderRadius: 1, background: isRecording ? '#16a34a' : '#14532d', transition: 'all 0.2s' }} />)}
-                                </div>
-                                <div style={{ width: 1.5, height: 4, borderRadius: '0 1px 1px 0', background: isRecording ? '#22c55e' : '#166534' }} />
-                              </div>
-                              <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontSize: 5.5, color: isRecording ? 'rgba(34,197,94,0.42)' : 'rgba(34,197,94,0.2)', fontFamily: '"Courier New",monospace' }}>MHz</div>
-                                <div style={{ fontSize: 9, fontWeight: 900, fontFamily: '"Courier New",monospace',
-                                  color: isRecording ? '#22c55e' : '#155724',
-                                  textShadow: isRecording ? '0 0 8px rgba(34,197,94,0.88)' : 'none',
-                                  transition: 'all 0.22s',
-                                }}>154.310</div>
-                              </div>
-                            </div>
-                          </div>
-                          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'repeating-linear-gradient(0deg,rgba(0,0,0,0.2) 0px,rgba(0,0,0,0.2) 1px,transparent 1px,transparent 3px)', animation: 'radioScanFlicker 6s linear infinite' }} />
-                          <div style={{ position: 'absolute', top: 3, left: 5, width: 36, height: 12, borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(255,255,255,0.17) 0%,rgba(255,255,255,0.04) 55%,transparent 100%)', transform: 'rotate(-12deg)', pointerEvents: 'none' }} />
-                        </div>
-
-                        {/* PTT BUTTON — GRABAR / DETENER — recessed bezel so the button reads as a real part sunk into the housing, not a flat sticker */}
-                        <div style={{
-                          margin: '0 8px 0', padding: 4, borderRadius: 13,
-                          background: 'linear-gradient(155deg,#050a12 0%,#0c1420 45%,#060b14 100%)',
-                          boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.92), inset 0 -1px 0 rgba(255,255,255,0.04), 0 1px 0 rgba(255,255,255,0.03)',
-                        }}>
-                        <button
-                          onClick={async () => {
+                    <OsiRadio
+                      isRecording={isRecording}
+                      seconds={recordingDuration}
+                      onToggle={async () => {
                             if (isRecording) {
                               if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
                               setIsRecording(false); setMediaRecorder(null);
@@ -4416,103 +4237,15 @@ export default function DriverPortal() {
                               mr.start(); setMediaRecorder(mr); setIsRecording(true); setRecordingDuration(0);
                             } catch {}
                           }}
-                          className="select-none touch-none transition-transform active:scale-[0.97] block"
-                          style={{
-                            position: 'relative', overflow: 'hidden',
-                            width: '100%', height: 52,
-                            borderRadius: 10, cursor: 'pointer',
-                            border: isRecording ? '1px solid rgba(127,29,29,0.9)' : '1px solid rgba(146,64,14,0.9)',
-                            background: isRecording
-                              ? [
-                                  'radial-gradient(ellipse 88% 65% at 50% -8%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 32%, transparent 62%)',
-                                  'repeating-linear-gradient(135deg,rgba(0,0,0,0.1) 0px,rgba(0,0,0,0.1) 2px,transparent 2px,transparent 6px)',
-                                  'linear-gradient(180deg,#f87171 0%,#ef4444 36%,#991b1b 100%)',
-                                ].join(',')
-                              : [
-                                  'radial-gradient(ellipse 88% 65% at 50% -8%, rgba(255,255,255,0.46) 0%, rgba(255,255,255,0.09) 32%, transparent 62%)',
-                                  'repeating-linear-gradient(135deg,rgba(0,0,0,0.09) 0px,rgba(0,0,0,0.09) 2px,transparent 2px,transparent 6px)',
-                                  'linear-gradient(180deg,#fb923c 0%,#f97316 36%,#b45309 100%)',
-                                ].join(','),
-                            boxShadow: isRecording
-                              ? 'inset 0 -7px 15px rgba(0,0,0,0.6), inset 0 3px 5px rgba(255,180,180,0.35), inset 0 0 0 1px rgba(0,0,0,0.25), 0 0 28px rgba(239,68,68,0.82), 0 3px 10px rgba(0,0,0,0.9)'
-                              : 'inset 0 -7px 15px rgba(0,0,0,0.5), inset 0 3px 5px rgba(255,210,160,0.3), inset 0 0 0 1px rgba(0,0,0,0.22), 0 0 18px rgba(249,115,22,0.48), 0 3px 10px rgba(0,0,0,0.9)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                            transform: isRecording ? 'translateY(0.5px)' : 'translateY(0)',
-                            transition: 'all 0.15s',
-                          }}
-                        >
-                          {/* Glossy sheen sweep — idle only, realism pass */}
-                          {!isRecording && (
-                            <div style={{ position: 'absolute', top: 0, left: 0, width: '35%', height: '100%',
-                              background: 'linear-gradient(100deg,transparent 0%,rgba(255,255,255,0.4) 50%,transparent 100%)',
-                              animation: 'radioSheen 5s ease-in-out infinite', pointerEvents: 'none', zIndex: 0,
-                            }} />
-                          )}
-                          {/* Left ridge — embossed rubber grip lines */}
-                          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            {[0,1,2,3].map(i => <div key={i} style={{ width: 3, height: 5, borderRadius: 1.5, background: 'linear-gradient(180deg,rgba(255,255,255,0.45),rgba(255,255,255,0.15))', boxShadow: 'inset 0 1px 1px rgba(0,0,0,0.25), 0 0.5px 0 rgba(255,255,255,0.1)' }} />)}
-                          </div>
-                          {/* Center content */}
-                          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                            {/* Signal dot */}
-                            <div style={{ width: 7, height: 7, borderRadius: '50%',
-                              background: isRecording ? '#fff' : 'rgba(255,255,255,0.7)',
-                              boxShadow: isRecording ? '0 0 10px rgba(255,255,255,0.9), 0 0 20px rgba(255,255,255,0.5)' : 'none',
-                              animation: isRecording ? 'pulse-dot 0.8s ease-in-out infinite' : 'none',
-                              transition: 'all 0.2s',
-                            }} />
-                            {/* PTT text */}
-                            <span style={{
-                              fontSize: 15, fontWeight: 900, letterSpacing: '0.3em',
-                              fontFamily: 'Arial Black, Arial, sans-serif',
-                              color: 'rgba(255,255,255,0.95)',
-                              textShadow: isRecording
-                                ? '0 0 12px rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.6)'
-                                : '0 2px 6px rgba(0,0,0,0.6)',
-                              lineHeight: 1,
-                              transition: 'text-shadow 0.2s',
-                            }}>PTT</span>
-                            {/* Sub label */}
-                            <span style={{ fontSize: 5.5, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.55)', fontFamily: 'Arial', fontWeight: 700 }}>
-                              {isRecording ? t('driverPortal.transmittingShort') : t('driverPortal.pushToTalk')}
-                            </span>
-                          </div>
-                          {/* Right ridge — embossed rubber grip lines */}
-                          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            {[0,1,2,3].map(i => <div key={i} style={{ width: 3, height: 5, borderRadius: 1.5, background: 'linear-gradient(180deg,rgba(255,255,255,0.45),rgba(255,255,255,0.15))', boxShadow: 'inset 0 1px 1px rgba(0,0,0,0.25), 0 0.5px 0 rgba(255,255,255,0.1)' }} />)}
-                          </div>
-                        </button>
-                        </div>{/* end PTT bezel recess */}
-
-                        {/* State label + brand */}
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 8, paddingTop: 4, gap: 3 }}>
-                          {isRecording ? (
-                            <span style={{ fontSize: 8.5, fontWeight: 800, letterSpacing: '0.16em', color: '#f87171', textTransform: 'uppercase', fontFamily: 'Arial', textShadow: '0 0 10px rgba(239,68,68,0.7)', animation: 'pulse-dot 1s ease-in-out infinite' }}>
-                              {t('driverPortal.tapToStop')}
-                            </span>
-                          ) : (
-                            <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.14em', color: 'rgba(251,146,60,0.75)', textTransform: 'uppercase', fontFamily: 'Arial' }}>
-                              {t('driverPortal.tapToRecord')}
-                            </span>
-                          )}
-                          <span style={{ fontSize: 5.5, letterSpacing: '0.35em', fontWeight: 900, fontFamily: 'Arial', color: 'rgba(71,85,105,0.38)', textTransform: 'uppercase' }}>{t('driverPortal2.fleetRadio')}</span>
-                        </div>
-
-                      </div>{/* end body */}
-
-                      {/* Side PTT bar */}
-                      <div style={{ position: 'absolute', left: -6, top: 98, width: 8, height: 58, borderRadius: '4px 0 0 4px',
-                        background: isRecording ? 'linear-gradient(to right,#ef4444,#dc2626 60%,#991b1b 100%)' : 'linear-gradient(to right,#f97316,#ea580c 60%,#c2410c 100%)',
-                        boxShadow: isRecording ? '-4px 0 14px rgba(239,68,68,0.75)' : '-4px 0 14px rgba(249,115,22,0.6)',
-                        transition: 'all 0.3s',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
-                      }}>
-                        {[0,1,2].map(i => <div key={i} style={{ width: 4, height: 1.5, borderRadius: 1, background: 'rgba(255,255,255,0.35)' }} />)}
-                      </div>
-
-                    </div>{/* end drop-shadow wrapper */}
-                    </div>{/* end outer relative (glow + reflection) wrapper */}
-                    <p className="text-[9px] text-slate-500 tracking-wider uppercase">{t('driverPortal.secureChannel')}</p>
+                      labels={{
+                        fleetRadio: t('driverPortal2.fleetRadio'),
+                        secureChannel: t('driverPortal.secureChannel'),
+                        pushToTalk: t('driverPortal.pushToTalk'),
+                        transmitting: t('driverPortal.transmittingShort'),
+                        tapToRecord: t('driverPortal.tapToRecord'),
+                        tapToStop: t('driverPortal.tapToStop'),
+                      }}
+                    />
                   </div>
 
                   {/* Text input row -- extra bottom padding so it clears the floating AI assistant button */}
