@@ -1,31 +1,48 @@
 import { useEffect } from 'react';
-import { setThemeColor, DRIVER_COLOR } from '../utils/appManifest';
+import { setThemeColor } from '../utils/appManifest';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Languages, Share2, UserPlus, TrendingDown, Gift } from 'lucide-react';
+import { ArrowLeft, Share2, UserPlus, TrendingDown, Gift } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import OsiLogo from '../components/OsiLogo';
 
-function Step({ icon: Icon, title, text, color }: { icon: any; title: string; text: string; color: string }) {
+// Esta pagina usa el mismo diseno que osilogistics.com (fondo oscuro, verde #97f048, Russo One + Cantarell,
+// tarjetas con borde verde arriba y botones redondeados). No usa el estilo de la app.
+const SITE_LOGO = 'https://d1yei2z3i6k35z.cloudfront.net/13421204/6afb568e90e5e8.91981144_osi-logo-fondo-oscuro.svg';
+const GREEN = '#97F048';
+const HEAD = "'Russo One', Arial, sans-serif";
+const BODY = "Cantarell, Arial, sans-serif";
+
+function Step({ icon: Icon, title, text, n }: { icon: any; title: string; text: string; n: number }) {
   return (
-    <div className="flex gap-3 items-start">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
+    <div
+      className="rounded-2xl p-5 flex gap-4 items-start"
+      style={{ background: '#262626', border: '1px solid #333', borderTop: `3px solid ${GREEN}` }}
+    >
+      <div
+        className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
+        style={{ background: GREEN, color: '#111' }}
+      >
         <Icon className="w-5 h-5" />
       </div>
       <div>
-        <p className="text-sm font-bold text-white mb-0.5">{title}</p>
-        <p className="text-sm text-slate-400 leading-snug">{text}</p>
+        <p className="text-[11px] font-bold tracking-widest mb-0.5" style={{ color: GREEN }}>0{n}</p>
+        <p className="text-lg mb-1 leading-tight" style={{ fontFamily: HEAD, color: GREEN }}>{title}</p>
+        <p className="text-[15px] leading-snug" style={{ color: '#cfcfcf' }}>{text}</p>
       </div>
     </div>
   );
 }
 
 export default function ReferralInfo() {
-  // Pantallas de drivers: barra superior del navegador en azul (no el naranja de Dispatch)
+  // Fuentes del sitio principal + color de la barra del navegador igual que el sitio
   useEffect(() => {
-    const prev = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.content || '#f97316';
-    setThemeColor(DRIVER_COLOR);
-    return () => setThemeColor(prev);
+    const prevTheme = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.content || '#f97316';
+    setThemeColor('#1b1b1b');
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Cantarell:wght@400;700&family=Russo+One&display=swap';
+    document.head.appendChild(link);
+    return () => { setThemeColor(prevTheme); link.remove(); };
   }, []);
   const { t } = useTranslation();
   const { lang, toggle: toggleLang } = useLanguage();
@@ -34,61 +51,60 @@ export default function ReferralInfo() {
   const registerLink = ref ? `/driver/register?ref=${ref}` : '/driver/register';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col items-center justify-start px-4 py-8">
-      <div className="w-full max-w-lg">
-        <div className="flex items-center justify-between mb-6">
-          <Link to={registerLink} className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors">
-            <ArrowLeft className="w-3.5 h-3.5" /> {t('referralInfo.back')}
-          </Link>
-          <button onClick={toggleLang} className="flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-slate-200 transition-colors">
-            <Languages className="w-4 h-4 hidden sm:block" /> {lang.toUpperCase()}
-          </button>
-        </div>
-
-        <div className="text-center mb-7">
-          <OsiLogo variant="dark" className="h-[60px] w-auto object-contain mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white text-balance">{t('referralInfo.title')}</h1>
-          <p className="text-slate-400 text-sm mt-1">{t('referralInfo.subtitle')}</p>
-        </div>
-
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-5 mb-6">
-          <Step
-            icon={Share2}
-            color="bg-blue-500/15 text-blue-400"
-            title={t('referralInfo.step1Title')}
-            text={t('referralInfo.step1Text')}
-          />
-          <Step
-            icon={UserPlus}
-            color="bg-cyan-500/15 text-cyan-400"
-            title={t('referralInfo.step2Title')}
-            text={t('referralInfo.step2Text')}
-          />
-          <Step
-            icon={TrendingDown}
-            color="bg-emerald-500/15 text-emerald-400"
-            title={t('referralInfo.step3Title')}
-            text={t('referralInfo.step3Text')}
-          />
-          <Step
-            icon={Gift}
-            color="bg-amber-500/15 text-amber-400"
-            title={t('referralInfo.step4Title')}
-            text={t('referralInfo.step4Text')}
-          />
-        </div>
-
-        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl px-4 py-3.5 mb-6">
-          <p className="text-xs text-emerald-300 leading-snug">{t('referralInfo.example')}</p>
-        </div>
-
-        <Link
-          to={registerLink}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3.5 rounded-2xl transition-colors flex items-center justify-center gap-2 text-base shadow-xl shadow-blue-500/20"
-        >
-          {t('referralInfo.registerBtn')}
+    <div className="min-h-screen flex flex-col" style={{ background: '#1b1b1b', color: '#fff', fontFamily: BODY }}>
+      {/* barra superior como la del sitio */}
+      <header
+        className="flex items-center justify-between px-5 min-h-[64px]"
+        style={{ borderBottom: `2px solid ${GREEN}`, background: '#1b1b1b' }}
+      >
+        <Link to={registerLink} className="inline-flex items-center gap-1.5 text-sm transition-colors" style={{ color: '#d8d8d8' }}>
+          <ArrowLeft className="w-4 h-4" /> {t('referralInfo.back')}
         </Link>
-      </div>
+        <button
+          onClick={toggleLang}
+          className="text-xs font-bold px-3.5 py-1.5 rounded-full"
+          style={{ border: `1.5px solid ${GREEN}`, color: GREEN, background: 'transparent' }}
+        >
+          {lang.toUpperCase()}
+        </button>
+      </header>
+
+      <main
+        className="flex-1 px-5 pt-10 pb-12"
+        style={{ background: 'radial-gradient(ellipse at top,#26331a 0,#1b1b1b 55%)' }}
+      >
+        <div className="w-full max-w-lg mx-auto">
+          <div className="text-center mb-8">
+            <img src={SITE_LOGO} alt="OSI Logistics" className="h-[56px] w-auto object-contain mx-auto mb-6" />
+            <h1 className="text-3xl leading-tight text-balance" style={{ fontFamily: HEAD, color: GREEN }}>
+              {t('referralInfo.title')}
+            </h1>
+            <p className="text-[17px] mt-3 leading-snug" style={{ color: '#d8d8d8' }}>{t('referralInfo.subtitle')}</p>
+          </div>
+
+          <div className="space-y-4 mb-6">
+            <Step n={1} icon={Share2} title={t('referralInfo.step1Title')} text={t('referralInfo.step1Text')} />
+            <Step n={2} icon={UserPlus} title={t('referralInfo.step2Title')} text={t('referralInfo.step2Text')} />
+            <Step n={3} icon={TrendingDown} title={t('referralInfo.step3Title')} text={t('referralInfo.step3Text')} />
+            <Step n={4} icon={Gift} title={t('referralInfo.step4Title')} text={t('referralInfo.step4Text')} />
+          </div>
+
+          <div
+            className="rounded-2xl px-5 py-4 mb-7"
+            style={{ background: 'rgba(151,240,72,.08)', border: '1px solid rgba(151,240,72,.35)' }}
+          >
+            <p className="text-sm leading-snug" style={{ color: '#d8f5b8' }}>{t('referralInfo.example')}</p>
+          </div>
+
+          <Link
+            to={registerLink}
+            className="w-full font-bold py-4 rounded-full transition-colors flex items-center justify-center text-base hover:bg-white"
+            style={{ background: GREEN, color: '#111', fontFamily: BODY, boxShadow: '0 10px 30px rgba(151,240,72,.18)' }}
+          >
+            {t('referralInfo.registerBtn')}
+          </Link>
+        </div>
+      </main>
     </div>
   );
 }
