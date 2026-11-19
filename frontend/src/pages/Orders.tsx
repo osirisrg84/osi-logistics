@@ -265,7 +265,7 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
             <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
               <Package className="w-4 h-4 text-orange-500" /> {t('orders.shipmentDetailsTitle')}
             </h3>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-3 items-end">
               <div>
                 <label className="label">{t('orders.rateFieldLabel')}</label>
                 <input className="input" type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} placeholder="0.00" min="0" step="0.01" />
@@ -607,7 +607,7 @@ function EditOrderModal({ order, onClose, onSave }: EditOrderModalProps) {
             <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
               <Package className="w-4 h-4 text-orange-500" /> {t('orders.shipmentDetailsTitle')}
             </h3>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-3 items-end">
               <div>
                 <label className="label">{t('orders.rateFieldLabel')}</label>
                 <input className="input" type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} placeholder="0.00" min="0" step="0.01" />
