@@ -3,6 +3,8 @@ import Map, { Marker, NavigationControl, Source, Layer } from 'react-map-gl/mapl
 import type { MapRef, LayerSpecification } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Order, Driver } from '../types';
+import { RouteOverlay, useOrderRoute } from './OrderRouteMap';
+import { routeBounds } from '../utils/orderRoute';
 
 // Free map style with 3D buildings — no API key required
 const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
@@ -38,10 +40,26 @@ export default function Map3D({ driver, activeOrders = [], interactive = true, p
   const lat = driver?.current_lat  || 25.7617;
   const lng = driver?.current_lng  || -80.1918;
 
-  // Re-center when driver position changes (simulation moves them)
+  // Ruta de la primera orden activa (recogida -> entregas), dibujada sobre el mapa
+  const { route } = useOrderRoute(activeOrders[0]);
+  const fitted = useRef('');
+
+  // Re-center when driver position changes (simulation moves them) -- salvo que haya una ruta que mostrar
   useEffect(() => {
+    if (route) return;
     mapRef.current?.easeTo({ center: [lng, lat], duration: 1200, easing: t => t });
-  }, [lat, lng]);
+  }, [lat, lng, route]);
+
+  // Al cargar la ruta se encuadra completa una sola vez por orden
+  useEffect(() => {
+    if (!route) return;
+    const id = activeOrders[0]?.id || '';
+    if (fitted.current === id) return;
+    fitted.current = id;
+    const [sw, ne] = routeBounds(route);
+    const fit = () => mapRef.current?.fitBounds([sw, ne], { padding: 60, duration: 800, maxZoom: 12, pitch: 0, bearing: 0 });
+    fit(); setTimeout(fit, 700);
+  }, [route]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onMapLoad = useCallback(() => {
     const map = mapRef.current?.getMap();
@@ -94,8 +112,10 @@ export default function Map3D({ driver, activeOrders = [], interactive = true, p
           </Marker>
         )}
 
+        {route && <RouteOverlay route={route} id="osi-driver-route" />}
+
         {/* Delivery destination markers */}
-        {activeOrders.filter(o => o.delivery_lat && o.delivery_lng).map(order => (
+        {!route && activeOrders.filter(o => o.delivery_lat && o.delivery_lng).map(order => (
           <Marker key={order.id} latitude={order.delivery_lat} longitude={order.delivery_lng} anchor="bottom">
             <div style={{
               background: '#1e293b', color: 'white',

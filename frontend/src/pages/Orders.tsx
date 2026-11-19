@@ -18,6 +18,7 @@ import { formatPhone } from '../utils/phone';
 import { CITIES_BY_STATE } from '../data/usCities';
 import { useAuth } from '../context/AuthContext';
 import CountryFlag, { countryCode } from '../components/CountryFlag';
+import OrderRouteMap from '../components/OrderRouteMap';
 import i18n from '../i18n';
 
 const numLocale = () => (i18n.language?.startsWith('en') ? 'en-US' : 'es-US');
@@ -807,6 +808,9 @@ function DetailModal({ order: initialOrder, onClose, onRefresh }: DetailModalPro
               <p className="text-sm text-gray-700 dark:text-slate-300">{formatLocation(order.delivery_address, order.delivery_contact)}</p>
             </div>
           </div>
+
+          {/* Ruta en el mapa: recogida (A), entregas y destino final (B) */}
+          <OrderRouteMap order={order} />
 
           {/* Equipment */}
           {order.equipment_type && (
