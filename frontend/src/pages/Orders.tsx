@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Plus, Search, Filter, X, ChevronDown, Package,
@@ -75,20 +75,59 @@ function CityStateFields({ state, city, onStateChange, onCityChange, listId }: C
   );
 }
 
+// Borrador de la orden nueva: lo que el dispatcher va escribiendo se guarda en este navegador y sobrevive a actualizar
+// la pagina (y a cerrar la ventana por error). Solo se borra al crear la orden o al pulsar "Borrar lo escrito".
+const ORDER_DRAFT_KEY = 'osi-order-draft-v1';
+const EMPTY_ORDER_FORM = {
+  pickup_name: '', pickup_address: '',
+  delivery_name: '', delivery_address: '',
+  weight_kg: '', commodity: '',
+  notes: '', price: '', distance_mi: '', estimated_delivery: '',
+  equipment_type: 'Dry Van', temperature: '',
+};
+interface OrderDraft { open: boolean; form: typeof EMPTY_ORDER_FORM; extraPickups: string[]; extraDeliveries: string[]; assignDriverId: string }
+function loadOrderDraft(): OrderDraft | null {
+  try {
+    const raw = localStorage.getItem(ORDER_DRAFT_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    if (!d || typeof d !== 'object') return null;
+    return {
+      open: d.open === true,
+      form: { ...EMPTY_ORDER_FORM, ...(d.form || {}) },
+      extraPickups: Array.isArray(d.extraPickups) ? d.extraPickups.map(String) : [],
+      extraDeliveries: Array.isArray(d.extraDeliveries) ? d.extraDeliveries.map(String) : [],
+      assignDriverId: typeof d.assignDriverId === 'string' ? d.assignDriverId : '',
+    };
+  } catch { return null; }
+}
+function saveOrderDraft(d: OrderDraft) { try { localStorage.setItem(ORDER_DRAFT_KEY, JSON.stringify(d)); } catch { /* sin almacenamiento */ } }
+function clearOrderDraft() { try { localStorage.removeItem(ORDER_DRAFT_KEY); } catch { /* sin almacenamiento */ } }
+function orderDraftHasContent(d: OrderDraft): boolean {
+  return JSON.stringify(d.form) !== JSON.stringify(EMPTY_ORDER_FORM) || d.extraPickups.some(a => a.trim()) || d.extraDeliveries.some(a => a.trim()) || !!d.assignDriverId;
+}
+function closeOrderDraft() { const d = loadOrderDraft(); if (d) saveOrderDraft({ ...d, open: false }); }
+
 function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
   const { t } = useTranslation();
-  const [form, setForm] = useState({
-    pickup_name: '', pickup_address: '',
-    delivery_name: '', delivery_address: '',
-    weight_kg: '', commodity: '',
-    notes: '', price: '', distance_mi: '', estimated_delivery: '',
-    equipment_type: 'Dry Van', temperature: '',
-  });
-  const [extraPickups, setExtraPickups] = useState<string[]>([]);
-  const [extraDeliveries, setExtraDeliveries] = useState<string[]>([]);
-  const [assignDriverId, setAssignDriverId] = useState('');
+  const [initialDraft] = useState(loadOrderDraft);
+  const [form, setForm] = useState(() => initialDraft?.form ?? EMPTY_ORDER_FORM);
+  const [extraPickups, setExtraPickups] = useState<string[]>(() => initialDraft?.extraPickups ?? []);
+  const [extraDeliveries, setExtraDeliveries] = useState<string[]>(() => initialDraft?.extraDeliveries ?? []);
+  const [assignDriverId, setAssignDriverId] = useState(() => initialDraft?.assignDriverId ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const created = useRef(false);
+
+  // Cada cambio se guarda al momento (la ventana queda marcada como abierta para reabrirla tras actualizar).
+  useEffect(() => {
+    if (created.current) return;
+    saveOrderDraft({ open: true, form, extraPickups, extraDeliveries, assignDriverId });
+  }, [form, extraPickups, extraDeliveries, assignDriverId]);
+  const draftHasContent = orderDraftHasContent({ open: true, form, extraPickups, extraDeliveries, assignDriverId });
+  const discardDraft = () => {
+    setForm(EMPTY_ORDER_FORM); setExtraPickups([]); setExtraDeliveries([]); setAssignDriverId(''); setError('');
+  };
 
   const availableDrivers = drivers.filter(d => d.status === 'available' && !(d.hold && !d.hold.mine && new Date(d.hold.expires_at).getTime() > Date.now()));
 
@@ -130,6 +169,8 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
         await ordersApi.offer(data.id, { driver_id: assignDriverId, truck_id: '' });
       }
 
+      created.current = true;
+      clearOrderDraft();
       onSave();
       onClose();
     } catch {
@@ -144,6 +185,11 @@ function CreateOrderModal({ onClose, onSave, drivers }: OrderModalProps) {
       <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">{t('orders.newOrder')}</h2>
+          {draftHasContent && (
+            <button type="button" onClick={discardDraft} className="ml-auto mr-3 text-xs text-gray-400 hover:text-red-500 underline">
+              {t('orders.clearDraft', { defaultValue: 'Borrar lo escrito' })}
+            </button>
+          )}
           <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
             <X className="w-5 h-5 text-gray-500 dark:text-slate-400" />
           </button>
@@ -896,7 +942,7 @@ export default function Orders() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [showCreate, setShowCreate] = useState(false);
+  const [showCreate, setShowCreate] = useState(() => loadOrderDraft()?.open === true);
   const [assignOrder, setAssignOrder] = useState<Order | null>(null);
   const [detailOrder, setDetailOrder] = useState<Order | null>(null);
   const [editOrder, setEditOrder] = useState<Order | null>(null);
@@ -1255,7 +1301,7 @@ export default function Orders() {
       )}
 
       {/* Modals */}
-      {showCreate && <CreateOrderModal onClose={() => setShowCreate(false)} onSave={() => { fetchOrders(); showToast(t('grupoB.orders.createdToast')); playSuccessChime(); }} drivers={drivers} trucks={trucks} />}
+      {showCreate && <CreateOrderModal onClose={() => { closeOrderDraft(); setShowCreate(false); }} onSave={() => { fetchOrders(); showToast(t('grupoB.orders.createdToast')); playSuccessChime(); }} drivers={drivers} trucks={trucks} />}
       {assignOrder && <AssignModal order={assignOrder} drivers={drivers} onClose={() => setAssignOrder(null)} onSave={fetchOrders} />}
       {detailOrder && <DetailModal order={detailOrder} onClose={() => setDetailOrder(null)} onRefresh={fetchOrders} />}
       {editOrder && <EditOrderModal order={editOrder} onClose={() => setEditOrder(null)} onSave={() => { fetchOrders(); showToast(t('grupoB.orders.updatedToast')); }} />}
