@@ -264,6 +264,8 @@ export async function initDatabase(): Promise<void> {
   await addColumnIfMissing('users', 'payout_method',        "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('users', 'payout_details',       "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('users', 'equipment_experience', "TEXT NOT NULL DEFAULT ''");
+  // Herramientas con las que el dispatcher busca cargas (DAT One, Truckstop u otras, separadas por coma)
+  await addColumnIfMissing('users', 'load_boards',          "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('users', 'dispatcher_code',      "TEXT NOT NULL DEFAULT ''");
   await addColumnIfMissing('users', 'shift_active',         "INTEGER NOT NULL DEFAULT 0");
   await addColumnIfMissing('users', 'shift_changed_at',     "TEXT");

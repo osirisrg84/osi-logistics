@@ -1931,7 +1931,7 @@ export default function DriverPortal() {
                 label={t('driverPortal.gaugeOnTime')}
                 valueText={`${Math.round(onTimePct)}%`}
                 maxText="100"
-                from="#ef4444" to="#22c55e"
+                from="#1d78b8" to="#4cb944"
               />
               <TruckGauge
                 size={134}
@@ -1940,9 +1940,7 @@ export default function DriverPortal() {
                 label={t('driverPortal.gaugeRevenue')}
                 valueText={`$${Math.round(displayRevenue).toLocaleString('en-US')}`}
                 maxText={`$${(revenueGoal / 1000).toFixed(revenueGoal % 1000 ? 1 : 0)}k`}
-                from="#facc15" to="#22c55e"
-                valueColor={revenueTone(displayRevenue)}
-                edgeColor={revenueTone(displayRevenue, true)}
+                from="#1d78b8" to="#4cb944"
                 onClick={() => setTab('delivered')}
               />
               <TruckGauge
@@ -1952,7 +1950,7 @@ export default function DriverPortal() {
                 label={t('driverPortal.achievements')}
                 valueText={`${unlockedCount}/8`}
                 maxText="8"
-                from="#3b82f6" to="#22d3ee"
+                from="#1d78b8" to="#4cb944"
               />
             </div>
             <div className="mt-2 flex items-center justify-center gap-2 text-xs text-slate-300">

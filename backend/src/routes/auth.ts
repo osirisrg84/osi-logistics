@@ -101,7 +101,7 @@ router.post('/register', sensitiveLimiter, async (req: Request, res: Response) =
       name, email, password, role = 'dispatcher', driver_id = null,
       phone = '', date_of_birth = '', city = '', country: rawCountry = '',
       years_experience = 0, previous_companies = '', languages = '', availability = 'full-time',
-      equipment_experience = '',
+      equipment_experience = '', load_boards = '',
       id_document_filename = '', id_document_data = '',
     } = req.body;
 
@@ -141,11 +141,11 @@ router.post('/register', sensitiveLimiter, async (req: Request, res: Response) =
 
     await exec(`INSERT INTO users
       (id, name, email, password_hash, salt, role, driver_id,
-       phone, date_of_birth, city, country, years_experience, previous_companies, languages, availability, equipment_experience, dispatcher_code,
+       phone, date_of_birth, city, country, years_experience, previous_companies, languages, availability, equipment_experience, load_boards, dispatcher_code,
        active, approval_status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending')`,
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending')`,
       [id, name, email.toLowerCase(), passwordHash, salt, role, driver_id,
-       phone, date_of_birth, city, country, years_experience, previous_companies, languages, availability, equipment_experience, dispatcher_code]);
+       phone, date_of_birth, city, country, years_experience, previous_companies, languages, availability, equipment_experience, String(load_boards || '').slice(0, 200), dispatcher_code]);
 
     if (id_document_filename && id_document_data) {
       await exec(`INSERT INTO dispatcher_id_documents (user_id, filename, data, uploaded_at) VALUES (?, ?, ?, ?)`,

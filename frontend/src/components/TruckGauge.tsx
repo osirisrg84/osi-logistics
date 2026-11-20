@@ -30,7 +30,7 @@ interface TruckGaugeProps {
   edgeColor?: string;
 }
 
-export default function TruckGauge({ value, max, label, valueText, minText = '0', maxText, from = '#22c55e', to = '#f59e0b', size = 126, onClick, valueColor = '#fbbf24', edgeColor = '#e2e8f0' }: TruckGaugeProps) {
+export default function TruckGauge({ value, max, label, valueText, minText = '0', maxText, from = '#1d78b8', to = '#4cb944', size = 126, onClick, valueColor = '#5ed06b', edgeColor = '#e2e8f0' }: TruckGaugeProps) {
   const uid = useId().replace(/:/g, '');
   const cx = size / 2;
   const cy = size / 2;
@@ -124,7 +124,7 @@ export default function TruckGauge({ value, max, label, valueText, minText = '0'
 
         {/* aguja conica con contrapeso */}
         <g style={{ filter: 'drop-shadow(0 2px 2px rgba(0,0,0,.7))' }}>
-          <polygon points={`${tip.x},${tip.y} ${b1.x},${b1.y} ${tail.x},${tail.y} ${b2.x},${b2.y}`} fill="#ff4d2e" style={{ transition: 'all .6s ease' }} />
+          <polygon points={`${tip.x},${tip.y} ${b1.x},${b1.y} ${tail.x},${tail.y} ${b2.x},${b2.y}`} fill="#4cb944" style={{ transition: 'all .6s ease' }} />
         </g>
         <circle cx={cx} cy={cy} r="7" fill={`url(#hub${uid})`} stroke="#0b0f18" strokeWidth="1" />
         <circle cx={cx} cy={cy} r="2.2" fill="#0b0f18" />

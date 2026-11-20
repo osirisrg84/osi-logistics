@@ -299,7 +299,7 @@ router.get('/verifications', async (_req: Request, res: Response) => {
     const dispatchers = await query<Record<string, unknown>>(`
       SELECT u.id, u.name, u.email, u.phone, u.city, u.years_experience,
              u.previous_companies, u.languages, u.availability,
-             u.equipment_experience, u.date_of_birth, u.dispatcher_code, u.country,
+             u.equipment_experience, u.load_boards, u.date_of_birth, u.dispatcher_code, u.country,
              u.active, u.approval_status,
              EXISTS(SELECT 1 FROM dispatcher_id_documents WHERE user_id = u.id) as has_id_document
       FROM users u

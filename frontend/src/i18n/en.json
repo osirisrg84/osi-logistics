@@ -685,6 +685,7 @@
     "dispatcherCode": "Dispatcher Code",
     "previousCompanies": "Previous companies",
     "equipmentExperience": "Equipment experience",
+    "loadBoards": "Load search tool",
     "idDocument": "ID Document",
     "equipmentPhoto": "Equipment Photo",
     "viewIdDocument": "View document"
@@ -1208,6 +1209,10 @@
     "languageSpanish": "Spanish",
     "equipmentExpQuestion": "What type of loads do you have experience with?",
     "equipmentExpHint": "(select all that apply)",
+    "loadBoardsQuestion": "What tool do you use to find loads?",
+    "loadBoardsHint": "(select all that apply)",
+    "loadBoardsOther": "Other",
+    "loadBoardsOtherPlaceholder": "Which other tool do you use?",
     "sectionAccountSecurity": "Account Security",
     "passwordLabel": "Password",
     "passwordPlaceholderMin": "Min. 8 characters",

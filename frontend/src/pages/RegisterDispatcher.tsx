@@ -24,6 +24,7 @@ function Field({ label, required, children }: { label: string; required?: boolea
 }
 
 const LANGUAGES = ['English', 'Spanish'];
+const LOAD_BOARDS = ['DAT One', 'Truckstop'];
 const EQUIPMENT_TYPES = ['Dry Van', 'Reefer', 'Flatbed', 'Box Truck', 'Power Only', 'Hotshot', 'Tanker'];
 
 export default function RegisterDispatcher() {
@@ -57,6 +58,9 @@ export default function RegisterDispatcher() {
   const [companies, setCompanies] = useState<string[]>(['']);
   const [languages, setLanguages] = useState<string[]>(['English']);
   const [equipmentExp, setEquipmentExp] = useState<string[]>([]);
+  const [loadBoards, setLoadBoards] = useState<string[]>([]);
+  const [otherBoard, setOtherBoard] = useState('');
+  const [otherOn, setOtherOn] = useState(false);
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -94,6 +98,9 @@ export default function RegisterDispatcher() {
       prev.includes(eq) ? prev.filter(e => e !== eq) : [...prev, eq]
     );
 
+  const toggleBoard = (b: string) =>
+    setLoadBoards(prev => prev.includes(b) ? prev.filter(x => x !== b) : [...prev, b]);
+
   const handleIdDocUpload = async (file: File) => {
     setIdDocError('');
     if (file.size > 8 * 1024 * 1024) {
@@ -124,6 +131,7 @@ export default function RegisterDispatcher() {
     if (!form.city.trim()) { setError(t('registerDispatcher.citySelect') + ' *'); return; }
     if (!form.country) { setError(t('registerDispatcher.countryPlaceholder') + ' *'); return; }
     if (!idDocument) { setError(t('registerDispatcher.errorIdDocumentRequired')); return; }
+    if (otherOn && !otherBoard.trim()) { setError(t('registerDispatcher.loadBoardsOtherPlaceholder') + ' *'); return; }
     setLoading(true);
     try {
       const previous_companies = companies.filter(c => c.trim()).join(', ');
@@ -141,6 +149,7 @@ export default function RegisterDispatcher() {
         languages:            languages.join(', '),
         availability:         form.availability,
         equipment_experience: equipmentExp.join(', '),
+        load_boards:          [...loadBoards, ...(otherOn && otherBoard.trim() ? [otherBoard.trim()] : [])].join(', '),
         id_document_filename: idDocument?.filename,
         id_document_data:     idDocument?.data,
       });
@@ -410,6 +419,34 @@ export default function RegisterDispatcher() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Herramienta para buscar cargas */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-2">
+                {t('registerDispatcher.loadBoardsQuestion')} <span className="text-gray-400 font-normal">{t('registerDispatcher.loadBoardsHint')}</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {LOAD_BOARDS.map(b => (
+                  <button key={b} type="button" onClick={() => toggleBoard(b)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors ${
+                      loadBoards.includes(b) ? 'bg-orange-500 border-orange-500 text-white' : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-orange-300'
+                    }`}>
+                    {b}
+                  </button>
+                ))}
+                <button type="button" onClick={() => setOtherOn(v => !v)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors ${
+                    otherOn ? 'bg-orange-500 border-orange-500 text-white' : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-orange-300'
+                  }`}>
+                  {t('registerDispatcher.loadBoardsOther')}
+                </button>
+              </div>
+              {otherOn && (
+                <input className="input mt-2" type="text" maxLength={60} value={otherBoard} autoComplete="off"
+                  placeholder={t('registerDispatcher.loadBoardsOtherPlaceholder')}
+                  onChange={e => setOtherBoard(e.target.value)} />
+              )}
             </div>
           </div>
 

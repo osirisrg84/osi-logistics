@@ -685,6 +685,7 @@
     "dispatcherCode": "Código Dispatcher",
     "previousCompanies": "Empresas anteriores",
     "equipmentExperience": "Experiencia en equipo",
+    "loadBoards": "Herramienta para buscar cargas",
     "idDocument": "Identificación",
     "equipmentPhoto": "Foto de Equipo",
     "viewIdDocument": "Ver documento"
@@ -1208,6 +1209,10 @@
     "languageSpanish": "Español",
     "equipmentExpQuestion": "¿Con qué tipo de loads tienes experiencia?",
     "equipmentExpHint": "(selecciona todos los que apliquen)",
+    "loadBoardsQuestion": "¿Con qué herramienta buscas cargas?",
+    "loadBoardsHint": "(selecciona todas las que uses)",
+    "loadBoardsOther": "Otra",
+    "loadBoardsOtherPlaceholder": "¿Cuál otra herramienta usas?",
     "sectionAccountSecurity": "Seguridad de la Cuenta",
     "passwordLabel": "Contraseña",
     "passwordPlaceholderMin": "Mín. 8 caracteres",

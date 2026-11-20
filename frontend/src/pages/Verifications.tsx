@@ -69,6 +69,7 @@ interface DispatcherEntity {
   languages: string;
   availability: string;
   equipment_experience: string;
+  load_boards?: string;
   date_of_birth: string;
   dispatcher_code: string;
   active: number;
@@ -660,6 +661,12 @@ export default function Verifications() {
                     <div className="col-span-2">
                       <span className="text-xs text-gray-500 dark:text-slate-400">{t('verifications.equipmentExperience')}: </span>
                       <span className="text-xs text-gray-800 dark:text-slate-200">{d.equipment_experience}</span>
+                    </div>
+                  )}
+                  {d.load_boards && (
+                    <div className="col-span-2">
+                      <span className="text-xs text-gray-500 dark:text-slate-400">{t('verifications.loadBoards')}: </span>
+                      <span className="text-xs text-gray-800 dark:text-slate-200">{d.load_boards}</span>
                     </div>
                   )}
                 </EntityCard>
