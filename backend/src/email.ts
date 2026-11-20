@@ -22,35 +22,22 @@ async function sendEmail(payload: Parameters<Resend['emails']['send']>[0]) {
 // card with a "Ver tutorial ahora" CTA. Returns '' (section simply omitted)
 // when no tutorial URL is configured yet, instead of linking to a broken or
 // placeholder video.
-function buildVideoSection(tutorialUrl: string | undefined, accentFrom: string, accentTo: string, audienceLabel: string): string {
+function buildVideoSection(tutorialUrl: string | undefined, poster: string, accentTo: string, audienceLabel: string): string {
   if (!tutorialUrl) return '';
   return `
       <tr><td style="padding:0 0 24px;">
-        <p style="margin:0 0 12px;font-size:15px;font-weight:700;color:#111827;">📹 Video Tutorial — Primeros pasos</p>
-        <p style="margin:0 0 16px;font-size:13px;color:#6b7280;line-height:1.6;">
-          Mira este tutorial corto y aprende a usar la plataforma en minutos.
+        <p style="margin:0 0 12px;font-size:15px;font-weight:700;color:#111827;">📹 ${audienceLabel}</p>
+        <p style="margin:0 0 14px;font-size:13px;color:#6b7280;line-height:1.6;">
+          Un video corto para empezar en minutos. / A short video to get started in minutes.
         </p>
-        <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
-          <tr>
-            <td style="background:linear-gradient(135deg,${accentFrom},${accentTo});border-radius:12px;padding:0;overflow:hidden;">
-              <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
-                <tr>
-                  <td style="padding:28px 24px;text-align:center;">
-                    <div style="width:60px;height:60px;background:rgba(255,255,255,0.15);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;border:2px solid rgba(255,255,255,0.3);">
-                      <span style="font-size:28px;line-height:1;">▶</span>
-                    </div>
-                    <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:1px;">OSI Logistics</p>
-                    <p style="margin:0 0 20px;font-size:18px;font-weight:700;color:#fff;">${audienceLabel}</p>
-                    <a href="${tutorialUrl}"
-                      style="display:inline-block;background:#fff;color:${accentTo};text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:700;font-size:14px;">
-                      ▶&nbsp; Ver tutorial ahora
-                    </a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
+        <a href="${tutorialUrl}" style="display:block;text-decoration:none;">
+          <img src="${poster}" alt="${audienceLabel}" width="496" style="display:block;width:100%;max-width:496px;height:auto;border-radius:12px;border:1px solid #e5e7eb;">
+        </a>
+        <div style="text-align:center;padding:14px 0 0;">
+          <a href="${tutorialUrl}" style="display:inline-block;background:${accentTo};color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:700;font-size:14px;">
+            ▶&nbsp; Ver tutorial ahora
+          </a>
+        </div>
       </td></tr>`;
 }
 
@@ -64,14 +51,14 @@ export async function sendActivationEmail(to: string, name: string, role: string
   const link        = isDriver
     ? `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/driver/login`
     : `${process.env.FRONTEND_URL || 'https://osi-logistics.vercel.app'}/dispatcher`;
-  const tutorialUrl = process.env.DRIVER_TUTORIAL_URL || 'https://drive.google.com/file/d/1Kge1Z_ZQNAaHuYApUEJT_lY01-vP-BSJ/view?usp=sharing';
+  const tutorialUrl = process.env.DRIVER_TUTORIAL_URL || 'https://driver.osilogistics.com/tutorial/driver.html';
   // Sin fallback a proposito -- el video de dispatcher todavia se esta
   // grabando. Hasta que se configure DISPATCHER_TUTORIAL_URL en Render, la
   // seccion de video simplemente no aparece en el correo (ver buildVideoSection).
-  const dispatcherTutorialUrl = process.env.DISPATCHER_TUTORIAL_URL;
+  const dispatcherTutorialUrl = process.env.DISPATCHER_TUTORIAL_URL || 'https://dispatch.osilogistics.com/tutorial/dispatcher.html';
 
   if (isDriver) {
-    const videoSection = buildVideoSection(tutorialUrl, '#1e3a5f', '#2563eb', 'Tutorial para Drivers');
+    const videoSection = buildVideoSection(tutorialUrl, 'https://driver.osilogistics.com/videos/poster-driver.jpg', '#2563eb', 'Tutorial para Drivers / Driver tutorial');
 
     await sendEmail({
       from: FROM,
@@ -160,6 +147,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
 
                   <!-- Video Tutorial -->
                   ${videoSection}
+                  ${buildGuideBody(name, 'driver')}
 
                   <!-- Support note -->
                   <tr><td style="padding:0;">
@@ -192,7 +180,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
   }
 
   if (isDispatcher) {
-    const videoSection = buildVideoSection(dispatcherTutorialUrl, '#7c2d12', '#f97316', 'Tutorial para Dispatchers');
+    const videoSection = buildVideoSection(dispatcherTutorialUrl, 'https://dispatch.osilogistics.com/videos/poster-dispatcher.jpg', '#f97316', 'Tutorial para Dispatchers');
 
     await sendEmail({
       from: FROM,
@@ -292,6 +280,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
 
                   <!-- Video Tutorial -->
                   ${videoSection}
+                  ${buildGuideBody(name, 'dispatcher')}
 
                   <!-- Support note -->
                   <tr><td style="padding:0;">
@@ -354,6 +343,66 @@ export async function sendActivationEmail(to: string, name: string, role: string
       </div>
     `,
   });
+}
+
+// Segundo correo tras aprobar una cuenta (va junto al de bienvenida): explicacion
+// breve de como funciona todo + enlace al PDF. Driver en espanol e ingles,
+// dispatcher solo en espanol. Los PDF viven en frontend/public/guias.
+// Contenido de la guia de inicio (pasos + boton al PDF). Va DENTRO del correo de bienvenida: asi cada aprobado recibe un solo correo.
+function buildGuideBody(name: string, role: string): string {
+  const isDriver = role === 'driver';
+  const host = isDriver ? 'https://driver.osilogistics.com' : 'https://dispatch.osilogistics.com';
+  const pdf = isDriver ? `${host}/guias/OSI-Guia-Driver-ES-EN.pdf` : `${host}/guias/OSI-Guia-Dispatcher.pdf`;
+  const from = isDriver ? '#1e3a5f' : '#7c2d12';
+  const accent = isDriver ? '#2563eb' : '#f97316';
+  const light = isDriver ? '#eff6ff' : '#fff7ed';
+  const portal = isDriver ? 'Driver Portal' : 'Dispatch Console';
+
+  const stepRow = (n: number, title: string, text: string) => `
+    <tr>
+      <td style="padding:8px 0;vertical-align:top;width:36px;"><div style="width:28px;height:28px;background:${light};border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:${accent};">${n}</div></td>
+      <td style="padding:8px 0 8px 8px;vertical-align:top;"><p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">${title}</p><p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">${text}</p></td>
+    </tr>`;
+  const section = (heading: string, intro: string, steps: string, extra: string, cta: string) => `
+    <tr><td style="padding:0 0 8px;">
+      <h2 style="margin:0 0 10px;font-size:18px;font-weight:700;color:#111827;">${heading}</h2>
+      <p style="margin:0 0 14px;font-size:14px;color:#4b5563;line-height:1.7;">${intro}</p>
+      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">${steps}</table>
+      ${extra}
+      <div style="text-align:center;padding:18px 0 4px;">
+        <a href="${pdf}" style="display:inline-block;background:${accent};color:#fff;text-decoration:none;padding:14px 32px;border-radius:10px;font-weight:700;font-size:15px;">${cta}</a>
+      </div>
+    </td></tr>`;
+  const note = (txt: string) => `<div style="background:${light};border-left:4px solid ${accent};border-radius:8px;padding:12px 14px;margin:14px 0 0;font-size:13px;color:#374151;line-height:1.6;">${txt}</div>`;
+
+  const dispatcherSteps =
+    stepRow(1, 'Ponte “En turno”', 'Arriba en la Consola, toca el interruptor <b>Activo</b> hasta que diga <b>En turno</b>.') +
+    stepRow(2, 'Busca cargas en DAT One o Truckstop', 'Filtra por el equipo y la ciudad de tu driver, mira la tarifa por milla y negocia con el broker. OSI no está conectada a esos servicios: buscas la carga allá y la registras acá.') +
+    stepRow(3, 'Crea la orden y ofrécela', 'En <b>Orders</b> pon origen, destino y tarifa, y asígnala a un driver <b>disponible</b> (míralos en Drivers y Tracking).') +
+    stepRow(4, 'Sigue la entrega', 'Asignada, recogida, en tránsito, entregada. El driver sube el BOL y el POD.') +
+    stepRow(5, 'Cobra tu comisión', 'Recibes el <b>3%</b> de cada carga entregada. Lo ves en <b>Comisiones</b>. Configura tu método de pago en Mi Perfil.');
+  const driverStepsEs =
+    stepRow(1, 'Completa tu perfil', 'Compañía, MC y DOT, tu equipo y tu certificado de seguro (COI).') +
+    stepRow(2, 'Paga tu 7% a OSI', 'Tú cobras de cada carga directo del broker. En <b>Payments</b> pagas a OSI el 7% de esa carga con tarjeta, Zelle o ACH.') +
+    stepRow(3, 'Activa el GPS y ponte Online', 'Sin Online no te llegan ofertas de carga.') +
+    stepRow(4, 'Acepta una oferta', 'Revisa origen, destino y tarifa; toca <b>Aceptar</b>. Verás el contacto del dispatcher.') +
+    stepRow(5, 'Confirma cada paso', 'Recogida, en tránsito, entregada, y sube el BOL y el POD.');
+  const driverStepsEn =
+    stepRow(1, 'Complete your profile', 'Company, MC and DOT, your equipment and your certificate of insurance (COI).') +
+    stepRow(2, 'Pay your 7% to OSI', 'You collect for each load directly from the broker. In <b>Payments</b> you pay OSI 7% of that load by card, Zelle or ACH.') +
+    stepRow(3, 'Turn on GPS and go Online', 'If you are not Online, you will not get load offers.') +
+    stepRow(4, 'Accept an offer', 'Review origin, destination and rate; tap <b>Accept</b>. You will see the dispatcher&rsquo;s contact.') +
+    stepRow(5, 'Confirm each step', 'Picked up, in transit, delivered, and upload the BOL and the POD.');
+
+  const body = isDriver
+    ? section('Así funciona OSI, en 2 minutos', `Hola, ${name}. Además de tu bienvenida, aquí tienes lo básico para empezar en el <b>${portal}</b> hoy mismo. Tú cobras de cada carga directo del broker y a OSI le pagas el 7% por gestionarla. Tú eliges qué ofertas aceptar.`, driverStepsEs, '', '📄 Descargar la guía completa (PDF)') +
+      `<tr><td style="padding:18px 0;"><div style="height:1px;background:#e5e7eb;"></div></td></tr>` +
+      section('How OSI works, in 2 minutes', `Hi ${name}. Besides your welcome email, here are the basics to get started in the <b>${portal}</b> today. You get paid by the broker for each load and you pay OSI 7% for managing it. You choose which offers to accept.`, driverStepsEn, '', '📄 Download the full guide (PDF)')
+    : section('Así funciona OSI, en 2 minutos', `Hola, ${name}. Además de tu bienvenida, aquí tienes lo básico para trabajar en la <b>${portal}</b>. Tú eres el puente entre las cargas (brokers y load boards) y los drivers, y OSI te da el lugar donde organizarlo todo.`, dispatcherSteps,
+      note('<b>Tiempo disponible:</b> los brokers en EE. UU. atienden en su horario, así que necesitas algunas horas libres al día para buscar y negociar cargas. Se puede combinar con otro trabajo.'),
+      '📄 Descargar la guía completa (PDF)');
+
+  return body;
 }
 
 interface OfferEmailOrder {
