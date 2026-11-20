@@ -63,7 +63,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
     await sendEmail({
       from: FROM,
       to,
-      subject: '🎉 ¡Bienvenido a OSI Logistics! Tu cuenta de driver está activa',
+      subject: '🎉 ¡Bienvenido a OSI Logistics! Tu cuenta de driver está activa / Welcome to OSI Logistics! Your driver account is active',
       html: `
       <!DOCTYPE html>
       <html lang="es">
@@ -75,10 +75,10 @@ export async function sendActivationEmail(to: string, name: string, role: string
               <!-- HEADER -->
               <tr><td style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);border-radius:16px 16px 0 0;padding:32px 32px 28px;text-align:center;">
                 <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:2px;">OSI Logistics · Driver Portal</p>
-                <h1 style="margin:0 0 8px;font-size:32px;font-weight:800;color:#fff;letter-spacing:-0.5px;">¡Bienvenido a bordo!</h1>
-                <p style="margin:0;font-size:15px;color:rgba(255,255,255,0.8);">Tu cuenta ha sido verificada y activada</p>
+                <h1 style="margin:0 0 8px;font-size:32px;font-weight:800;color:#fff;letter-spacing:-0.5px;">¡Bienvenido a bordo!<br><span style="font-size:20px;font-weight:600;opacity:0.85;">Welcome aboard!</span></h1>
+                <p style="margin:0;font-size:15px;color:rgba(255,255,255,0.8);">Tu cuenta ha sido verificada y activada / Your account has been verified and activated</p>
                 <div style="margin-top:20px;display:inline-block;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:100px;padding:6px 18px;">
-                  <span style="font-size:13px;font-weight:600;color:#fff;">✅ Cuenta Activa</span>
+                  <span style="font-size:13px;font-weight:600;color:#fff;">✅ Cuenta Activa / Active account</span>
                 </div>
               </td></tr>
 
@@ -92,13 +92,16 @@ export async function sendActivationEmail(to: string, name: string, role: string
                     <p style="margin:0;font-size:14px;color:#4b5563;line-height:1.7;">
                       El equipo de <strong>OSI Logistics</strong> ha revisado y aprobado tu cuenta. A partir de ahora formas parte de nuestra red de conductores y ya puedes recibir cargas, gestionar tus entregas y administrar tus comisiones desde el <strong>Driver Portal</strong>.
                     </p>
+                    <p style="margin:12px 0 0;font-size:14px;color:#4b5563;line-height:1.7;">
+                      <strong>Hi, ${name}.</strong> The <strong>OSI Logistics</strong> team has reviewed and approved your account. You are now part of our driver network and can receive loads, manage your deliveries and track your commissions from the <strong>Driver Portal</strong>.
+                    </p>
                   </td></tr>
 
                   <!-- CTA Login -->
                   <tr><td style="padding:0 0 28px;text-align:center;">
                     <a href="${link}"
                       style="display:inline-block;background:#2563eb;color:#fff;text-decoration:none;padding:16px 40px;border-radius:10px;font-weight:700;font-size:16px;letter-spacing:0.2px;">
-                      Entrar al Driver Portal →
+                      Entrar al Driver Portal / Open the Driver Portal →
                     </a>
                     <p style="margin:10px 0 0;font-size:12px;color:#9ca3af;">https://driver.osilogistics.com/driver</p>
                   </td></tr>
@@ -108,15 +111,15 @@ export async function sendActivationEmail(to: string, name: string, role: string
 
                   <!-- Steps -->
                   <tr><td style="padding:0 0 24px;">
-                    <p style="margin:0 0 16px;font-size:15px;font-weight:700;color:#111827;">🚀 Pasos para empezar</p>
+                    <p style="margin:0 0 16px;font-size:15px;font-weight:700;color:#111827;">🚀 Pasos para empezar / Steps to get started</p>
                     <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
                       <tr>
                         <td style="padding:10px 0;vertical-align:top;width:36px;">
                           <div style="width:28px;height:28px;background:#eff6ff;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#2563eb;">1</div>
                         </td>
                         <td style="padding:10px 0 10px 8px;vertical-align:top;">
-                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Inicia sesión</p>
-                          <p style="margin:0;font-size:13px;color:#6b7280;">Usa tu email y la contraseña que registraste en el Driver Portal.</p>
+                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Inicia sesión / Log in</p>
+                          <p style="margin:0;font-size:13px;color:#6b7280;">Usa tu email y la contraseña que registraste en el Driver Portal. / Use your email and the password you chose when you signed up.</p>
                         </td>
                       </tr>
                       <tr><td colspan="2" style="padding:0 0 2px 0;"><div style="height:1px;background:#f3f4f6;margin-left:36px;"></div></td></tr>
@@ -125,8 +128,8 @@ export async function sendActivationEmail(to: string, name: string, role: string
                           <div style="width:28px;height:28px;background:#eff6ff;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#2563eb;">2</div>
                         </td>
                         <td style="padding:10px 0 10px 8px;vertical-align:top;">
-                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Completa tu perfil</p>
-                          <p style="margin:0;font-size:13px;color:#6b7280;">Agrega tu información de empresa, MC Number, tipo de equipo y datos de autoridad.</p>
+                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Completa tu perfil / Complete your profile</p>
+                          <p style="margin:0;font-size:13px;color:#6b7280;">Agrega tu información de empresa, MC Number, tipo de equipo y datos de autoridad. / Add your company info, MC number, equipment type and authority details.</p>
                         </td>
                       </tr>
                       <tr><td colspan="2" style="padding:0 0 2px 0;"><div style="height:1px;background:#f3f4f6;margin-left:36px;"></div></td></tr>
@@ -135,8 +138,8 @@ export async function sendActivationEmail(to: string, name: string, role: string
                           <div style="width:28px;height:28px;background:#dcfce7;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;color:#16a34a;">3</div>
                         </td>
                         <td style="padding:10px 0 10px 8px;vertical-align:top;">
-                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Activa tu GPS y ponte Online</p>
-                          <p style="margin:0;font-size:13px;color:#6b7280;">Activa tu GPS y cambia tu estatus a <strong style="color:#16a34a;">Disponible</strong> para comenzar a recibir ofertas de carga del dispatcher.</p>
+                          <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Activa tu GPS y ponte Online / Turn on GPS and go Online</p>
+                          <p style="margin:0;font-size:13px;color:#6b7280;">Activa tu GPS y cambia tu estatus a <strong style="color:#16a34a;">Disponible</strong> para comenzar a recibir ofertas de carga del dispatcher. / Turn on GPS and set your status to <strong style="color:#16a34a;">Available</strong> to start receiving load offers from the dispatcher.</p>
                         </td>
                       </tr>
                     </table>
@@ -152,9 +155,10 @@ export async function sendActivationEmail(to: string, name: string, role: string
                   <!-- Support note -->
                   <tr><td style="padding:0;">
                     <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px;">
-                      <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#374151;">¿Necesitas ayuda?</p>
+                      <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#374151;">¿Necesitas ayuda? / Need help?</p>
                       <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">
-                        Comunícate con nuestro equipo de dispatch a través de la sección <strong>Hub</strong> dentro del Driver Portal o responde a este correo.
+                        Comunícate con nuestro equipo de dispatch a través de la sección <strong>Hub</strong> dentro del Driver Portal o responde a este correo.<br>
+                        Contact our dispatch team through the <strong>Hub</strong> section inside the Driver Portal, or reply to this email.
                       </p>
                     </div>
                   </td></tr>
@@ -166,7 +170,7 @@ export async function sendActivationEmail(to: string, name: string, role: string
               <tr><td style="background:#f9fafb;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 16px 16px;padding:20px 32px;text-align:center;">
                 <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:#374151;">OSI Logistics INC</p>
                 <p style="margin:0 0 12px;font-size:11px;color:#9ca3af;">Miami, FL · admin@osilogistics.com</p>
-                <p style="margin:0;font-size:11px;color:#d1d5db;">Si no solicitaste esta cuenta, ignora este mensaje.</p>
+                <p style="margin:0;font-size:11px;color:#d1d5db;">Si no solicitaste esta cuenta, ignora este mensaje. / If you did not request this account, please ignore this message.</p>
               </td></tr>
 
             </table>
