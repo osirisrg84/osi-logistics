@@ -54,8 +54,8 @@ router.get('/contacts', async (_req: Request, res: Response) => {
         email: r.email,
         phone: r.phone || null,
         role: r.role,
-        // Solo "activo" si la cuenta esta habilitada Y aprobada por un admin.
-        status: r.active === 1 && r.approval_status === 'approved' ? 'active' : 'inactive',
+        // Solo "activo" si la cuenta esta habilitada Y aprobada por un admin; "pending" = registrado esperando aprobacion.
+        status: r.active === 1 && r.approval_status === 'approved' ? 'active' : r.approval_status === 'pending' ? 'pending' : 'inactive',
         createdAt: r.created_at,
       })),
     });
